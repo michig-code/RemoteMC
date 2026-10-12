@@ -1,33 +1,45 @@
 # ─────────────────────────────────────────────────────────────
-#  RemoteMC – Verbindung zwischen Server und Android-App
+#  RemoteMC – control your server from the RemoteMC app
+#  Docs: https://github.com/michig-code/main
 # ─────────────────────────────────────────────────────────────
 
+# Language of plugin messages: en, de
+language: en
+
 api:
-  # Interface, auf dem der HTTP-Server lauscht (0.0.0.0 = alle).
+  # Interface to listen on (0.0.0.0 = all interfaces).
   host: 0.0.0.0
-  # Port der API. Muss in Firewall / Router freigegeben werden,
-  # wenn du von außerhalb deines Netzwerks verbinden willst.
+  # Port of the RemoteMC API. Open it in your firewall / router or
+  # use one of the extra ports your hosting provider gives you.
   port: 8765
-  # Adresse, die in "/remotemc link" angezeigt wird (z.B. deine
-  # Domain oder öffentliche IP). Leer = Server-IP aus server.properties.
+  # Address shown in pairing QR codes and links (domain or public IP).
+  # Empty = server-ip from server.properties.
   public-address: ""
-  # Zugangs-Token. Leer lassen -> wird beim Start automatisch erzeugt
-  # und hier gespeichert. Mit "/remotemc newtoken" neu erzeugen.
-  token: ""
+  # Built-in encryption (HTTPS) with a self-signed certificate.
+  # The app trusts it via the fingerprint inside the pairing QR code.
+  # Only disable this if a reverse proxy in front of RemoteMC handles HTTPS.
+  tls: true
 
 security:
-  # Nach so vielen falschen Tokens wird die IP gesperrt ...
+  # Invalid tokens / pairing codes before an IP address is locked out ...
   max-failed-attempts: 5
-  # ... für so viele Sekunden.
+  # ... for this many seconds.
   lockout-seconds: 300
-  # Darf die App Konsolenbefehle ausführen?
+  # How long a pairing code from /remotemc pair stays valid.
+  pairing-code-minutes: 5
+  # Allow admin devices to run console commands.
   allow-commands: true
-  # Befehle, die über die App NICHT ausgeführt werden dürfen
-  # (nur der erste Teil des Befehls, ohne "/").
+  # Commands that can never be run from the app (label only, without "/").
   blocked-commands:
     - stop
     - restart
 
 console:
-  # Wie viele Konsolenzeilen für die App zwischengespeichert werden.
+  # Console lines kept in memory for the app.
   buffer-size: 500
+
+# Log every action performed through the app to plugins/RemoteMC/audit.log
+audit-log: true
+
+# Tell admins on join when a new RemoteMC version is available.
+update-check: true

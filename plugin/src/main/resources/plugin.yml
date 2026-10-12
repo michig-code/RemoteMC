@@ -1,15 +1,17 @@
 name: RemoteMC
 version: '${project.version}'
 main: de.remotemc.plugin.RemoteMCPlugin
-api-version: '1.21'
-description: REST API for the RemoteMC Android app
+api-version: '1.20'
+folia-supported: true
+description: Manage your server from your phone with the RemoteMC app
+website: https://github.com/michig-code/main
 commands:
   remotemc:
-    description: RemoteMC connection info and management
+    description: Pair the RemoteMC app and manage access
     aliases: [rmc]
-    usage: /remotemc <info|link|newtoken|reload>
+    usage: /remotemc <pair|info|token|reload>
     permission: remotemc.admin
 permissions:
   remotemc.admin:
-    description: Manage RemoteMC and view the access token
+    description: Pair devices, manage tokens and view connection info
     default: op
