@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">RemoteMC</string>
 
     <!-- Common actions -->
@@ -333,4 +333,10 @@
     <string name="history_summary">avg %1$s · min %2$s · max %3$s</string>
     <string name="history_empty">No data yet – the plugin records one value per minute.</string>
     <string name="history_failed">Could not load the history.</string>
+    <string name="widget_name">Server status</string>
+    <string name="widget_description">Status, players and TPS of your servers</string>
+    <string name="widget_empty">No servers yet</string>
+    <string name="widget_updated">Updated %s</string>
+    <string name="tile_label">Server alerts</string>
+    <string name="tile_online" tools:ignore="PluralsCandidate">%1$d/%2$d online</string>
 </resources>

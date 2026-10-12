@@ -318,4 +318,10 @@
     <string name="history_summary">сред. %1$s · мин. %2$s · макс. %3$s</string>
     <string name="history_empty">Пока нет данных – плагин записывает одно значение в минуту.</string>
     <string name="history_failed">Не удалось загрузить историю.</string>
+    <string name="widget_name">Статус серверов</string>
+    <string name="widget_description">Статус, игроки и TPS ваших серверов</string>
+    <string name="widget_empty">Серверов пока нет</string>
+    <string name="widget_updated">Обновлено %s</string>
+    <string name="tile_label">Уведомления серверов</string>
+    <string name="tile_online">%1$d/%2$d онлайн</string>
 </resources>

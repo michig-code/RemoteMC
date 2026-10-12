@@ -318,4 +318,10 @@
     <string name="history_summary">śr. %1$s · min. %2$s · maks. %3$s</string>
     <string name="history_empty">Brak danych – plugin zapisuje jedną wartość na minutę.</string>
     <string name="history_failed">Nie udało się wczytać historii.</string>
+    <string name="widget_name">Stan serwerów</string>
+    <string name="widget_description">Stan, gracze i TPS twoich serwerów</string>
+    <string name="widget_empty">Brak serwerów</string>
+    <string name="widget_updated">Zaktualizowano %s</string>
+    <string name="tile_label">Powiadomienia serwerów</string>
+    <string name="tile_online">%1$d/%2$d online</string>
 </resources>

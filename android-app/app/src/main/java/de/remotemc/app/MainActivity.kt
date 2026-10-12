@@ -34,6 +34,9 @@ import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ThemeMode
 import de.remotemc.app.notify.WatchService
+import de.remotemc.app.widget.RemoteMCWidget
+import de.remotemc.app.widget.StatusRefresher
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import de.remotemc.app.data.suggestedDeviceName
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
@@ -120,6 +123,12 @@ private fun AppNavigation(
     // Background notifications: start the service while the app is open; it stops itself when not needed.
     LaunchedEffect(settings.alerts.enabled, servers.map { it.id to it.notify }) {
         WatchService.sync(context)
+    }
+    // Keep the home screen widget in step with added, renamed or removed servers.
+    LaunchedEffect(servers.map { it.id to it.name }) {
+        if (GlanceAppWidgetManager(context).getGlanceIds(RemoteMCWidget::class.java).isNotEmpty()) {
+            StatusRefresher.refreshNow(context)
+        }
     }
 
     LaunchedEffect(pendingLink, pendingServer) {

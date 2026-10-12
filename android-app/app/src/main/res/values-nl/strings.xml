@@ -302,4 +302,10 @@
     <string name="history_summary">gem. %1$s · min. %2$s · max. %3$s</string>
     <string name="history_empty">Nog geen gegevens – de plugin slaat elke minuut een waarde op.</string>
     <string name="history_failed">Geschiedenis kon niet worden geladen.</string>
+    <string name="widget_name">Serverstatus</string>
+    <string name="widget_description">Status, spelers en TPS van je servers</string>
+    <string name="widget_empty">Nog geen servers</string>
+    <string name="widget_updated">Bijgewerkt %s</string>
+    <string name="tile_label">Servermeldingen</string>
+    <string name="tile_online">%1$d/%2$d online</string>
 </resources>

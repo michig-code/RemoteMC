@@ -316,4 +316,10 @@
     <string name="history_summary">Ø %1$s · min. %2$s · max. %3$s</string>
     <string name="history_empty">Noch keine Daten – das Plugin speichert einen Wert pro Minute.</string>
     <string name="history_failed">Verlauf konnte nicht geladen werden.</string>
+    <string name="widget_name">Serverstatus</string>
+    <string name="widget_description">Status, Spieler und TPS deiner Server</string>
+    <string name="widget_empty">Noch keine Server</string>
+    <string name="widget_updated">Aktualisiert %s</string>
+    <string name="tile_label">Server-Benachrichtigungen</string>
+    <string name="tile_online">%1$d/%2$d online</string>
 </resources>

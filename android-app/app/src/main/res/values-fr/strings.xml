@@ -310,4 +310,10 @@
     <string name="history_summary">moy. %1$s · min. %2$s · max. %3$s</string>
     <string name="history_empty">Pas encore de données – le plugin enregistre une valeur par minute.</string>
     <string name="history_failed">Impossible de charger l’historique.</string>
+    <string name="widget_name">État des serveurs</string>
+    <string name="widget_description">État, joueurs et TPS de vos serveurs</string>
+    <string name="widget_empty">Aucun serveur pour l’instant</string>
+    <string name="widget_updated">Mis à jour à %s</string>
+    <string name="tile_label">Alertes serveurs</string>
+    <string name="tile_online">%1$d/%2$d en ligne</string>
 </resources>

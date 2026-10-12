@@ -104,6 +104,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("sh.calvin.reorderable:reorderable:2.5.1") // drag to sort the server list
+    implementation("androidx.glance:glance-appwidget:1.1.1") // home screen widget
+    implementation("androidx.glance:glance-material3:1.1.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0") // widget refresh
 
     // QR scanner: CameraX + ML Kit with the bundled model (works without Google Play services)
     implementation("androidx.camera:camera-camera2:1.4.1")

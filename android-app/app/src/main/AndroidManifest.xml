@@ -60,6 +60,32 @@
             </intent-filter>
         </receiver>
 
+        <!-- Home screen widget and quick settings tile -->
+        <receiver
+            android:name=".widget.WidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/remotemc_widget_info" />
+        </receiver>
+        <service
+            android:name=".widget.AlertsTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_remotemc"
+            android:label="@string/tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
         <!-- Stores the per-app language on Android 12 and older -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

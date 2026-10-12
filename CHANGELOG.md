@@ -32,5 +32,8 @@ First public release of **RemoteMC**.
 - Background notifications (optional): server offline / back online, low TPS, player joins
   (all or chosen players) and chat mentions; per server on or off. Works without Google
   services through a live connection with a small permanent notification
+- Home screen widget with every server (online, players, TPS; tap to open, refresh button,
+  updates every 15 minutes) and a quick settings tile that turns background notifications on
+  or off and shows how many servers are online
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)

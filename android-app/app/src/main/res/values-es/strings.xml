@@ -310,4 +310,10 @@
     <string name="history_summary">media %1$s · mín. %2$s · máx. %3$s</string>
     <string name="history_empty">Aún no hay datos: el plugin guarda un valor por minuto.</string>
     <string name="history_failed">No se pudo cargar el historial.</string>
+    <string name="widget_name">Estado de servidores</string>
+    <string name="widget_description">Estado, jugadores y TPS de tus servidores</string>
+    <string name="widget_empty">Aún no hay servidores</string>
+    <string name="widget_updated">Actualizado %s</string>
+    <string name="tile_label">Avisos de servidores</string>
+    <string name="tile_online">%1$d/%2$d en línea</string>
 </resources>

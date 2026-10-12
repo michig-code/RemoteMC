@@ -302,4 +302,10 @@
     <string name="history_summary">ort. %1$s · min. %2$s · maks. %3$s</string>
     <string name="history_empty">Henüz veri yok – eklenti dakikada bir değer kaydeder.</string>
     <string name="history_failed">Geçmiş yüklenemedi.</string>
+    <string name="widget_name">Sunucu durumu</string>
+    <string name="widget_description">Sunucularının durumu, oyuncuları ve TPS değeri</string>
+    <string name="widget_empty">Henüz sunucu yok</string>
+    <string name="widget_updated">Güncellendi %s</string>
+    <string name="tile_label">Sunucu bildirimleri</string>
+    <string name="tile_online">%1$d/%2$d çevrimiçi</string>
 </resources>
