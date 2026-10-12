@@ -61,6 +61,8 @@ android {
         // Adaptive icons must stay in mipmap-anydpi-v26 for aapt. Version update checks depend on the
         // day the build runs; Dependabot (.github/dependabot.yml) handles updates instead.
         disable += setOf("ObsoleteSdkInt", "GradleDependency", "AndroidGradlePluginVersion", "NewerVersionAvailable")
+        // API 36 meets Google Play's current requirement; moving to 37 needs Android Gradle Plugin 9.
+        informational += "OldTargetApi"
         warningsAsErrors = true
         abortOnError = true
     }
