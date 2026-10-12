@@ -12,8 +12,8 @@ android {
         applicationId = "de.remotemc.app"
         minSdk = 26
         targetSdk = 36
-        // Release builds get the version from the git tag (-Prmc.version=2.1.0).
-        val version = (project.findProperty("rmc.version") as String?) ?: "2.1.0"
+        // Release builds get the version from the git tag (-Prmc.version=1.0.0).
+        val version = (project.findProperty("rmc.version") as String?) ?: "1.0.0"
         val (major, minor, patch) = (version.split('.').map { it.takeWhile(Char::isDigit).toIntOrNull() ?: 0 } + listOf(0, 0, 0))
         versionName = version
         versionCode = major * 10_000 + minor * 100 + patch

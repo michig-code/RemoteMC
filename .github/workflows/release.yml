@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like v2.0.0 to publish the plugin and the app.
+# Push a tag like v1.0.0 to publish the plugin and the app.
 on:
   push:
     tags: ["v*"]

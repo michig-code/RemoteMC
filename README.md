@@ -35,7 +35,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 4. **Pair:** run `/remotemc pair` in game or in the console and scan the QR code with the app.
    Without a camera: tap “Enter code” and type the address, port and 6-digit code.
 
-> Upgrading from McRemote 1.x? Remove `McRemote-1.0.0.jar`. RemoteMC takes over its config and token on first start.
+> Upgrading from the McRemote prototype? Remove `McRemote-1.0.0.jar`. RemoteMC takes over its config and token on first start.
 
 ## Commands
 Permission `remotemc.admin` (default: OP), alias `/rmc`.

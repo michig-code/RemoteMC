@@ -80,7 +80,7 @@ class NetworkTest {
 
     @Test
     fun probeReportsFingerprint() = runBlocking {
-        server.enqueue(json("""{"app":"RemoteMC","version":"2.0.0","apiVersion":1,"platform":"Paper"}"""))
+        server.enqueue(json("""{"app":"RemoteMC","version":"1.0.0","apiVersion":1,"platform":"Paper"}"""))
         val probe = ApiClient.probe(server.hostName, server.port, tls = true)
         assertEquals(fingerprint, probe.fingerprint)
         assertEquals("Paper", probe.ping.platform)
@@ -112,7 +112,7 @@ class NetworkTest {
 
     @Test
     fun pairingExchangesCode() = runBlocking {
-        server.enqueue(json("""{"app":"RemoteMC","version":"2.0.0","apiVersion":1,"platform":"Paper"}"""))
+        server.enqueue(json("""{"app":"RemoteMC","version":"1.0.0","apiVersion":1,"platform":"Paper"}"""))
         server.enqueue(json("""{"token":"rmc_new","name":"Pixel","role":"admin"}"""))
         val result = ApiClient.pair(server.hostName, server.port, true, fingerprint, "123456", "Pixel")
         assertEquals("rmc_new", result.token)

@@ -11,7 +11,7 @@
     <name>RemoteMC</name>
 
     <properties>
-        <revision>2.1.0</revision>
+        <revision>1.0.0</revision>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

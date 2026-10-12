@@ -49,7 +49,7 @@ class ScreenshotTest {
 
     private val status = ServerStatus(
         motd = "Welcome to Michi's survival server!", version = "1.21.4-232 (MC: 1.21.4)",
-        minecraftVersion = "1.21.4", platform = "Paper", pluginVersion = "2.0.0",
+        minecraftVersion = "1.21.4", platform = "Paper", pluginVersion = "1.0.0",
         onlinePlayers = 3, maxPlayers = 20, tps = listOf(19.8, 19.6, 17.2), mspt = 12.4,
         memoryUsedMb = 2860, memoryMaxMb = 4096, uptimeSeconds = 93_000,
         worlds = listOf(
@@ -179,7 +179,7 @@ class ScreenshotTest {
         val vm = PairViewModel(RuntimeEnvironment.getApplication()).apply {
             serverName = "Survival"
             deviceName = "Pixel 8"
-            step = PairStep.Confirm("mc.example.com", 8765, true, PingInfo("2.0.0", 1, "Paper"),
+            step = PairStep.Confirm("mc.example.com", 8765, true, PingInfo("1.0.0", 1, "Paper"),
                 "X8Z7vZ4QM1IFpAkiY4T3PF5DKiok9ifVqw6sAUAyJBM", verified = false, mismatch = false, code = "123456", token = null)
         }
         PairScreen(vm, {}, {}, {})
@@ -187,7 +187,7 @@ class ScreenshotTest {
 
     @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen("Pixel 8", {}) }
     @Test fun onboardingName() = shot("13b_onboarding_name") { OnboardingScreen("Pixel 8", {}, onlyName = true) }
-    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "2.0.0") }
+    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "1.0.0") }
 
     @Test
     @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")

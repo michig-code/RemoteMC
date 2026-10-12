@@ -4,7 +4,7 @@ _None right now._
 
 # Resolved
 
-## Player heads show only Steve (fixed in 2.1.0)
+## Player heads show only Steve (fixed in 1.0.0)
 Cause: mc-heads.net returned the default head for some real accounts (e.g. Micheeee14,
 flatsch), even when asked by UUID. The plugin now sends each player's skin texture URL and the
 app cuts the face from it; without a skin URL (offline players in chat) it uses minotar.net.

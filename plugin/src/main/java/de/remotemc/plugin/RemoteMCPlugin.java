@@ -144,7 +144,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    /** RemoteMC 1.x was called McRemote; take over its settings and token on first start. */
+    /** The prototype was called McRemote; take over its settings and token on first start. */
     private void importFromMcRemote() {
         File old = new File(getDataFolder().getParentFile(), "McRemote/config.yml");
         if (old.isFile() && !getDataFolder().exists()) {
