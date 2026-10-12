@@ -47,6 +47,15 @@ public final class PairingManager {
         return c;
     }
 
+    /** Replaces open pairing codes in a text, so they cannot be read from the console stream. */
+    public String redact(String text) {
+        String result = text;
+        for (String code : codes.keySet()) {
+            result = result.replace(code, "••••••");
+        }
+        return result;
+    }
+
     private void purgeExpired() {
         long now = System.currentTimeMillis();
         for (Iterator<Code> it = codes.values().iterator(); it.hasNext(); ) {

@@ -83,6 +83,15 @@ public final class Platform {
         return PAPER ? PaperSupport.entityCount(world) : world.getEntities().size();
     }
 
+    /** The server's command map (public on Paper, via CraftServer's method on Spigot). */
+    public static org.bukkit.command.CommandMap commandMap() {
+        try {
+            return (org.bukkit.command.CommandMap) Bukkit.getServer().getClass().getMethod("getCommandMap").invoke(Bukkit.getServer());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Command map not available", e);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     public static String motd() {
         return org.bukkit.ChatColor.stripColor(Bukkit.getMotd());

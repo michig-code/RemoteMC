@@ -12,32 +12,37 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.function.UnaryOperator;
 
 /** Mirrors the server console into a ring buffer and the live event stream. */
 public final class ConsoleBuffer {
 
-    public record Line(long id, long time, String level, String message) {
+    /** {@code formatted} keeps colours as section codes (§a); {@code message} is plain text. */
+    public record Line(long id, long time, String level, String message, String formatted) {
         public JsonObject toJson() {
             JsonObject o = new JsonObject();
             o.addProperty("id", id);
             o.addProperty("time", time);
             o.addProperty("level", level);
             o.addProperty("message", message);
+            if (!formatted.equals(message)) {
+                o.addProperty("formatted", formatted);
+            }
             return o;
         }
     }
 
-    private static final Pattern FORMATTING = Pattern.compile("\u001B\\[[;\\d]*m|§[0-9a-fk-orx]");
-
     private final EventHub hub;
+    private final UnaryOperator<String> redactor;
     private final Deque<Line> lines = new ArrayDeque<>();
     private int capacity;
     private long nextId = 1;
     private Appender appender;
 
-    public ConsoleBuffer(EventHub hub, int capacity) {
+    /** @param redactor hides secrets (tokens, pairing codes) before lines reach the app */
+    public ConsoleBuffer(EventHub hub, int capacity, UnaryOperator<String> redactor) {
         this.hub = hub;
+        this.redactor = redactor;
         this.capacity = Math.max(50, capacity);
     }
 
@@ -63,7 +68,8 @@ public final class ConsoleBuffer {
     void add(String level, String message) {
         Line line;
         synchronized (this) {
-            line = new Line(nextId++, System.currentTimeMillis(), level, FORMATTING.matcher(message).replaceAll(""));
+            String formatted = redactor.apply(Formatting.toSectionCodes(message));
+            line = new Line(nextId++, System.currentTimeMillis(), level, Formatting.strip(formatted), formatted);
             lines.addLast(line);
             trim();
         }

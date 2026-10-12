@@ -90,7 +90,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
                 getConfig().getLong("security.lockout-seconds", 300));
         audit = new AuditLog(new File(getDataFolder(), "audit.log"), getLogger(), getConfig().getBoolean("audit-log", true));
         snapshots = new Snapshots(getDescription().getVersion());
-        console = new ConsoleBuffer(hub, getConfig().getInt("console.buffer-size", 500));
+        console = new ConsoleBuffer(hub, getConfig().getInt("console.buffer-size", 500), this::redact);
         console.attach();
         chat = new ChatBuffer(hub);
 
@@ -380,6 +380,21 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────
+
+    private static final java.util.regex.Pattern TOKEN = java.util.regex.Pattern.compile("rmc_[A-Za-z0-9_-]{20,}");
+    private static final java.util.regex.Pattern QR_LINE = java.util.regex.Pattern.compile("^[█▀▄ ]{10,}$");
+
+    /**
+     * Console lines are visible to moderators in the app; access tokens, pairing codes and
+     * console QR codes would let them gain admin access, so they are hidden.
+     */
+    private String redact(String line) {
+        String stripped = de.remotemc.plugin.live.Formatting.strip(line).strip();
+        if (QR_LINE.matcher(stripped).matches()) {
+            return "[QR code hidden]";
+        }
+        return pairing.redact(TOKEN.matcher(line).replaceAll("rmc_[hidden]"));
+    }
 
     /** Address for QR codes: configured address, server-ip, or the machine's LAN address. */
     String publicAddress() {

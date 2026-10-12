@@ -123,6 +123,21 @@ if LEGACY:
     st, d = req("GET", "/api/v1/me", LEGACY)
     check("migrated McRemote token works", st == 200 and d.get("name") == "Legacy token", d)
 
+# 5b. secrets never reach the console stream (moderators can read it)
+st, d = req("GET", "/api/v1/console?since=0", admin)
+text = json.dumps(d)
+check("console hides tokens, pairing codes and QR codes",
+      viewer not in text and mod not in text and code not in text and "█" not in text, text[-300:])
+
+# 5c. command list and completion
+st, d = req("GET", "/api/v1/commands", admin)
+names = [c["name"] for c in d.get("commands", [])]
+check("command list without blocked commands", st == 200 and "gamemode" in names and "stop" not in names, names[:10])
+st, d = req("GET", "/api/v1/complete?buffer=gamemode%20cr", admin)
+check("tab completion", st == 200 and d.get("suggestions") == ["creative"], d)
+st, d = req("GET", "/api/v1/complete?buffer=gam", mod)
+check("completion needs admin", st == 403, d)
+
 # 6. live stream
 c = conn()
 c.request("GET", "/api/v1/events", headers={"Authorization": "Bearer " + admin})

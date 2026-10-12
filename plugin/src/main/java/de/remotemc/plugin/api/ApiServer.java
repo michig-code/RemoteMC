@@ -16,6 +16,7 @@ import de.remotemc.plugin.auth.TokenStore;
 import de.remotemc.plugin.live.ChatBuffer;
 import de.remotemc.plugin.live.ConsoleBuffer;
 import de.remotemc.plugin.live.EventHub;
+import de.remotemc.plugin.live.Formatting;
 import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -166,6 +167,24 @@ public final class ApiServer {
             case "POST /api/v1/chat" -> {
                 require(caller, Role.MODERATOR);
                 return broadcast(caller, stringField(readBody(ex), "message", 256));
+            }
+            case "GET /api/v1/commands" -> {
+                require(caller, Role.ADMIN);
+                List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
+                return global(() -> Commands.list(blocked));
+            }
+            case "GET /api/v1/complete" -> {
+                require(caller, Role.ADMIN);
+                String buffer = stringParam(ex, "buffer");
+                if (buffer.startsWith("/")) {
+                    buffer = buffer.substring(1);
+                }
+                if (buffer.length() > 512) {
+                    throw new ApiException(413, "too_large", "Buffer too long");
+                }
+                String finalBuffer = buffer;
+                List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
+                return global(() -> Commands.complete(finalBuffer, blocked));
             }
             case "POST /api/v1/command" -> {
                 require(caller, Role.ADMIN);
@@ -354,11 +373,16 @@ public final class ApiServer {
         JsonObject o = new JsonObject();
         o.addProperty("success", success);
         o.addProperty("captured", Platform.capturesCommandOutput());
-        JsonArray arr = new JsonArray();
+        JsonArray plain = new JsonArray();
+        JsonArray formatted = new JsonArray();
         synchronized (output) {
-            output.forEach(arr::add);
+            for (String line : output) {
+                plain.add(Formatting.strip(line));
+                formatted.add(line);
+            }
         }
-        o.add("output", arr);
+        o.add("output", plain);
+        o.add("formatted", formatted);
         return o;
     }
 
@@ -465,6 +489,19 @@ public final class ApiServer {
         JsonObject o = new JsonObject();
         o.addProperty("ok", true);
         return o;
+    }
+
+    private static String stringParam(HttpExchange ex, String key) {
+        String q = ex.getRequestURI().getRawQuery();
+        if (q != null) {
+            for (String pair : q.split("&")) {
+                String[] kv = pair.split("=", 2);
+                if (kv[0].equals(key)) {
+                    return kv.length > 1 ? java.net.URLDecoder.decode(kv[1], StandardCharsets.UTF_8) : "";
+                }
+            }
+        }
+        return "";
     }
 
     private static long longParam(HttpExchange ex, String key) {
