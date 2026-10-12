@@ -4,6 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/michig-code/RemoteMC?include_prereleases&label=release)](https://github.com/michig-code/RemoteMC/releases)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6%20–%2026.x-62b47a)
 ![Android](https://img.shields.io/badge/Android-8%2B-3ddc84)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kostenlos.
 **[English version](README.md)** (dort auch API-Referenz und Entwickler-Infos)
@@ -48,3 +49,6 @@ kicken/bannen/heilen · *admin* zusätzlich Konsolenbefehle und OP.
 ## Sicherheit
 Die Verbindung ist per HTTPS verschlüsselt; die App vertraut genau dem Zertifikat aus dem QR-Code. Jedes Handy
 bekommt einen eigenen Zugang, der Server speichert nur Hashes. Alle Aktionen landen in `plugins/RemoteMC/audit.log`.
+
+## Lizenz
+[MIT](LICENSE). Verwendete Bibliotheken behalten ihre eigenen Lizenzen (in der App unter Einstellungen → Open-Source-Lizenzen).

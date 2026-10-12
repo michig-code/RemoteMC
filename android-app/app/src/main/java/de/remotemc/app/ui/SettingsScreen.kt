@@ -201,12 +201,13 @@ fun SettingsScreen(
             title = { Text(stringResource(R.string.settings_licenses)) },
             text = {
                 Text(
-                    "AndroidX, Jetpack Compose, CameraX – Apache 2.0\n" +
+                    "RemoteMC – MIT\n\n" +
+                        "AndroidX, Jetpack Compose, CameraX – Apache 2.0\n" +
                         "Kotlin, kotlinx.coroutines – Apache 2.0\n" +
                         "OkHttp – Apache 2.0\n" +
                         "Coil – Apache 2.0\n" +
                         "ML Kit Barcode Scanning – ML Kit Terms\n" +
-                        "Player heads – mc-heads.net",
+                        "Player heads – textures.minecraft.net, minotar.net",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             },

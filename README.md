@@ -4,6 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/michig-code/RemoteMC?include_prereleases&label=release)](https://github.com/michig-code/RemoteMC/releases)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6%20–%2026.x-62b47a)
 ![Android](https://img.shields.io/badge/Android-8%2B-3ddc84)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Manage your Minecraft server from your phone – live, encrypted and free.
 **[Deutsche Version](README.de.md)**
@@ -151,3 +152,6 @@ SpigotMC has no upload API; upload the jar there by hand. Store texts are in [`d
 the privacy policy in [`docs/PRIVACY.md`](docs/PRIVACY.md).
 
 RemoteMC is not affiliated with Mojang or Microsoft.
+
+## License
+[MIT](LICENSE). Third-party libraries keep their own licences (listed in the app under Settings → Open-source licences).
