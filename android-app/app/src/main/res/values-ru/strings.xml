@@ -392,4 +392,9 @@
     <string name="schedules_preset_save">Сохранить миры</string>
     <string name="schedules_timezone">Время указано в часовом поясе сервера (%s).</string>
     <string name="error_schedule_unknown">Эта задача больше не существует.</string>
+    <string name="players_playtime">Наиграно: %s</string>
+    <string name="players_teleport">Телепорт</string>
+    <string name="players_teleport_to">Телепортировать %s к…</string>
+    <string name="players_teleport_spawn">Точка появления</string>
+    <string name="players_teleported">%s: телепортирован</string>
 </resources>

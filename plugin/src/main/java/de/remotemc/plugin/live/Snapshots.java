@@ -76,6 +76,7 @@ public final class Snapshots {
             o.addProperty("ping", p.getPing());
             o.addProperty("gameMode", p.getGameMode().name());
             o.addProperty("op", p.isOp());
+            o.addProperty("playtime", safe(() -> p.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE) / 20));
             String skin = skinUrl(p);
             if (skin != null) {
                 o.addProperty("skin", skin);

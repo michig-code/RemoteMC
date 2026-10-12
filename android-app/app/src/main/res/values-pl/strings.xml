@@ -392,4 +392,9 @@
     <string name="schedules_preset_save">Zapisz światy</string>
     <string name="schedules_timezone">Godziny są w strefie czasowej serwera (%s).</string>
     <string name="error_schedule_unknown">To zadanie już nie istnieje.</string>
+    <string name="players_playtime">Czas gry: %s</string>
+    <string name="players_teleport">Teleportuj</string>
+    <string name="players_teleport_to">Teleportuj %s do…</string>
+    <string name="players_teleport_spawn">Spawn</string>
+    <string name="players_teleported">Teleportowano: %s</string>
 </resources>

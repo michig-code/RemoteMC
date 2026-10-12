@@ -21,6 +21,8 @@ First public release of **RemoteMC**.
 - `GET /api/v1/plugins`: installed plugins with version, authors and state (moderator)
 - Scheduled commands every N minutes or daily at a time, with an optional countdown in the chat
   (`schedules.json`, `/api/v1/schedules`, admin; blocked commands stay blocked)
+- Teleport players to the spawn or to another player (also on Folia); play time in the player list;
+  world spawn in the world details
 - Supports Paper, Purpur, Folia and Spigot from 1.20.6 up to 26.x
 - Messages in English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese,
   Turkish and Russian; update check
@@ -46,5 +48,6 @@ First public release of **RemoteMC**.
 - Plugin list on the overview (moderators and admins)
 - Scheduled tasks (admins): announcements, saving the worlds or any command, repeating or daily,
   with a chat countdown; run now, pause, edit
+- Teleport a player to the spawn or another player; play time per player
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)

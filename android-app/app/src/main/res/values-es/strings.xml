@@ -384,4 +384,9 @@
     <string name="schedules_preset_save">Guardar mundos</string>
     <string name="schedules_timezone">Las horas están en la zona horaria del servidor (%s).</string>
     <string name="error_schedule_unknown">Esta tarea ya no existe.</string>
+    <string name="players_playtime">Jugado: %s</string>
+    <string name="players_teleport">Teletransportar</string>
+    <string name="players_teleport_to">Teletransportar a %s a…</string>
+    <string name="players_teleport_spawn">Punto de aparición</string>
+    <string name="players_teleported">%s teletransportado</string>
 </resources>

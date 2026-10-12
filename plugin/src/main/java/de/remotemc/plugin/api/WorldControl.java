@@ -34,6 +34,11 @@ final class WorldControl {
         o.addProperty("storm", w.hasStorm());
         o.addProperty("thunder", w.isThundering());
         o.addProperty("difficulty", w.getDifficulty().name());
+        JsonObject spawn = new JsonObject();
+        spawn.addProperty("x", w.getSpawnLocation().getBlockX());
+        spawn.addProperty("y", w.getSpawnLocation().getBlockY());
+        spawn.addProperty("z", w.getSpawnLocation().getBlockZ());
+        o.add("spawn", spawn);
         JsonArray rules = new JsonArray();
         GameRule<?>[] all = GameRule.values();
         Arrays.sort(all, Comparator.comparing(GameRule::getName));

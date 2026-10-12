@@ -537,6 +537,27 @@ public final class ApiServer {
 
         require(caller, action.equals("op") || action.equals("deop") ? Role.ADMIN : Role.MODERATOR);
 
+        if (action.equals("teleport")) {
+            Player p = Bukkit.getPlayerExact(name);
+            if (p == null) {
+                throw ApiException.notFound("player_offline", "Player " + name + " is not online");
+            }
+            String to = body.has("to") ? body.get("to").getAsString() : "";
+            org.bukkit.Location target;
+            if (to.equals("spawn")) {
+                target = global(() -> Bukkit.getWorlds().get(0).getSpawnLocation());
+            } else {
+                Player other = Bukkit.getPlayerExact(to);
+                if (other == null) {
+                    throw ApiException.notFound("player_offline", "Player " + to + " is not online");
+                }
+                // Read the other player's position on their own thread (Folia).
+                target = await(plugin.scheduler().entity(other, other::getLocation));
+            }
+            onPlayer(p, () -> Platform.teleport(p, target));
+            plugin.audit().log(caller.who(), caller.ip(), "teleport " + name + " to " + to);
+            return ok();
+        }
         if (action.equals("ban")) {
             // The vanilla command also resolves offline players.
             boolean ok = global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),

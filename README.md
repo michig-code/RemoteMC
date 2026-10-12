@@ -41,7 +41,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 - **Worlds** – time, weather, difficulty and game rules per world at a tap (admins)
 - **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
   players, memory and MSPT over the last hour, day or week
-- **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort;
+- **Players** – heads, health, ping and location; message, heal, teleport, game mode, OP, kick, ban; play time; search and sort;
   whitelist and ban list with unban
 - **Console** – coloured live server log, commands with their output, suggestions while typing
   (from the server's own tab completion) and your recently used commands

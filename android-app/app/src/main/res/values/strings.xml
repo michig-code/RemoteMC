@@ -407,4 +407,9 @@
     <string name="schedules_preset_save">Save worlds</string>
     <string name="schedules_timezone">Times are in the server\'s time zone (%s).</string>
     <string name="error_schedule_unknown">This task no longer exists.</string>
+    <string name="players_playtime">Played %s</string>
+    <string name="players_teleport">Teleport</string>
+    <string name="players_teleport_to">Teleport %s to …</string>
+    <string name="players_teleport_spawn">Spawn</string>
+    <string name="players_teleported">%s teleported</string>
 </resources>

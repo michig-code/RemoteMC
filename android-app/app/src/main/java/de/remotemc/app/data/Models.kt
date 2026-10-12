@@ -77,6 +77,8 @@ data class PlayerInfo(
     val op: Boolean,
     /** Skin texture URL from the player's profile (plugin 2.1+), used to draw the real head. */
     val skin: String? = null,
+    /** Total time played on this server in seconds; -1 if unknown. */
+    val playtime: Long = -1,
 ) {
     companion object {
         fun listFromJson(arr: JSONArray?): List<PlayerInfo> {
@@ -98,6 +100,7 @@ data class PlayerInfo(
                     gameMode = p.optString("gameMode"),
                     op = p.optBoolean("op"),
                     skin = p.optString("skin").takeIf { it.startsWith("https://") },
+                    playtime = p.optLong("playtime", -1),
                 )
             }
         }

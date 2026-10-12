@@ -384,4 +384,9 @@
     <string name="schedules_preset_save">Salva mondi</string>
     <string name="schedules_timezone">Gli orari sono nel fuso orario del server (%s).</string>
     <string name="error_schedule_unknown">Questa attività non esiste più.</string>
+    <string name="players_playtime">Giocato: %s</string>
+    <string name="players_teleport">Teletrasporta</string>
+    <string name="players_teleport_to">Teletrasporta %s da…</string>
+    <string name="players_teleport_spawn">Punto di rinascita</string>
+    <string name="players_teleported">%s teletrasportato</string>
 </resources>

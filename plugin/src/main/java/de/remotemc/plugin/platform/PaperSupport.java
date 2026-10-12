@@ -23,6 +23,10 @@ final class PaperSupport {
         return Bukkit.getMinecraftVersion();
     }
 
+    static void teleport(org.bukkit.entity.Player player, org.bukkit.Location to) {
+        player.teleportAsync(to); // required on Folia, smoother on Paper
+    }
+
     static int entityCount(org.bukkit.World world) {
         return world.getEntityCount();
     }

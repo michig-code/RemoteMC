@@ -390,4 +390,9 @@
     <string name="schedules_preset_save">Welten speichern</string>
     <string name="schedules_timezone">Uhrzeiten in der Zeitzone des Servers (%s).</string>
     <string name="error_schedule_unknown">Diese Aufgabe gibt es nicht mehr.</string>
+    <string name="players_playtime">Gespielt: %s</string>
+    <string name="players_teleport">Teleportieren</string>
+    <string name="players_teleport_to">%s teleportieren zu …</string>
+    <string name="players_teleport_spawn">Spawn</string>
+    <string name="players_teleported">%s teleportiert</string>
 </resources>

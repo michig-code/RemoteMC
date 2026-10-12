@@ -58,6 +58,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -132,7 +135,7 @@ fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction) {
     // Look the player up again so the sheet shows fresh data and closes if they leave.
     selected?.let { name ->
         val player = players.firstOrNull { it.name == name }
-        if (player == null) selected = null else PlayerSheet(player, role, onAction) { selected = null }
+        if (player == null) selected = null else PlayerSheet(player, role, players.map { it.name } - name, onAction) { selected = null }
     }
 }
 
@@ -243,9 +246,10 @@ private fun PingIndicator(ping: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun PlayerSheet(p: PlayerInfo, role: Role, onAction: PlayerAction, onDismiss: () -> Unit) {
+private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, onAction: PlayerAction, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf<String?>(null) }
+    var teleport by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val haptics = rememberHaptics()
     val canModerate = role.atLeast(Role.MODERATOR)
@@ -277,6 +281,13 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, onAction: PlayerAction, onDis
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (p.playtime >= 0) {
+                        Text(
+                            stringResource(R.string.players_playtime, formatPlaytime(p.playtime)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
@@ -347,6 +358,9 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, onAction: PlayerAction, onDis
                             UiText.Res(if (p.op) R.string.players_deopped else R.string.players_opped, listOf(p.name)))
                     }
                 }
+                ActionButton(Icons.Outlined.MyLocation, stringResource(R.string.players_teleport), McColors.End) {
+                    teleport = true
+                }
                 ActionButton(Icons.AutoMirrored.Outlined.Logout, stringResource(R.string.players_kick), McColors.Warning) {
                     haptics.heavy(); confirm = "kick"
                 }
@@ -355,6 +369,37 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, onAction: PlayerAction, onDis
                 }
             }
         }
+    }
+
+    if (teleport) {
+        AlertDialog(
+            onDismissRequest = { teleport = false },
+            icon = { Icon(Icons.Outlined.MyLocation, null) },
+            title = { Text(stringResource(R.string.players_teleport_to, p.name)) },
+            text = {
+                Column {
+                    (listOf("spawn") + others).forEach { target ->
+                        Row(
+                            Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable {
+                                teleport = false
+                                act("teleport", JSONObject().put("to", target), UiText.Res(R.string.players_teleported, listOf(p.name)))
+                            }.padding(vertical = 10.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (target == "spawn") {
+                                Icon(Icons.Outlined.Home, null, Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+                            } else {
+                                PlayerHead(target, 32.dp)
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Text(if (target == "spawn") stringResource(R.string.players_teleport_spawn) else target, style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { teleport = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 
     confirm?.let { action ->
@@ -402,4 +447,14 @@ private fun gameModeColor(mode: String) = when (mode) {
     "ADVENTURE" -> McColors.Food
     "SPECTATOR" -> Color(0xFF64B5F6)
     else -> McColors.Grass
+}
+
+/** "12 h 5 min" / "3 d 4 h" for a play time in seconds. */
+internal fun formatPlaytime(seconds: Long): String {
+    val minutes = seconds / 60
+    return when {
+        minutes < 60 -> "$minutes min"
+        minutes < 24 * 60 -> "${minutes / 60} h ${minutes % 60} min"
+        else -> "${minutes / (24 * 60)} d ${minutes / 60 % 24} h"
+    }
 }

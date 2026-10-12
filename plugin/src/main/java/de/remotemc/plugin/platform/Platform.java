@@ -119,4 +119,13 @@ public final class Platform {
             return false;
         }
     }
+
+    /** Teleports on the player's own thread (call from the entity scheduler). */
+    public static void teleport(org.bukkit.entity.Player player, org.bukkit.Location to) {
+        if (PAPER) {
+            PaperSupport.teleport(player, to);
+        } else {
+            player.teleport(to);
+        }
+    }
 }
