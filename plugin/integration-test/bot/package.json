@@ -1,0 +1,8 @@
+{
+  "name": "remotemc-test-bot",
+  "private": true,
+  "description": "Test player for the RemoteMC integration tests",
+  "dependencies": {
+    "mineflayer": "^4.23.0"
+  }
+}
