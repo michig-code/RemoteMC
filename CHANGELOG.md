@@ -25,7 +25,7 @@ First public release of **RemoteMC**.
 - Live connection with automatic reconnect and offline fallback
 - Overview with TPS, MSPT, memory and worlds; players with search, sorting, real skin heads
   and actions; coloured console with your recent commands and Minecraft-like suggestions; chat
-- Server list: hold a server to sort it by dragging, pin servers to the top, group them in
-  folders, search by name or address
+- Server list: hold a server and drag it to sort it, into or out of a folder, from folder to
+  folder or into "Pinned"; pin servers to the top, group them in folders, search by name or address
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)

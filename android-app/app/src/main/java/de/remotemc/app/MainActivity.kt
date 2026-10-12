@@ -165,7 +165,7 @@ private fun AppNavigation(
                 onMoveToFolder = { profile, folder -> repo.setFolder(profile.id, folder) },
                 onRenameFolder = repo::renameFolder,
                 onRemoveFolder = repo::removeFolder,
-                onMove = repo::move,
+                onReorder = repo::setOrder,
             )
         }
         composable(

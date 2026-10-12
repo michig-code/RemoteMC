@@ -144,47 +144,6 @@ sealed interface ServerProbe {
     data class Offline(val reason: Throwable) : ServerProbe
 }
 
-/** One row of the server list. */
-private sealed interface ListRow {
-    val key: String
-
-    data class Title(val text: Int) : ListRow {
-        override val key get() = "title:$text"
-    }
-    data class Folder(val name: String, val count: Int, val expanded: Boolean) : ListRow {
-        override val key get() = "folder:$name"
-    }
-    data class Server(val server: ServerProfile) : ListRow {
-        override val key get() = server.id
-    }
-}
-
-/** Pinned servers first, then servers without a folder, then each folder (in the order of its first server). */
-private fun buildRows(servers: List<ServerProfile>, query: String, collapsed: List<String>): List<ListRow> {
-    if (query.isNotBlank()) return servers.filter { it.matches(query) }.map { ListRow.Server(it) }
-    val rows = mutableListOf<ListRow>()
-    val pinned = servers.filter { it.pinned }
-    if (pinned.isNotEmpty()) {
-        rows += ListRow.Title(R.string.servers_pinned)
-        pinned.mapTo(rows) { ListRow.Server(it) }
-    }
-    val loose = servers.filter { !it.pinned && it.folder.isBlank() }
-    if (loose.isNotEmpty()) {
-        rows += ListRow.Title(R.string.servers_title)
-        loose.mapTo(rows) { ListRow.Server(it) }
-    }
-    servers.filter { !it.pinned && it.folder.isNotBlank() }.groupBy { it.folder }.forEach { (folder, items) ->
-        val expanded = folder !in collapsed
-        rows += ListRow.Folder(folder, items.size, expanded)
-        if (expanded) items.mapTo(rows) { ListRow.Server(it) }
-    }
-    return rows
-}
-
-/** Servers may only be dragged within their own section. */
-private fun sameSection(a: ServerProfile, b: ServerProfile) =
-    a.pinned == b.pinned && (a.pinned || a.folder == b.folder)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServerListScreen(
@@ -199,7 +158,7 @@ fun ServerListScreen(
     onMoveToFolder: (ServerProfile, String) -> Unit = { _, _ -> },
     onRenameFolder: (old: String, new: String) -> Unit = { _, _ -> },
     onRemoveFolder: (String) -> Unit = {},
-    onMove: (fromId: String, toId: String) -> Unit = { _, _ -> },
+    onReorder: (List<ServerProfile>) -> Unit = {},
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
     initialQuery: String = "",
 ) {
@@ -213,7 +172,6 @@ fun ServerListScreen(
     val haptics = rememberHaptics()
     val folders = remember(servers) { servers.map { it.folder }.filter { it.isNotBlank() }.distinct() }
     val rows = buildRows(servers, query, collapsed)
-    val byId = remember(servers) { servers.associateBy { it.id } }
 
     // Pull down to check all servers again (also those in collapsed folders).
     var refreshing by remember { mutableStateOf(false) }
@@ -236,12 +194,11 @@ fun ServerListScreen(
 
     val listState = rememberLazyListState()
     val reorder = rememberReorderableLazyListState(listState) { from, to ->
-        val a = byId[from.key]
-        val b = byId[to.key]
-        if (a != null && b != null && sameSection(a, b)) {
-            onMove(a.id, b.id)
-            haptics.tick()
-        }
+        val id = from.key as? String ?: return@rememberReorderableLazyListState
+        val result = drop(servers, rows, id, to.key, collapsed) ?: return@rememberReorderableLazyListState
+        result.expand?.let { collapsed = collapsed - it }
+        onReorder(result.servers)
+        haptics.tick()
     }
 
     Scaffold(
@@ -289,8 +246,10 @@ fun ServerListScreen(
                     }
                     itemsIndexed(rows, key = { _, row -> row.key }) { i, row ->
                         when (row) {
-                            is ListRow.Title -> SectionTitle(stringResource(row.text), Modifier.animateItem())
-                            is ListRow.Folder -> FolderHeader(
+                            is ListRow.Title -> ReorderableItem(reorder, key = row.key) {
+                                SectionTitle(stringResource(row.text))
+                            }
+                            is ListRow.Folder -> ReorderableItem(reorder, key = row.key) { FolderHeader(
                                 row,
                                 onToggle = {
                                     haptics.tap()
@@ -298,8 +257,7 @@ fun ServerListScreen(
                                 },
                                 onRename = { renamingFolder = row.name },
                                 onRemove = { removingFolder = row.name },
-                                modifier = Modifier.animateItem(),
-                            )
+                            ) }
                             is ListRow.Server -> ReorderableItem(reorder, key = row.key) { dragging ->
                                 val server = row.server
                                 ServerCard(

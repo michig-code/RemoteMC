@@ -34,6 +34,12 @@ class ServerRepository(private val prefs: SharedPreferences, private val box: Se
         save(list)
     }
 
+    /** Saves a new order (and folders / pins) after a drag; ignored if it does not hold the same servers. */
+    fun setOrder(list: List<ServerProfile>) {
+        if (list.map { it.id }.sorted() != _servers.value.map { it.id }.sorted()) return
+        save(list)
+    }
+
     fun setPinned(id: String, pinned: Boolean) = update(id) { it.copy(pinned = pinned) }
 
     fun setFolder(id: String, folder: String) = update(id) { it.copy(folder = folder.trim()) }
