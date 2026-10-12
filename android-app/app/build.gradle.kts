@@ -100,8 +100,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("com.squareup.okhttp3:okhttp-sse:5.5.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // QR scanner: CameraX + ML Kit with the bundled model (works without Google Play services)
@@ -112,8 +112,8 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.5.0")
+    testImplementation("com.squareup.okhttp3:okhttp-tls:5.5.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.2")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.2")
