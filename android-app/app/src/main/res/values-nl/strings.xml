@@ -351,4 +351,8 @@
     <string name="world_gamerules_search">Spelregels zoeken</string>
     <string name="world_gamerule_value">Waarde</string>
     <string name="error_world_unknown">Deze wereld bestaat niet (meer).</string>
+    <string name="dashboard_plugins">Plugins</string>
+    <string name="plugins_disabled">Uitgeschakeld</string>
+    <string name="plugins_by">door %s</string>
+    <string name="plugins_search">Plugins zoeken</string>
 </resources>

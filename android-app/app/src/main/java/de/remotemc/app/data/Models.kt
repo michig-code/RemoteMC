@@ -236,3 +236,26 @@ data class WorldDetails(
         }
     }
 }
+
+data class PluginInfo(
+    val name: String,
+    val version: String,
+    val enabled: Boolean,
+    val description: String?,
+    val authors: List<String>,
+) {
+    companion object {
+        fun listFromJson(o: JSONObject): List<PluginInfo> {
+            val arr = o.optJSONArray("plugins") ?: JSONArray()
+            return List(arr.length()) {
+                val p = arr.getJSONObject(it)
+                val authors = p.optJSONArray("authors") ?: JSONArray()
+                PluginInfo(
+                    p.getString("name"), p.optString("version"), p.optBoolean("enabled", true),
+                    p.optString("description").takeIf { d -> d.isNotBlank() },
+                    List(authors.length()) { i -> authors.getString(i) },
+                )
+            }
+        }
+    }
+}

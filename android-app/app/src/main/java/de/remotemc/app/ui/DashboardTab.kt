@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
+import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.WorldInfo
 import de.remotemc.app.ui.components.AnimatedBar
@@ -69,7 +70,10 @@ fun DashboardTab(
     wide: Boolean = false,
     loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
     worldActions: WorldActions? = null,
+    loadPlugins: (suspend () -> List<PluginInfo>)? = null,
 ) {
+    var showPlugins by rememberSaveable { mutableStateOf(false) }
+    if (showPlugins && loadPlugins != null) PluginsSheet(loadPlugins) { showPlugins = false }
     var openWorld by rememberSaveable { mutableStateOf<String?>(null) }
     val onWorld: ((String) -> Unit)? = worldActions?.let { { name: String -> openWorld = name } }
     if (worldActions != null) {
@@ -106,6 +110,7 @@ fun DashboardTab(
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GaugeRow(status, Modifier.staggeredAppear(1))
                     Worlds(status.worlds, onWorld)
+            loadPlugins?.let { PluginsRow { showPlugins = true } }
                 }
             }
         } else {
@@ -115,6 +120,7 @@ fun DashboardTab(
             TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
             loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(6)) }
             Worlds(status.worlds, onWorld)
+            loadPlugins?.let { PluginsRow { showPlugins = true } }
         }
         Spacer(Modifier.height(8.dp))
     }

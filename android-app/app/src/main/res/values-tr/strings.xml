@@ -351,4 +351,8 @@
     <string name="world_gamerules_search">Oyun kurallarında ara</string>
     <string name="world_gamerule_value">Değer</string>
     <string name="error_world_unknown">Bu dünya mevcut değil (veya artık yok).</string>
+    <string name="dashboard_plugins">Eklentiler</string>
+    <string name="plugins_disabled">Devre dışı</string>
+    <string name="plugins_by">yapımcı: %s</string>
+    <string name="plugins_search">Eklenti ara</string>
 </resources>

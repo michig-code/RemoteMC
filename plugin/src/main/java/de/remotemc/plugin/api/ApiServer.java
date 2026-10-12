@@ -230,6 +230,10 @@ public final class ApiServer {
                 plugin.audit().log(caller.who(), caller.ip(), "whitelist " + (add ? "add " : "remove ") + name);
                 return global(Moderation::whitelist);
             }
+            case "GET /api/v1/plugins" -> {
+                require(caller, Role.MODERATOR);
+                return global(ApiServer::plugins);
+            }
             case "GET /api/v1/bans" -> {
                 require(caller, Role.MODERATOR);
                 return global(Moderation::bans);
@@ -570,6 +574,32 @@ public final class ApiServer {
         } catch (ApiException e) {
             throw new java.util.concurrent.CompletionException(e);
         }
+    }
+
+    @SuppressWarnings("deprecation") // getDescription works on Paper and Spigot alike
+    private static JsonObject plugins() {
+        JsonArray arr = new JsonArray();
+        org.bukkit.plugin.Plugin[] all = Bukkit.getPluginManager().getPlugins();
+        java.util.Arrays.sort(all, java.util.Comparator.comparing(p -> p.getName().toLowerCase(Locale.ROOT)));
+        for (org.bukkit.plugin.Plugin p : all) {
+            JsonObject o = new JsonObject();
+            o.addProperty("name", p.getName());
+            o.addProperty("version", p.getDescription().getVersion());
+            o.addProperty("enabled", p.isEnabled());
+            if (p.getDescription().getDescription() != null) {
+                o.addProperty("description", p.getDescription().getDescription());
+            }
+            JsonArray authors = new JsonArray();
+            p.getDescription().getAuthors().forEach(authors::add);
+            o.add("authors", authors);
+            if (p.getDescription().getWebsite() != null) {
+                o.addProperty("website", p.getDescription().getWebsite());
+            }
+            arr.add(o);
+        }
+        JsonObject o = new JsonObject();
+        o.add("plugins", arr);
+        return o;
     }
 
     private static String playerName(String name) throws ApiException {

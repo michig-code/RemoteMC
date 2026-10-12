@@ -134,6 +134,8 @@ check("world gamerule", st == 200 and next(r for r in d["gamerules"] if r["name"
 req("POST", "/api/v1/worlds/world/gamerule", admin, {"rule": rule["name"], "value": rule["value"]})
 st, d = req("GET", "/api/v1/worlds/nowhere", admin)
 check("unknown world", st == 404 and d.get("error") == "world_unknown", d)
+st, d = req("GET", "/api/v1/plugins", admin)
+check("plugin list", st == 200 and any(p["name"] == "RemoteMC" and p["enabled"] and p["version"] for p in d.get("plugins", [])), str(d)[:200])
 for rng in ("1h", "24h", "7d"):
     st, d = req("GET", "/api/v1/history?range=" + rng, admin)
     check("history " + rng, st == 200 and isinstance(d.get("points"), list) and d.get("step", 0) >= 60000, str(d)[:200])

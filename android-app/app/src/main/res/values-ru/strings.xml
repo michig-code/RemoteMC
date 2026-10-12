@@ -367,4 +367,8 @@
     <string name="world_gamerules_search">Поиск игровых правил</string>
     <string name="world_gamerule_value">Значение</string>
     <string name="error_world_unknown">Этого мира нет (или больше нет).</string>
+    <string name="dashboard_plugins">Плагины</string>
+    <string name="plugins_disabled">Отключён</string>
+    <string name="plugins_by">автор: %s</string>
+    <string name="plugins_search">Поиск плагинов</string>
 </resources>

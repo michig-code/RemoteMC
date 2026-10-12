@@ -134,6 +134,7 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | POST | `/api/v1/whitelist` | admin | `{"enabled"}` turns it on or off |
 | POST | `/api/v1/whitelist/add` · `/remove` | moderator | `{"name"}` |
 | GET | `/api/v1/bans` | moderator | Player bans with reason, source, created, expires |
+| GET | `/api/v1/plugins` | moderator | Installed plugins: name, version, enabled, description, authors |
 | GET | `/api/v1/worlds/<world>` | admin | Time, weather, difficulty, game rules |
 | POST | `/api/v1/worlds/<world>/time` · `weather` · `difficulty` · `gamerule` | admin | `{"time": "day"}`, `{"weather": "rain"}`, `{"difficulty": "hard"}`, `{"rule", "value"}` |
 | POST | `/api/v1/bans/<name>/pardon` | moderator | Unban |

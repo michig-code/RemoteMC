@@ -9,6 +9,7 @@ import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.PairResult
 import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
@@ -68,6 +69,7 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
 
     private fun enc(s: String) = java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20")
 
+    suspend fun plugins(): List<PluginInfo> = PluginInfo.listFromJson(call("GET", "/api/v1/plugins"))
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 
     suspend fun console(since: Long): List<ConsoleLine> {

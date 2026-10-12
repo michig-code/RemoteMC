@@ -184,6 +184,8 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         change = { world, action, body -> api.worldAction(world, action, body) },
     )
 
+    suspend fun plugins() = api.plugins()
+
     /** Performance history for the dashboard chart. */
     suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)
 

@@ -359,4 +359,8 @@
     <string name="world_gamerules_search">Rechercher des règles du jeu</string>
     <string name="world_gamerule_value">Valeur</string>
     <string name="error_world_unknown">Ce monde n\'existe pas (ou plus).</string>
+    <string name="dashboard_plugins">Plugins</string>
+    <string name="plugins_disabled">Désactivé</string>
+    <string name="plugins_by">par %s</string>
+    <string name="plugins_search">Rechercher des plugins</string>
 </resources>

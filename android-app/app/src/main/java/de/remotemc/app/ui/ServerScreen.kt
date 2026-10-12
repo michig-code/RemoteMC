@@ -74,6 +74,7 @@ import de.remotemc.app.R
 import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.Role
@@ -127,6 +128,8 @@ class ServerActions(
     val moderation: ModerationActions? = null,
     /** World controls (admins); null hides them. */
     val worlds: WorldActions? = null,
+    /** Installed plugins (moderators and admins); null hides them. */
+    val loadPlugins: (suspend () -> List<PluginInfo>)? = null,
 )
 
 class WorldActions(
@@ -186,6 +189,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             loadHistory = vm::performance,
             moderation = vm.moderation,
             worlds = vm.worldActions,
+            loadPlugins = vm::plugins,
         ),
         snackbar = snackbar,
     )
@@ -311,6 +315,7 @@ fun ServerScreenContent(
                                 DashboardTab(
                                     state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory,
                                     actions.worlds?.takeIf { state.role.atLeast(Role.ADMIN) },
+                                    actions.loadPlugins?.takeIf { state.role.atLeast(Role.MODERATOR) },
                                 )
                             }
                             Tab.Players -> PlayersSection(state, actions)
