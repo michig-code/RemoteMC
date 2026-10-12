@@ -2,47 +2,75 @@ package de.remotemc.app
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
-import de.remotemc.app.data.ServerStore
+import de.remotemc.app.data.ThemeMode
+import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
 import de.remotemc.app.ui.ServerViewModel
+import de.remotemc.app.ui.SettingsScreen
+import de.remotemc.app.ui.pair.PairScreen
+import de.remotemc.app.ui.pair.PairViewModel
+import de.remotemc.app.ui.pair.ScannerScreen
 import de.remotemc.app.ui.theme.RemoteMCTheme
+import de.remotemc.app.ui.util.LocalHapticsEnabled
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
-    /** Profile parsed from a remotemc:// link that should be offered for saving. */
-    private var pendingLink by mutableStateOf<ServerProfile?>(null)
+    /** Pairing link or shortcut target received via an intent, consumed by the navigation. */
+    private var pendingLink by mutableStateOf<ConnectLink?>(null)
+    private var pendingServer by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        handleIntent(intent)
-        val store = ServerStore(this)
+        if (savedInstanceState == null) handleIntent(intent)
         setContent {
-            RemoteMCTheme {
-                App(store, pendingLink, onLinkConsumed = { pendingLink = null })
+            val settings by app.settings.settings.collectAsState()
+            val dark = when (settings.theme) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
+                CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics) {
+                    AppNavigation(
+                        startOnboarding = !settings.onboardingDone,
+                        pendingLink = pendingLink,
+                        pendingServer = pendingServer,
+                        onIntentConsumed = { pendingLink = null; pendingServer = null },
+                    )
+                }
             }
         }
     }
@@ -53,50 +81,147 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.dataString?.let { ServerProfile.fromLink(it) }?.let { pendingLink = it }
+        intent?.dataString?.let(ConnectLink::parse)?.let { pendingLink = it }
+        intent?.getStringExtra(EXTRA_SERVER_ID)?.let { pendingServer = it }
     }
+
+    companion object {
+        const val EXTRA_SERVER_ID = "server_id"
+    }
+}
+
+private object Routes {
+    const val ONBOARDING = "onboarding"
+    const val SERVERS = "servers"
+    const val PAIR = "pair?repair={repair}"
+    const val SCAN = "scan"
+    const val SERVER = "server/{id}"
+    const val SETTINGS = "settings"
+
+    fun pair(repair: String? = null) = if (repair == null) "pair" else "pair?repair=$repair"
+    fun server(id: String) = "server/$id"
 }
 
 @Composable
-private fun App(store: ServerStore, pendingLink: ServerProfile?, onLinkConsumed: () -> Unit) {
-    var servers by remember { mutableStateOf(store.load()) }
-    var selected by remember { mutableStateOf<ServerProfile?>(null) }
+private fun AppNavigation(
+    startOnboarding: Boolean,
+    pendingLink: ConnectLink?,
+    pendingServer: String?,
+    onIntentConsumed: () -> Unit,
+) {
+    val nav = rememberNavController()
+    val context = LocalContext.current
+    val repo = context.app.servers
+    val servers by repo.servers.collectAsState()
 
-    fun update(list: List<ServerProfile>) {
-        servers = list
-        store.save(list)
+    LaunchedEffect(pendingLink, pendingServer) {
+        when {
+            pendingLink != null -> {
+                nav.navigate(Routes.pair())
+                nav.currentBackStackEntry?.savedStateHandle?.set(LINK_KEY, pendingLink.raw)
+                onIntentConsumed()
+            }
+            pendingServer != null && repo.get(pendingServer) != null -> {
+                nav.navigate(Routes.server(pendingServer)) { launchSingleTop = true }
+                onIntentConsumed()
+            }
+        }
     }
 
-    // Slide between the server list and a server, like a navigation push/pop.
-    AnimatedContent(
-        targetState = selected,
-        transitionSpec = {
-            val forward = targetState != null
-            (slideInHorizontally(tween(320)) { if (forward) it else -it / 3 } + fadeIn(tween(320)))
-                .togetherWith(slideOutHorizontally(tween(320)) { if (forward) -it / 3 else it } + fadeOut(tween(240)))
-        },
-        contentKey = { it?.id },
-        label = "screen",
-    ) { current ->
-        if (current == null) {
+    NavHost(
+        navController = nav,
+        startDestination = if (startOnboarding) Routes.ONBOARDING else Routes.SERVERS,
+        enterTransition = { slideInHorizontally { it } + fadeIn() },
+        exitTransition = { slideOutHorizontally { -it / 3 } + fadeOut() },
+        popEnterTransition = { slideInHorizontally { -it / 3 } + fadeIn() },
+        popExitTransition = { slideOutHorizontally { it } + fadeOut() },
+    ) {
+        composable(Routes.ONBOARDING) {
+            OnboardingScreen(onFinish = {
+                context.app.settings.update { it.copy(onboardingDone = true) }
+                nav.navigate(Routes.SERVERS) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+            })
+        }
+        composable(Routes.SERVERS) {
             ServerListScreen(
                 servers = servers,
-                pendingLink = pendingLink,
-                onLinkConsumed = onLinkConsumed,
-                onOpen = { selected = it },
-                onSave = { profile ->
-                    val existing = servers.indexOfFirst { it.id == profile.id }
-                    update(if (existing >= 0) servers.toMutableList().also { it[existing] = profile } else servers + profile)
+                onOpen = { nav.navigate(Routes.server(it.id)) },
+                onAdd = { nav.navigate(Routes.pair()) },
+                onRename = { profile, name -> repo.upsert(profile.copy(name = name)) },
+                onRepair = { nav.navigate(Routes.pair(it.id)) },
+                onDelete = {
+                    repo.delete(it.id)
+                    ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(it.id))
                 },
-                onDelete = { profile -> update(servers.filterNot { it.id == profile.id }) },
+                onSettings = { nav.navigate(Routes.SETTINGS) },
             )
-        } else {
-            BackHandler { selected = null }
+        }
+        composable(
+            Routes.PAIR,
+            arguments = listOf(navArgument("repair") { type = NavType.StringType; nullable = true }),
+        ) { entry ->
+            val vm: PairViewModel = viewModel()
+            val repairId = entry.arguments?.getString("repair")
+            LaunchedEffect(repairId) { repairId?.let(repo::get)?.let(vm::startRepair) }
+            // Links arrive as text (saved state only holds simple types) from the scanner or an intent.
+            val link = entry.savedStateHandle.getStateFlow<String?>(LINK_KEY, null).collectAsState().value
+            LaunchedEffect(link) {
+                if (link != null) {
+                    entry.savedStateHandle[LINK_KEY] = null
+                    ConnectLink.parse(link)?.let(vm::useLink)
+                }
+            }
+            PairScreen(
+                vm = vm,
+                onScan = { nav.navigate(Routes.SCAN) },
+                onClose = { nav.popBackStack() },
+                onPaired = { profile ->
+                    nav.navigate(Routes.server(profile.id)) { popUpTo(Routes.SERVERS) }
+                },
+            )
+        }
+        composable(Routes.SCAN) {
+            ScannerScreen(
+                onResult = { link ->
+                    nav.previousBackStackEntry?.savedStateHandle?.set(LINK_KEY, link.raw)
+                    nav.popBackStack()
+                },
+                onClose = { nav.popBackStack() },
+            )
+        }
+        composable(Routes.SERVER, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString("id").orEmpty()
+            val profile = repo.get(id)
+            if (profile == null) {
+                LaunchedEffect(Unit) { nav.popBackStack(Routes.SERVERS, inclusive = false) }
+                return@composable
+            }
+            LaunchedEffect(id) { publishShortcut(context, profile) }
             val vm: ServerViewModel = viewModel(
-                key = current.id + current.hashCode(),
-                factory = viewModelFactory { initializer { ServerViewModel(current) } },
+                factory = viewModelFactory { initializer { ServerViewModel(context.app, profile) } },
             )
-            ServerScreen(vm, onBack = { selected = null })
+            ServerScreen(vm, onBack = { nav.popBackStack() }, onRepair = { nav.navigate(Routes.pair(id)) })
+        }
+        composable(Routes.SETTINGS) {
+            val settings by context.app.settings.settings.collectAsState()
+            SettingsScreen(settings, onChange = context.app.settings::update, onBack = { nav.popBackStack() })
         }
     }
 }
+
+private const val LINK_KEY = "link"
+
+/** Long-press shortcut on the launcher icon for recently opened servers. */
+private fun publishShortcut(context: android.content.Context, profile: ServerProfile) {
+    val intent = Intent(context, MainActivity::class.java)
+        .setAction(Intent.ACTION_VIEW)
+        .putExtra(MainActivity.EXTRA_SERVER_ID, profile.id)
+    val shortcut = ShortcutInfoCompat.Builder(context, profile.id)
+        .setShortLabel(profile.name.take(24))
+        .setLongLabel(profile.name)
+        .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+        .setIntent(intent)
+        .build()
+    runCatching { ShortcutManagerCompat.pushDynamicShortcut(context, shortcut) }
+}
+

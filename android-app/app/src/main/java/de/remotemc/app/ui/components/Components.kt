@@ -63,7 +63,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import de.remotemc.app.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import de.remotemc.app.ui.theme.McColors
+import de.remotemc.app.ui.theme.statusTextColor
 
 enum class ConnectionState { Connecting, Online, Offline }
 
@@ -157,7 +161,7 @@ fun StatusPill(
         Spacer(Modifier.width(6.dp))
         Icon(
             Icons.Default.Refresh,
-            contentDescription = "Aktualisieren",
+            contentDescription = stringResource(R.string.action_refresh),
             modifier = Modifier.size(14.dp).rotate(if (refreshing) angle else 0f),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -198,17 +202,18 @@ fun AnimatedCounter(value: Int, style: androidx.compose.ui.text.TextStyle, color
     Text(animated.toString(), style = style, color = color)
 }
 
-/** Circular TPS gauge (0–20) with animated sweep and colour. */
+/** Circular TPS gauge (0–20) with animated sweep and colour; null = not reported by the server. */
 @Composable
-fun TpsGauge(tps: Double, modifier: Modifier = Modifier, stroke: Dp = 10.dp) {
+fun TpsGauge(tps: Double?, modifier: Modifier = Modifier, stroke: Dp = 10.dp) {
     val fraction by animateFloatAsState(
-        (tps / 20.0).toFloat().coerceIn(0f, 1f),
+        ((tps ?: 0.0) / 20.0).toFloat().coerceIn(0f, 1f),
         spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow),
         label = "tps",
     )
-    val color by animateColorAsState(tpsColor(tps), label = "tpsColor")
+    val color by animateColorAsState(tps?.let(::tpsColor) ?: MaterialTheme.colorScheme.outline, label = "tpsColor")
     val track = MaterialTheme.colorScheme.surfaceContainerHighest
-    Box(modifier, contentAlignment = Alignment.Center) {
+    val description = tps?.let { stringResource(R.string.dashboard_tps_description, it) } ?: stringResource(R.string.dashboard_tps_unavailable)
+    Box(modifier.clearAndSetSemantics { contentDescription = description }, contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val s = stroke.toPx()
             val arcSize = Size(size.width - s, size.height - s)
@@ -217,7 +222,7 @@ fun TpsGauge(tps: Double, modifier: Modifier = Modifier, stroke: Dp = 10.dp) {
             drawArc(color, 135f, 270f * fraction, false, topLeft, arcSize, style = Stroke(s, cap = StrokeCap.Round))
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("%.1f".format(tps), style = MaterialTheme.typography.headlineMedium, color = color)
+            Text(tps?.let { "%.1f".format(it) } ?: "–", style = MaterialTheme.typography.headlineMedium, color = statusTextColor(color))
             Text("TPS", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -250,10 +255,17 @@ fun AnimatedBar(fraction: Float, color: Color, modifier: Modifier = Modifier, he
     )
 }
 
+/** False in screenshot tests so images do not depend on the network. */
+val LocalLoadPlayerHeads = androidx.compose.runtime.staticCompositionLocalOf { true }
+
 /** Player head from mc-heads.net with a letter fallback while loading / offline. */
 @Composable
 fun PlayerHead(name: String, size: Dp, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(size * 0.22f)
+    if (!LocalLoadPlayerHeads.current) {
+        Box(modifier.size(size).clip(shape)) { HeadFallback(name, size) }
+        return
+    }
     SubcomposeAsyncImage(
         model = "https://mc-heads.net/avatar/$name/${(size.value * 3).toInt()}",
         contentDescription = name,
@@ -322,7 +334,13 @@ fun Shimmer(modifier: Modifier = Modifier) {
 
 /** Centered illustration + text for empty lists. */
 @Composable
-fun EmptyState(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, text: String, modifier: Modifier = Modifier) {
+fun EmptyState(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    text: String,
+    modifier: Modifier = Modifier,
+    tint: Color? = null,
+) {
     val scale = remember { androidx.compose.animation.core.Animatable(0.6f) }
     LaunchedEffect(Unit) { scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy)) }
     Column(
@@ -334,10 +352,10 @@ fun EmptyState(icon: androidx.compose.ui.graphics.vector.ImageVector, title: Str
             Modifier
                 .scale(scale.value)
                 .size(88.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                .background(tint?.copy(alpha = 0.18f) ?: MaterialTheme.colorScheme.primaryContainer, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            Icon(icon, null, Modifier.size(40.dp), tint = tint ?: MaterialTheme.colorScheme.onPrimaryContainer)
         }
         Spacer(Modifier.height(20.dp))
         Text(title, style = MaterialTheme.typography.titleLarge)

@@ -1,3 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RemoteMC</string>
+    <string name="app_name" translatable="false">RemoteMC</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_close">Close</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_more">More options</string>
+    <string name="action_next">Next</string>
+    <string name="action_pair_again">Pair again</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_save">Save</string>
+    <string name="action_send">Send</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_undo">Undo</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Your server in your pocket</string>
+    <string name="onboarding_welcome_text">See who is online, keep an eye on performance, chat with players and run commands – live and encrypted.</string>
+    <string name="onboarding_plugin_title">Install the plugin</string>
+    <string name="onboarding_plugin_text">Put the RemoteMC plugin into the plugins folder of your Paper, Purpur, Folia or Spigot server (1.20.6 or newer) and restart it.</string>
+    <string name="onboarding_download_plugin">Download the plugin</string>
+    <string name="onboarding_pair_title">Create a pairing code</string>
+    <string name="onboarding_pair_text">Type this command in game or in the server console. You get a QR code and a 6-digit code.</string>
+    <string name="onboarding_scan_title">Scan and you\'re done</string>
+    <string name="onboarding_scan_text">Scan the QR code with this app. Each phone gets its own access, which you can revoke at any time.</string>
+    <string name="onboarding_start">Get started</string>
+
+    <!-- Server list -->
+    <string name="servers_title">My servers</string>
+    <string name="servers_tagline">Your server, in your pocket</string>
+    <string name="servers_add">Add server</string>
+    <string name="servers_empty_title">No server yet</string>
+    <string name="servers_empty_text">Install the RemoteMC plugin on your server, run /remotemc pair and tap “Add server”.</string>
+    <string name="servers_rename">Rename</string>
+    <string name="servers_delete_title">Remove server?</string>
+    <string name="servers_delete_text">“%s” will be removed from this app. To also revoke its access on the server, run /remotemc token revoke.</string>
+    <string name="servers_unencrypted">unencrypted</string>
+    <plurals name="servers_count">
+        <item quantity="one">%d server</item>
+        <item quantity="other">%d servers</item>
+    </plurals>
+
+    <!-- Status -->
+    <string name="status_live">Live · %s</string>
+    <string name="status_online">Online · %s</string>
+    <string name="status_online_short">Online</string>
+    <string name="status_offline_short">Offline</string>
+    <string name="status_offline_retry">Offline · tap to retry</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_checking">Checking…</string>
+    <plurals name="players_count">
+        <item quantity="one">%d player</item>
+        <item quantity="other">%d players</item>
+    </plurals>
+    <plurals name="players_label">
+        <item quantity="one">player</item>
+        <item quantity="other">players</item>
+    </plurals>
+    <plurals name="players_online">
+        <item quantity="one">%1$d of %2$d player online</item>
+        <item quantity="other">%1$d of %2$d players online</item>
+    </plurals>
+
+    <!-- Roles -->
+    <string name="role_admin">Admin</string>
+    <string name="role_moderator">Moderator</string>
+    <string name="role_viewer">Viewer</string>
+
+    <!-- Tabs -->
+    <string name="tab_overview">Overview</string>
+    <string name="tab_players">Players</string>
+    <string name="tab_console">Console</string>
+    <string name="tab_chat">Chat</string>
+
+    <!-- Banner -->
+    <string name="banner_certificate_changed">The server presented a different certificate. If you did not reset RemoteMC on the server, someone may be intercepting the connection.</string>
+    <string name="banner_token_revoked">This phone\'s access was revoked or the server was reset.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_unreachable_title">Server not reachable</string>
+    <string name="dashboard_unreachable_hint">Tap the status at the top or pull down to try again.</string>
+    <string name="dashboard_default_motd">Minecraft server</string>
+    <plurals name="dashboard_players_suffix">
+        <item quantity="one">%d player online</item>
+        <item quantity="other">%d players online</item>
+    </plurals>
+    <string name="dashboard_mspt">MSPT</string>
+    <string name="dashboard_uptime">Uptime</string>
+    <string name="dashboard_memory">Memory</string>
+    <string name="dashboard_memory_detail">%1$s of %2$s used</string>
+    <string name="dashboard_tps_1m">1 min</string>
+    <string name="dashboard_tps_5m">5 min</string>
+    <string name="dashboard_tps_15m">15 min</string>
+    <string name="dashboard_tps_description">%.1f ticks per second</string>
+    <string name="dashboard_tps_unavailable">This server software does not report TPS (e.g. Folia or Spigot).</string>
+    <string name="dashboard_worlds">Worlds</string>
+    <string name="world_overworld">Overworld</string>
+    <string name="world_nether">Nether</string>
+    <string name="world_end">The End</string>
+    <plurals name="world_chunks">
+        <item quantity="one">%d chunk</item>
+        <item quantity="other">%d chunks</item>
+    </plurals>
+    <plurals name="world_entities">
+        <item quantity="one">%d entity</item>
+        <item quantity="other">%d entities</item>
+    </plurals>
+    <string name="unit_ms">%.1f ms</string>
+    <string name="unit_ping">%d ms</string>
+    <string name="unit_tps">%.1f TPS</string>
+
+    <!-- Players -->
+    <string name="players_empty_title">Nobody online</string>
+    <string name="players_empty_text">Players appear here as soon as they join.</string>
+    <string name="players_search">Search players</string>
+    <string name="players_sort">Sort</string>
+    <string name="players_sort_name">Name</string>
+    <string name="players_sort_ping">Ping</string>
+    <string name="players_sort_world">World</string>
+    <string name="players_no_match">No player matches “%s”</string>
+    <string name="players_card_description">%1$s, %2$s, in %3$s, health %4$d, ping %5$d ms</string>
+    <string name="players_op">OP</string>
+    <string name="players_level_location">Level %1$d · %2$s (%3$d, %4$d, %5$d)</string>
+    <string name="players_health">Health %1$.1f / %2$.0f</string>
+    <string name="players_food">Hunger %d / 20</string>
+    <string name="players_viewer_hint">Your role on this server can only view players.</string>
+    <string name="players_message_or_reason">Message or reason</string>
+    <string name="players_send_message">Send private message</string>
+    <string name="players_message_sent">Message sent to %s</string>
+    <string name="players_game_mode">Game mode</string>
+    <string name="players_game_mode_set">Game mode: %s</string>
+    <string name="players_actions">Actions</string>
+    <string name="players_heal">Heal</string>
+    <string name="players_healed">%s healed</string>
+    <string name="players_make_op">Make OP</string>
+    <string name="players_deop">Remove OP</string>
+    <string name="players_opped">%s is now OP</string>
+    <string name="players_deopped">%s is no longer OP</string>
+    <string name="players_kick">Kick</string>
+    <string name="players_ban">Ban</string>
+    <string name="players_kick_confirm">Kick %s?</string>
+    <string name="players_ban_confirm">Ban %s?</string>
+    <string name="players_kicked">%s kicked</string>
+    <string name="players_banned">%s banned</string>
+    <string name="players_no_reason">No reason given.</string>
+    <string name="players_reason">Reason: %s</string>
+    <string name="gamemode_survival">Survival</string>
+    <string name="gamemode_creative">Creative</string>
+    <string name="gamemode_adventure">Adventure</string>
+    <string name="gamemode_spectator">Spectator</string>
+
+    <!-- Console -->
+    <string name="console_waiting">Waiting for console output…</string>
+    <string name="console_scroll_down">Jump to latest</string>
+    <string name="console_input_hint">Enter a command…</string>
+    <string name="console_read_only">Your role can read the console but not run commands.</string>
+    <string name="console_command_failed">Unknown command or it failed</string>
+    <string name="console_output_in_log">Command sent – its output appears in the console above.</string>
+
+    <!-- Chat -->
+    <string name="chat_empty_title">Quiet here</string>
+    <string name="chat_empty_text">Chat messages, joins and leaves appear here live.</string>
+    <string name="chat_input_hint">Message to all players…</string>
+    <string name="chat_sending">Sending to all players…</string>
+    <string name="chat_cancelled">Message cancelled</string>
+    <string name="chat_joined">%s joined</string>
+    <string name="chat_left">%s left</string>
+    <string name="chat_from_server">Server · %s</string>
+
+    <!-- Pairing -->
+    <string name="pair_title">Add server</string>
+    <string name="pair_intro_title">Connect your server</string>
+    <string name="pair_intro_text">Run the command below on your server – in game or in the console – then scan the QR code or type the code.</string>
+    <string name="pair_command_hint">On your server:</string>
+    <string name="pair_scan">Scan QR code</string>
+    <string name="pair_scan_text">Fastest: point your camera at the map or console</string>
+    <string name="pair_enter_code">Enter code</string>
+    <string name="pair_enter_code_text">Type the address and 6-digit code</string>
+    <string name="pair_use_token">Connect with an access token</string>
+    <string name="pair_code_form_text">Enter the address and port of your server and the code shown after /remotemc pair.</string>
+    <string name="pair_token_form_text">For tokens created with /remotemc token create.</string>
+    <string name="pair_address">Address</string>
+    <string name="pair_port">RemoteMC port</string>
+    <string name="pair_code">6-digit code</string>
+    <string name="pair_token">Access token</string>
+    <string name="pair_https">Encrypted connection</string>
+    <string name="pair_https_text">On by default. Only turn off if HTTPS is disabled in the plugin config.</string>
+    <string name="pair_checking">Checking server…</string>
+    <string name="pair_pairing">Pairing…</string>
+    <string name="pair_done">Paired!</string>
+    <string name="pair_confirm_title">Connect to</string>
+    <string name="pair_server_info">%1$s · RemoteMC %2$s</string>
+    <string name="pair_server_name">Name in the app</string>
+    <string name="pair_device_name">Name of this phone</string>
+    <string name="pair_device_name_text">Shown on the server in /remotemc token list</string>
+    <string name="pair_action">Pair</string>
+    <string name="pair_action_token">Connect</string>
+    <string name="pair_verified_title">Verified by QR code</string>
+    <string name="pair_verified_text">The server\'s certificate matches the QR code. The connection is encrypted and secure.</string>
+    <string name="pair_compare_title">Security check</string>
+    <string name="pair_compare_text">Make sure this code matches the “Security check” line on your server:</string>
+    <string name="pair_mismatch_title">Certificate does not match</string>
+    <string name="pair_mismatch_text">The server presented a different certificate than the QR code. Do not pair – the connection may be intercepted. Check the address and create a new code.</string>
+    <string name="pair_unencrypted_title">Unencrypted connection</string>
+    <string name="pair_unencrypted_text">Data, including the access token, is sent unencrypted. Only use this inside your own network.</string>
+    <string name="pair_ca_title">Trusted certificate</string>
+    <string name="pair_ca_text">The server uses a certificate from a trusted authority.</string>
+
+    <!-- Scanner -->
+    <string name="scan_hint">Point at the QR code on the map in game or in the server console</string>
+    <string name="scan_invalid">That is not a RemoteMC code. Run /remotemc pair on your server.</string>
+    <string name="scan_paste_link">Paste link</string>
+    <string name="scan_permission">RemoteMC needs the camera to scan the pairing code. You can also enter the code by hand.</string>
+    <string name="scan_allow_camera">Allow camera</string>
+    <string name="scan_torch_on">Turn on flashlight</string>
+    <string name="scan_torch_off">Turn off flashlight</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Material You colours</string>
+    <string name="settings_dynamic_color_text">Use colours from your wallpaper</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_en" translatable="false">English</string>
+    <string name="settings_language_de" translatable="false">Deutsch</string>
+    <string name="settings_behaviour">Behaviour</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_haptics_text">Vibrate briefly on actions</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %s</string>
+    <string name="settings_get_plugin">Download the server plugin</string>
+    <string name="settings_source">Source code</string>
+    <string name="settings_licenses">Open-source licences</string>
+    <string name="settings_privacy">Privacy: RemoteMC talks only to the servers you add. Player heads are loaded from mc-heads.net. No analytics, no accounts, no ads.</string>
+
+    <!-- Errors -->
+    <string name="error_unreachable">Server not reachable. Check the address and port, that the server is running and that the port is open in your firewall or router.</string>
+    <string name="error_timeout">The server took too long to respond.</string>
+    <string name="error_certificate_changed">The server\'s certificate changed. Pair again if you reset RemoteMC on the server.</string>
+    <string name="error_tls">Secure connection failed. If HTTPS is disabled in the plugin config, turn off “Encrypted connection”.</string>
+    <string name="error_invalid_response">The server sent an unexpected response. Is this the RemoteMC port (not the Minecraft port)?</string>
+    <string name="error_plugin_too_old">The RemoteMC plugin on this server is too old. Please update it.</string>
+    <string name="error_app_too_old">This server runs a newer RemoteMC plugin. Please update the app.</string>
+    <string name="error_invalid_token">Access denied. This phone was removed from the server – pair it again.</string>
+    <string name="error_invalid_code">Wrong or expired code. Create a new one with /remotemc pair.</string>
+    <string name="error_locked_out">Too many failed attempts. Please wait a few minutes.</string>
+    <string name="error_forbidden">Your role on this server is not allowed to do that.</string>
+    <string name="error_command_blocked">This command is blocked in the plugin config.</string>
+    <string name="error_player_offline">That player is not online.</string>
+    <string name="error_too_large">That text is too long.</string>
+    <string name="error_too_many_streams">Too many live connections to this server.</string>
+    <string name="error_server_timeout">The Minecraft server did not respond in time.</string>
+    <string name="error_http">Server error (HTTP %d)</string>
+    <string name="error_unknown">Something went wrong.</string>
 </resources>

@@ -51,7 +51,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import de.remotemc.app.R
 import de.remotemc.app.ui.theme.McColors
+import de.remotemc.app.ui.util.rememberHaptics
 import de.remotemc.app.ui.theme.MonoStyle
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -59,10 +62,10 @@ import java.util.Date
 import java.util.Locale
 
 private val quickCommands = listOf("list", "time set day", "weather clear", "save-all", "difficulty", "whitelist list")
-private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.GERMANY)
+private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
 
 @Composable
-fun ConsoleTab(entries: List<ConsoleEntry>, onCommand: (String) -> Unit) {
+fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: (String) -> Unit) {
     var input by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -82,8 +85,11 @@ fun ConsoleTab(entries: List<ConsoleEntry>, onCommand: (String) -> Unit) {
         }
     }
 
+    val haptics = rememberHaptics()
+
     fun send() {
         if (input.isBlank()) return
+        haptics.tap()
         onCommand(input)
         input = ""
     }
@@ -99,7 +105,7 @@ fun ConsoleTab(entries: List<ConsoleEntry>, onCommand: (String) -> Unit) {
         ) {
             if (entries.isEmpty()) {
                 Text(
-                    "Warte auf Konsolenausgabe…",
+                    stringResource(R.string.console_waiting),
                     style = MonoStyle,
                     color = Color(0xFF6B7A70),
                     modifier = Modifier.align(Alignment.Center),
@@ -121,31 +127,39 @@ fun ConsoleTab(entries: List<ConsoleEntry>, onCommand: (String) -> Unit) {
                 SmallFloatingActionButton(
                     onClick = { scope.launch { listState.animateScrollToItem(entries.size - 1) } },
                     containerColor = MaterialTheme.colorScheme.primary,
-                ) { Icon(Icons.Default.KeyboardArrowDown, "Nach unten") }
+                ) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.console_scroll_down)) }
             }
         }
 
-        Row(
-            Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            quickCommands.forEach { cmd ->
-                AssistChip(
-                    onClick = { onCommand(cmd) },
-                    label = { Text("/$cmd", fontFamily = FontFamily.Monospace) },
-                    colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = null,
-                )
+        if (canRunCommands) {
+            Row(
+                Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                quickCommands.forEach { cmd ->
+                    AssistChip(
+                        onClick = { haptics.tap(); onCommand(cmd) },
+                        label = { Text("/$cmd", fontFamily = FontFamily.Monospace) },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                        border = null,
+                    )
+                }
             }
+            CommandInput(
+                value = input,
+                onValueChange = { input = it },
+                placeholder = stringResource(R.string.console_input_hint),
+                prefix = "/",
+                onSend = ::send,
+            )
+        } else {
+            Text(
+                stringResource(R.string.console_read_only),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp),
+            )
         }
-
-        CommandInput(
-            value = input,
-            onValueChange = { input = it },
-            placeholder = "Befehl eingeben…",
-            prefix = "/",
-            onSend = ::send,
-        )
     }
 }
 
@@ -197,7 +211,7 @@ fun CommandInput(
             keyboardActions = KeyboardActions(onSend = { onSend() }),
         )
         FilledIconButton(onClick = onSend, enabled = value.isNotBlank(), modifier = Modifier.padding(start = 8.dp)) {
-            Icon(Icons.AutoMirrored.Filled.Send, "Senden")
+            Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.action_send))
         }
     }
 }

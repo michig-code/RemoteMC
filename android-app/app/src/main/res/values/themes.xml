@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.RemoteMC" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.RemoteMC" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/splash_background</item>
     </style>
 

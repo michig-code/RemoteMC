@@ -1,0 +1,159 @@
+package de.remotemc.app
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
+import com.github.takahirom.roborazzi.captureRoboImage
+import de.remotemc.app.data.AppSettings
+import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.Role
+import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.data.WorldInfo
+import de.remotemc.app.net.PingInfo
+import de.remotemc.app.ui.Connection
+import de.remotemc.app.ui.ConsoleEntry
+import de.remotemc.app.ui.OnboardingScreen
+import de.remotemc.app.ui.ServerActions
+import de.remotemc.app.ui.ServerListScreen
+import de.remotemc.app.ui.ServerScreenContent
+import de.remotemc.app.ui.ServerUiState
+import de.remotemc.app.ui.SettingsScreen
+import de.remotemc.app.ui.Tab
+import de.remotemc.app.ui.components.LocalLoadPlayerHeads
+import de.remotemc.app.ui.pair.PairScreen
+import de.remotemc.app.ui.pair.PairStep
+import de.remotemc.app.ui.pair.PairViewModel
+import de.remotemc.app.ui.theme.RemoteMCTheme
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+/**
+ * Renders the main screens with sample data. Images live in src/test/screenshots.
+ * Record: ./gradlew testDebugUnitTest -Proborazzi.test.record=true
+ * Verify: ./gradlew testDebugUnitTest -Proborazzi.test.verify=true
+ */
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [34], qualifiers = "w400dp-h860dp-xxhdpi")
+class ScreenshotTest {
+    @get:Rule
+    val rule = createComposeRule()
+
+    private val status = ServerStatus(
+        motd = "Welcome to Michi's survival server!", version = "1.21.4-232 (MC: 1.21.4)",
+        minecraftVersion = "1.21.4", platform = "Paper", pluginVersion = "2.0.0",
+        onlinePlayers = 3, maxPlayers = 20, tps = listOf(19.8, 19.6, 17.2), mspt = 12.4,
+        memoryUsedMb = 2860, memoryMaxMb = 4096, uptimeSeconds = 93_000,
+        worlds = listOf(
+            WorldInfo("world", "NORMAL", 2, 812, 1530),
+            WorldInfo("world_nether", "NETHER", 1, 210, 340),
+            WorldInfo("world_the_end", "THE_END", 0, 49, 12),
+        ),
+    )
+    private val players = listOf(
+        PlayerInfo("Steve", "1", "world", 120, 64, -340, 20.0, 20.0, 18, 31, 24, "SURVIVAL", true),
+        PlayerInfo("Alex_Builds", "2", "world", -12, 70, 88, 13.5, 20.0, 12, 8, 96, "CREATIVE", false),
+        PlayerInfo("Notch", "3", "world_nether", 5, 40, 5, 6.0, 20.0, 4, 54, 210, "SURVIVAL", false),
+    )
+    private val console = listOf(
+        ConsoleEntry("1", "Starting minecraft server version 1.21.4", "INFO", 0),
+        ConsoleEntry("2", "Done (15.928s)! For help, type \"help\"", "INFO", 1000),
+        ConsoleEntry("3", "Steve joined the game", "INFO", 2000),
+        ConsoleEntry("4", "<Steve> hi everyone!", "INFO", 3000),
+        ConsoleEntry("5", "Can't keep up! Is the server overloaded? Running 2034ms or 40 ticks behind", "WARN", 4000),
+        ConsoleEntry("6", "> /time set day", "COMMAND", 5000),
+        ConsoleEntry("7", "Set the time to 1000", "OUTPUT", 5000),
+    )
+    private val chat = listOf(
+        ChatEntry(1, 0, ChatEntry.Type.JOIN, "Steve", ""),
+        ChatEntry(2, 1000, ChatEntry.Type.CHAT, "Steve", "hi everyone!"),
+        ChatEntry(3, 2000, ChatEntry.Type.CHAT, "Alex_Builds", "who wants to help with the castle?"),
+        ChatEntry(4, 3000, ChatEntry.Type.BROADCAST, "Pixel 8", "Restart at 4:00 am"),
+        ChatEntry(5, 4000, ChatEntry.Type.QUIT, "Notch", ""),
+    )
+    private val actions = ServerActions({}, {}, {}, {}, {}, { _, _, _, _ -> }, {})
+    private val servers = listOf(
+        ServerProfile(name = "Survival", host = "mc.example.com", token = "x"),
+        ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", role = Role.MODERATOR),
+        ServerProfile(name = "Test server", host = "10.0.0.5", token = "x", tls = false),
+    )
+
+    private fun shot(name: String, dark: Boolean = true, content: @Composable () -> Unit) {
+        rule.setContent {
+            RemoteMCTheme(darkTheme = dark) {
+                CompositionLocalProvider(LocalLoadPlayerHeads provides false) { content() }
+            }
+        }
+        rule.mainClock.advanceTimeBy(3000)
+        rule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
+    }
+
+    @Composable
+    @Suppress("ComposableNaming")
+    private fun server(tab: Tab, role: Role = Role.ADMIN, error: Throwable? = null, st: ServerStatus? = status, connection: Connection = Connection.LIVE) =
+        ServerScreenContent(
+            ServerUiState("Survival", st, players, console, chat, connection, error, false, role),
+            actions, initialTab = tab,
+        )
+
+    private fun list() = @Composable {
+        ServerListScreen(
+            servers, {}, {}, { _, _ -> }, {}, {}, {},
+            probe = { if (it.port == 8765 && it.tls) status else throw java.io.IOException("down") },
+        )
+    }
+
+    @Test fun serverList() = shot("01_servers", content = list())
+    @Test fun serverListLight() = shot("02_servers_light", dark = false, content = list())
+    @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
+    @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }
+    @Test fun players() = shot("05_players") { server(Tab.Players) }
+    @Test fun consoleTab() = shot("06_console") { server(Tab.Console) }
+    @Test fun chatTab() = shot("07_chat") { server(Tab.Chat) }
+    @Test fun viewerRole() = shot("08_viewer") { server(Tab.Dashboard, role = Role.VIEWER, st = status.copy(tps = emptyList(), mspt = null, platform = "Folia")) }
+    @Test fun offline() = shot("09_offline") {
+        server(Tab.Dashboard, error = de.remotemc.app.net.ApiError.Unreachable("x"), st = null, connection = Connection.OFFLINE)
+    }
+    @Test fun certificateChanged() = shot("10_certificate_changed") {
+        server(Tab.Dashboard, error = de.remotemc.app.net.ApiError.CertificateChanged("x"))
+    }
+
+    @Test fun pairChoose() = shot("11_pair") {
+        PairScreen(PairViewModel(RuntimeEnvironment.getApplication()), {}, {}, {})
+    }
+
+    @Test fun pairConfirm() = shot("12_pair_confirm") {
+        val vm = PairViewModel(RuntimeEnvironment.getApplication()).apply {
+            serverName = "Survival"
+            deviceName = "Pixel 8"
+            step = PairStep.Confirm("mc.example.com", 8765, true, PingInfo("2.0.0", 1, "Paper"),
+                "X8Z7vZ4QM1IFpAkiY4T3PF5DKiok9ifVqw6sAUAyJBM", verified = false, mismatch = false, code = "123456", token = null)
+        }
+        PairScreen(vm, {}, {}, {})
+    }
+
+    @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen {} }
+    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(), {}, {}) }
+
+    @Test
+    @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")
+    fun german() = shot("15_dashboard_de") { server(Tab.Players) }
+
+    @Test
+    @Config(qualifiers = "w840dp-h600dp-xhdpi")
+    fun tablet() = shot("16_tablet") { server(Tab.Dashboard) }
+
+    @Test
+    fun largeFont() {
+        RuntimeEnvironment.setFontScale(2f)
+        shot("17_large_font") { server(Tab.Players) }
+    }
+}

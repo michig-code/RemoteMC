@@ -1,10 +1,18 @@
 package de.remotemc.app.data
 
-import android.content.Context
-import android.net.Uri
-import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
+
+/** What the paired device may do on a server (mirrors the plugin's roles). */
+enum class Role {
+    VIEWER, MODERATOR, ADMIN;
+
+    fun atLeast(other: Role) = ordinal >= other.ordinal
+
+    companion object {
+        fun parse(value: String?) = entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: VIEWER
+    }
+}
 
 data class ServerProfile(
     val id: String = UUID.randomUUID().toString(),
@@ -12,13 +20,20 @@ data class ServerProfile(
     val host: String,
     val port: Int = 8765,
     val token: String,
-    val https: Boolean = false,
+    /** HTTPS (built-in certificate or a reverse proxy). */
+    val tls: Boolean = true,
+    /** Pinned SHA-256 fingerprint (base64url) of the plugin's certificate; null = normal CA validation. */
+    val fingerprint: String? = null,
+    val role: Role = Role.ADMIN,
+    val deviceName: String = "",
 ) {
     val baseUrl: String
         get() {
             val h = if (host.contains(':') && !host.startsWith("[")) "[$host]" else host
-            return "${if (https) "https" else "http"}://$h:$port"
+            return "${if (tls) "https" else "http"}://$h:$port"
         }
+
+    val address: String get() = "$host:$port"
 
     fun toJson(): JSONObject = JSONObject()
         .put("id", id)
@@ -26,7 +41,10 @@ data class ServerProfile(
         .put("host", host)
         .put("port", port)
         .put("token", token)
-        .put("https", https)
+        .put("tls", tls)
+        .put("fingerprint", fingerprint)
+        .put("role", role.name)
+        .put("deviceName", deviceName)
 
     companion object {
         fun fromJson(o: JSONObject) = ServerProfile(
@@ -35,44 +53,11 @@ data class ServerProfile(
             host = o.getString("host"),
             port = o.optInt("port", 8765),
             token = o.getString("token"),
-            https = o.optBoolean("https", false),
+            // Profiles from version 1 used "https" and had no fingerprint.
+            tls = if (o.has("tls")) o.getBoolean("tls") else o.optBoolean("https", false),
+            fingerprint = o.optString("fingerprint").takeIf { it.isNotBlank() && it != "null" },
+            role = Role.parse(o.optString("role", "ADMIN")),
+            deviceName = o.optString("deviceName"),
         )
-
-        /**
-         * Parses the link printed by `/remotemc link`, e.g.
-         * `remotemc://play.example.de:8765?token=abc` (append `&https=1` for TLS).
-         */
-        fun fromLink(link: String): ServerProfile? {
-            val uri = runCatching { Uri.parse(link.trim()) }.getOrNull() ?: return null
-            if (uri.scheme != "remotemc" && uri.scheme != "mcremote") return null
-            val host = uri.host?.takeIf { it.isNotBlank() } ?: return null
-            val token = uri.getQueryParameter("token")?.takeIf { it.isNotBlank() } ?: return null
-            return ServerProfile(
-                name = uri.getQueryParameter("name") ?: host,
-                host = host,
-                port = if (uri.port > 0) uri.port else 8765,
-                token = token,
-                https = uri.getQueryParameter("https") == "1",
-            )
-        }
-    }
-}
-
-/** Saved servers, kept in private SharedPreferences. */
-class ServerStore(context: Context) {
-    private val prefs = context.getSharedPreferences("servers", Context.MODE_PRIVATE)
-
-    fun load(): List<ServerProfile> {
-        val raw = prefs.getString("list", null) ?: return emptyList()
-        return runCatching {
-            val arr = JSONArray(raw)
-            List(arr.length()) { ServerProfile.fromJson(arr.getJSONObject(it)) }
-        }.getOrDefault(emptyList())
-    }
-
-    fun save(list: List<ServerProfile>) {
-        val arr = JSONArray()
-        list.forEach { arr.put(it.toJson()) }
-        prefs.edit().putString("list", arr.toString()).apply()
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Minecraft-Server laufen meist ohne HTTPS (z.B. 192.168.x.x:8765),
-     daher ist unverschlüsseltes HTTP erlaubt. Für Verbindungen über das
-     Internet wird ein HTTPS-Reverse-Proxy empfohlen (siehe README). -->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
+<!-- RemoteMC uses HTTPS with a pinned certificate by default. Plain HTTP stays possible for
+     servers that disabled TLS (e.g. behind a local reverse proxy); the app warns about it. -->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration" />
 </network-security-config>

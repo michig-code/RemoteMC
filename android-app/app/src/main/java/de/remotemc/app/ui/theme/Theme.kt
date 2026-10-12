@@ -1,6 +1,10 @@
 package de.remotemc.app.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -9,6 +13,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,6 +24,10 @@ object McColors {
     val Online = Color(0xFF4ADE80)
     val Warning = Color(0xFFFBBF24)
     val Offline = Color(0xFFF87171)
+    // Darker variants with enough contrast for text on light backgrounds (WCAG AA).
+    val OnlineText = Color(0xFF15803D)
+    val WarningText = Color(0xFFB45309)
+    val OfflineText = Color(0xFFDC2626)
     val Gold = Color(0xFFFFD54F)
     val Grass = Color(0xFF66BB6A)
     val Dirt = Color(0xFF7A4E2D)
@@ -98,11 +107,37 @@ private val AppShapes = Shapes(
 val MonoStyle = TextStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontSize = 12.sp, lineHeight = 16.sp)
 
 @Composable
-fun RemoteMCTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun RemoteMCTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    val scheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        darkTheme -> Dark
+        else -> Light
+    }
     MaterialTheme(
-        colorScheme = if (darkTheme) Dark else Light,
+        colorScheme = scheme,
         typography = AppTypography,
         shapes = AppShapes,
         content = content,
     )
 }
+
+/** Status colour readable as text on the current background. */
+@Composable
+fun statusTextColor(base: Color): Color {
+    if (!isLightTheme()) return base
+    return when (base) {
+        McColors.Online -> McColors.OnlineText
+        McColors.Warning -> McColors.WarningText
+        McColors.Offline -> McColors.OfflineText
+        else -> base
+    }
+}
+
+@Composable
+fun isLightTheme(): Boolean = MaterialTheme.colorScheme.background.luminance() > 0.5f

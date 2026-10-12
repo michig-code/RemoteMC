@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,8 +34,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.remotemc.app.R
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.WorldInfo
 import de.remotemc.app.ui.components.AnimatedBar
@@ -47,13 +54,19 @@ import de.remotemc.app.ui.components.TpsGauge
 import de.remotemc.app.ui.components.staggeredAppear
 import de.remotemc.app.ui.components.tpsColor
 import de.remotemc.app.ui.theme.McColors
+import de.remotemc.app.ui.theme.statusTextColor
 
 @Composable
-fun DashboardTab(status: ServerStatus?, error: String?) {
+fun DashboardTab(status: ServerStatus?, error: String?, wide: Boolean = false) {
     if (status == null) {
         if (error != null) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-                EmptyState(Icons.Outlined.CloudOff, "Server nicht erreichbar", "$error\n\nTippe oben auf den Status oder ziehe nach unten, um es erneut zu versuchen.")
+                EmptyState(
+                    Icons.Outlined.CloudOff,
+                    stringResource(R.string.dashboard_unreachable_title),
+                    error + "\n\n" + stringResource(R.string.dashboard_unreachable_hint),
+                    tint = McColors.Offline,
+                )
             }
         } else {
             DashboardSkeleton()
@@ -65,65 +78,94 @@ fun DashboardTab(status: ServerStatus?, error: String?) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        HeroCard(status, Modifier.staggeredAppear(0))
-
-        Row(Modifier.height(IntrinsicSizeRow), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            McCard(Modifier.weight(1f).fillMaxHeight().staggeredAppear(1)) {
-                Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-                    TpsGauge(status.tps.firstOrNull() ?: 0.0, Modifier.fillMaxWidth().aspectRatio(1f))
+        if (wide) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    HeroCard(status, Modifier.staggeredAppear(0))
+                    MemoryCard(status, Modifier.staggeredAppear(2))
+                    TpsHistoryCard(status.tps, Modifier.staggeredAppear(3))
+                }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    GaugeRow(status, Modifier.staggeredAppear(1))
+                    Worlds(status.worlds)
                 }
             }
-            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                MiniStat(Icons.Outlined.Speed, "MSPT", "%.1f ms".format(status.mspt), msptColor(status.mspt), Modifier.weight(1f).staggeredAppear(2))
-                MiniStat(Icons.Outlined.Schedule, "Laufzeit", formatUptime(status.uptimeSeconds), MaterialTheme.colorScheme.primary, Modifier.weight(1f).staggeredAppear(3))
-            }
+        } else {
+            HeroCard(status, Modifier.staggeredAppear(0))
+            GaugeRow(status, Modifier.staggeredAppear(1))
+            MemoryCard(status, Modifier.staggeredAppear(4))
+            TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
+            Worlds(status.worlds)
         }
-
-        MemoryCard(status, Modifier.staggeredAppear(4))
-        TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
-
-        SectionTitle("Welten")
-        status.worlds.forEachIndexed { i, w -> WorldRow(w, Modifier.staggeredAppear(6 + i)) }
         Spacer(Modifier.height(8.dp))
     }
 }
 
-private val IntrinsicSizeRow = 184.dp
+@Composable
+private fun Worlds(worlds: List<WorldInfo>) {
+    SectionTitle(stringResource(R.string.dashboard_worlds))
+    worlds.forEachIndexed { i, w -> WorldRow(w, Modifier.staggeredAppear(6 + i)) }
+}
+
+private val GaugeRowHeight = 184.dp
+
+@Composable
+private fun GaugeRow(status: ServerStatus, modifier: Modifier = Modifier) {
+    Row(modifier.heightIn(min = GaugeRowHeight).height(GaugeRowHeight), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        McCard(Modifier.weight(1f).fillMaxHeight()) {
+            Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                TpsGauge(status.tps.firstOrNull(), Modifier.fillMaxWidth().aspectRatio(1f))
+            }
+        }
+        Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            MiniStat(
+                Icons.Outlined.Speed, stringResource(R.string.dashboard_mspt),
+                status.mspt?.let { stringResource(R.string.unit_ms, it) } ?: "–",
+                status.mspt?.let(::msptColor) ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                Modifier.weight(1f),
+            )
+            MiniStat(
+                Icons.Outlined.Schedule, stringResource(R.string.dashboard_uptime),
+                formatUptime(status.uptimeSeconds), MaterialTheme.colorScheme.primary, Modifier.weight(1f),
+            )
+        }
+    }
+}
 
 @Composable
 private fun HeroCard(status: ServerStatus, modifier: Modifier = Modifier) {
     val fraction = if (status.maxPlayers > 0) status.onlinePlayers.toFloat() / status.maxPlayers else 0f
+    val playersText = pluralStringResource(R.plurals.players_online, status.onlinePlayers, status.onlinePlayers, status.maxPlayers)
     Box(
         modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .background(
-                Brush.linearGradient(
-                    listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer),
-                ),
+                Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer)),
             )
             .padding(20.dp),
     ) {
         Column {
             Text(
-                status.motd.lines().firstOrNull().orEmpty().ifBlank { "Minecraft-Server" },
+                status.motd.lines().firstOrNull().orEmpty().ifBlank { stringResource(R.string.dashboard_default_motd) },
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                status.version,
+                listOf(status.platform, status.minecraftVersion).filter { it.isNotBlank() }.joinToString(" · ")
+                    .ifBlank { status.version },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.clearAndSetSemantics { contentDescription = playersText }, verticalAlignment = Alignment.Bottom) {
                 AnimatedCounter(status.onlinePlayers, MaterialTheme.typography.headlineLarge, MaterialTheme.colorScheme.onSurface)
                 Text(
-                    " / ${status.maxPlayers} Spieler online",
+                    " / " + pluralStringResource(R.plurals.dashboard_players_suffix, status.maxPlayers, status.maxPlayers),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp),
@@ -137,7 +179,7 @@ private fun HeroCard(status: ServerStatus, modifier: Modifier = Modifier) {
 
 @Composable
 private fun MiniStat(icon: ImageVector, label: String, value: String, color: Color, modifier: Modifier = Modifier) {
-    McCard(modifier.fillMaxWidth()) {
+    McCard(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -148,7 +190,7 @@ private fun MiniStat(icon: ImageVector, label: String, value: String, color: Col
                 Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.height(6.dp))
-            Text(value, style = MaterialTheme.typography.titleLarge)
+            Text(value, style = MaterialTheme.typography.titleLarge, maxLines = 1)
         }
     }
 }
@@ -161,19 +203,19 @@ private fun MemoryCard(status: ServerStatus, modifier: Modifier = Modifier) {
         fraction < 0.9f -> McColors.Warning
         else -> McColors.Offline
     }
-    McCard(modifier.fillMaxWidth()) {
+    McCard(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Memory, null, tint = color)
                 Spacer(Modifier.width(8.dp))
-                Text("Arbeitsspeicher", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Text("${(fraction * 100).toInt()} %", style = MaterialTheme.typography.titleMedium, color = color)
+                Text(stringResource(R.string.dashboard_memory), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text("${(fraction * 100).toInt()} %", style = MaterialTheme.typography.titleMedium, color = statusTextColor(color))
             }
             Spacer(Modifier.height(12.dp))
             AnimatedBar(fraction, color)
             Spacer(Modifier.height(8.dp))
             Text(
-                "${formatMb(status.memoryUsedMb)} von ${formatMb(status.memoryMaxMb)} belegt",
+                stringResource(R.string.dashboard_memory_detail, formatMb(status.memoryUsedMb), formatMb(status.memoryMaxMb)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -184,12 +226,21 @@ private fun MemoryCard(status: ServerStatus, modifier: Modifier = Modifier) {
 @Composable
 private fun TpsHistoryCard(tps: List<Double>, modifier: Modifier = Modifier) {
     McCard(modifier.fillMaxWidth()) {
+        if (tps.isEmpty()) {
+            Text(
+                stringResource(R.string.dashboard_tps_unavailable),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp),
+            )
+            return@McCard
+        }
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            listOf("1 min", "5 min", "15 min").forEachIndexed { i, label ->
+            listOf(R.string.dashboard_tps_1m, R.string.dashboard_tps_5m, R.string.dashboard_tps_15m).forEachIndexed { i, label ->
                 val value = tps.getOrNull(i) ?: 0.0
-                Column(Modifier.weight(1f)) {
-                    Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("%.1f".format(value), style = MaterialTheme.typography.titleLarge, color = tpsColor(value))
+                Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                    Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("%.1f".format(value), style = MaterialTheme.typography.titleLarge, color = statusTextColor(tpsColor(value)))
                     Spacer(Modifier.height(6.dp))
                     AnimatedBar((value / 20.0).toFloat(), tpsColor(value), height = 6.dp)
                 }
@@ -201,11 +252,16 @@ private fun TpsHistoryCard(tps: List<Double>, modifier: Modifier = Modifier) {
 @Composable
 private fun WorldRow(world: WorldInfo, modifier: Modifier = Modifier) {
     val (color, label) = when (world.environment) {
-        "NETHER" -> McColors.Nether to "Nether"
-        "THE_END" -> McColors.End to "End"
-        else -> McColors.Grass to "Oberwelt"
+        "NETHER" -> McColors.Nether to stringResource(R.string.world_nether)
+        "THE_END" -> McColors.End to stringResource(R.string.world_end)
+        else -> McColors.Grass to stringResource(R.string.world_overworld)
     }
-    McCard(modifier.fillMaxWidth()) {
+    val details = buildList {
+        add(label)
+        if (world.loadedChunks >= 0) add(pluralStringResource(R.plurals.world_chunks, world.loadedChunks, world.loadedChunks))
+        if (world.entities >= 0) add(pluralStringResource(R.plurals.world_entities, world.entities, world.entities))
+    }.joinToString(" · ")
+    McCard(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(40.dp).clip(MaterialTheme.shapes.small)
@@ -215,15 +271,15 @@ private fun WorldRow(world: WorldInfo, modifier: Modifier = Modifier) {
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(world.name, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "$label · ${world.loadedChunks} Chunks · ${world.entities} Entities",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(world.players.toString(), style = MaterialTheme.typography.titleLarge, color = color)
-                Text("Spieler", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(world.players.toString(), style = MaterialTheme.typography.titleLarge, color = statusTextColor(color))
+                Text(
+                    pluralStringResource(R.plurals.players_label, world.players),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
@@ -234,7 +290,7 @@ private fun DashboardSkeleton() {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Shimmer(Modifier.fillMaxWidth().height(150.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Shimmer(Modifier.weight(1f).height(IntrinsicSizeRow))
+            Shimmer(Modifier.weight(1f).height(GaugeRowHeight))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Shimmer(Modifier.fillMaxWidth().height(86.dp))
                 Shimmer(Modifier.fillMaxWidth().height(86.dp))
