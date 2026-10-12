@@ -78,6 +78,11 @@ public final class Platform {
         return PAPER;
     }
 
+    /** Entity count of a world (Paper has a cheap counter; Spigot has to list them). */
+    public static int entityCount(org.bukkit.World world) {
+        return PAPER ? PaperSupport.entityCount(world) : world.getEntities().size();
+    }
+
     @SuppressWarnings("deprecation")
     public static String motd() {
         return org.bukkit.ChatColor.stripColor(Bukkit.getMotd());

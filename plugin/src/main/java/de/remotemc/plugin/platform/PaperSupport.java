@@ -23,6 +23,10 @@ final class PaperSupport {
         return Bukkit.getMinecraftVersion();
     }
 
+    static int entityCount(org.bukkit.World world) {
+        return world.getEntityCount();
+    }
+
     static CommandSender capturingSender(List<String> output) {
         return Bukkit.createCommandSender(component -> {
             synchronized (output) {

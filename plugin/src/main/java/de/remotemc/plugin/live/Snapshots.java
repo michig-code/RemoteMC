@@ -49,7 +49,7 @@ public final class Snapshots {
             wo.addProperty("players", w.getPlayers().size());
             // Folia does not allow world-wide queries from the global thread.
             wo.addProperty("loadedChunks", safe(() -> w.getLoadedChunks().length));
-            wo.addProperty("entities", safe(w::getEntityCount));
+            wo.addProperty("entities", safe(() -> Platform.entityCount(w)));
             wo.addProperty("time", w.getTime());
             wo.addProperty("storm", w.hasStorm());
             worlds.add(wo);
