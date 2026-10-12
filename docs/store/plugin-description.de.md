@@ -12,7 +12,7 @@ online ist, behalte die Leistung im Blick, lies die Live-Konsole, chatte und fü
 - **Sicher ab Werk** – eingebautes HTTPS mit Zertifikats-Pinning, eigener Token pro Gerät (nur gehasht gespeichert),
   Rollen (Admin / Moderator / Zuschauer), Sperre nach Fehlversuchen und Audit-Log
 - **Läuft überall** – Paper, Purpur, Folia und Spigot, Minecraft 1.20.6 bis 26.x
-- Deutsch und Englisch
+- Deutsch, Englisch, Spanisch, Französisch, Italienisch, Niederländisch, Polnisch, brasilianisches Portugiesisch, Türkisch und Russisch
 
 ## Loslegen
 1. `RemoteMC.jar` in `plugins/` legen und den Server neu starten.

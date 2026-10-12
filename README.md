@@ -1,5 +1,10 @@
 # RemoteMC
 
+[![Build](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml/badge.svg)](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/michig-code/RemoteMC?include_prereleases&label=release)](https://github.com/michig-code/RemoteMC/releases)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6%20–%2026.x-62b47a)
+![Android](https://img.shields.io/badge/Android-8%2B-3ddc84)
+
 Manage your Minecraft server from your phone – live, encrypted and free.
 **[Deutsche Version](README.de.md)**
 
@@ -12,16 +17,22 @@ Manage your Minecraft server from your phone – live, encrypted and free.
   <img src="docs/screenshots/01_servers.png" width="190" alt="Server list">
   <img src="docs/screenshots/03_dashboard.png" width="190" alt="Dashboard">
   <img src="docs/screenshots/05_players.png" width="190" alt="Players">
-  <img src="docs/screenshots/06_console.png" width="190" alt="Console">
-  <img src="docs/screenshots/12_pair_confirm.png" width="190" alt="Pairing">
+  <img src="docs/screenshots/06b_console_suggestions.png" width="190" alt="Console with command suggestions">
 </p>
+<p>
+  <img src="docs/screenshots/07_chat.png" width="190" alt="Chat">
+  <img src="docs/screenshots/12_pair_confirm.png" width="190" alt="Pairing">
+  <img src="docs/screenshots/13b_onboarding_name.png" width="190" alt="Naming the phone">
+  <img src="docs/screenshots/14_settings.png" width="190" alt="Settings">
+</p>
+<p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
 - **Dashboard** – TPS gauge, MSPT, memory, uptime, TPS history and worlds, updated live
 - **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort
 - **Console** – coloured live server log, commands with their output, suggestions while typing
   (from the server's own tab completion) and your recently used commands
-- **Chat** – chat, joins and leaves as they happen; broadcast with undo
+- **Chat** – chat, joins and leaves as they happen; send messages to all players
 - **Pairing in seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
 - **Security** – built-in HTTPS with certificate pinning, one token per device (stored hashed on the
   server, encrypted in the Android Keystore on the phone), roles, lockout, audit log

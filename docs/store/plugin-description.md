@@ -12,7 +12,7 @@ watch performance, read the live console, chat with players and run commands –
 - **Secure by default** – built-in HTTPS with certificate pinning, per-device tokens (stored hashed),
   roles (admin / moderator / viewer), lockout after failed attempts and an audit log
 - **Works everywhere** – Paper, Purpur, Folia and Spigot, Minecraft 1.20.6 up to 26.x
-- English and German
+- English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
 
 ## Getting started
 1. Put `RemoteMC.jar` into `plugins/` and restart the server.

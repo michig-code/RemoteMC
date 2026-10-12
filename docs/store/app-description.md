@@ -14,7 +14,7 @@ Paper, Purpur, Folia or Spigot server, run /remotemc pair and scan the QR code.
 • Secure: encrypted connection with certificate pinning, tokens stored in the Android Keystore
 • Roles: give moderators limited access
 • Light and dark theme, Material You colours, tablet layout
-• English and German
+• English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
 • No account, no ads, no tracking
 
 RemoteMC is not affiliated with Mojang or Microsoft.

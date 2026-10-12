@@ -1,5 +1,10 @@
 # RemoteMC
 
+[![Build](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml/badge.svg)](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/michig-code/RemoteMC?include_prereleases&label=release)](https://github.com/michig-code/RemoteMC/releases)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6%20–%2026.x-62b47a)
+![Android](https://img.shields.io/badge/Android-8%2B-3ddc84)
+
 Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kostenlos.
 **[English version](README.md)** (dort auch API-Referenz und Entwickler-Infos)
 
@@ -7,7 +12,13 @@ Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kost
   <img src="docs/screenshots/01_servers.png" width="190" alt="Serverliste">
   <img src="docs/screenshots/03_dashboard.png" width="190" alt="Übersicht">
   <img src="docs/screenshots/05_players.png" width="190" alt="Spieler">
+  <img src="docs/screenshots/06b_console_suggestions.png" width="190" alt="Konsole mit Befehlsvorschlägen">
+</p>
+<p>
   <img src="docs/screenshots/07_chat.png" width="190" alt="Chat">
+  <img src="docs/screenshots/12_pair_confirm.png" width="190" alt="Koppeln">
+  <img src="docs/screenshots/13b_onboarding_name.png" width="190" alt="Handy benennen">
+  <img src="docs/screenshots/14_settings.png" width="190" alt="Einstellungen">
 </p>
 
 ## Einrichtung
