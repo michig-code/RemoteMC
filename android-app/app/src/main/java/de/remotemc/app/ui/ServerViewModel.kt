@@ -179,6 +179,11 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         pardon = { api.pardon(it) },
     )
 
+    val worldActions = WorldActions(
+        load = { api.world(it) },
+        change = { world, action, body -> api.worldAction(world, action, body) },
+    )
+
     /** Performance history for the dashboard chart. */
     suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)
 

@@ -330,4 +330,25 @@
     <string name="bans_by">Yasaklayan: %s</string>
     <string name="error_player_unknown">Bu adla bir Minecraft hesabı yok.</string>
     <string name="moderation_load_failed">Liste yüklenemedi.</string>
+    <string name="world_controls">Dünya ayarları</string>
+    <string name="world_time">Zaman</string>
+    <string name="time_morning">Sabah</string>
+    <string name="time_day">Gündüz</string>
+    <string name="time_noon">Öğle</string>
+    <string name="time_evening">Akşam</string>
+    <string name="time_night">Gece</string>
+    <string name="time_midnight">Gece yarısı</string>
+    <string name="world_weather">Hava durumu</string>
+    <string name="weather_clear">Açık</string>
+    <string name="weather_rain">Yağmur</string>
+    <string name="weather_thunder">Fırtına</string>
+    <string name="world_difficulty">Zorluk</string>
+    <string name="difficulty_peaceful">Barışçıl</string>
+    <string name="difficulty_easy">Kolay</string>
+    <string name="difficulty_normal">Normal</string>
+    <string name="difficulty_hard">Zor</string>
+    <string name="world_gamerules">Oyun kuralları</string>
+    <string name="world_gamerules_search">Oyun kurallarında ara</string>
+    <string name="world_gamerule_value">Değer</string>
+    <string name="error_world_unknown">Bu dünya mevcut değil (veya artık yok).</string>
 </resources>

@@ -79,6 +79,7 @@ import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Whitelist
+import de.remotemc.app.data.WorldDetails
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.ui.components.ConnectionState
 import de.remotemc.app.ui.components.StatusPill
@@ -124,6 +125,13 @@ class ServerActions(
     val loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
     /** Whitelist and ban list (moderators and admins); null hides them. */
     val moderation: ModerationActions? = null,
+    /** World controls (admins); null hides them. */
+    val worlds: WorldActions? = null,
+)
+
+class WorldActions(
+    val load: suspend (String) -> WorldDetails,
+    val change: suspend (world: String, action: String, body: JSONObject) -> WorldDetails,
 )
 
 /** Calls for the whitelist and ban list; each returns the updated list. */
@@ -177,6 +185,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onForgetCommand = vm::forgetCommand,
             loadHistory = vm::performance,
             moderation = vm.moderation,
+            worlds = vm.worldActions,
         ),
         snackbar = snackbar,
     )
@@ -299,7 +308,10 @@ fun ServerScreenContent(
                     ) { current ->
                         when (current) {
                             Tab.Dashboard -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
-                                DashboardTab(state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory)
+                                DashboardTab(
+                                    state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory,
+                                    actions.worlds?.takeIf { state.role.atLeast(Role.ADMIN) },
+                                )
                             }
                             Tab.Players -> PlayersSection(state, actions)
                             Tab.Console -> ConsoleTab(

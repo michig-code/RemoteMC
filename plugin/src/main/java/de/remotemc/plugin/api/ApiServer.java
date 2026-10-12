@@ -20,6 +20,7 @@ import de.remotemc.plugin.live.Formatting;
 import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -238,6 +239,10 @@ public final class ApiServer {
                 return runCommand(caller, stringField(readBody(ex), "command", 1024));
             }
             default -> {
+                if (parts.length >= 5 && parts[3].equals("worlds")) {
+                    return worldAction(caller, method, java.net.URLDecoder.decode(parts[4], java.nio.charset.StandardCharsets.UTF_8),
+                            parts.length > 5 ? parts[5] : "", ex);
+                }
                 if (method.equals("POST") && parts.length == 6 && parts[3].equals("bans") && parts[5].equals("pardon")) {
                     require(caller, Role.MODERATOR);
                     String name = playerName(parts[4]);
@@ -524,6 +529,49 @@ public final class ApiServer {
 
     // ── Helpers ─────────────────────────────────────────────────────────
 
+    /** GET /worlds/<name>; POST /worlds/<name>/time|weather|difficulty|gamerule (admin). */
+    private JsonObject worldAction(Caller caller, String method, String world, String action, HttpExchange ex) throws Exception {
+        require(caller, Role.ADMIN);
+        if (method.equals("GET") && action.isEmpty()) {
+            return global(() -> safeDescribe(world));
+        }
+        if (!method.equals("POST")) {
+            throw ApiException.notFound("not_found", "Unknown endpoint");
+        }
+        JsonObject body = readBody(ex);
+        String what = switch (action) {
+            case "time" -> "time " + stringField(body, "time", 16);
+            case "weather" -> "weather " + stringField(body, "weather", 16);
+            case "difficulty" -> "difficulty " + stringField(body, "difficulty", 16);
+            case "gamerule" -> "gamerule " + stringField(body, "rule", 64) + " " + body.get("value");
+            default -> throw ApiException.notFound("not_found", "Unknown world action: " + action);
+        };
+        JsonObject result = global(() -> {
+            try {
+                World w = WorldControl.world(world);
+                switch (action) {
+                    case "time" -> WorldControl.setTime(w, body.get("time").getAsString());
+                    case "weather" -> WorldControl.setWeather(w, body.get("weather").getAsString());
+                    case "difficulty" -> WorldControl.setDifficulty(w, body.get("difficulty").getAsString());
+                    default -> WorldControl.setGameRule(w, body.get("rule").getAsString(), body.get("value"));
+                }
+                return WorldControl.describe(w);
+            } catch (ApiException e) {
+                throw new java.util.concurrent.CompletionException(e);
+            }
+        });
+        plugin.audit().log(caller.who(), caller.ip(), world + ": " + what);
+        return result;
+    }
+
+    private static JsonObject safeDescribe(String world) {
+        try {
+            return WorldControl.describe(WorldControl.world(world));
+        } catch (ApiException e) {
+            throw new java.util.concurrent.CompletionException(e);
+        }
+    }
+
     private static String playerName(String name) throws ApiException {
         if (!PLAYER_NAME.matcher(name).matches()) {
             throw ApiException.badRequest("bad_request", "Invalid player name");
@@ -546,7 +594,12 @@ public final class ApiServer {
         try {
             return future.get(10, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
-            throw e.getCause() instanceof Exception c ? c : e;
+            Throwable cause = e.getCause();
+            // Tasks wrap checked API errors in CompletionException to pass them out.
+            if (cause instanceof java.util.concurrent.CompletionException ce && ce.getCause() instanceof ApiException api) {
+                throw api;
+            }
+            throw cause instanceof Exception c ? c : e;
         } catch (TimeoutException e) {
             throw new ApiException(504, "timeout", "The server did not respond in time");
         }

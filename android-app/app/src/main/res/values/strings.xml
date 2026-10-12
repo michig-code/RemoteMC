@@ -361,4 +361,25 @@
     <string name="bans_by">by %s</string>
     <string name="error_player_unknown">There is no Minecraft account with this name.</string>
     <string name="moderation_load_failed">Could not load the list.</string>
+    <string name="world_controls">World settings</string>
+    <string name="world_time">Time</string>
+    <string name="time_morning">Morning</string>
+    <string name="time_day">Day</string>
+    <string name="time_noon">Noon</string>
+    <string name="time_evening">Evening</string>
+    <string name="time_night">Night</string>
+    <string name="time_midnight">Midnight</string>
+    <string name="world_weather">Weather</string>
+    <string name="weather_clear">Clear</string>
+    <string name="weather_rain">Rain</string>
+    <string name="weather_thunder">Thunder</string>
+    <string name="world_difficulty">Difficulty</string>
+    <string name="difficulty_peaceful">Peaceful</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_normal">Normal</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="world_gamerules">Game rules</string>
+    <string name="world_gamerules_search">Search game rules</string>
+    <string name="world_gamerule_value">Value</string>
+    <string name="error_world_unknown">This world does not exist (any more).</string>
 </resources>

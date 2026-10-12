@@ -17,6 +17,7 @@ First public release of **RemoteMC**.
   (`history.csv`, `GET /api/v1/history?range=1h|24h|7d`, `history: false` turns it off)
 - Whitelist and ban list: `GET/POST /api/v1/whitelist` (on/off, add, remove) and
   `GET /api/v1/bans`, `POST /api/v1/bans/<name>/pardon`
+- World controls: `GET /api/v1/worlds/<world>` and `POST …/time|weather|difficulty|gamerule` (admin)
 - Supports Paper, Purpur, Folia and Spigot from 1.20.6 up to 26.x
 - Messages in English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese,
   Turkish and Russian; update check
@@ -38,5 +39,6 @@ First public release of **RemoteMC**.
   updates every 15 minutes) and a quick settings tile that turns background notifications on
   or off and shows how many servers are online
 - Whitelist (on/off, add, remove) and ban list with reason and dates, unban with one tap
+- World settings (admins): tap a world to set the time, weather, difficulty and game rules
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)

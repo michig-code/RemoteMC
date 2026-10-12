@@ -330,4 +330,25 @@
     <string name="bans_by">door %s</string>
     <string name="error_player_unknown">Er bestaat geen Minecraft-account met deze naam.</string>
     <string name="moderation_load_failed">Kan de lijst niet laden.</string>
+    <string name="world_controls">Wereldinstellingen</string>
+    <string name="world_time">Tijd</string>
+    <string name="time_morning">Ochtend</string>
+    <string name="time_day">Dag</string>
+    <string name="time_noon">Middag</string>
+    <string name="time_evening">Avond</string>
+    <string name="time_night">Nacht</string>
+    <string name="time_midnight">Middernacht</string>
+    <string name="world_weather">Weer</string>
+    <string name="weather_clear">Helder</string>
+    <string name="weather_rain">Regen</string>
+    <string name="weather_thunder">Onweer</string>
+    <string name="world_difficulty">Moeilijkheid</string>
+    <string name="difficulty_peaceful">Vredig</string>
+    <string name="difficulty_easy">Makkelijk</string>
+    <string name="difficulty_normal">Normaal</string>
+    <string name="difficulty_hard">Moeilijk</string>
+    <string name="world_gamerules">Spelregels</string>
+    <string name="world_gamerules_search">Spelregels zoeken</string>
+    <string name="world_gamerule_value">Waarde</string>
+    <string name="error_world_unknown">Deze wereld bestaat niet (meer).</string>
 </resources>

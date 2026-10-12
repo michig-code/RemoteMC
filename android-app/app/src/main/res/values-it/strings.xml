@@ -338,4 +338,25 @@
     <string name="bans_by">da %s</string>
     <string name="error_player_unknown">Non esiste un account Minecraft con questo nome.</string>
     <string name="moderation_load_failed">Impossibile caricare la lista.</string>
+    <string name="world_controls">Impostazioni del mondo</string>
+    <string name="world_time">Ora</string>
+    <string name="time_morning">Mattina</string>
+    <string name="time_day">Giorno</string>
+    <string name="time_noon">Mezzogiorno</string>
+    <string name="time_evening">Sera</string>
+    <string name="time_night">Notte</string>
+    <string name="time_midnight">Mezzanotte</string>
+    <string name="world_weather">Meteo</string>
+    <string name="weather_clear">Sereno</string>
+    <string name="weather_rain">Pioggia</string>
+    <string name="weather_thunder">Temporale</string>
+    <string name="world_difficulty">Difficoltà</string>
+    <string name="difficulty_peaceful">Pacifica</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_normal">Normale</string>
+    <string name="difficulty_hard">Difficile</string>
+    <string name="world_gamerules">Regole di gioco</string>
+    <string name="world_gamerules_search">Cerca regole di gioco</string>
+    <string name="world_gamerule_value">Valore</string>
+    <string name="error_world_unknown">Questo mondo non esiste (più).</string>
 </resources>

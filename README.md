@@ -31,6 +31,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
+- **Worlds** – time, weather, difficulty and game rules per world at a tap (admins)
 - **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
   players, memory and MSPT over the last hour, day or week
 - **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort;
@@ -133,6 +134,8 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | POST | `/api/v1/whitelist` | admin | `{"enabled"}` turns it on or off |
 | POST | `/api/v1/whitelist/add` · `/remove` | moderator | `{"name"}` |
 | GET | `/api/v1/bans` | moderator | Player bans with reason, source, created, expires |
+| GET | `/api/v1/worlds/<world>` | admin | Time, weather, difficulty, game rules |
+| POST | `/api/v1/worlds/<world>/time` · `weather` · `difficulty` · `gamerule` | admin | `{"time": "day"}`, `{"weather": "rain"}`, `{"difficulty": "hard"}`, `{"rule", "value"}` |
 | POST | `/api/v1/bans/<name>/pardon` | moderator | Unban |
 | GET | `/api/v1/chat?since=<id>` | viewer | Chat, joins and leaves |
 | GET | `/api/v1/events` | viewer | Server-Sent Events: `hello`, `status`, `chat`, `console` (moderator+) |

@@ -28,6 +28,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,7 +68,13 @@ fun DashboardTab(
     error: String?,
     wide: Boolean = false,
     loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
+    worldActions: WorldActions? = null,
 ) {
+    var openWorld by rememberSaveable { mutableStateOf<String?>(null) }
+    val onWorld: ((String) -> Unit)? = worldActions?.let { { name: String -> openWorld = name } }
+    if (worldActions != null) {
+        openWorld?.let { WorldSheet(it, worldActions) { openWorld = null } }
+    }
     if (status == null) {
         if (error != null) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
@@ -95,7 +105,7 @@ fun DashboardTab(
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GaugeRow(status, Modifier.staggeredAppear(1))
-                    Worlds(status.worlds)
+                    Worlds(status.worlds, onWorld)
                 }
             }
         } else {
@@ -104,16 +114,16 @@ fun DashboardTab(
             MemoryCard(status, Modifier.staggeredAppear(4))
             TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
             loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(6)) }
-            Worlds(status.worlds)
+            Worlds(status.worlds, onWorld)
         }
         Spacer(Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun Worlds(worlds: List<WorldInfo>) {
+private fun Worlds(worlds: List<WorldInfo>, onOpen: ((String) -> Unit)?) {
     SectionTitle(stringResource(R.string.dashboard_worlds))
-    worlds.forEachIndexed { i, w -> WorldRow(w, Modifier.staggeredAppear(6 + i)) }
+    worlds.forEachIndexed { i, w -> WorldRow(w, Modifier.staggeredAppear(6 + i), onOpen?.let { { it(w.name) } }) }
 }
 
 private val GaugeRowHeight = 184.dp
@@ -259,7 +269,7 @@ private fun TpsHistoryCard(tps: List<Double>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun WorldRow(world: WorldInfo, modifier: Modifier = Modifier) {
+private fun WorldRow(world: WorldInfo, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val (color, label) = when (world.environment) {
         "NETHER" -> McColors.Nether to stringResource(R.string.world_nether)
         "THE_END" -> McColors.End to stringResource(R.string.world_end)
@@ -270,7 +280,7 @@ private fun WorldRow(world: WorldInfo, modifier: Modifier = Modifier) {
         if (world.loadedChunks >= 0) add(pluralStringResource(R.plurals.world_chunks, world.loadedChunks, world.loadedChunks))
         if (world.entities >= 0) add(pluralStringResource(R.plurals.world_entities, world.entities, world.entities))
     }.joinToString(" · ")
-    McCard(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
+    McCard(modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, onClick = onClick) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(40.dp).clip(MaterialTheme.shapes.small)

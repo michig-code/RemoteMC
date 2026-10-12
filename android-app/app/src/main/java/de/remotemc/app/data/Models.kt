@@ -205,3 +205,34 @@ data class BanInfo(val name: String, val reason: String?, val source: String?, v
         }
     }
 }
+
+data class GameRuleInfo(val name: String, val isBoolean: Boolean, val value: String)
+
+/** One world's settings for the world controls (admin). */
+data class WorldDetails(
+    val name: String,
+    val environment: String,
+    val time: Long,
+    val storm: Boolean,
+    val thunder: Boolean,
+    val difficulty: String,
+    val gameRules: List<GameRuleInfo>,
+) {
+    companion object {
+        fun fromJson(o: JSONObject): WorldDetails {
+            val rules = o.optJSONArray("gamerules") ?: JSONArray()
+            return WorldDetails(
+                name = o.getString("name"),
+                environment = o.optString("environment"),
+                time = o.optLong("time"),
+                storm = o.optBoolean("storm"),
+                thunder = o.optBoolean("thunder"),
+                difficulty = o.optString("difficulty"),
+                gameRules = List(rules.length()) {
+                    val r = rules.getJSONObject(it)
+                    GameRuleInfo(r.getString("name"), r.optString("type") == "boolean", r.get("value").toString())
+                },
+            )
+        }
+    }
+}

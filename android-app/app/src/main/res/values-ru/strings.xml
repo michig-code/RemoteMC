@@ -346,4 +346,25 @@
     <string name="bans_by">кем: %s</string>
     <string name="error_player_unknown">Аккаунта Minecraft с таким именем нет.</string>
     <string name="moderation_load_failed">Не удалось загрузить список.</string>
+    <string name="world_controls">Настройки мира</string>
+    <string name="world_time">Время</string>
+    <string name="time_morning">Утро</string>
+    <string name="time_day">День</string>
+    <string name="time_noon">Полдень</string>
+    <string name="time_evening">Вечер</string>
+    <string name="time_night">Ночь</string>
+    <string name="time_midnight">Полночь</string>
+    <string name="world_weather">Погода</string>
+    <string name="weather_clear">Ясно</string>
+    <string name="weather_rain">Дождь</string>
+    <string name="weather_thunder">Гроза</string>
+    <string name="world_difficulty">Сложность</string>
+    <string name="difficulty_peaceful">Мирный</string>
+    <string name="difficulty_easy">Лёгкий</string>
+    <string name="difficulty_normal">Обычный</string>
+    <string name="difficulty_hard">Сложный</string>
+    <string name="world_gamerules">Игровые правила</string>
+    <string name="world_gamerules_search">Поиск игровых правил</string>
+    <string name="world_gamerule_value">Значение</string>
+    <string name="error_world_unknown">Этого мира нет (или больше нет).</string>
 </resources>

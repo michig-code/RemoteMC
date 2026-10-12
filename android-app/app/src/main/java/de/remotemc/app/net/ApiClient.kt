@@ -14,6 +14,7 @@ import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
 import de.remotemc.app.data.Whitelist
+import de.remotemc.app.data.WorldDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -59,6 +60,14 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     suspend fun bans(): List<BanInfo> = BanInfo.listFromJson(call("GET", "/api/v1/bans"))
     suspend fun pardon(name: String): List<BanInfo> =
         BanInfo.listFromJson(call("POST", "/api/v1/bans/${java.net.URLEncoder.encode(name, "UTF-8")}/pardon"))
+    suspend fun world(name: String): WorldDetails = WorldDetails.fromJson(call("GET", "/api/v1/worlds/${enc(name)}"))
+
+    /** [action]: time, weather, difficulty or gamerule; returns the world afterwards. */
+    suspend fun worldAction(name: String, action: String, body: JSONObject): WorldDetails =
+        WorldDetails.fromJson(call("POST", "/api/v1/worlds/${enc(name)}/$action", body))
+
+    private fun enc(s: String) = java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20")
+
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 
     suspend fun console(since: Long): List<ConsoleLine> {
