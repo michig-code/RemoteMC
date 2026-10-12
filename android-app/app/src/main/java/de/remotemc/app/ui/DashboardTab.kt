@@ -71,7 +71,10 @@ fun DashboardTab(
     loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
     worldActions: WorldActions? = null,
     loadPlugins: (suspend () -> List<PluginInfo>)? = null,
+    schedules: ScheduleActions? = null,
 ) {
+    var showSchedules by rememberSaveable { mutableStateOf(false) }
+    if (showSchedules && schedules != null) SchedulesSheet(schedules) { showSchedules = false }
     var showPlugins by rememberSaveable { mutableStateOf(false) }
     if (showPlugins && loadPlugins != null) PluginsSheet(loadPlugins) { showPlugins = false }
     var openWorld by rememberSaveable { mutableStateOf<String?>(null) }
@@ -110,6 +113,7 @@ fun DashboardTab(
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GaugeRow(status, Modifier.staggeredAppear(1))
                     Worlds(status.worlds, onWorld)
+            schedules?.let { SchedulesRow { showSchedules = true } }
             loadPlugins?.let { PluginsRow { showPlugins = true } }
                 }
             }
@@ -120,6 +124,7 @@ fun DashboardTab(
             TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
             loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(6)) }
             Worlds(status.worlds, onWorld)
+            schedules?.let { SchedulesRow { showSchedules = true } }
             loadPlugins?.let { PluginsRow { showPlugins = true } }
         }
         Spacer(Modifier.height(8.dp))

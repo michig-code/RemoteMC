@@ -21,6 +21,7 @@ fun Context.errorText(e: Throwable): String = when (e) {
         "player_offline" -> getString(R.string.error_player_offline)
         "player_unknown" -> getString(R.string.error_player_unknown)
         "world_unknown" -> getString(R.string.error_world_unknown)
+        "schedule_unknown" -> getString(R.string.error_schedule_unknown)
         "too_large" -> getString(R.string.error_too_large)
         "too_many_streams" -> getString(R.string.error_too_many_streams)
         "timeout" -> getString(R.string.error_server_timeout)

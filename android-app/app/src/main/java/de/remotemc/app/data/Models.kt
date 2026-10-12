@@ -259,3 +259,54 @@ data class PluginInfo(
         }
     }
 }
+
+/** A scheduled console command: every [minutes], or daily at [time] ("HH:mm", server time zone). */
+data class ScheduleInfo(
+    val id: String?,
+    val name: String,
+    val command: String,
+    val daily: Boolean,
+    val minutes: Int,
+    val time: String,
+    val warn: Int,
+    val enabled: Boolean,
+    val nextRun: Long = 0,
+    val lastRun: Long = 0,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id ?: "")
+        .put("name", name)
+        .put("command", command)
+        .put("type", if (daily) "daily" else "interval")
+        .put("minutes", minutes)
+        .put("time", time)
+        .put("warn", warn)
+        .put("enabled", enabled)
+}
+
+data class ScheduleList(val schedules: List<ScheduleInfo>, val timezone: String, val serverNow: Long) {
+    companion object {
+        fun fromJson(o: JSONObject): ScheduleList {
+            val arr = o.optJSONArray("schedules") ?: JSONArray()
+            return ScheduleList(
+                List(arr.length()) {
+                    val t = arr.getJSONObject(it)
+                    ScheduleInfo(
+                        id = t.getString("id"),
+                        name = t.optString("name"),
+                        command = t.optString("command"),
+                        daily = t.optString("type") == "daily",
+                        minutes = t.optInt("minutes"),
+                        time = t.optString("time", "04:00"),
+                        warn = t.optInt("warn"),
+                        enabled = t.optBoolean("enabled", true),
+                        nextRun = t.optLong("nextRun"),
+                        lastRun = t.optLong("lastRun"),
+                    )
+                },
+                o.optString("timezone"),
+                o.optLong("now"),
+            )
+        }
+    }
+}

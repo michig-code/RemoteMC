@@ -75,6 +75,8 @@ import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.PluginInfo
+import de.remotemc.app.data.ScheduleInfo
+import de.remotemc.app.data.ScheduleList
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.Role
@@ -130,6 +132,15 @@ class ServerActions(
     val worlds: WorldActions? = null,
     /** Installed plugins (moderators and admins); null hides them. */
     val loadPlugins: (suspend () -> List<PluginInfo>)? = null,
+    /** Scheduled commands (admins); null hides them. */
+    val schedules: ScheduleActions? = null,
+)
+
+class ScheduleActions(
+    val load: suspend () -> ScheduleList,
+    val save: suspend (ScheduleInfo) -> ScheduleList,
+    val run: suspend (String) -> ScheduleList,
+    val delete: suspend (String) -> ScheduleList,
 )
 
 class WorldActions(
@@ -190,6 +201,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             moderation = vm.moderation,
             worlds = vm.worldActions,
             loadPlugins = vm::plugins,
+            schedules = vm.scheduleActions,
         ),
         snackbar = snackbar,
     )
@@ -316,6 +328,7 @@ fun ServerScreenContent(
                                     state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory,
                                     actions.worlds?.takeIf { state.role.atLeast(Role.ADMIN) },
                                     actions.loadPlugins?.takeIf { state.role.atLeast(Role.MODERATOR) },
+                                    actions.schedules?.takeIf { state.role.atLeast(Role.ADMIN) && state.commandsEnabled },
                                 )
                             }
                             Tab.Players -> PlayersSection(state, actions)

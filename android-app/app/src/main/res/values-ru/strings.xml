@@ -371,4 +371,25 @@
     <string name="plugins_disabled">Отключён</string>
     <string name="plugins_by">автор: %s</string>
     <string name="plugins_search">Поиск плагинов</string>
+    <string name="schedules_title">Запланированные задачи</string>
+    <string name="schedules_empty">Запланированных задач пока нет. Выполняйте команды автоматически, например объявления или сохранение миров.</string>
+    <string name="schedules_add">Новая задача</string>
+    <string name="schedules_edit">Изменить задачу</string>
+    <string name="schedules_name">Название</string>
+    <string name="schedules_command">Команда</string>
+    <string name="schedules_interval">Повтор</string>
+    <string name="schedules_daily">Ежедневно</string>
+    <string name="schedules_minutes">Каждые … минут</string>
+    <string name="schedules_warn">Обратный отсчёт в чате перед запуском</string>
+    <string name="schedules_warn_none">Нет</string>
+    <string name="schedules_summary_interval">Каждые %d мин</string>
+    <string name="schedules_summary_daily">Ежедневно в %s</string>
+    <string name="schedules_next">следующий запуск через %s</string>
+    <string name="schedules_run_now">Запустить сейчас</string>
+    <string name="schedules_ran">%s: запущено</string>
+    <string name="schedules_delete_confirm">Удалить «%s»?</string>
+    <string name="schedules_preset_announce">Объявление</string>
+    <string name="schedules_preset_save">Сохранить миры</string>
+    <string name="schedules_timezone">Время указано в часовом поясе сервера (%s).</string>
+    <string name="error_schedule_unknown">Эта задача больше не существует.</string>
 </resources>

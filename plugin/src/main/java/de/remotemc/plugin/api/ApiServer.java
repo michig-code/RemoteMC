@@ -18,6 +18,7 @@ import de.remotemc.plugin.live.ConsoleBuffer;
 import de.remotemc.plugin.live.EventHub;
 import de.remotemc.plugin.live.Formatting;
 import de.remotemc.plugin.live.History;
+import de.remotemc.plugin.live.Schedules;
 import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -234,6 +235,28 @@ public final class ApiServer {
                 require(caller, Role.MODERATOR);
                 return global(ApiServer::plugins);
             }
+            case "GET /api/v1/schedules" -> {
+                require(caller, Role.ADMIN);
+                return plugin.schedules().json(System.currentTimeMillis());
+            }
+            case "POST /api/v1/schedules" -> {
+                require(caller, Role.ADMIN);
+                if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+                    throw ApiException.forbidden("Console commands are disabled in config.yml");
+                }
+                JsonObject body = readBody(ex);
+                if (body.has("command") && body.get("command").isJsonPrimitive()) {
+                    body.addProperty("command", checkCommand(body.get("command").getAsString()));
+                }
+                Schedules.Task task;
+                try {
+                    task = plugin.schedules().upsert(body, System.currentTimeMillis());
+                } catch (IllegalArgumentException | java.time.DateTimeException | UnsupportedOperationException e) {
+                    throw ApiException.badRequest("bad_request", e.getMessage());
+                }
+                plugin.audit().log(caller.who(), caller.ip(), "schedule saved: " + task.name + " /" + task.command);
+                return plugin.schedules().json(System.currentTimeMillis());
+            }
             case "GET /api/v1/bans" -> {
                 require(caller, Role.MODERATOR);
                 return global(Moderation::bans);
@@ -246,6 +269,25 @@ public final class ApiServer {
                 if (parts.length >= 5 && parts[3].equals("worlds")) {
                     return worldAction(caller, method, java.net.URLDecoder.decode(parts[4], java.nio.charset.StandardCharsets.UTF_8),
                             parts.length > 5 ? parts[5] : "", ex);
+                }
+                if (method.equals("POST") && parts.length == 6 && parts[3].equals("schedules")) {
+                    require(caller, Role.ADMIN);
+                    Schedules.Task task = plugin.schedules().find(parts[4]);
+                    if (task == null) {
+                        throw ApiException.notFound("schedule_unknown", "No scheduled task " + parts[4]);
+                    }
+                    switch (parts[5]) {
+                        case "delete" -> plugin.schedules().delete(task.id);
+                        case "run" -> {
+                            if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+                                throw ApiException.forbidden("Console commands are disabled in config.yml");
+                            }
+                            global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), task.command));
+                        }
+                        default -> throw ApiException.notFound("not_found", "Unknown action: " + parts[5]);
+                    }
+                    plugin.audit().log(caller.who(), caller.ip(), "schedule " + parts[5] + ": " + task.name);
+                    return plugin.schedules().json(System.currentTimeMillis());
                 }
                 if (method.equals("POST") && parts.length == 6 && parts[3].equals("bans") && parts[5].equals("pardon")) {
                     require(caller, Role.MODERATOR);
@@ -407,10 +449,8 @@ public final class ApiServer {
         return ok();
     }
 
-    private JsonObject runCommand(Caller caller, String command) throws Exception {
-        if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
-            throw ApiException.forbidden("Console commands are disabled in config.yml");
-        }
+    /** Strips the slash and refuses empty and blocked commands. */
+    private String checkCommand(String command) throws ApiException {
         String cmd = command.strip();
         if (cmd.startsWith("/")) {
             cmd = cmd.substring(1);
@@ -425,6 +465,14 @@ public final class ApiServer {
                 throw new ApiException(403, "command_blocked", "The command '" + label + "' is blocked in config.yml");
             }
         }
+        return cmd;
+    }
+
+    private JsonObject runCommand(Caller caller, String command) throws Exception {
+        if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+            throw ApiException.forbidden("Console commands are disabled in config.yml");
+        }
+        String cmd = checkCommand(command);
 
         String finalCmd = cmd;
         List<String> output = new ArrayList<>();

@@ -363,4 +363,25 @@
     <string name="plugins_disabled">Désactivé</string>
     <string name="plugins_by">par %s</string>
     <string name="plugins_search">Rechercher des plugins</string>
+    <string name="schedules_title">Tâches planifiées</string>
+    <string name="schedules_empty">Aucune tâche planifiée pour l\'instant. Exécutez des commandes automatiquement, par exemple des annonces ou la sauvegarde des mondes.</string>
+    <string name="schedules_add">Nouvelle tâche</string>
+    <string name="schedules_edit">Modifier la tâche</string>
+    <string name="schedules_name">Nom</string>
+    <string name="schedules_command">Commande</string>
+    <string name="schedules_interval">Répétition</string>
+    <string name="schedules_daily">Quotidien</string>
+    <string name="schedules_minutes">Toutes les … minutes</string>
+    <string name="schedules_warn">Compte à rebours dans le chat avant l\'exécution</string>
+    <string name="schedules_warn_none">Aucun</string>
+    <string name="schedules_summary_interval">Toutes les %d min</string>
+    <string name="schedules_summary_daily">Tous les jours à %s</string>
+    <string name="schedules_next">prochaine dans %s</string>
+    <string name="schedules_run_now">Exécuter maintenant</string>
+    <string name="schedules_ran">%s lancée</string>
+    <string name="schedules_delete_confirm">Supprimer « %s » ?</string>
+    <string name="schedules_preset_announce">Annonce</string>
+    <string name="schedules_preset_save">Sauvegarder les mondes</string>
+    <string name="schedules_timezone">Les heures sont dans le fuseau horaire du serveur (%s).</string>
+    <string name="error_schedule_unknown">Cette tâche n\'existe plus.</string>
 </resources>

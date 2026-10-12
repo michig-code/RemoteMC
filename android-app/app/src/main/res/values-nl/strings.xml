@@ -355,4 +355,25 @@
     <string name="plugins_disabled">Uitgeschakeld</string>
     <string name="plugins_by">door %s</string>
     <string name="plugins_search">Plugins zoeken</string>
+    <string name="schedules_title">Geplande taken</string>
+    <string name="schedules_empty">Nog geen geplande taken. Voer commando\'s automatisch uit, bijvoorbeeld aankondigingen of het opslaan van de werelden.</string>
+    <string name="schedules_add">Nieuwe taak</string>
+    <string name="schedules_edit">Taak bewerken</string>
+    <string name="schedules_name">Naam</string>
+    <string name="schedules_command">Commando</string>
+    <string name="schedules_interval">Herhalen</string>
+    <string name="schedules_daily">Dagelijks</string>
+    <string name="schedules_minutes">Elke … minuten</string>
+    <string name="schedules_warn">Aftellen in de chat vóór het uitvoeren</string>
+    <string name="schedules_warn_none">Geen</string>
+    <string name="schedules_summary_interval">Elke %d min</string>
+    <string name="schedules_summary_daily">Dagelijks om %s</string>
+    <string name="schedules_next">volgende over %s</string>
+    <string name="schedules_run_now">Nu uitvoeren</string>
+    <string name="schedules_ran">%s gestart</string>
+    <string name="schedules_delete_confirm">“%s” verwijderen?</string>
+    <string name="schedules_preset_announce">Aankondiging</string>
+    <string name="schedules_preset_save">Werelden opslaan</string>
+    <string name="schedules_timezone">Tijden zijn in de tijdzone van de server (%s).</string>
+    <string name="error_schedule_unknown">Deze taak bestaat niet meer.</string>
 </resources>

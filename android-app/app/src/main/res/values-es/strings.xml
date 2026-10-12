@@ -363,4 +363,25 @@
     <string name="plugins_disabled">Desactivado</string>
     <string name="plugins_by">por %s</string>
     <string name="plugins_search">Buscar plugins</string>
+    <string name="schedules_title">Tareas programadas</string>
+    <string name="schedules_empty">Aún no hay tareas programadas. Ejecuta comandos automáticamente, por ejemplo anuncios o guardar los mundos.</string>
+    <string name="schedules_add">Nueva tarea</string>
+    <string name="schedules_edit">Editar tarea</string>
+    <string name="schedules_name">Nombre</string>
+    <string name="schedules_command">Comando</string>
+    <string name="schedules_interval">Repetir</string>
+    <string name="schedules_daily">Diario</string>
+    <string name="schedules_minutes">Cada … minutos</string>
+    <string name="schedules_warn">Cuenta atrás en el chat antes de ejecutarse</string>
+    <string name="schedules_warn_none">Ninguna</string>
+    <string name="schedules_summary_interval">Cada %d min</string>
+    <string name="schedules_summary_daily">Diario a las %s</string>
+    <string name="schedules_next">próxima en %s</string>
+    <string name="schedules_run_now">Ejecutar ahora</string>
+    <string name="schedules_ran">%s iniciada</string>
+    <string name="schedules_delete_confirm">¿Eliminar «%s»?</string>
+    <string name="schedules_preset_announce">Anuncio</string>
+    <string name="schedules_preset_save">Guardar mundos</string>
+    <string name="schedules_timezone">Las horas están en la zona horaria del servidor (%s).</string>
+    <string name="error_schedule_unknown">Esta tarea ya no existe.</string>
 </resources>

@@ -12,6 +12,7 @@ import de.remotemc.plugin.live.EventHub;
 import de.remotemc.plugin.live.GameListener;
 import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.live.PaperChatListener;
+import de.remotemc.plugin.live.Schedules;
 import de.remotemc.plugin.live.Snapshots;
 import de.remotemc.plugin.live.SpigotChatListener;
 import de.remotemc.plugin.pairing.QrCodes;
@@ -65,6 +66,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     private Runnable statusTask;
     private Runnable historyTask;
     private History history;
+    private Schedules schedules;
     private ScheduledExecutorService housekeeping;
     private volatile UpdateChecker.Update update;
 
@@ -116,6 +118,27 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
             return t;
         });
         housekeeping.scheduleAtFixedRate(tokens::saveIfDirty, 5, 5, TimeUnit.MINUTES);
+        // Scheduled commands: checked every 5 seconds, run on the server thread.
+        schedules = new Schedules(new File(getDataFolder(), "schedules.json"), getLogger(), java.time.ZoneId.systemDefault());
+        housekeeping.scheduleAtFixedRate(() -> {
+            try {
+                schedules.tick(System.currentTimeMillis(),
+                        (task, seconds) -> scheduler.global(() -> {
+                            Bukkit.broadcastMessage(messages.prefixed("schedule-warning", "task", task.name,
+                                    "time", seconds >= 60 ? (seconds / 60) + " min" : seconds + " s"));
+                            return null;
+                        }),
+                        task -> {
+                            if (!getConfig().getBoolean("security.allow-commands", true)) {
+                                return;
+                            }
+                            audit.log("schedule " + task.name, "-", "command: /" + task.command);
+                            scheduler.global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), task.command));
+                        });
+            } catch (RuntimeException e) {
+                getLogger().warning("Scheduled task failed: " + e);
+            }
+        }, 5, 5, TimeUnit.SECONDS);
         // Performance history: measure on the server thread every minute, save off it.
         if (getConfig().getBoolean("history", true)) {
             ScheduledExecutorService saver = housekeeping;
@@ -213,6 +236,8 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     public ChatBuffer chat() { return chat; }
     public Snapshots snapshots() { return snapshots; }
     public Scheduler scheduler() { return scheduler; }
+
+    public Schedules schedules() { return schedules; }
 
     /** Null when the history is turned off in the config. */
     public History history() { return history; }

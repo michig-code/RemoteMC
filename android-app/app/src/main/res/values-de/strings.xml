@@ -369,4 +369,25 @@
     <string name="plugins_disabled">Deaktiviert</string>
     <string name="plugins_by">von %s</string>
     <string name="plugins_search">Plugins durchsuchen</string>
+    <string name="schedules_title">Geplante Aufgaben</string>
+    <string name="schedules_empty">Noch keine geplanten Aufgaben. Führe Befehle automatisch aus, z. B. Ankündigungen oder das Speichern der Welten.</string>
+    <string name="schedules_add">Neue Aufgabe</string>
+    <string name="schedules_edit">Aufgabe bearbeiten</string>
+    <string name="schedules_name">Name</string>
+    <string name="schedules_command">Befehl</string>
+    <string name="schedules_interval">Wiederholen</string>
+    <string name="schedules_daily">Täglich</string>
+    <string name="schedules_minutes">Alle … Minuten</string>
+    <string name="schedules_warn">Countdown im Chat vorher</string>
+    <string name="schedules_warn_none">Keiner</string>
+    <string name="schedules_summary_interval">Alle %d Min.</string>
+    <string name="schedules_summary_daily">Täglich um %s</string>
+    <string name="schedules_next">nächste in %s</string>
+    <string name="schedules_run_now">Jetzt ausführen</string>
+    <string name="schedules_ran">%s gestartet</string>
+    <string name="schedules_delete_confirm">„%s“ löschen?</string>
+    <string name="schedules_preset_announce">Ankündigung</string>
+    <string name="schedules_preset_save">Welten speichern</string>
+    <string name="schedules_timezone">Uhrzeiten in der Zeitzone des Servers (%s).</string>
+    <string name="error_schedule_unknown">Diese Aufgabe gibt es nicht mehr.</string>
 </resources>

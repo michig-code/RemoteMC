@@ -363,4 +363,25 @@
     <string name="plugins_disabled">Disattivato</string>
     <string name="plugins_by">di %s</string>
     <string name="plugins_search">Cerca plugin</string>
+    <string name="schedules_title">Attività pianificate</string>
+    <string name="schedules_empty">Nessuna attività pianificata. Esegui comandi automaticamente, ad esempio annunci o il salvataggio dei mondi.</string>
+    <string name="schedules_add">Nuova attività</string>
+    <string name="schedules_edit">Modifica attività</string>
+    <string name="schedules_name">Nome</string>
+    <string name="schedules_command">Comando</string>
+    <string name="schedules_interval">Ripetizione</string>
+    <string name="schedules_daily">Ogni giorno</string>
+    <string name="schedules_minutes">Ogni … minuti</string>
+    <string name="schedules_warn">Conto alla rovescia in chat prima dell\'esecuzione</string>
+    <string name="schedules_warn_none">Nessuno</string>
+    <string name="schedules_summary_interval">Ogni %d min</string>
+    <string name="schedules_summary_daily">Ogni giorno alle %s</string>
+    <string name="schedules_next">prossima tra %s</string>
+    <string name="schedules_run_now">Esegui ora</string>
+    <string name="schedules_ran">%s avviata</string>
+    <string name="schedules_delete_confirm">Eliminare “%s”?</string>
+    <string name="schedules_preset_announce">Annuncio</string>
+    <string name="schedules_preset_save">Salva mondi</string>
+    <string name="schedules_timezone">Gli orari sono nel fuso orario del server (%s).</string>
+    <string name="error_schedule_unknown">Questa attività non esiste più.</string>
 </resources>

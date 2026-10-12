@@ -186,6 +186,13 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     suspend fun plugins() = api.plugins()
 
+    val scheduleActions = ScheduleActions(
+        load = { api.schedules() },
+        save = { api.saveSchedule(it) },
+        run = { api.scheduleAction(it, "run") },
+        delete = { api.scheduleAction(it, "delete") },
+    )
+
     /** Performance history for the dashboard chart. */
     suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)
 

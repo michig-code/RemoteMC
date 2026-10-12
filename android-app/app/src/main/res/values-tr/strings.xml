@@ -355,4 +355,25 @@
     <string name="plugins_disabled">Devre dışı</string>
     <string name="plugins_by">yapımcı: %s</string>
     <string name="plugins_search">Eklenti ara</string>
+    <string name="schedules_title">Zamanlanmış görevler</string>
+    <string name="schedules_empty">Henüz zamanlanmış görev yok. Komutları otomatik çalıştır, örneğin duyurular veya dünyaları kaydetme.</string>
+    <string name="schedules_add">Yeni görev</string>
+    <string name="schedules_edit">Görevi düzenle</string>
+    <string name="schedules_name">Ad</string>
+    <string name="schedules_command">Komut</string>
+    <string name="schedules_interval">Tekrar</string>
+    <string name="schedules_daily">Her gün</string>
+    <string name="schedules_minutes">Her … dakikada bir</string>
+    <string name="schedules_warn">Çalışmadan önce sohbette geri sayım</string>
+    <string name="schedules_warn_none">Yok</string>
+    <string name="schedules_summary_interval">%d dk\'da bir</string>
+    <string name="schedules_summary_daily">Her gün %s</string>
+    <string name="schedules_next">sonraki: %s sonra</string>
+    <string name="schedules_run_now">Şimdi çalıştır</string>
+    <string name="schedules_ran">%s başlatıldı</string>
+    <string name="schedules_delete_confirm">“%s” silinsin mi?</string>
+    <string name="schedules_preset_announce">Duyuru</string>
+    <string name="schedules_preset_save">Dünyaları kaydet</string>
+    <string name="schedules_timezone">Saatler sunucunun saat dilimindedir (%s).</string>
+    <string name="error_schedule_unknown">Bu görev artık mevcut değil.</string>
 </resources>

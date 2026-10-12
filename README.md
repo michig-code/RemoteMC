@@ -31,6 +31,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
+- **Scheduled tasks** – commands every N minutes or daily, with a countdown in the chat (admins)
 - **Worlds** – time, weather, difficulty and game rules per world at a tap (admins)
 - **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
   players, memory and MSPT over the last hour, day or week
@@ -134,6 +135,9 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | POST | `/api/v1/whitelist` | admin | `{"enabled"}` turns it on or off |
 | POST | `/api/v1/whitelist/add` · `/remove` | moderator | `{"name"}` |
 | GET | `/api/v1/bans` | moderator | Player bans with reason, source, created, expires |
+| GET | `/api/v1/schedules` | admin | Scheduled commands with their next run, server time zone |
+| POST | `/api/v1/schedules` | admin | Create or update: `{"id"?, "name", "command", "type": "interval"\|"daily", "minutes", "time", "warn", "enabled"}` |
+| POST | `/api/v1/schedules/<id>/run` · `/delete` | admin | Run now or delete |
 | GET | `/api/v1/plugins` | moderator | Installed plugins: name, version, enabled, description, authors |
 | GET | `/api/v1/worlds/<world>` | admin | Time, weather, difficulty, game rules |
 | POST | `/api/v1/worlds/<world>/time` · `weather` · `difficulty` · `gamerule` | admin | `{"time": "day"}`, `{"weather": "rain"}`, `{"difficulty": "hard"}`, `{"rule", "value"}` |

@@ -371,4 +371,25 @@
     <string name="plugins_disabled">Wyłączony</string>
     <string name="plugins_by">autor: %s</string>
     <string name="plugins_search">Szukaj pluginów</string>
+    <string name="schedules_title">Zaplanowane zadania</string>
+    <string name="schedules_empty">Brak zaplanowanych zadań. Uruchamiaj komendy automatycznie, np. ogłoszenia lub zapisywanie światów.</string>
+    <string name="schedules_add">Nowe zadanie</string>
+    <string name="schedules_edit">Edytuj zadanie</string>
+    <string name="schedules_name">Nazwa</string>
+    <string name="schedules_command">Komenda</string>
+    <string name="schedules_interval">Powtarzanie</string>
+    <string name="schedules_daily">Codziennie</string>
+    <string name="schedules_minutes">Co … minut</string>
+    <string name="schedules_warn">Odliczanie na czacie przed uruchomieniem</string>
+    <string name="schedules_warn_none">Brak</string>
+    <string name="schedules_summary_interval">Co %d min</string>
+    <string name="schedules_summary_daily">Codziennie o %s</string>
+    <string name="schedules_next">następne za %s</string>
+    <string name="schedules_run_now">Uruchom teraz</string>
+    <string name="schedules_ran">Uruchomiono: %s</string>
+    <string name="schedules_delete_confirm">Usunąć „%s”?</string>
+    <string name="schedules_preset_announce">Ogłoszenie</string>
+    <string name="schedules_preset_save">Zapisz światy</string>
+    <string name="schedules_timezone">Godziny są w strefie czasowej serwera (%s).</string>
+    <string name="error_schedule_unknown">To zadanie już nie istnieje.</string>
 </resources>

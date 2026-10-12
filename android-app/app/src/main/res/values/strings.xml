@@ -386,4 +386,25 @@
     <string name="plugins_disabled">Disabled</string>
     <string name="plugins_by">by %s</string>
     <string name="plugins_search">Search plugins</string>
+    <string name="schedules_title">Scheduled tasks</string>
+    <string name="schedules_empty">No scheduled tasks yet. Run commands automatically, for example announcements or saving the worlds.</string>
+    <string name="schedules_add">New task</string>
+    <string name="schedules_edit">Edit task</string>
+    <string name="schedules_name">Name</string>
+    <string name="schedules_command">Command</string>
+    <string name="schedules_interval">Repeat</string>
+    <string name="schedules_daily">Daily</string>
+    <string name="schedules_minutes">Every … minutes</string>
+    <string name="schedules_warn">Countdown in the chat before it runs</string>
+    <string name="schedules_warn_none">None</string>
+    <string name="schedules_summary_interval" tools:ignore="PluralsCandidate">Every %d min</string>
+    <string name="schedules_summary_daily">Daily at %s</string>
+    <string name="schedules_next">next in %s</string>
+    <string name="schedules_run_now">Run now</string>
+    <string name="schedules_ran">%s started</string>
+    <string name="schedules_delete_confirm">Delete “%s”?</string>
+    <string name="schedules_preset_announce">Announcement</string>
+    <string name="schedules_preset_save">Save worlds</string>
+    <string name="schedules_timezone">Times are in the server\'s time zone (%s).</string>
+    <string name="error_schedule_unknown">This task no longer exists.</string>
 </resources>
