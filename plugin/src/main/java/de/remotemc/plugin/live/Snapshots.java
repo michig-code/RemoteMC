@@ -76,6 +76,10 @@ public final class Snapshots {
             o.addProperty("ping", p.getPing());
             o.addProperty("gameMode", p.getGameMode().name());
             o.addProperty("op", p.isOp());
+            String skin = skinUrl(p);
+            if (skin != null) {
+                o.addProperty("skin", skin);
+            }
             arr.add(o);
         }
         return arr;
@@ -87,6 +91,19 @@ public final class Snapshots {
         o.add("status", status());
         o.add("players", players());
         return o;
+    }
+
+    /**
+     * The player's skin texture from their profile (as Mojang delivered it at login, so it also
+     * reflects skins set by plugins like SkinsRestorer). The app cuts the face from it.
+     */
+    private static String skinUrl(Player p) {
+        try {
+            java.net.URL url = p.getPlayerProfile().getTextures().getSkin();
+            return url == null ? null : url.toString().replaceFirst("^http://", "https://");
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     private static int safe(java.util.function.IntSupplier supplier) {

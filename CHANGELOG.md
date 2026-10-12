@@ -7,6 +7,7 @@
 - New endpoints `/api/v1/commands` and `/api/v1/complete` for command suggestions
 - Security: access tokens, pairing codes and console QR codes no longer appear in the console
   stream that moderators can read
+- Player list includes each player's skin texture URL
 
 ### App
 - Coloured console (Minecraft colour codes, plugin prefixes, warnings and errors)
@@ -14,6 +15,9 @@
   then the server's own completions for arguments, plus a usage hint
 - The fixed example commands were replaced by your recently used commands (long-press to remove)
 - Targets Android 16 (API 36)
+- Player heads are cut from the real skin (mc-heads.net showed Steve for some accounts);
+  fallback minotar.net
+- Fixed: with the keyboard open, console and chat shrank and left a gap above the keyboard
 
 ## 2.0.0
 

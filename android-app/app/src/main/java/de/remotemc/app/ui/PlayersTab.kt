@@ -187,7 +187,7 @@ private fun PlayerCard(p: PlayerInfo, modifier: Modifier = Modifier, onClick: ()
             Modifier.padding(14.dp).clearAndSetSemantics { contentDescription = description },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PlayerHead(p.name, 48.dp)
+            PlayerHead(p.name, 48.dp, skinUrl = p.skin)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -262,7 +262,7 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, onAction: PlayerAction, onDis
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PlayerHead(p.name, 64.dp)
+                PlayerHead(p.name, 64.dp, skinUrl = p.skin)
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {

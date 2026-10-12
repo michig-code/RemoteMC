@@ -44,7 +44,7 @@ import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) -> Unit) {
+fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) -> Unit, skins: Map<String, String> = emptyMap()) {
     var input by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
     LaunchedEffect(entries.size) {
@@ -66,7 +66,7 @@ fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) ->
                 items(entries, key = { "${it.id}-${it.time}" }) { entry ->
                     when (entry.type) {
                         ChatEntry.Type.JOIN, ChatEntry.Type.QUIT -> SystemLine(entry, Modifier.animateItem())
-                        else -> ChatBubble(entry, Modifier.animateItem())
+                        else -> ChatBubble(entry, skins[entry.player], Modifier.animateItem())
                     }
                 }
             }
@@ -109,7 +109,7 @@ private fun SystemLine(entry: ChatEntry, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ChatBubble(entry: ChatEntry, modifier: Modifier = Modifier) {
+private fun ChatBubble(entry: ChatEntry, skin: String?, modifier: Modifier = Modifier) {
     val fromServer = entry.type == ChatEntry.Type.BROADCAST
     Row(
         modifier.fillMaxWidth(),
@@ -117,7 +117,7 @@ private fun ChatBubble(entry: ChatEntry, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.Bottom,
     ) {
         if (!fromServer) {
-            PlayerHead(entry.player, 32.dp)
+            PlayerHead(entry.player, 32.dp, skinUrl = skin)
             Spacer(Modifier.width(8.dp))
         }
         Column(

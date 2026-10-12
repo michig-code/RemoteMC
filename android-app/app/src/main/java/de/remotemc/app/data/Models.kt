@@ -75,6 +75,8 @@ data class PlayerInfo(
     val ping: Int,
     val gameMode: String,
     val op: Boolean,
+    /** Skin texture URL from the player's profile (plugin 2.1+), used to draw the real head. */
+    val skin: String? = null,
 ) {
     companion object {
         fun listFromJson(arr: JSONArray?): List<PlayerInfo> {
@@ -95,6 +97,7 @@ data class PlayerInfo(
                     ping = p.optInt("ping"),
                     gameMode = p.optString("gameMode"),
                     op = p.optBoolean("op"),
+                    skin = p.optString("skin").takeIf { it.startsWith("https://") },
                 )
             }
         }

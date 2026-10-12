@@ -61,7 +61,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import de.remotemc.app.ui.util.SkinFaceTransformation
 import de.remotemc.app.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -258,16 +262,29 @@ fun AnimatedBar(fraction: Float, color: Color, modifier: Modifier = Modifier, he
 /** False in screenshot tests so images do not depend on the network. */
 val LocalLoadPlayerHeads = androidx.compose.runtime.staticCompositionLocalOf { true }
 
-/** Player head from mc-heads.net with a letter fallback while loading / offline. */
+/**
+ * Player head. With the skin URL from the server (plugin 2.1+) the face is cut from the real skin;
+ * otherwise it is looked up by name at minotar.net. A coloured letter shows while loading / offline.
+ */
 @Composable
-fun PlayerHead(name: String, size: Dp, modifier: Modifier = Modifier) {
+fun PlayerHead(name: String, size: Dp, modifier: Modifier = Modifier, skinUrl: String? = null) {
     val shape = RoundedCornerShape(size * 0.22f)
     if (!LocalLoadPlayerHeads.current) {
         Box(modifier.size(size).clip(shape)) { HeadFallback(name, size) }
         return
     }
+    val context = LocalContext.current
+    val request = remember(name, skinUrl) {
+        val builder = ImageRequest.Builder(context)
+        if (skinUrl != null) {
+            builder.data(skinUrl).transformations(SkinFaceTransformation())
+        } else {
+            builder.data("https://minotar.net/helm/${Uri.encode(name)}/128.png")
+        }
+        builder.crossfade(true).build()
+    }
     SubcomposeAsyncImage(
-        model = "https://mc-heads.net/avatar/$name/${(size.value * 3).toInt()}",
+        model = request,
         contentDescription = name,
         contentScale = ContentScale.Crop,
         filterQuality = FilterQuality.None,

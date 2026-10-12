@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -262,7 +263,8 @@ fun ServerScreenContent(
         snackbarHost = { SnackbarHost(snackbar) },
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
-        Row(Modifier.fillMaxSize().padding(padding).imePadding()) {
+        // consumeWindowInsets: the keyboard covers the bottom bar, so its height must not be added twice.
+        Row(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding()) {
             if (wide) {
                 NavigationRail(containerColor = MaterialTheme.colorScheme.background) {
                     Spacer(Modifier.padding(top = 8.dp))
@@ -310,7 +312,10 @@ fun ServerScreenContent(
                                 onCommand = actions.onCommand,
                                 onForget = actions.onForgetCommand,
                             )
-                            Tab.Chat -> ChatTab(state.chat, state.role.atLeast(Role.MODERATOR), broadcast)
+                            Tab.Chat -> ChatTab(
+                                state.chat, state.role.atLeast(Role.MODERATOR), broadcast,
+                                skins = state.players.mapNotNull { p -> p.skin?.let { p.name to it } }.toMap(),
+                            )
                         }
                     }
                 }
