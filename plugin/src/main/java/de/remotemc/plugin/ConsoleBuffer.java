@@ -1,4 +1,4 @@
-package de.mcremote.plugin;
+package de.remotemc.plugin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -77,7 +77,7 @@ final class ConsoleBuffer {
 
     private final class Appender extends AbstractAppender {
         Appender() {
-            super("McRemoteConsole", null, null, true, Property.EMPTY_ARRAY);
+            super("RemoteMCConsole", null, null, true, Property.EMPTY_ARRAY);
         }
 
         @Override

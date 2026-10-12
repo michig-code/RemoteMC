@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,9 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import de.mcremote.app.ui.components.EmptyState
-import de.mcremote.app.ui.components.PlayerHead
-import de.mcremote.app.ui.components.staggeredAppear
+import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.PlayerHead
+import de.remotemc.app.ui.components.staggeredAppear
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

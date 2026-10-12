@@ -1,4 +1,4 @@
-package de.mcremote.app.ui.components
+package de.remotemc.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -62,8 +62,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
-import de.mcremote.app.R
-import de.mcremote.app.ui.theme.McColors
+import de.remotemc.app.R
+import de.remotemc.app.ui.theme.McColors
 
 enum class ConnectionState { Connecting, Online, Offline }
 

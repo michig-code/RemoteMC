@@ -1,4 +1,4 @@
-package de.mcremote.plugin;
+package de.remotemc.plugin;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -40,7 +40,7 @@ final class ApiServer {
     private static final Gson GSON = new Gson();
     private static final int MAX_BODY = 16 * 1024;
 
-    private final McRemotePlugin plugin;
+    private final RemoteMCPlugin plugin;
     private final ConsoleBuffer console;
     private final Map<String, Failures> failures = new ConcurrentHashMap<>();
     private HttpServer server;
@@ -60,7 +60,7 @@ final class ApiServer {
         }
     }
 
-    ApiServer(McRemotePlugin plugin, ConsoleBuffer console) {
+    ApiServer(RemoteMCPlugin plugin, ConsoleBuffer console) {
         this.plugin = plugin;
         this.console = console;
     }
@@ -70,7 +70,7 @@ final class ApiServer {
         int port = plugin.getConfig().getInt("api.port", 8765);
         server = HttpServer.create(new InetSocketAddress(host, port), 0);
         executor = Executors.newFixedThreadPool(4, r -> {
-            Thread t = new Thread(r, "McRemote-API");
+            Thread t = new Thread(r, "RemoteMC-API");
             t.setDaemon(true);
             return t;
         });
@@ -95,7 +95,7 @@ final class ApiServer {
 
             if (path.equals("/api/ping")) {
                 JsonObject o = new JsonObject();
-                o.addProperty("app", "McRemote");
+                o.addProperty("app", "RemoteMC");
                 o.addProperty("version", plugin.getPluginMeta().getVersion());
                 send(ex, 200, o);
                 return;
@@ -173,7 +173,7 @@ final class ApiServer {
             if (entry.count >= plugin.getConfig().getInt("security.max-failed-attempts", 5)) {
                 entry.lockedUntil = now + plugin.getConfig().getLong("security.lockout-seconds", 300) * 1000L;
                 entry.count = 0;
-                plugin.getLogger().warning("McRemote: locked out " + ip + " after too many invalid tokens");
+                plugin.getLogger().warning("RemoteMC: locked out " + ip + " after too many invalid tokens");
             }
         }
         throw new ApiException(401, "Ungültiger Token");
@@ -277,7 +277,7 @@ final class ApiServer {
             case "message" -> requireOnline(p, name).sendMessage(Component.text("[Server] " + stringField(body, "message")));
             default -> throw new ApiException(404, "Unbekannte Aktion: " + action);
         }
-        plugin.getLogger().info("McRemote: " + action + " " + name);
+        plugin.getLogger().info("RemoteMC: " + action + " " + name);
         return ok();
     }
 
@@ -313,7 +313,7 @@ final class ApiServer {
                     output.add(PlainTextComponentSerializer.plainText().serialize(component));
                 }
             });
-            plugin.getLogger().info("McRemote executing: /" + cmd);
+            plugin.getLogger().info("RemoteMC executing: /" + cmd);
             return Bukkit.dispatchCommand(sender, cmd);
         });
 

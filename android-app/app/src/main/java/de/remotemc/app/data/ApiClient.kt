@@ -1,4 +1,4 @@
-package de.mcremote.app.data
+package de.remotemc.app.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,7 +49,7 @@ data class ConsoleLine(val id: Long, val time: Long, val level: String, val mess
 
 data class CommandResult(val success: Boolean, val output: List<String>)
 
-/** Talks to the McRemote plugin's REST API. */
+/** Talks to the RemoteMC plugin's REST API. */
 class ApiClient(private val profile: ServerProfile) {
 
     suspend fun ping(): String = request("GET", "/api/ping", auth = false).getString("version")

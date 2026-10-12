@@ -1,4 +1,4 @@
-package de.mcremote.app.ui.theme
+package de.remotemc.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +98,7 @@ private val AppShapes = Shapes(
 val MonoStyle = TextStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontSize = 12.sp, lineHeight = 16.sp)
 
 @Composable
-fun McRemoteTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun RemoteMCTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = if (darkTheme) Dark else Light,
         typography = AppTypography,

@@ -1,4 +1,4 @@
-package de.mcremote.app.data
+package de.remotemc.app.data
 
 import android.content.Context
 import android.net.Uri
@@ -39,12 +39,12 @@ data class ServerProfile(
         )
 
         /**
-         * Parses the link printed by `/mcremote link`, e.g.
-         * `mcremote://play.example.de:8765?token=abc` (append `&https=1` for TLS).
+         * Parses the link printed by `/remotemc link`, e.g.
+         * `remotemc://play.example.de:8765?token=abc` (append `&https=1` for TLS).
          */
         fun fromLink(link: String): ServerProfile? {
             val uri = runCatching { Uri.parse(link.trim()) }.getOrNull() ?: return null
-            if (uri.scheme != "mcremote") return null
+            if (uri.scheme != "remotemc" && uri.scheme != "mcremote") return null
             val host = uri.host?.takeIf { it.isNotBlank() } ?: return null
             val token = uri.getQueryParameter("token")?.takeIf { it.isNotBlank() } ?: return null
             return ServerProfile(

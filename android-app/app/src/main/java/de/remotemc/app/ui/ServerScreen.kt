@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -48,10 +48,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import de.mcremote.app.data.PlayerInfo
-import de.mcremote.app.data.ServerStatus
-import de.mcremote.app.ui.components.ConnectionState
-import de.mcremote.app.ui.components.StatusPill
+import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.ui.components.ConnectionState
+import de.remotemc.app.ui.components.StatusPill
 import org.json.JSONObject
 
 enum class Tab(val label: String, val icon: ImageVector) {

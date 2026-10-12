@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "de.mcremote.app"
+    namespace = "de.remotemc.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "de.mcremote.app"
+        applicationId = "de.remotemc.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 2

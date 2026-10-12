@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,18 +35,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import de.mcremote.app.data.ServerStatus
-import de.mcremote.app.data.WorldInfo
-import de.mcremote.app.ui.components.AnimatedBar
-import de.mcremote.app.ui.components.AnimatedCounter
-import de.mcremote.app.ui.components.EmptyState
-import de.mcremote.app.ui.components.McCard
-import de.mcremote.app.ui.components.SectionTitle
-import de.mcremote.app.ui.components.Shimmer
-import de.mcremote.app.ui.components.TpsGauge
-import de.mcremote.app.ui.components.staggeredAppear
-import de.mcremote.app.ui.components.tpsColor
-import de.mcremote.app.ui.theme.McColors
+import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.data.WorldInfo
+import de.remotemc.app.ui.components.AnimatedBar
+import de.remotemc.app.ui.components.AnimatedCounter
+import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.McCard
+import de.remotemc.app.ui.components.SectionTitle
+import de.remotemc.app.ui.components.Shimmer
+import de.remotemc.app.ui.components.TpsGauge
+import de.remotemc.app.ui.components.staggeredAppear
+import de.remotemc.app.ui.components.tpsColor
+import de.remotemc.app.ui.theme.McColors
 
 @Composable
 fun DashboardTab(status: ServerStatus?, error: String?) {

@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.mcremote.app.data.ApiClient
-import de.mcremote.app.data.ConsoleLine
-import de.mcremote.app.data.PlayerInfo
-import de.mcremote.app.data.ServerProfile
-import de.mcremote.app.data.ServerStatus
+import de.remotemc.app.data.ApiClient
+import de.remotemc.app.data.ConsoleLine
+import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.ServerStatus
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow

@@ -1,14 +1,15 @@
-name: McRemote
+name: RemoteMC
 version: '${project.version}'
-main: de.mcremote.plugin.McRemotePlugin
+main: de.remotemc.plugin.RemoteMCPlugin
 api-version: '1.21'
-description: REST API for the McRemote Android app
+description: REST API for the RemoteMC Android app
 commands:
-  mcremote:
-    description: McRemote connection info and management
-    usage: /mcremote <info|link|newtoken|reload>
-    permission: mcremote.admin
+  remotemc:
+    description: RemoteMC connection info and management
+    aliases: [rmc]
+    usage: /remotemc <info|link|newtoken|reload>
+    permission: remotemc.admin
 permissions:
-  mcremote.admin:
-    description: Manage McRemote and view the access token
+  remotemc.admin:
+    description: Manage RemoteMC and view the access token
     default: op

@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -51,8 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import de.mcremote.app.ui.theme.McColors
-import de.mcremote.app.ui.theme.MonoStyle
+import de.remotemc.app.ui.theme.McColors
+import de.remotemc.app.ui.theme.MonoStyle
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date

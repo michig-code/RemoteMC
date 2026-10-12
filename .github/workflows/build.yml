@@ -19,8 +19,8 @@ jobs:
         working-directory: plugin
       - uses: actions/upload-artifact@v4
         with:
-          name: McRemote-plugin
-          path: plugin/target/McRemote-*.jar
+          name: RemoteMC-plugin
+          path: plugin/target/RemoteMC-*.jar
 
   android:
     runs-on: ubuntu-latest
@@ -35,5 +35,5 @@ jobs:
         working-directory: android-app
       - uses: actions/upload-artifact@v4
         with:
-          name: McRemote-app
+          name: RemoteMC-app
           path: android-app/app/build/outputs/apk/release/*.apk

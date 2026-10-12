@@ -1,4 +1,4 @@
-package de.mcremote.app
+package de.remotemc.app
 
 import android.content.Intent
 import android.os.Bundle
@@ -22,16 +22,16 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import de.mcremote.app.data.ServerProfile
-import de.mcremote.app.data.ServerStore
-import de.mcremote.app.ui.ServerListScreen
-import de.mcremote.app.ui.ServerScreen
-import de.mcremote.app.ui.ServerViewModel
-import de.mcremote.app.ui.theme.McRemoteTheme
+import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.ServerStore
+import de.remotemc.app.ui.ServerListScreen
+import de.remotemc.app.ui.ServerScreen
+import de.remotemc.app.ui.ServerViewModel
+import de.remotemc.app.ui.theme.RemoteMCTheme
 
 class MainActivity : ComponentActivity() {
 
-    /** Profile parsed from a mcremote:// link that should be offered for saving. */
+    /** Profile parsed from a remotemc:// link that should be offered for saving. */
     private var pendingLink by mutableStateOf<ServerProfile?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
         val store = ServerStore(this)
         setContent {
-            McRemoteTheme {
+            RemoteMCTheme {
                 App(store, pendingLink, onLinkConsumed = { pendingLink = null })
             }
         }

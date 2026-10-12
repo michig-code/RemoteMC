@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.mcremote</groupId>
-    <artifactId>mcremote-plugin</artifactId>
+    <groupId>de.remotemc</groupId>
+    <artifactId>remotemc-plugin</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>McRemote</name>
+    <name>RemoteMC</name>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -39,7 +39,7 @@
     </dependencies>
 
     <build>
-        <finalName>McRemote-${project.version}</finalName>
+        <finalName>RemoteMC-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

@@ -1,4 +1,4 @@
-package de.mcremote.plugin;
+package de.remotemc.plugin;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -16,7 +16,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 
-public final class McRemotePlugin extends JavaPlugin {
+public final class RemoteMCPlugin extends JavaPlugin {
 
     private ConsoleBuffer consoleBuffer;
     private ApiServer apiServer;
@@ -45,9 +45,9 @@ public final class McRemotePlugin extends JavaPlugin {
         apiServer = new ApiServer(this, consoleBuffer);
         try {
             apiServer.start();
-            getLogger().info("McRemote API listening on " + getConfig().getString("api.host") + ":" + getConfig().getInt("api.port"));
+            getLogger().info("RemoteMC API listening on " + getConfig().getString("api.host") + ":" + getConfig().getInt("api.port"));
         } catch (Exception e) {
-            getLogger().severe("Could not start McRemote API: " + e.getMessage());
+            getLogger().severe("Could not start RemoteMC API: " + e.getMessage());
             apiServer = null;
         }
     }
@@ -63,7 +63,7 @@ public final class McRemotePlugin extends JavaPlugin {
         String token = getConfig().getString("api.token", "");
         if (token == null || token.isBlank()) {
             regenerateToken();
-            getLogger().info("Generated new McRemote access token. Use /mcremote info to view it.");
+            getLogger().info("Generated new RemoteMC access token. Use /remotemc info to view it.");
         }
     }
 
@@ -86,7 +86,7 @@ public final class McRemotePlugin extends JavaPlugin {
         if (address == null || address.isBlank()) {
             address = "localhost";
         }
-        return "mcremote://" + address + ":" + getConfig().getInt("api.port")
+        return "remotemc://" + address + ":" + getConfig().getInt("api.port")
                 + "?token=" + URLEncoder.encode(getConfig().getString("api.token", ""), StandardCharsets.UTF_8);
     }
 
@@ -95,7 +95,7 @@ public final class McRemotePlugin extends JavaPlugin {
         String sub = args.length == 0 ? "info" : args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "info" -> {
-                sender.sendMessage(Component.text("McRemote", NamedTextColor.GOLD)
+                sender.sendMessage(Component.text("RemoteMC", NamedTextColor.GOLD)
                         .append(Component.text(apiServer != null ? " – API läuft" : " – API gestoppt",
                                 apiServer != null ? NamedTextColor.GREEN : NamedTextColor.RED)));
                 sender.sendMessage(Component.text("Port: ", NamedTextColor.GRAY)
@@ -105,7 +105,7 @@ public final class McRemotePlugin extends JavaPlugin {
                         .append(Component.text(token, NamedTextColor.WHITE)
                                 .clickEvent(ClickEvent.copyToClipboard(token))
                                 .hoverEvent(HoverEvent.showText(Component.text("Klicken zum Kopieren")))));
-                sender.sendMessage(Component.text("/mcremote link", NamedTextColor.YELLOW)
+                sender.sendMessage(Component.text("/remotemc link", NamedTextColor.YELLOW)
                         .append(Component.text(" zeigt den Verbindungslink für die App.", NamedTextColor.GRAY)));
             }
             case "link" -> {
@@ -128,7 +128,7 @@ public final class McRemotePlugin extends JavaPlugin {
                 ensureToken();
                 consoleBuffer.resize(getConfig().getInt("console.buffer-size", 500));
                 startApi();
-                sender.sendMessage(Component.text("McRemote neu geladen.", NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("RemoteMC neu geladen.", NamedTextColor.GREEN));
             }
             default -> sender.sendMessage(Component.text("Benutzung: /" + label + " <info|link|newtoken|reload>", NamedTextColor.RED));
         }

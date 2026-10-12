@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -54,14 +54,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import de.mcremote.app.data.PlayerInfo
-import de.mcremote.app.ui.components.AnimatedBar
-import de.mcremote.app.ui.components.Badge
-import de.mcremote.app.ui.components.EmptyState
-import de.mcremote.app.ui.components.McCard
-import de.mcremote.app.ui.components.PlayerHead
-import de.mcremote.app.ui.components.staggeredAppear
-import de.mcremote.app.ui.theme.McColors
+import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.ui.components.AnimatedBar
+import de.remotemc.app.ui.components.Badge
+import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.McCard
+import de.remotemc.app.ui.components.PlayerHead
+import de.remotemc.app.ui.components.staggeredAppear
+import de.remotemc.app.ui.theme.McColors
 import org.json.JSONObject
 
 typealias PlayerAction = (player: String, action: String, body: JSONObject, success: String) -> Unit

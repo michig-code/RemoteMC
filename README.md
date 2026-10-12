@@ -1,4 +1,4 @@
-# McRemote – Minecraft-Server per Android-App verwalten
+# RemoteMC – Minecraft-Server per Android-App verwalten
 
 Dieses Repository enthält zwei Teile:
 
@@ -30,35 +30,35 @@ Dieses Repository enthält zwei Teile:
 
 ### 1. Plugin auf dem Server
 
-1. Bauen: `cd plugin && mvn package` → `plugin/target/McRemote-1.0.0.jar`
-   (oder die fertige Datei aus dem GitHub-Actions-Artefakt **McRemote-plugin** nehmen)
+1. Bauen: `cd plugin && mvn package` → `plugin/target/RemoteMC-1.0.0.jar`
+   (oder die fertige Datei aus dem GitHub-Actions-Artefakt **RemoteMC-plugin** nehmen)
 2. Die JAR in den Ordner `plugins/` deines **Paper**-Servers (oder Purpur/Pufferfish) legen und den Server starten.
-3. Beim ersten Start wird `plugins/McRemote/config.yml` angelegt und ein zufälliger **Token** erzeugt.
+3. Beim ersten Start wird `plugins/RemoteMC/config.yml` angelegt und ein zufälliger **Token** erzeugt.
 4. Den Port (Standard **8765**, TCP) in der Firewall freigeben. Für den Zugriff von außerhalb deines Heimnetzes zusätzlich eine Portweiterleitung im Router einrichten.
 
 ### 2. App auf dem Handy
 
 1. Bauen: `cd android-app && ./gradlew assembleRelease` → `app/build/outputs/apk/release/app-release.apk`
-   (oder das Artefakt **McRemote-app** aus GitHub Actions nehmen)
+   (oder das Artefakt **RemoteMC-app** aus GitHub Actions nehmen)
 2. Die APK aufs Handy kopieren und installieren („Installation aus unbekannten Quellen“ erlauben).
 
 ### 3. Verbinden
 
 **Variante A – per Link (empfohlen):**
-Im Spiel oder in der Konsole `/mcremote link` eingeben. Mit einem Klick auf den Link landet er in der Zwischenablage. In der App auf **+ Server** → **Link aus Zwischenablage** tippen → **Speichern**.
+Im Spiel oder in der Konsole `/remotemc link` eingeben. Mit einem Klick auf den Link landet er in der Zwischenablage. In der App auf **+ Server** → **Link aus Zwischenablage** tippen → **Speichern**.
 Öffnest du den Link direkt auf dem Handy, startet die App automatisch mit den richtigen Daten.
 
-**Variante B – manuell:** Adresse/IP, Port und Token (aus `/mcremote info` oder der `config.yml`) eintragen.
+**Variante B – manuell:** Adresse/IP, Port und Token (aus `/remotemc info` oder der `config.yml`) eintragen.
 
 Tippe vor dem Speichern auf **Verbindung testen**.
 
-## Konfiguration (`plugins/McRemote/config.yml`)
+## Konfiguration (`plugins/RemoteMC/config.yml`)
 
 ```yaml
 api:
   host: 0.0.0.0          # Interface, auf dem gelauscht wird
   port: 8765             # API-Port
-  public-address: ""     # Domain/IP für /mcremote link (leer = server-ip)
+  public-address: ""     # Domain/IP für /remotemc link (leer = server-ip)
   token: "..."           # wird automatisch erzeugt
 
 security:
@@ -73,21 +73,21 @@ console:
   buffer-size: 500       # zwischengespeicherte Konsolenzeilen
 ```
 
-Nach Änderungen: `/mcremote reload`
+Nach Änderungen: `/remotemc reload`
 
-### Befehle (Permission `mcremote.admin`, Standard: OP)
+### Befehle (Permission `remotemc.admin`, Standard: OP)
 
 | Befehl | Beschreibung |
 |---|---|
-| `/mcremote info` | Status, Port und Token (Token anklicken = kopieren) |
-| `/mcremote link` | Verbindungslink für die App |
-| `/mcremote newtoken` | Neuen Token erzeugen; alte Verbindungen werden ungültig |
-| `/mcremote reload` | Config neu laden und API neu starten |
+| `/remotemc info` | Status, Port und Token (Token anklicken = kopieren) |
+| `/remotemc link` | Verbindungslink für die App |
+| `/remotemc newtoken` | Neuen Token erzeugen; alte Verbindungen werden ungültig |
+| `/remotemc reload` | Config neu laden und API neu starten |
 
 ## Sicherheit
 
 - Jede Anfrage braucht den Token (`Authorization: Bearer <token>`). Nach zu vielen Fehlversuchen wird die IP gesperrt.
-- Der Token hat **volle Konsolenrechte**. Gib ihn nicht weiter. Falls er doch bekannt wird: `/mcremote newtoken`.
+- Der Token hat **volle Konsolenrechte**. Gib ihn nicht weiter. Falls er doch bekannt wird: `/remotemc newtoken`.
 - Die API spricht standardmäßig **unverschlüsseltes HTTP**. Im Heimnetz ist das in Ordnung. Über das Internet sollte HTTPS davor:
   zum Beispiel ein Reverse-Proxy (Caddy/nginx) auf eine Domain oder ein Tunnel (Tailscale, Cloudflare Tunnel). In der App dann **HTTPS** aktivieren und den Proxy-Port eintragen.
   Beispiel mit Caddy: `mc-api.example.de { reverse_proxy 127.0.0.1:8765 }`

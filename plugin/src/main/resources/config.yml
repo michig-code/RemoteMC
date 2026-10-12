@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────
-#  McRemote – Verbindung zwischen Server und Android-App
+#  RemoteMC – Verbindung zwischen Server und Android-App
 # ─────────────────────────────────────────────────────────────
 
 api:
@@ -8,11 +8,11 @@ api:
   # Port der API. Muss in Firewall / Router freigegeben werden,
   # wenn du von außerhalb deines Netzwerks verbinden willst.
   port: 8765
-  # Adresse, die in "/mcremote link" angezeigt wird (z.B. deine
+  # Adresse, die in "/remotemc link" angezeigt wird (z.B. deine
   # Domain oder öffentliche IP). Leer = Server-IP aus server.properties.
   public-address: ""
   # Zugangs-Token. Leer lassen -> wird beim Start automatisch erzeugt
-  # und hier gespeichert. Mit "/mcremote newtoken" neu erzeugen.
+  # und hier gespeichert. Mit "/remotemc newtoken" neu erzeugen.
   token: ""
 
 security:

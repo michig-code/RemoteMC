@@ -1,4 +1,4 @@
-package de.mcremote.app.ui
+package de.remotemc.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,8 +49,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import de.mcremote.app.data.ApiClient
-import de.mcremote.app.data.ServerProfile
+import de.remotemc.app.data.ApiClient
+import de.remotemc.app.data.ServerProfile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.animation.AnimatedContent
@@ -75,15 +75,15 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
-import de.mcremote.app.data.ServerStatus
-import de.mcremote.app.ui.components.AppLogo
-import de.mcremote.app.ui.components.ConnectionState
-import de.mcremote.app.ui.components.EmptyState
-import de.mcremote.app.ui.components.McCard
-import de.mcremote.app.ui.components.SectionTitle
-import de.mcremote.app.ui.components.StatusPill
-import de.mcremote.app.ui.components.staggeredAppear
-import de.mcremote.app.ui.components.tpsColor
+import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.ui.components.AppLogo
+import de.remotemc.app.ui.components.ConnectionState
+import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.McCard
+import de.remotemc.app.ui.components.SectionTitle
+import de.remotemc.app.ui.components.StatusPill
+import de.remotemc.app.ui.components.staggeredAppear
+import de.remotemc.app.ui.components.tpsColor
 
 /** Live status shown on a server card. */
 sealed interface ServerProbe {
@@ -141,7 +141,7 @@ fun ServerListScreen(
                     EmptyState(
                         Icons.Outlined.Dns,
                         "Noch kein Server",
-                        "Installiere das McRemote-Plugin auf deinem Server, gib dort /mcremote link ein " +
+                        "Installiere das RemoteMC-Plugin auf deinem Server, gib dort /remotemc link ein " +
                             "und füge den Link über „Server hinzufügen“ ein.",
                     )
                 }
@@ -206,7 +206,7 @@ private fun Header(count: Int) {
         )
         Spacer(Modifier.width(16.dp))
         Column {
-            Text("MC Remote", style = MaterialTheme.typography.headlineLarge)
+            Text("RemoteMC", style = MaterialTheme.typography.headlineLarge)
             Text(
                 when (count) {
                     0 -> "Dein Server, in deiner Hosentasche"
@@ -371,7 +371,7 @@ private fun ServerEditDialog(
                             if (name.isBlank()) name = parsed.name
                             testResult = "Link übernommen"
                         } else {
-                            testResult = "Kein gültiger mcremote:// Link in der Zwischenablage"
+                            testResult = "Kein gültiger remotemc:// Link in der Zwischenablage"
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
