@@ -15,10 +15,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
 /** One entry in the console tab: either a server log line or a local command echo/result. */
-data class ConsoleEntry(val key: String, val text: String, val level: String)
+data class ConsoleEntry(
+    val key: String,
+    val text: String,
+    val level: String,
+    val time: Long = System.currentTimeMillis(),
+)
 
 class ServerViewModel(val profile: ServerProfile) : ViewModel() {
 
@@ -30,9 +37,15 @@ class ServerViewModel(val profile: ServerProfile) : ViewModel() {
         private set
     var connectionError by mutableStateOf<String?>(null)
         private set
+    var refreshing by mutableStateOf(false)
+        private set
+    var lastUpdated by mutableStateOf(0L)
+        private set
     val console = mutableStateListOf<ConsoleEntry>()
 
     private var lastConsoleId = 0L
+    // Polling and manual refresh may overlap; avoid appending the same lines twice.
+    private val consoleMutex = Mutex()
     private var localCounter = 0L
 
     private val messageChannel = Channel<String>(Channel.BUFFERED)
@@ -54,18 +67,34 @@ class ServerViewModel(val profile: ServerProfile) : ViewModel() {
             status = api.status()
             players = api.players()
             connectionError = null
+            lastUpdated = System.currentTimeMillis()
         } catch (e: Exception) {
             connectionError = e.message
         }
     }
 
-    private suspend fun refreshConsole() {
+    /** Manual refresh (status pill, pull-to-refresh). */
+    fun refresh() {
+        if (refreshing) return
+        viewModelScope.launch {
+            refreshing = true
+            val started = System.currentTimeMillis()
+            refreshStatus()
+            refreshConsole()
+            // Keep the indicator visible briefly so the tap gives feedback.
+            val elapsed = System.currentTimeMillis() - started
+            if (elapsed < 600) delay(600 - elapsed)
+            refreshing = false
+        }
+    }
+
+    private suspend fun refreshConsole() = consoleMutex.withLock {
         try {
             val (lines, last) = api.console(lastConsoleId)
             // Server restarted -> ids start again at 1
             if (last < lastConsoleId) {
                 lastConsoleId = 0
-                return
+                return@withLock
             }
             lines.forEach { console.add(it.toEntry()) }
             lastConsoleId = last
@@ -75,7 +104,7 @@ class ServerViewModel(val profile: ServerProfile) : ViewModel() {
         }
     }
 
-    private fun ConsoleLine.toEntry() = ConsoleEntry("s$id", message, level)
+    private fun ConsoleLine.toEntry() = ConsoleEntry("s$id", message, level, time)
 
     private fun trimConsole() {
         val overflow = console.size - 1000

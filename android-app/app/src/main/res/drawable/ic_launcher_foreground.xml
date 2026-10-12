@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- McRemote-Logo: isometrischer Grasblock mit Funkwellen -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Erdblock -->
-    <path android:fillColor="#8D6E63" android:pathData="M30,30h48v48h-48z" />
-    <!-- Grasschicht -->
-    <path android:fillColor="#7CB342" android:pathData="M30,30h48v14h-48z" />
-    <path android:fillColor="#7CB342" android:pathData="M36,44h6v6h-6zM54,44h6v4h-6zM66,44h6v8h-6z" />
+    <!-- Erde links / rechts -->
+    <path android:fillColor="#7A4E2D" android:pathData="M28,46L52,58L52,84L28,72Z" />
+    <path android:fillColor="#5E3B22" android:pathData="M52,58L76,46L76,72L52,84Z" />
+    <!-- Gras-Kante an den Seiten -->
+    <path android:fillColor="#4CAF50" android:pathData="M28,46L52,58L52,64L46,61L46,66L40,63L40,58L34,55L34,59L28,56Z" />
+    <path android:fillColor="#388E3C" android:pathData="M52,58L76,46L76,55L70,58L70,62L64,65L64,61L58,64L58,67L52,70Z" />
+    <!-- Oberseite -->
+    <path android:fillColor="#66BB6A" android:pathData="M52,34L76,46L52,58L28,46Z" />
+    <path android:fillColor="#81C784" android:pathData="M52,34L58,37L52,40L46,37ZM40,46L46,49L40,52L34,49ZM64,46L70,49L64,52L58,49Z" />
+    <path android:fillColor="#57A05B" android:pathData="M52,46L58,49L52,52L46,49Z" />
     <!-- Erd-Pixel -->
-    <path android:fillColor="#6D4C41" android:pathData="M38,58h6v6h-6zM58,62h6v6h-6zM46,70h6v4h-6zM68,56h4v4h-4z" />
+    <path android:fillColor="#5E3B22" android:pathData="M34,64L38,66L38,70L34,68ZM42,72L46,74L46,77L42,75Z" />
+    <path android:fillColor="#4A2F1B" android:pathData="M62,72L66,70L66,74L62,76ZM70,64L73,62.5L73,66L70,67.5Z" />
+    <!-- Funkwellen -->
+    <path
+        android:pathData="M68,30a8,8 0,0 1,8 8"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFD54F"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M68,22a16,16 0,0 1,16 16"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFD54F"
+        android:strokeLineCap="round" />
+    <path android:fillColor="#FFD54F" android:pathData="M68,38m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0" />
 </vector>

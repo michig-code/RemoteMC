@@ -7,13 +7,24 @@ Dieses Repository enthält zwei Teile:
 | [`plugin/`](plugin) | Paper-Plugin (1.21+), das eine abgesicherte REST-API auf deinem Server öffnet |
 | [`android-app/`](android-app) | Android-App (Kotlin / Jetpack Compose, ab Android 8), die sich mit dieser API verbindet |
 
+<p>
+  <img src="docs/screenshots/01_list.png" width="200" alt="Serverliste">
+  <img src="docs/screenshots/03_dashboard.png" width="200" alt="Übersicht">
+  <img src="docs/screenshots/05_players.png" width="200" alt="Spieler">
+  <img src="docs/screenshots/06_console.png" width="200" alt="Konsole">
+  <img src="docs/screenshots/07_chat.png" width="200" alt="Chat">
+  <img src="docs/screenshots/04_dashboard_light.png" width="200" alt="Heller Modus">
+</p>
+
 ## Funktionen der App
 
-- **Übersicht:** Spielerzahl, TPS (1/5/15 min), MSPT, Arbeitsspeicher, Laufzeit, Welten
-- **Spieler:** Online-Liste mit Position, Leben, Hunger und Ping; Aktionen: Nachricht, Heilen, OP/DeOP, Spielmodus, Kicken, Bannen
-- **Konsole:** Live-Konsole und beliebige Befehle mit Rückgabe, dazu Schnellbefehle
-- **Chat:** Chatverlauf mitlesen und Nachrichten an alle senden
-- Mehrere Server speicherbar, Verbindungstest, Einrichtung per Link
+- **Serverliste:** Live-Status jedes Servers (online/offline, Spieler, TPS), mehrere Server, Einrichtung per Link
+- **Übersicht:** animierte TPS-Anzeige, MSPT, Arbeitsspeicher, Laufzeit, TPS-Verlauf (1/5/15 min), Welten
+- **Spieler:** Spielerköpfe, Position, Leben, Spielmodus und Ping. Per Antippen: Nachricht, Heilen, OP, Spielmodus, Kicken, Bannen
+- **Konsole:** Live-Konsole mit Zeitstempeln und Farben, Befehle mit Rückgabe, Schnellbefehle
+- **Chat:** Chatverlauf als Sprechblasen, Nachrichten an alle senden
+- **Aktualisieren:** auf den Online/Offline-Status tippen oder nach unten ziehen
+- Eigenes Logo, Splash-Screen, Animationen, dunkles und helles Design (folgt der Systemeinstellung)
 
 ## Installation
 
