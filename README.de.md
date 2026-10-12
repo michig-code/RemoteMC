@@ -1,3 +1,5 @@
+<p><img src="docs/logo.svg" width="96" alt="RemoteMC logo"></p>
+
 # RemoteMC
 
 [![Build](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml/badge.svg)](https://github.com/michig-code/RemoteMC/actions/workflows/build.yml)

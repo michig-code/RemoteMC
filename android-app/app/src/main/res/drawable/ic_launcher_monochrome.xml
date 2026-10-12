@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon (Android 13+): the system tints it, so shades are made with alpha only -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Centred: the drawing spans y 31.5–83.5, moved up to 28–80 -->
+    <group android:translateY="-3.5">
+        <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.55" android:pathData="M29,44L54,56.5L54,83.5L29,71Z" />
+        <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.35" android:pathData="M54,56.5L79,44L79,71L54,83.5Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M54,31.5L79,44L54,56.5L29,44Z" />
+        <path
+            android:pathData="M36,60l7,6.5l-7,3M47,73l9,4.5"
+            android:strokeWidth="4"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

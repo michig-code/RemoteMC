@@ -82,13 +82,13 @@ fun AppLogo(size: Dp, modifier: Modifier = Modifier) {
         modifier
             .size(size)
             .clip(RoundedCornerShape(size * 0.28f))
-            .background(Brush.linearGradient(listOf(Color(0xFF1E3A2B), Color(0xFF0B1410)))),
+            .background(Brush.linearGradient(listOf(Color(0xFF263238), Color(0xFF0E1411)))),
         contentAlignment = Alignment.Center,
     ) {
         Image(
             painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize().scale(1.45f),
+            modifier = Modifier.fillMaxSize().scale(1.5f),
         )
     }
 }
