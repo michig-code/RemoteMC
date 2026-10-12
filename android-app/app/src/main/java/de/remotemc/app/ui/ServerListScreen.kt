@@ -96,6 +96,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.net.ApiClient
+import de.remotemc.app.net.Http
 import de.remotemc.app.ui.components.AppLogo
 import de.remotemc.app.ui.components.Badge
 import de.remotemc.app.ui.components.ConnectionState
@@ -177,7 +178,7 @@ fun ServerListScreen(
     onRenameFolder: (old: String, new: String) -> Unit = { _, _ -> },
     onRemoveFolder: (String) -> Unit = {},
     onMove: (fromId: String, toId: String) -> Unit = { _, _ -> },
-    probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it).status() },
+    probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
     initialQuery: String = "",
 ) {
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
@@ -534,7 +535,7 @@ private fun ServerCard(
             }
             ProbeCache[server.id] = result
             value = result
-            delay(if (result is ServerProbe.Online) 10_000 else 5_000)
+            delay(if (result is ServerProbe.Online) 10_000 else 3_000)
         }
     }
     val connection = when (state) {

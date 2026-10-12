@@ -215,6 +215,19 @@ object Http {
             .build()
     }
 
+    /**
+     * For the status checks on the server list: gives up quickly, so an offline server shows as
+     * offline after about 2 s instead of waiting for the full timeouts (per IP address of the host).
+     * A false "offline" on a slow network fixes itself with the next check a few seconds later.
+     */
+    val quick: OkHttpClient by lazy {
+        base.newBuilder()
+            .connectTimeout(2, TimeUnit.SECONDS)
+            .readTimeout(4, TimeUnit.SECONDS)
+            .callTimeout(4, TimeUnit.SECONDS)
+            .build()
+    }
+
     private val pinned = ConcurrentHashMap<Pair<OkHttpClient, String?>, OkHttpClient>()
 
     /**

@@ -148,4 +148,18 @@ class NetworkTest {
         assertTrue(Http.forProfile(base, true, "abc") !== Http.forProfile(base, true, "other"))
         assertTrue(Http.forProfile(base, false, null) === base)
     }
+
+    @Test
+    fun quickClientGivesUpFastOnUnreachableServer() = runBlocking {
+        // 10.255.255.1 is not routed: the connection attempt hangs until the timeout.
+        val offline = ServerProfile(name = "Down", host = "10.255.255.1", token = "t", tls = false)
+        val start = System.nanoTime()
+        try {
+            ApiClient(offline, Http.quick).status()
+            fail("expected an error")
+        } catch (_: ApiError) {
+        }
+        val seconds = (System.nanoTime() - start) / 1e9
+        assertTrue("took $seconds s", seconds < 4.5)
+    }
 }
