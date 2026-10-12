@@ -229,8 +229,6 @@
     <string name="settings_dynamic_color_text">Use colours from your wallpaper</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_system">System default</string>
-    <string name="settings_language_en" translatable="false">English</string>
-    <string name="settings_language_de" translatable="false">Deutsch</string>
     <string name="settings_behaviour">Behaviour</string>
     <string name="settings_haptics">Haptic feedback</string>
     <string name="settings_haptics_text">Vibrate briefly on actions</string>
@@ -239,7 +237,7 @@
     <string name="settings_get_plugin">Download the server plugin</string>
     <string name="settings_source">Source code</string>
     <string name="settings_licenses">Open-source licences</string>
-    <string name="settings_privacy">Privacy: RemoteMC talks only to the servers you add. Player heads are loaded from mc-heads.net. No analytics, no accounts, no ads.</string>
+    <string name="settings_privacy">Privacy: RemoteMC talks only to the servers you add. Player heads are loaded from Mojang\'s skin server (textures.minecraft.net) or minotar.net. No analytics, no accounts, no ads.</string>
 
     <!-- Errors -->
     <string name="error_unreachable">Server not reachable. Check the address and port, that the server is running and that the port is open in your firewall or router.</string>
@@ -260,4 +258,10 @@
     <string name="error_server_timeout">The Minecraft server did not respond in time.</string>
     <string name="error_http">Server error (HTTP %d)</string>
     <string name="error_unknown">Something went wrong.</string>
+    <string name="action_change">Change</string>
+    <string name="pair_as_device">Pairs as “%s”</string>
+    <string name="onboarding_name_title">Name this phone</string>
+    <string name="onboarding_name_text">Your servers show this name, so you can tell which device has access. You can change it later in the settings.</string>
+    <string name="settings_this_phone">This phone</string>
+    <string name="settings_device_name_text">Used when pairing new servers. Already paired servers keep their name.</string>
 </resources>

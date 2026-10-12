@@ -20,7 +20,7 @@ Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kost
    (im Spiel erscheint er auf einer Karte). Ohne Kamera: „Code eingeben“ und Adresse, Port und Code eintippen.
 
 > Umstieg von McRemote 1.x: `McRemote-1.0.0.jar` löschen – RemoteMC übernimmt Config und Token automatisch.
-> Für Deutsch in den Plugin-Meldungen `language: de` in der Config setzen.
+> Für Deutsch in den Plugin-Meldungen `language: de` in der Config setzen (außerdem: es, fr, it, nl, pl, pt-BR, tr, ru).
 
 ## Befehle (Recht `remotemc.admin`, Standard: OP, Kurzform `/rmc`)
 | Befehl | Beschreibung |

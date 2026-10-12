@@ -8,6 +8,8 @@
 - Security: access tokens, pairing codes and console QR codes no longer appear in the console
   stream that moderators can read
 - Player list includes each player's skin texture URL
+- Messages in Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
+  (`language: es`, `fr`, `it`, `nl`, `pl`, `pt-BR`, `tr`, `ru`)
 
 ### App
 - Coloured console (Minecraft colour codes, plugin prefixes, warnings and errors)
@@ -18,6 +20,10 @@
 - Player heads are cut from the real skin (mc-heads.net showed Steve for some accounts);
   fallback minotar.net
 - Fixed: with the keyboard open, console and chat shrank and left a gap above the keyboard
+- The phone's name is asked once on first start and used for every pairing (changeable in the
+  settings), instead of typing it for each server
+- Now also in Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
+- Chat messages are sent right away; the newest lines stay visible while typing
 
 ## 2.0.0
 

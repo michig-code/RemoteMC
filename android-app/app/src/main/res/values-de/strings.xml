@@ -221,7 +221,7 @@
     <string name="settings_get_plugin">Server-Plugin herunterladen</string>
     <string name="settings_source">Quellcode</string>
     <string name="settings_licenses">Open-Source-Lizenzen</string>
-    <string name="settings_privacy">Datenschutz: RemoteMC verbindet sich nur mit den Servern, die du hinzufügst. Spielerköpfe werden von mc-heads.net geladen. Keine Analyse, keine Konten, keine Werbung.</string>
+    <string name="settings_privacy">Datenschutz: RemoteMC verbindet sich nur mit den Servern, die du hinzufügst. Spielerköpfe werden vom Skin-Server von Mojang (textures.minecraft.net) oder von minotar.net geladen. Keine Analyse, keine Konten, keine Werbung.</string>
 
     <string name="error_unreachable">Server nicht erreichbar. Prüfe Adresse und Port, ob der Server läuft und ob der Port in Firewall bzw. Router freigegeben ist.</string>
     <string name="error_timeout">Der Server hat zu lange nicht geantwortet.</string>
@@ -241,4 +241,10 @@
     <string name="error_server_timeout">Der Minecraft-Server hat nicht rechtzeitig geantwortet.</string>
     <string name="error_http">Serverfehler (HTTP %d)</string>
     <string name="error_unknown">Etwas ist schiefgelaufen.</string>
+    <string name="action_change">Ändern</string>
+    <string name="pair_as_device">Wird als „%s“ gekoppelt</string>
+    <string name="onboarding_name_title">Wie heißt dieses Handy?</string>
+    <string name="onboarding_name_text">Deine Server zeigen diesen Namen an, damit du siehst, welches Gerät Zugriff hat. Du kannst ihn später in den Einstellungen ändern.</string>
+    <string name="settings_this_phone">Dieses Handy</string>
+    <string name="settings_device_name_text">Wird beim Koppeln neuer Server verwendet. Bereits gekoppelte Server behalten ihren Namen.</string>
 </resources>

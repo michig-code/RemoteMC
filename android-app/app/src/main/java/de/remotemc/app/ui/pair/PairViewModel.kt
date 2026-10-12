@@ -1,7 +1,6 @@
 package de.remotemc.app.ui.pair
 
 import android.app.Application
-import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import de.remotemc.app.app
 import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.suggestedDeviceName
 import de.remotemc.app.net.ApiClient
 import de.remotemc.app.net.PingInfo
 import kotlinx.coroutines.launch
@@ -55,7 +55,9 @@ class PairViewModel(application: Application) : AndroidViewModel(application) {
     var token by mutableStateOf("")
     var tls by mutableStateOf(true)
     var serverName by mutableStateOf("")
-    var deviceName by mutableStateOf(defaultDeviceName())
+    var deviceName by mutableStateOf(
+        application.app.settings.settings.value.deviceName.ifBlank { suggestedDeviceName() },
+    )
 
     /** Server being re-paired (keeps its id and name). */
     private var replacing: ServerProfile? = null
@@ -159,18 +161,6 @@ class PairViewModel(application: Application) : AndroidViewModel(application) {
                 error = e
                 step = confirm
             }
-        }
-    }
-
-    private companion object {
-        fun defaultDeviceName(): String {
-            val model = Build.MODEL.orEmpty()
-            val maker = Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() }
-            return when {
-                model.isBlank() -> "Android"
-                model.startsWith(maker, ignoreCase = true) -> model
-                else -> "$maker $model"
-            }.take(40)
         }
     }
 }

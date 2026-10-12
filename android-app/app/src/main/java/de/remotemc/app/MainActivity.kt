@@ -33,6 +33,7 @@ import androidx.navigation.navArgument
 import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ThemeMode
+import de.remotemc.app.data.suggestedDeviceName
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
                 CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics) {
                     AppNavigation(
-                        startOnboarding = !settings.onboardingDone,
+                        startOnboarding = !settings.onboardingDone || settings.deviceName.isBlank(),
                         pendingLink = pendingLink,
                         pendingServer = pendingServer,
                         onIntentConsumed = { pendingLink = null; pendingServer = null },
@@ -137,10 +138,16 @@ private fun AppNavigation(
         popExitTransition = { slideOutHorizontally { it } + fadeOut() },
     ) {
         composable(Routes.ONBOARDING) {
-            OnboardingScreen(onFinish = {
-                context.app.settings.update { it.copy(onboardingDone = true) }
-                nav.navigate(Routes.SERVERS) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
-            })
+            val current = context.app.settings.settings.collectAsState().value
+            OnboardingScreen(
+                initialName = current.deviceName.ifBlank { suggestedDeviceName() },
+                // Users of an older version already saw the welcome pages and only need a name.
+                onlyName = current.onboardingDone,
+                onFinish = { name ->
+                    context.app.settings.update { it.copy(onboardingDone = true, deviceName = name) }
+                    nav.navigate(Routes.SERVERS) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+                },
+            )
         }
         composable(Routes.SERVERS) {
             ServerListScreen(

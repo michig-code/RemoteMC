@@ -7,6 +7,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Plugin messages from lang/&lt;language&gt;.yml, with English as fallback for missing keys.
@@ -19,8 +22,29 @@ public final class Messages {
 
     Messages(JavaPlugin plugin, String language) {
         fallback = load(plugin, "en");
-        YamlConfiguration selected = load(plugin, language);
+        YamlConfiguration selected = null;
+        for (String candidate : candidates(language)) {
+            selected = load(plugin, candidate);
+            if (selected != null) {
+                break;
+            }
+        }
         lang = selected != null ? selected : fallback;
+    }
+
+    /** "pt_br" → pt-BR, pt; "fr-FR" → fr-FR, fr. Plain "pt" also finds the only Portuguese file. */
+    static List<String> candidates(String language) {
+        String[] parts = language.trim().replace('_', '-').split("-", 2);
+        String base = parts[0].toLowerCase(Locale.ROOT);
+        List<String> list = new ArrayList<>();
+        if (parts.length > 1) {
+            list.add(base + "-" + parts[1].toUpperCase(Locale.ROOT));
+        }
+        list.add(base);
+        if (base.equals("pt") && !list.contains("pt-BR")) {
+            list.add("pt-BR");
+        }
+        return list;
     }
 
     private static YamlConfiguration load(JavaPlugin plugin, String language) {

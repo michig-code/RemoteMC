@@ -36,6 +36,7 @@ import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +53,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,6 +72,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.remotemc.app.R
+import de.remotemc.app.data.MAX_DEVICE_NAME
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.net.Tls
 import de.remotemc.app.ui.components.AppLogo
@@ -279,17 +285,35 @@ private fun ConfirmStep(vm: PairViewModel, s: PairStep.Confirm) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
-        if (s.code != null) {
-            OutlinedTextField(
-                vm.deviceName, { if (it.length <= 40) vm.deviceName = it },
-                label = { Text(stringResource(R.string.pair_device_name)) },
-                supportingText = { Text(stringResource(R.string.pair_device_name_text)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        if (s.code != null) DeviceNameRow(vm)
         Button(onClick = vm::pair, modifier = Modifier.fillMaxWidth().height(52.dp)) {
             Text(stringResource(if (s.code != null) R.string.pair_action else R.string.pair_action_token))
+        }
+    }
+}
+
+/** The phone's default name (from settings) is used; it can still be changed for this server. */
+@Composable
+private fun DeviceNameRow(vm: PairViewModel) {
+    var editing by rememberSaveable { mutableStateOf(vm.deviceName.isBlank()) }
+    if (editing) {
+        OutlinedTextField(
+            vm.deviceName, { if (it.length <= MAX_DEVICE_NAME) vm.deviceName = it },
+            label = { Text(stringResource(R.string.pair_device_name)) },
+            supportingText = { Text(stringResource(R.string.pair_device_name_text)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.Smartphone, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                stringResource(R.string.pair_as_device, vm.deviceName),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = { editing = true }) { Text(stringResource(R.string.action_change)) }
         }
     }
 }

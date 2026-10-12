@@ -7,7 +7,8 @@ RemoteMC (the Android app and the server plugin) does not collect, sell or share
 **App**
 - Connects only to the Minecraft servers you add. Server addresses and access tokens are stored on
   your device, encrypted with a key from the Android Keystore, and are excluded from backups.
-- Loads player head images from `mc-heads.net` by player name.
+- Loads player skins from Mojang's texture server (`textures.minecraft.net`, address supplied by
+  your server) and, for players who are not online, head images from `minotar.net` by name.
 - Uses the camera only while you scan a pairing QR code; images are processed on the device and not stored.
 - No analytics, no advertising, no accounts.
 

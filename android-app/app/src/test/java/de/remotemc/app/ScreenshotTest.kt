@@ -185,12 +185,21 @@ class ScreenshotTest {
         PairScreen(vm, {}, {}, {})
     }
 
-    @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen {} }
-    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(), {}, {}, versionName = "2.0.0") }
+    @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen("Pixel 8", {}) }
+    @Test fun onboardingName() = shot("13b_onboarding_name") { OnboardingScreen("Pixel 8", {}, onlyName = true) }
+    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "2.0.0") }
 
     @Test
     @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")
     fun german() = shot("15_dashboard_de") { server(Tab.Players) }
+
+    @Test
+    @Config(qualifiers = "fr-w400dp-h860dp-xxhdpi")
+    fun french() = shot("15b_dashboard_fr") { server(Tab.Dashboard) }
+
+    @Test
+    @Config(qualifiers = "ru-w400dp-h860dp-xxhdpi")
+    fun russian() = shot("15c_players_ru") { server(Tab.Players) }
 
     @Test
     @Config(qualifiers = "w840dp-h600dp-xhdpi")

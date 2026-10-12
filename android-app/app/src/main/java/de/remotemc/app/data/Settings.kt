@@ -13,6 +13,8 @@ data class AppSettings(
     val dynamicColor: Boolean = false,
     val haptics: Boolean = true,
     val onboardingDone: Boolean = false,
+    /** Name of this phone, used for every pairing (shown on the server in /remotemc token list). */
+    val deviceName: String = "",
 )
 
 class SettingsStore(private val prefs: SharedPreferences) {
@@ -28,6 +30,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putBoolean("dynamicColor", next.dynamicColor)
             putBoolean("haptics", next.haptics)
             putBoolean("onboardingDone", next.onboardingDone)
+            putString("deviceName", next.deviceName)
         }
     }
 
@@ -36,5 +39,19 @@ class SettingsStore(private val prefs: SharedPreferences) {
         dynamicColor = prefs.getBoolean("dynamicColor", false),
         haptics = prefs.getBoolean("haptics", true),
         onboardingDone = prefs.getBoolean("onboardingDone", false),
+        deviceName = prefs.getString("deviceName", "").orEmpty(),
     )
 }
+
+/** Suggestion for the phone's name, e.g. "Samsung SM-S931B" or "Pixel 8". */
+fun suggestedDeviceName(): String {
+    val model = android.os.Build.MODEL.orEmpty()
+    val maker = android.os.Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() }
+    return when {
+        model.isBlank() -> "Android"
+        model.startsWith(maker, ignoreCase = true) -> model
+        else -> "$maker $model"
+    }.take(MAX_DEVICE_NAME)
+}
+
+const val MAX_DEVICE_NAME = 40

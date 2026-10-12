@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -48,12 +49,27 @@ import androidx.core.os.LocaleListCompat
 import de.remotemc.app.BuildConfig
 import de.remotemc.app.R
 import de.remotemc.app.data.AppSettings
+import de.remotemc.app.data.MAX_DEVICE_NAME
 import de.remotemc.app.data.ThemeMode
 import de.remotemc.app.ui.components.AppLogo
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.SectionTitle
 
 const val SOURCE_URL = "https://github.com/michig-code/RemoteMC"
+
+/** Languages the app is translated into, with their names in that language. */
+private val APP_LANGUAGES = listOf(
+    "en" to "English",
+    "de" to "Deutsch",
+    "es" to "Español",
+    "fr" to "Français",
+    "it" to "Italiano",
+    "nl" to "Nederlands",
+    "pl" to "Polski",
+    "pt-BR" to "Português (Brasil)",
+    "tr" to "Türkçe",
+    "ru" to "Русский",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +81,10 @@ fun SettingsScreen(
 ) {
     val uri = LocalUriHandler.current
     var licenses by remember { mutableStateOf(false) }
-    val currentLanguage = AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore('-')
+    val currentLanguage = AppCompatDelegate.getApplicationLocales().get(0)?.let { locale ->
+        APP_LANGUAGES.firstOrNull { it.first == locale.toLanguageTag() }?.first
+            ?: APP_LANGUAGES.firstOrNull { it.first == locale.language }?.first
+    }.orEmpty()
 
     Scaffold(
         topBar = {
@@ -84,6 +103,26 @@ fun SettingsScreen(
                 Modifier.widthIn(max = 640.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                SectionTitle(stringResource(R.string.settings_this_phone))
+                McCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp)) {
+                        OutlinedTextField(
+                            value = settings.deviceName,
+                            onValueChange = { v -> if (v.length <= MAX_DEVICE_NAME) onChange { it.copy(deviceName = v) } },
+                            label = { Text(stringResource(R.string.pair_device_name)) },
+                            singleLine = true,
+                            isError = settings.deviceName.isBlank(),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            stringResource(R.string.settings_device_name_text),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
                 SectionTitle(stringResource(R.string.settings_appearance))
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(vertical = 8.dp)) {
@@ -107,14 +146,14 @@ fun SettingsScreen(
                 SectionTitle(stringResource(R.string.settings_language))
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(vertical = 8.dp)) {
-                        listOf("" to R.string.settings_language_system, "en" to R.string.settings_language_en, "de" to R.string.settings_language_de)
-                            .forEach { (tag, label) ->
-                                RadioRow(stringResource(label), currentLanguage == tag) {
-                                    AppCompatDelegate.setApplicationLocales(
-                                        if (tag.isEmpty()) LocaleListCompat.getEmptyLocaleList() else LocaleListCompat.forLanguageTags(tag),
-                                    )
-                                }
+                        RadioRow(stringResource(R.string.settings_language_system), currentLanguage.isEmpty()) {
+                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                        }
+                        APP_LANGUAGES.forEach { (tag, label) ->
+                            RadioRow(label, currentLanguage == tag) {
+                                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
                             }
+                        }
                     }
                 }
 

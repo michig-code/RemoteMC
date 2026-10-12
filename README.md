@@ -25,7 +25,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 - **Pairing in seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
 - **Security** – built-in HTTPS with certificate pinning, one token per device (stored hashed on the
   server, encrypted in the Android Keystore on the phone), roles, lockout, audit log
-- **Polish** – light/dark theme, Material You, tablet layout, English & German, haptics, accessibility
+- **Polish** – light/dark theme, Material You, tablet layout, 10 languages, haptics, accessibility
 
 ## Quick start
 1. **Plugin:** download `RemoteMC-x.y.z.jar` from the [releases](https://github.com/michig-code/RemoteMC/releases),
@@ -58,7 +58,7 @@ Permission `remotemc.admin` (default: OP), alias `/rmc`.
 
 ## Configuration (`plugins/RemoteMC/config.yml`)
 ```yaml
-language: en              # en, de
+language: en              # en, de, es, fr, it, nl, pl, pt-BR, tr, ru
 api:
   host: 0.0.0.0
   port: 8765

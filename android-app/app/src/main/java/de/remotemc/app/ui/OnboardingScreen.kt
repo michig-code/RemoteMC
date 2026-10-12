@@ -49,6 +49,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.outlined.Smartphone
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import de.remotemc.app.data.MAX_DEVICE_NAME
 import de.remotemc.app.ui.components.AppLogo
 import kotlinx.coroutines.launch
 
@@ -63,51 +75,108 @@ private val pages = listOf(
     Page(Icons.Outlined.QrCode2, R.string.onboarding_scan_title, R.string.onboarding_scan_text),
 )
 
+/**
+ * Welcome pages, ending with the phone's name (asked once; it is used for every pairing).
+ * With [onlyName] just the name page is shown, e.g. for users who set up an older version.
+ */
 @Composable
-fun OnboardingScreen(onFinish: () -> Unit) {
-    val pager = rememberPagerState { pages.size }
+fun OnboardingScreen(initialName: String, onFinish: (deviceName: String) -> Unit, onlyName: Boolean = false) {
+    val infoPages = if (onlyName) emptyList() else pages
+    val pageCount = infoPages.size + 1
+    val pager = rememberPagerState { pageCount }
     val scope = rememberCoroutineScope()
     val uri = LocalUriHandler.current
-    val last = pager.currentPage == pages.lastIndex
+    val last = pager.currentPage == pageCount - 1
+    var name by rememberSaveable { mutableStateOf(initialName) }
 
     // Surface sets the text colour for the background; without it, plain texts default to black.
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-    Column(
-        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.End) {
-            if (!last) TextButton(onClick = onFinish) { Text(stringResource(R.string.action_skip)) }
-            else Spacer(Modifier.height(48.dp))
-        }
-        HorizontalPager(pager, Modifier.weight(1f)) { index ->
-            PageContent(pages[index], index == pager.currentPage)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(16.dp)) {
-            pages.indices.forEach { i ->
-                val width by animateDpAsState(if (i == pager.currentPage) 24.dp else 8.dp, label = "dot")
-                Box(
-                    Modifier.height(8.dp).width(width).clip(CircleShape).background(
-                        if (i == pager.currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                    ),
-                )
-            }
-        }
-        Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
-            if (pager.currentPage == 1) {
-                OutlinedButton(onClick = { uri.openUri(PLUGIN_DOWNLOAD_URL) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                    Text(stringResource(R.string.onboarding_download_plugin))
+        Column(
+            Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.End) {
+                // "Skip" jumps to the name page; the name is still needed.
+                if (!last) {
+                    TextButton(onClick = { scope.launch { pager.animateScrollToPage(pageCount - 1) } }) {
+                        Text(stringResource(R.string.action_skip))
+                    }
+                } else {
+                    Spacer(Modifier.height(48.dp))
                 }
-                Spacer(Modifier.height(12.dp))
             }
-            Button(
-                onClick = { if (last) onFinish() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                Text(stringResource(if (last) R.string.onboarding_start else R.string.action_next))
+            HorizontalPager(pager, Modifier.weight(1f)) { index ->
+                if (index < infoPages.size) {
+                    PageContent(infoPages[index], index == pager.currentPage)
+                } else {
+                    NamePage(name) { if (it.length <= MAX_DEVICE_NAME) name = it }
+                }
+            }
+            if (pageCount > 1) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(16.dp)) {
+                    repeat(pageCount) { i ->
+                        val width by animateDpAsState(if (i == pager.currentPage) 24.dp else 8.dp, label = "dot")
+                        Box(
+                            Modifier.height(8.dp).width(width).clip(CircleShape).background(
+                                if (i == pager.currentPage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                            ),
+                        )
+                    }
+                }
+            }
+            Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
+                if (!onlyName && pager.currentPage == 1) {
+                    OutlinedButton(onClick = { uri.openUri(PLUGIN_DOWNLOAD_URL) }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                        Text(stringResource(R.string.onboarding_download_plugin))
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                Button(
+                    onClick = {
+                        if (last) onFinish(name.trim()) else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) }
+                    },
+                    enabled = !last || name.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                ) {
+                    Text(stringResource(if (last) R.string.onboarding_start else R.string.action_next))
+                }
             }
         }
     }
+}
+
+@Composable
+private fun NamePage(name: String, onName: (String) -> Unit) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            Modifier.size(112.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Outlined.Smartphone, null, Modifier.size(52.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+        }
+        Spacer(Modifier.height(28.dp))
+        Text(stringResource(R.string.onboarding_name_title), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.onboarding_name_text),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 420.dp),
+        )
+        Spacer(Modifier.height(24.dp))
+        OutlinedTextField(
+            value = name,
+            onValueChange = onName,
+            label = { Text(stringResource(R.string.pair_device_name)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
+            modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth(),
+        )
     }
 }
 
