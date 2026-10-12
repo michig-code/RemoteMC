@@ -254,4 +254,15 @@
     <string name="servers_no_match">Nenhum servidor corresponde a “%s”</string>
     <string name="servers_folder_expand">Mostrar pasta</string>
     <string name="servers_folder_collapse">Ocultar pasta</string>
+    <string name="settings_accent">Cor</string>
+    <string name="settings_accent_custom">Cor personalizada</string>
+    <string name="color_green">Verde</string>
+    <string name="color_teal">Turquesa</string>
+    <string name="color_blue">Azul</string>
+    <string name="color_indigo">Anil</string>
+    <string name="color_purple">Roxo</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_red">Vermelho</string>
+    <string name="color_orange">Laranja</string>
+    <string name="color_gold">Dourado</string>
 </resources>

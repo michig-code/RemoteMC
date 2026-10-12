@@ -278,4 +278,15 @@
     <string name="servers_no_match">No server matches “%s”</string>
     <string name="servers_folder_expand">Show folder</string>
     <string name="servers_folder_collapse">Hide folder</string>
+    <string name="settings_accent">Colour</string>
+    <string name="settings_accent_custom">Custom colour</string>
+    <string name="color_green">Green</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_red">Red</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_gold">Gold</string>
 </resources>

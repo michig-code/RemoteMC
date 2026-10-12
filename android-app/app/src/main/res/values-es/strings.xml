@@ -254,4 +254,15 @@
     <string name="servers_no_match">Ningún servidor coincide con «%s»</string>
     <string name="servers_folder_expand">Mostrar carpeta</string>
     <string name="servers_folder_collapse">Ocultar carpeta</string>
+    <string name="settings_accent">Color</string>
+    <string name="settings_accent_custom">Color personalizado</string>
+    <string name="color_green">Verde</string>
+    <string name="color_teal">Turquesa</string>
+    <string name="color_blue">Azul</string>
+    <string name="color_indigo">Índigo</string>
+    <string name="color_purple">Morado</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_red">Rojo</string>
+    <string name="color_orange">Naranja</string>
+    <string name="color_gold">Dorado</string>
 </resources>

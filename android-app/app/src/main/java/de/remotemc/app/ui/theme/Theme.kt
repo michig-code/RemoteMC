@@ -85,6 +85,60 @@ private val Light = lightColorScheme(
     outlineVariant = Color(0xFFDCE4DE),
 )
 
+/** Dark scheme in any hue, tuned like the classic green one (tinted near-black surfaces). */
+private fun darkScheme(h: Float) = darkColorScheme(
+    primary = Color.hsl(h, 0.72f, 0.67f),
+    onPrimary = Color.hsl(h, 0.9f, 0.12f),
+    primaryContainer = Color.hsl(h, 0.42f, 0.21f),
+    onPrimaryContainer = Color.hsl(h, 0.8f, 0.85f),
+    secondary = Dark.secondary,
+    onSecondary = Dark.onSecondary,
+    secondaryContainer = Dark.secondaryContainer,
+    onSecondaryContainer = Dark.onSecondaryContainer,
+    tertiary = Dark.tertiary,
+    background = Color.hsl(h, 0.18f, 0.067f),
+    onBackground = Color.hsl(h, 0.12f, 0.90f),
+    surface = Color.hsl(h, 0.18f, 0.067f),
+    onSurface = Color.hsl(h, 0.12f, 0.90f),
+    surfaceVariant = Color.hsl(h, 0.15f, 0.13f),
+    onSurfaceVariant = Color.hsl(h, 0.11f, 0.69f),
+    surfaceContainerLowest = Color.hsl(h, 0.2f, 0.05f),
+    surfaceContainerLow = Color.hsl(h, 0.17f, 0.09f),
+    surfaceContainer = Color.hsl(h, 0.17f, 0.11f),
+    surfaceContainerHigh = Color.hsl(h, 0.16f, 0.14f),
+    surfaceContainerHighest = Color.hsl(h, 0.16f, 0.17f),
+    outline = Color.hsl(h, 0.12f, 0.26f),
+    outlineVariant = Color.hsl(h, 0.13f, 0.19f),
+    error = Dark.error,
+)
+
+private fun lightScheme(h: Float) = lightColorScheme(
+    primary = Color.hsl(h, 0.72f, 0.30f),
+    onPrimary = Color.White,
+    primaryContainer = Color.hsl(h, 0.62f, 0.87f),
+    onPrimaryContainer = Color.hsl(h, 0.9f, 0.08f),
+    secondary = Light.secondary,
+    secondaryContainer = Light.secondaryContainer,
+    onSecondaryContainer = Light.onSecondaryContainer,
+    tertiary = Light.tertiary,
+    background = Color.hsl(h, 0.22f, 0.96f),
+    surface = Color.hsl(h, 0.22f, 0.96f),
+    surfaceVariant = Color.hsl(h, 0.17f, 0.90f),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color.hsl(h, 0.3f, 0.98f),
+    surfaceContainer = Color.White,
+    surfaceContainerHigh = Color.hsl(h, 0.2f, 0.94f),
+    surfaceContainerHighest = Color.hsl(h, 0.16f, 0.91f),
+    outline = Color.hsl(h, 0.14f, 0.77f),
+    outlineVariant = Color.hsl(h, 0.16f, 0.88f),
+)
+
+/** Colour for a theme hue as shown on the swatches (null = classic green). */
+fun accentSwatch(hue: Float?): Color = if (hue == null) Color(0xFF4CAF50) else Color.hsl(hue, 0.65f, 0.52f)
+
+/** Preset hues offered in the settings; null is the classic green. */
+val AccentPresets: List<Float?> = listOf(null, 172f, 212f, 240f, 275f, 330f, 2f, 24f, 45f)
+
 private val AppTypography = Typography().run {
     copy(
         headlineLarge = headlineLarge.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp),
@@ -110,12 +164,14 @@ val MonoStyle = TextStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.
 fun RemoteMCTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    accentHue: Float? = null,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val scheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        accentHue != null -> if (darkTheme) darkScheme(accentHue) else lightScheme(accentHue)
         darkTheme -> Dark
         else -> Light
     }

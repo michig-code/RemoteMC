@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
+            RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor, accentHue = settings.accentHue) {
                 CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics) {
                     AppNavigation(
                         startOnboarding = !settings.onboardingDone || settings.deviceName.isBlank(),

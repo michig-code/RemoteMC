@@ -261,4 +261,15 @@
     <string name="servers_no_match">Нет серверов по запросу «%s»</string>
     <string name="servers_folder_expand">Показать папку</string>
     <string name="servers_folder_collapse">Скрыть папку</string>
+    <string name="settings_accent">Цвет</string>
+    <string name="settings_accent_custom">Свой цвет</string>
+    <string name="color_green">Зелёный</string>
+    <string name="color_teal">Бирюзовый</string>
+    <string name="color_blue">Синий</string>
+    <string name="color_indigo">Индиго</string>
+    <string name="color_purple">Фиолетовый</string>
+    <string name="color_pink">Розовый</string>
+    <string name="color_red">Красный</string>
+    <string name="color_orange">Оранжевый</string>
+    <string name="color_gold">Золотой</string>
 </resources>

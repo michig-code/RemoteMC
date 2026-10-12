@@ -92,9 +92,9 @@ class ScreenshotTest {
         ServerProfile(name = "Skyblock", host = "sky.example.net", token = "x", folder = "Friends"),
     )
 
-    private fun shot(name: String, dark: Boolean = true, content: @Composable () -> Unit) {
+    private fun shot(name: String, dark: Boolean = true, hue: Float? = null, content: @Composable () -> Unit) {
         rule.setContent {
-            RemoteMCTheme(darkTheme = dark) {
+            RemoteMCTheme(darkTheme = dark, accentHue = hue) {
                 CompositionLocalProvider(LocalLoadPlayerHeads provides false) { content() }
             }
         }
@@ -190,6 +190,11 @@ class ScreenshotTest {
 
     @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen("Pixel 8", {}) }
     @Test fun onboardingName() = shot("13b_onboarding_name") { OnboardingScreen("Pixel 8", {}, onlyName = true) }
+    @Test fun accentBlue() = shot("18_accent_blue", hue = 212f, content = list())
+    @Test fun accentPurpleLight() = shot("19_accent_purple_light", dark = false, hue = 275f) { server(Tab.Dashboard) }
+    @Test fun settingsCustomColour() = shot("14b_settings_orange", hue = 24f) {
+        SettingsScreen(AppSettings(deviceName = "Pixel 8", accentHue = 24f), {}, {}, versionName = "1.0.0")
+    }
     @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "1.0.0") }
 
     @Test

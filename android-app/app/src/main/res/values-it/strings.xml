@@ -254,4 +254,15 @@
     <string name="servers_no_match">Nessun server corrisponde a “%s”</string>
     <string name="servers_folder_expand">Mostra cartella</string>
     <string name="servers_folder_collapse">Nascondi cartella</string>
+    <string name="settings_accent">Colore</string>
+    <string name="settings_accent_custom">Colore personalizzato</string>
+    <string name="color_green">Verde</string>
+    <string name="color_teal">Turchese</string>
+    <string name="color_blue">Blu</string>
+    <string name="color_indigo">Indaco</string>
+    <string name="color_purple">Viola</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_red">Rosso</string>
+    <string name="color_orange">Arancione</string>
+    <string name="color_gold">Oro</string>
 </resources>

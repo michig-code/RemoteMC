@@ -2,6 +2,24 @@ package de.remotemc.app.ui
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import de.remotemc.app.ui.theme.AccentPresets
+import de.remotemc.app.ui.theme.accentSwatch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -140,6 +158,10 @@ fun SettingsScreen(
                                 settings.dynamicColor,
                             ) { v -> onChange { it.copy(dynamicColor = v) } }
                         }
+                        // Material You takes its colours from the wallpaper, so the choice only applies without it.
+                        if (!settings.dynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                            AccentPicker(settings.accentHue) { hue -> onChange { it.copy(accentHue = hue) } }
+                        }
                     }
                 }
 
@@ -248,5 +270,88 @@ private fun LinkRow(label: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Icon(Icons.AutoMirrored.Outlined.OpenInNew, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+private val PresetNames = mapOf(
+    null to R.string.color_green, 172f to R.string.color_teal, 212f to R.string.color_blue,
+    240f to R.string.color_indigo, 275f to R.string.color_purple, 330f to R.string.color_pink,
+    2f to R.string.color_red, 24f to R.string.color_orange, 45f to R.string.color_gold,
+)
+
+/** Colour swatches for the theme, plus a rainbow swatch for any hue. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccentPicker(current: Float?, onPick: (Float?) -> Unit) {
+    var custom by remember { mutableStateOf(false) }
+    val isCustom = current != null && current !in AccentPresets
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(stringResource(R.string.settings_accent), style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(12.dp))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AccentPresets.forEach { hue ->
+                Swatch(
+                    SolidColor(accentSwatch(hue)),
+                    stringResource(PresetNames.getValue(hue)),
+                    selected = current == hue,
+                ) { onPick(hue) }
+            }
+            Swatch(
+                Brush.sweepGradient((0..6).map { Color.hsl(it * 60f % 360f, 0.65f, 0.52f) }),
+                stringResource(R.string.settings_accent_custom),
+                selected = isCustom,
+            ) { custom = true }
+        }
+    }
+    if (custom) {
+        var hue by remember { mutableFloatStateOf(current ?: 145f) }
+        AlertDialog(
+            onDismissRequest = { custom = false },
+            title = { Text(stringResource(R.string.settings_accent_custom)) },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(64.dp).clip(CircleShape).background(accentSwatch(hue)))
+                    Spacer(Modifier.height(16.dp))
+                    Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            Modifier.fillMaxWidth().height(12.dp).clip(CircleShape).background(
+                                Brush.horizontalGradient((0..12).map { Color.hsl(it * 30f % 360f, 0.65f, 0.52f) }),
+                            ),
+                        )
+                        Slider(
+                            value = hue,
+                            onValueChange = { hue = it },
+                            valueRange = 0f..359f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = accentSwatch(hue),
+                                activeTrackColor = Color.Transparent,
+                                inactiveTrackColor = Color.Transparent,
+                            ),
+                            
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onPick(hue); custom = false }) { Text(stringResource(R.string.action_save)) }
+            },
+            dismissButton = { TextButton(onClick = { custom = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+}
+
+@Composable
+private fun Swatch(fill: Brush, label: String, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(fill)
+            .border(if (selected) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (selected) Icon(Icons.Default.Check, null, tint = Color.White)
     }
 }

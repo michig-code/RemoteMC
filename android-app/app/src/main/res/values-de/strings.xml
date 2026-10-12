@@ -261,4 +261,15 @@
     <string name="servers_no_match">Kein Server passt zu „%s“</string>
     <string name="servers_folder_expand">Ordner anzeigen</string>
     <string name="servers_folder_collapse">Ordner ausblenden</string>
+    <string name="settings_accent">Farbe</string>
+    <string name="settings_accent_custom">Eigene Farbe</string>
+    <string name="color_green">Grün</string>
+    <string name="color_teal">Türkis</string>
+    <string name="color_blue">Blau</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_purple">Lila</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_red">Rot</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_gold">Gold</string>
 </resources>

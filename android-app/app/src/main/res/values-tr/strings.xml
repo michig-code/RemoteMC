@@ -247,4 +247,15 @@
     <string name="servers_no_match">Eşleşen sunucu yok: “%s”</string>
     <string name="servers_folder_expand">Klasörü göster</string>
     <string name="servers_folder_collapse">Klasörü gizle</string>
+    <string name="settings_accent">Renk</string>
+    <string name="settings_accent_custom">Özel renk</string>
+    <string name="color_green">Yeşil</string>
+    <string name="color_teal">Turkuaz</string>
+    <string name="color_blue">Mavi</string>
+    <string name="color_indigo">Çivit</string>
+    <string name="color_purple">Mor</string>
+    <string name="color_pink">Pembe</string>
+    <string name="color_red">Kırmızı</string>
+    <string name="color_orange">Turuncu</string>
+    <string name="color_gold">Altın</string>
 </resources>

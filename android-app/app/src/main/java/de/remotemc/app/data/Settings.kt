@@ -15,6 +15,8 @@ data class AppSettings(
     val onboardingDone: Boolean = false,
     /** Name of this phone, used for every pairing (shown on the server in /remotemc token list). */
     val deviceName: String = "",
+    /** Hue (0–360) of the app's colour theme; null = the classic RemoteMC green. */
+    val accentHue: Float? = null,
 )
 
 class SettingsStore(private val prefs: SharedPreferences) {
@@ -31,6 +33,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putBoolean("haptics", next.haptics)
             putBoolean("onboardingDone", next.onboardingDone)
             putString("deviceName", next.deviceName)
+            putFloat("accentHue", next.accentHue ?: -1f)
         }
     }
 
@@ -40,6 +43,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         haptics = prefs.getBoolean("haptics", true),
         onboardingDone = prefs.getBoolean("onboardingDone", false),
         deviceName = prefs.getString("deviceName", "").orEmpty(),
+        accentHue = prefs.getFloat("accentHue", -1f).takeIf { it >= 0f },
     )
 }
 
