@@ -1,7 +1,7 @@
 # Integration tests
 
 End-to-end tests against a real server. They were used to verify every release on
-Paper 1.20.6, Paper 1.21.4, Paper 26.3, Folia 1.21.4 and Spigot 1.21.4.
+Paper 1.20.6, Paper 1.21.4, Paper 26.3, Folia 1.21.4 and Spigot 1.21.4 (60/60 API checks on each).
 
 ```bash
 cd plugin && mvn package                         # build the plugin

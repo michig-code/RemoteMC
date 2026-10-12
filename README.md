@@ -28,6 +28,12 @@ Manage your Minecraft server from your phone – live, encrypted and free.
   <img src="docs/screenshots/13b_onboarding_name.png" width="190" alt="Naming the phone">
   <img src="docs/screenshots/14_settings.png" width="190" alt="Settings">
 </p>
+<p>
+  <img src="docs/screenshots/20_history.png" width="190" alt="Performance history">
+  <img src="docs/screenshots/21_whitelist.png" width="190" alt="Whitelist">
+  <img src="docs/screenshots/22_bans.png" width="190" alt="Ban list">
+  <img src="docs/screenshots/18_accent_blue.png" width="190" alt="Blue colour theme">
+</p>
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
