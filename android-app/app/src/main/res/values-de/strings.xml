@@ -247,4 +247,18 @@
     <string name="onboarding_name_text">Deine Server zeigen diesen Namen an, damit du siehst, welches Gerät Zugriff hat. Du kannst ihn später in den Einstellungen ändern.</string>
     <string name="settings_this_phone">Dieses Handy</string>
     <string name="settings_device_name_text">Wird beim Koppeln neuer Server verwendet. Bereits gekoppelte Server behalten ihren Namen.</string>
+    <string name="servers_pinned">Angeheftet</string>
+    <string name="servers_pin">Oben anheften</string>
+    <string name="servers_unpin">Nicht mehr anheften</string>
+    <string name="servers_move_to_folder">In Ordner verschieben</string>
+    <string name="servers_no_folder">Kein Ordner</string>
+    <string name="servers_new_folder">Neuer Ordner</string>
+    <string name="servers_folder_name">Ordnername</string>
+    <string name="servers_rename_folder">Ordner umbenennen</string>
+    <string name="servers_remove_folder">Ordner auflösen</string>
+    <string name="servers_remove_folder_text">Die Server in „%s“ bleiben in deiner Liste, nur ohne Ordner.</string>
+    <string name="servers_search">Nach Name oder Adresse suchen</string>
+    <string name="servers_no_match">Kein Server passt zu „%s“</string>
+    <string name="servers_folder_expand">Ordner anzeigen</string>
+    <string name="servers_folder_collapse">Ordner ausblenden</string>
 </resources>

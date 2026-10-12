@@ -161,6 +161,11 @@ private fun AppNavigation(
                     ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(it.id))
                 },
                 onSettings = { nav.navigate(Routes.SETTINGS) },
+                onPin = { profile, pinned -> repo.setPinned(profile.id, pinned) },
+                onMoveToFolder = { profile, folder -> repo.setFolder(profile.id, folder) },
+                onRenameFolder = repo::renameFolder,
+                onRemoveFolder = repo::removeFolder,
+                onMove = repo::move,
             )
         }
         composable(

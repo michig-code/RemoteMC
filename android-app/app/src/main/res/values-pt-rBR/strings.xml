@@ -240,4 +240,18 @@
     <string name="onboarding_name_text">Seus servidores mostram este nome para você saber qual aparelho tem acesso. Você pode alterá-lo depois nas configurações.</string>
     <string name="settings_this_phone">Este celular</string>
     <string name="settings_device_name_text">Usado ao parear novos servidores. Servidores já pareados mantêm o nome.</string>
+    <string name="servers_pinned">Fixados</string>
+    <string name="servers_pin">Fixar no topo</string>
+    <string name="servers_unpin">Desafixar</string>
+    <string name="servers_move_to_folder">Mover para pasta</string>
+    <string name="servers_no_folder">Sem pasta</string>
+    <string name="servers_new_folder">Nova pasta</string>
+    <string name="servers_folder_name">Nome da pasta</string>
+    <string name="servers_rename_folder">Renomear pasta</string>
+    <string name="servers_remove_folder">Remover pasta</string>
+    <string name="servers_remove_folder_text">Os servidores em “%s” continuam na sua lista, só que sem pasta.</string>
+    <string name="servers_search">Pesquisar por nome ou endereço</string>
+    <string name="servers_no_match">Nenhum servidor corresponde a “%s”</string>
+    <string name="servers_folder_expand">Mostrar pasta</string>
+    <string name="servers_folder_collapse">Ocultar pasta</string>
 </resources>

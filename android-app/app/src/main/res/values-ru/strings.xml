@@ -247,4 +247,18 @@
     <string name="onboarding_name_text">Серверы показывают это имя, чтобы было видно, у какого устройства есть доступ. Его можно изменить позже в настройках.</string>
     <string name="settings_this_phone">Этот телефон</string>
     <string name="settings_device_name_text">Используется при подключении новых серверов. Уже подключённые серверы сохраняют прежнее имя.</string>
+    <string name="servers_pinned">Закреплённые</string>
+    <string name="servers_pin">Закрепить вверху</string>
+    <string name="servers_unpin">Открепить</string>
+    <string name="servers_move_to_folder">Переместить в папку</string>
+    <string name="servers_no_folder">Без папки</string>
+    <string name="servers_new_folder">Новая папка</string>
+    <string name="servers_folder_name">Название папки</string>
+    <string name="servers_rename_folder">Переименовать папку</string>
+    <string name="servers_remove_folder">Удалить папку</string>
+    <string name="servers_remove_folder_text">Серверы из «%s» останутся в списке, просто без папки.</string>
+    <string name="servers_search">Поиск по имени или адресу</string>
+    <string name="servers_no_match">Нет серверов по запросу «%s»</string>
+    <string name="servers_folder_expand">Показать папку</string>
+    <string name="servers_folder_collapse">Скрыть папку</string>
 </resources>

@@ -5,6 +5,35 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOff
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.zIndex
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -89,6 +118,47 @@ sealed interface ServerProbe {
     data class Offline(val reason: Throwable) : ServerProbe
 }
 
+/** One row of the server list. */
+private sealed interface ListRow {
+    val key: String
+
+    data class Title(val text: Int) : ListRow {
+        override val key get() = "title:$text"
+    }
+    data class Folder(val name: String, val count: Int, val expanded: Boolean) : ListRow {
+        override val key get() = "folder:$name"
+    }
+    data class Server(val server: ServerProfile) : ListRow {
+        override val key get() = server.id
+    }
+}
+
+/** Pinned servers first, then servers without a folder, then each folder (in the order of its first server). */
+private fun buildRows(servers: List<ServerProfile>, query: String, collapsed: List<String>): List<ListRow> {
+    if (query.isNotBlank()) return servers.filter { it.matches(query) }.map { ListRow.Server(it) }
+    val rows = mutableListOf<ListRow>()
+    val pinned = servers.filter { it.pinned }
+    if (pinned.isNotEmpty()) {
+        rows += ListRow.Title(R.string.servers_pinned)
+        pinned.mapTo(rows) { ListRow.Server(it) }
+    }
+    val loose = servers.filter { !it.pinned && it.folder.isBlank() }
+    if (loose.isNotEmpty()) {
+        rows += ListRow.Title(R.string.servers_title)
+        loose.mapTo(rows) { ListRow.Server(it) }
+    }
+    servers.filter { !it.pinned && it.folder.isNotBlank() }.groupBy { it.folder }.forEach { (folder, items) ->
+        val expanded = folder !in collapsed
+        rows += ListRow.Folder(folder, items.size, expanded)
+        if (expanded) items.mapTo(rows) { ListRow.Server(it) }
+    }
+    return rows
+}
+
+/** Servers may only be dragged within their own section. */
+private fun sameSection(a: ServerProfile, b: ServerProfile) =
+    a.pinned == b.pinned && (a.pinned || a.folder == b.folder)
+
 @Composable
 fun ServerListScreen(
     servers: List<ServerProfile>,
@@ -98,10 +168,35 @@ fun ServerListScreen(
     onRepair: (ServerProfile) -> Unit,
     onDelete: (ServerProfile) -> Unit,
     onSettings: () -> Unit,
+    onPin: (ServerProfile, Boolean) -> Unit = { _, _ -> },
+    onMoveToFolder: (ServerProfile, String) -> Unit = { _, _ -> },
+    onRenameFolder: (old: String, new: String) -> Unit = { _, _ -> },
+    onRemoveFolder: (String) -> Unit = {},
+    onMove: (fromId: String, toId: String) -> Unit = { _, _ -> },
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it).status() },
+    initialQuery: String = "",
 ) {
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
+    var moving by remember { mutableStateOf<ServerProfile?>(null) }
+    var renamingFolder by remember { mutableStateOf<String?>(null) }
+    var removingFolder by remember { mutableStateOf<String?>(null) }
+    var query by rememberSaveable { mutableStateOf(initialQuery) }
+    var collapsed by rememberSaveable { mutableStateOf(listOf<String>()) }
+    val haptics = rememberHaptics()
+    val folders = remember(servers) { servers.map { it.folder }.filter { it.isNotBlank() }.distinct() }
+    val rows = buildRows(servers, query, collapsed)
+    val byId = remember(servers) { servers.associateBy { it.id } }
+
+    val listState = rememberLazyListState()
+    val reorder = rememberReorderableLazyListState(listState) { from, to ->
+        val a = byId[from.key]
+        val b = byId[to.key]
+        if (a != null && b != null && sameSection(a, b)) {
+            onMove(a.id, b.id)
+            haptics.tick()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -118,6 +213,7 @@ fun ServerListScreen(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(
                 Modifier.fillMaxSize().widthIn(max = 720.dp),
+                state = listState,
                 contentPadding = PaddingValues(
                     start = 16.dp, end = 16.dp,
                     top = padding.calculateTopPadding() + 24.dp,
@@ -131,17 +227,52 @@ fun ServerListScreen(
                         EmptyState(Icons.Outlined.Dns, stringResource(R.string.servers_empty_title), stringResource(R.string.servers_empty_text))
                     }
                 } else {
-                    item(key = "title") { SectionTitle(stringResource(R.string.servers_title)) }
-                    itemsIndexed(servers, key = { _, s -> s.id }) { i, server ->
-                        ServerCard(
-                            server = server,
-                            probe = probe,
-                            onOpen = { onOpen(server) },
-                            onRename = { renaming = server },
-                            onRepair = { onRepair(server) },
-                            onDelete = { deleting = server },
-                            modifier = Modifier.animateItem().staggeredAppear(i + 1),
-                        )
+                    if (servers.size > 1) {
+                        item(key = "search") { SearchField(query) { query = it } }
+                    }
+                    if (rows.isEmpty()) {
+                        item(key = "no-match") {
+                            Text(
+                                stringResource(R.string.servers_no_match, query.trim()),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    itemsIndexed(rows, key = { _, row -> row.key }) { i, row ->
+                        when (row) {
+                            is ListRow.Title -> SectionTitle(stringResource(row.text), Modifier.animateItem())
+                            is ListRow.Folder -> FolderHeader(
+                                row,
+                                onToggle = {
+                                    haptics.tap()
+                                    collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name
+                                },
+                                onRename = { renamingFolder = row.name },
+                                onRemove = { removingFolder = row.name },
+                                modifier = Modifier.animateItem(),
+                            )
+                            is ListRow.Server -> ReorderableItem(reorder, key = row.key) { dragging ->
+                                val server = row.server
+                                ServerCard(
+                                    server = server,
+                                    probe = probe,
+                                    dragging = dragging,
+                                    onOpen = { onOpen(server) },
+                                    onRename = { renaming = server },
+                                    onPin = { onPin(server, !server.pinned) },
+                                    onMoveToFolder = { moving = server },
+                                    onRepair = { onRepair(server) },
+                                    onDelete = { deleting = server },
+                                    // Hold a server to drag it; not while searching, the list is filtered then.
+                                    modifier = Modifier
+                                        .longPressDraggableHandle(enabled = query.isBlank(), onDragStarted = { haptics.heavy() })
+                                        .staggeredAppear(i + 1),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -149,19 +280,50 @@ fun ServerListScreen(
     }
 
     renaming?.let { profile ->
-        var name by remember(profile.id) { mutableStateOf(profile.name) }
+        NameDialog(
+            title = stringResource(R.string.servers_rename),
+            label = stringResource(R.string.pair_server_name),
+            initial = profile.name,
+            onDismiss = { renaming = null },
+            onSave = { onRename(profile, it); renaming = null },
+        )
+    }
+
+    renamingFolder?.let { folder ->
+        NameDialog(
+            title = stringResource(R.string.servers_rename_folder),
+            label = stringResource(R.string.servers_folder_name),
+            initial = folder,
+            onDismiss = { renamingFolder = null },
+            onSave = { onRenameFolder(folder, it); renamingFolder = null },
+        )
+    }
+
+    moving?.let { profile ->
+        MoveToFolderDialog(
+            current = profile.folder,
+            folders = folders,
+            onDismiss = { moving = null },
+            onMove = { folder ->
+                onMoveToFolder(profile, folder)
+                // Pinned servers are listed on top; moving one into a folder means "show it there".
+                if (profile.pinned && folder.isNotBlank()) onPin(profile, false)
+                collapsed = collapsed - folder
+                moving = null
+            },
+        )
+    }
+
+    removingFolder?.let { folder ->
         AlertDialog(
-            onDismissRequest = { renaming = null },
-            title = { Text(stringResource(R.string.servers_rename)) },
-            text = {
-                OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(stringResource(R.string.pair_server_name)) })
-            },
+            onDismissRequest = { removingFolder = null },
+            icon = { Icon(Icons.Outlined.FolderOff, null) },
+            title = { Text(stringResource(R.string.servers_remove_folder)) },
+            text = { Text(stringResource(R.string.servers_remove_folder_text, folder)) },
             confirmButton = {
-                TextButton(enabled = name.isNotBlank(), onClick = { onRename(profile, name.trim()); renaming = null }) {
-                    Text(stringResource(R.string.action_save))
-                }
+                TextButton(onClick = { onRemoveFolder(folder); removingFolder = null }) { Text(stringResource(R.string.action_remove)) }
             },
-            dismissButton = { TextButton(onClick = { renaming = null }) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { TextButton(onClick = { removingFolder = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 
@@ -177,6 +339,132 @@ fun ServerListScreen(
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+}
+
+@Composable
+private fun SearchField(query: String, onQuery: (String) -> Unit) {
+    TextField(
+        value = query,
+        onValueChange = onQuery,
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = { Text(stringResource(R.string.servers_search)) },
+        leadingIcon = { Icon(Icons.Outlined.Search, null) },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQuery("") }) { Icon(Icons.Outlined.Close, stringResource(R.string.action_clear)) }
+            }
+        },
+        singleLine = true,
+        shape = CircleShape,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
+    )
+}
+
+@Composable
+private fun FolderHeader(row: ListRow.Folder, onToggle: () -> Unit, onRename: () -> Unit, onRemove: () -> Unit, modifier: Modifier = Modifier) {
+    var menu by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(if (row.expanded) 0f else -90f, label = "chevron")
+    Row(
+        modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable(onClick = onToggle).padding(start = 4.dp, top = 4.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Default.ExpandMore,
+            stringResource(if (row.expanded) R.string.servers_folder_collapse else R.string.servers_folder_expand),
+            Modifier.size(20.dp).rotate(rotation),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(6.dp))
+        Icon(Icons.Outlined.Folder, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(8.dp))
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                row.name,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            Spacer(Modifier.width(8.dp))
+            Badge(row.count.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Box {
+            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.action_more)) }
+            DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.servers_rename_folder)) },
+                    leadingIcon = { Icon(Icons.Outlined.Edit, null) },
+                    onClick = { menu = false; onRename() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.servers_remove_folder)) },
+                    leadingIcon = { Icon(Icons.Outlined.FolderOff, null) },
+                    onClick = { menu = false; onRemove() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NameDialog(title: String, label: String, initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var name by remember { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(label) })
+        },
+        confirmButton = {
+            TextButton(enabled = name.isNotBlank(), onClick = { onSave(name.trim()) }) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+@Composable
+private fun MoveToFolderDialog(current: String, folders: List<String>, onDismiss: () -> Unit, onMove: (String) -> Unit) {
+    var selected by remember { mutableStateOf(current) }
+    var newFolder by remember { mutableStateOf("") }
+    val target = newFolder.trim().ifEmpty { selected }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.AutoMirrored.Outlined.DriveFileMove, null) },
+        title = { Text(stringResource(R.string.servers_move_to_folder)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                (listOf("") + folders).forEach { folder ->
+                    Row(
+                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                            .clickable { selected = folder; newFolder = "" }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = newFolder.isBlank() && selected == folder, onClick = { selected = folder; newFolder = "" })
+                        Text(folder.ifEmpty { stringResource(R.string.servers_no_folder) }, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    newFolder,
+                    { if (it.length <= 30) newFolder = it },
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.servers_new_folder)) },
+                    leadingIcon = { Icon(Icons.Outlined.CreateNewFolder, null) },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(enabled = target != current, onClick = { onMove(target) }) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }
 
 @Composable
@@ -214,8 +502,11 @@ private fun Header(count: Int, onSettings: () -> Unit) {
 private fun ServerCard(
     server: ServerProfile,
     probe: suspend (ServerProfile) -> ServerStatus,
+    dragging: Boolean,
     onOpen: () -> Unit,
     onRename: () -> Unit,
+    onPin: () -> Unit,
+    onMoveToFolder: () -> Unit,
     onRepair: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -243,7 +534,17 @@ private fun ServerCard(
         ServerProbe.Loading -> ConnectionState.Connecting
     }
 
-    McCard(modifier.fillMaxWidth(), onClick = { haptics.tap(); onOpen() }) {
+    val lift by animateFloatAsState(if (dragging) 1.03f else 1f, label = "lift")
+    McCard(
+        modifier.fillMaxWidth().zIndex(if (dragging) 1f else 0f).graphicsLayer {
+            scaleX = lift
+            scaleY = lift
+            shadowElevation = if (dragging) 16.dp.toPx() else 0f
+            shape = RoundedCornerShape(24.dp)
+            clip = false
+        },
+        onClick = { haptics.tap(); onOpen() },
+    ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -263,6 +564,13 @@ private fun ServerCard(
                             server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1,
                             overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
                         )
+                        if (server.pinned) {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                Icons.Filled.PushPin, stringResource(R.string.servers_pinned),
+                                Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                         if (server.role != Role.ADMIN) {
                             Spacer(Modifier.width(6.dp))
                             Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
@@ -279,6 +587,16 @@ private fun ServerCard(
                 Box {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.action_more)) }
                     DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(if (server.pinned) R.string.servers_unpin else R.string.servers_pin)) },
+                            leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                            onClick = { menu = false; onPin() },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.servers_move_to_folder)) },
+                            leadingIcon = { Icon(Icons.AutoMirrored.Outlined.DriveFileMove, null) },
+                            onClick = { menu = false; onMoveToFolder() },
+                        )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.servers_rename)) },
                             leadingIcon = { Icon(Icons.Outlined.Edit, null) },

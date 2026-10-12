@@ -233,4 +233,18 @@
     <string name="onboarding_name_text">Sunucuların bu adı gösterir, böylece hangi cihazın erişimi olduğunu anlarsın. Daha sonra ayarlardan değiştirebilirsin.</string>
     <string name="settings_this_phone">Bu telefon</string>
     <string name="settings_device_name_text">Yeni sunucular eşlenirken kullanılır. Zaten eşlenmiş sunucular adlarını korur.</string>
+    <string name="servers_pinned">Sabitlenenler</string>
+    <string name="servers_pin">En üste sabitle</string>
+    <string name="servers_unpin">Sabitlemeyi kaldır</string>
+    <string name="servers_move_to_folder">Klasöre taşı</string>
+    <string name="servers_no_folder">Klasör yok</string>
+    <string name="servers_new_folder">Yeni klasör</string>
+    <string name="servers_folder_name">Klasör adı</string>
+    <string name="servers_rename_folder">Klasörü yeniden adlandır</string>
+    <string name="servers_remove_folder">Klasörü kaldır</string>
+    <string name="servers_remove_folder_text">“%s” içindeki sunucular listende kalır, sadece klasörsüz.</string>
+    <string name="servers_search">Ada veya adrese göre ara</string>
+    <string name="servers_no_match">Eşleşen sunucu yok: “%s”</string>
+    <string name="servers_folder_expand">Klasörü göster</string>
+    <string name="servers_folder_collapse">Klasörü gizle</string>
 </resources>

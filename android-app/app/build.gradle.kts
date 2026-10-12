@@ -103,6 +103,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("sh.calvin.reorderable:reorderable:2.5.1") // drag to sort the server list
 
     // QR scanner: CameraX + ML Kit with the bundled model (works without Google Play services)
     implementation("androidx.camera:camera-camera2:1.4.1")

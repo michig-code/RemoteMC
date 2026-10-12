@@ -264,4 +264,18 @@
     <string name="onboarding_name_text">Your servers show this name, so you can tell which device has access. You can change it later in the settings.</string>
     <string name="settings_this_phone">This phone</string>
     <string name="settings_device_name_text">Used when pairing new servers. Already paired servers keep their name.</string>
+    <string name="servers_pinned">Pinned</string>
+    <string name="servers_pin">Pin to top</string>
+    <string name="servers_unpin">Unpin</string>
+    <string name="servers_move_to_folder">Move to folder</string>
+    <string name="servers_no_folder">No folder</string>
+    <string name="servers_new_folder">New folder</string>
+    <string name="servers_folder_name">Folder name</string>
+    <string name="servers_rename_folder">Rename folder</string>
+    <string name="servers_remove_folder">Remove folder</string>
+    <string name="servers_remove_folder_text">The servers in “%s” stay in your list, just without a folder.</string>
+    <string name="servers_search">Search by name or address</string>
+    <string name="servers_no_match">No server matches “%s”</string>
+    <string name="servers_folder_expand">Show folder</string>
+    <string name="servers_folder_collapse">Hide folder</string>
 </resources>

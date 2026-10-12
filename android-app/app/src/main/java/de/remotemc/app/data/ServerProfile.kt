@@ -26,6 +26,10 @@ data class ServerProfile(
     val fingerprint: String? = null,
     val role: Role = Role.ADMIN,
     val deviceName: String = "",
+    /** Pinned servers are listed first. */
+    val pinned: Boolean = false,
+    /** Folder in the server list; blank = no folder. */
+    val folder: String = "",
 ) {
     val baseUrl: String
         get() {
@@ -34,6 +38,12 @@ data class ServerProfile(
         }
 
     val address: String get() = "$host:$port"
+
+    /** Search by name, address or folder, ignoring case. */
+    fun matches(query: String): Boolean {
+        val q = query.trim()
+        return q.isEmpty() || listOf(name, address, folder).any { it.contains(q, ignoreCase = true) }
+    }
 
     fun toJson(): JSONObject = JSONObject()
         .put("id", id)
@@ -45,6 +55,8 @@ data class ServerProfile(
         .put("fingerprint", fingerprint)
         .put("role", role.name)
         .put("deviceName", deviceName)
+        .put("pinned", pinned)
+        .put("folder", folder)
 
     companion object {
         fun fromJson(o: JSONObject) = ServerProfile(
@@ -58,6 +70,8 @@ data class ServerProfile(
             fingerprint = o.optString("fingerprint").takeIf { it.isNotBlank() && it != "null" },
             role = Role.parse(o.optString("role", "ADMIN")),
             deviceName = o.optString("deviceName"),
+            pinned = o.optBoolean("pinned", false),
+            folder = o.optString("folder"),
         )
     }
 }

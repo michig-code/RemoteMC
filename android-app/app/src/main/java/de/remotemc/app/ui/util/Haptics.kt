@@ -16,6 +16,8 @@ class Haptics(private val view: View, private val enabled: Boolean) {
     fun success() = perform(if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.VIRTUAL_KEY)
     fun error() = perform(if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.LONG_PRESS)
     fun heavy() = perform(HapticFeedbackConstants.LONG_PRESS)
+    /** Light tick, e.g. while a dragged item passes another one. */
+    fun tick() = perform(if (Build.VERSION.SDK_INT >= 34) HapticFeedbackConstants.SEGMENT_FREQUENT_TICK else HapticFeedbackConstants.CLOCK_TICK)
 
     private fun perform(type: Int) {
         if (enabled) view.performHapticFeedback(type)

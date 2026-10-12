@@ -86,9 +86,10 @@ class ScreenshotTest {
     )
     private val actions = ServerActions({}, {}, {}, {}, { _, _, _, _ -> }, {})
     private val servers = listOf(
-        ServerProfile(name = "Survival", host = "mc.example.com", token = "x"),
+        ServerProfile(name = "Survival", host = "mc.example.com", token = "x", pinned = true),
         ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", role = Role.MODERATOR),
-        ServerProfile(name = "Test server", host = "10.0.0.5", token = "x", tls = false),
+        ServerProfile(name = "Test server", host = "10.0.0.5", token = "x", tls = false, folder = "Friends"),
+        ServerProfile(name = "Skyblock", host = "sky.example.net", token = "x", folder = "Friends"),
     )
 
     private fun shot(name: String, dark: Boolean = true, content: @Composable () -> Unit) {
@@ -109,15 +110,17 @@ class ScreenshotTest {
             actions, initialTab = tab,
         )
 
-    private fun list() = @Composable {
+    private fun list(query: String = "") = @Composable {
         ServerListScreen(
             servers, {}, {}, { _, _ -> }, {}, {}, {},
-            probe = { if (it.port == 8765 && it.tls) status else throw java.io.IOException("down") },
+            probe = { if (it.port == 8765 && it.tls && it.folder.isEmpty()) status else throw java.io.IOException("down") },
+            initialQuery = query,
         )
     }
 
     @Test fun serverList() = shot("01_servers", content = list())
     @Test fun serverListLight() = shot("02_servers_light", dark = false, content = list())
+    @Test fun serverSearch() = shot("02b_servers_search", content = list("192.168"))
     @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
     @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }
     @Test fun players() = shot("05_players") { server(Tab.Players) }

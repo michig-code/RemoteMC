@@ -233,4 +233,18 @@
     <string name="onboarding_name_text">Je servers tonen deze naam, zodat je ziet welk apparaat toegang heeft. Je kunt hem later wijzigen in de instellingen.</string>
     <string name="settings_this_phone">Deze telefoon</string>
     <string name="settings_device_name_text">Wordt gebruikt bij het koppelen van nieuwe servers. Al gekoppelde servers houden hun naam.</string>
+    <string name="servers_pinned">Vastgezet</string>
+    <string name="servers_pin">Bovenaan vastzetten</string>
+    <string name="servers_unpin">Losmaken</string>
+    <string name="servers_move_to_folder">Naar map verplaatsen</string>
+    <string name="servers_no_folder">Geen map</string>
+    <string name="servers_new_folder">Nieuwe map</string>
+    <string name="servers_folder_name">Mapnaam</string>
+    <string name="servers_rename_folder">Map hernoemen</string>
+    <string name="servers_remove_folder">Map opheffen</string>
+    <string name="servers_remove_folder_text">De servers in ‘%s’ blijven in je lijst, alleen zonder map.</string>
+    <string name="servers_search">Zoeken op naam of adres</string>
+    <string name="servers_no_match">Geen server komt overeen met ‘%s’</string>
+    <string name="servers_folder_expand">Map tonen</string>
+    <string name="servers_folder_collapse">Map verbergen</string>
 </resources>

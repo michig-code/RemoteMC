@@ -240,4 +240,18 @@
     <string name="onboarding_name_text">Vos serveurs affichent ce nom pour savoir quel appareil a accès. Vous pourrez le modifier plus tard dans les paramètres.</string>
     <string name="settings_this_phone">Ce téléphone</string>
     <string name="settings_device_name_text">Utilisé lors de l\'association de nouveaux serveurs. Les serveurs déjà associés gardent leur nom.</string>
+    <string name="servers_pinned">Épinglés</string>
+    <string name="servers_pin">Épingler en haut</string>
+    <string name="servers_unpin">Désépingler</string>
+    <string name="servers_move_to_folder">Déplacer vers un dossier</string>
+    <string name="servers_no_folder">Aucun dossier</string>
+    <string name="servers_new_folder">Nouveau dossier</string>
+    <string name="servers_folder_name">Nom du dossier</string>
+    <string name="servers_rename_folder">Renommer le dossier</string>
+    <string name="servers_remove_folder">Supprimer le dossier</string>
+    <string name="servers_remove_folder_text">Les serveurs de « %s » restent dans votre liste, simplement sans dossier.</string>
+    <string name="servers_search">Rechercher par nom ou adresse</string>
+    <string name="servers_no_match">Aucun serveur ne correspond à « %s »</string>
+    <string name="servers_folder_expand">Afficher le dossier</string>
+    <string name="servers_folder_collapse">Masquer le dossier</string>
 </resources>

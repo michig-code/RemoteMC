@@ -24,12 +24,28 @@ class ServerRepository(private val prefs: SharedPreferences, private val box: Se
 
     fun delete(id: String) = save(_servers.value.filterNot { it.id == id })
 
-    fun move(from: Int, to: Int) {
+    /** Moves [fromId] to the position of [toId] (manual sorting). */
+    fun move(fromId: String, toId: String) {
         val list = _servers.value.toMutableList()
-        if (from !in list.indices || to !in list.indices) return
+        val from = list.indexOfFirst { it.id == fromId }
+        val to = list.indexOfFirst { it.id == toId }
+        if (from < 0 || to < 0 || from == to) return
         list.add(to, list.removeAt(from))
         save(list)
     }
+
+    fun setPinned(id: String, pinned: Boolean) = update(id) { it.copy(pinned = pinned) }
+
+    fun setFolder(id: String, folder: String) = update(id) { it.copy(folder = folder.trim()) }
+
+    fun renameFolder(old: String, new: String) =
+        save(_servers.value.map { if (it.folder == old) it.copy(folder = new.trim()) else it })
+
+    /** Removes the folder; its servers stay, without a folder. */
+    fun removeFolder(name: String) = renameFolder(name, "")
+
+    private fun update(id: String, change: (ServerProfile) -> ServerProfile) =
+        save(_servers.value.map { if (it.id == id) change(it) else it })
 
     private fun load(): List<ServerProfile> {
         val encrypted = prefs.getString(KEY, null) ?: return emptyList()

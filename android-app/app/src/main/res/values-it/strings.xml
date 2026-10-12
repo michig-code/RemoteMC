@@ -240,4 +240,18 @@
     <string name="onboarding_name_text">I tuoi server mostrano questo nome, così sai quale dispositivo ha accesso. Puoi cambiarlo più tardi nelle impostazioni.</string>
     <string name="settings_this_phone">Questo telefono</string>
     <string name="settings_device_name_text">Usato quando associ nuovi server. I server già associati mantengono il loro nome.</string>
+    <string name="servers_pinned">Fissati</string>
+    <string name="servers_pin">Fissa in alto</string>
+    <string name="servers_unpin">Non fissare più</string>
+    <string name="servers_move_to_folder">Sposta in cartella</string>
+    <string name="servers_no_folder">Nessuna cartella</string>
+    <string name="servers_new_folder">Nuova cartella</string>
+    <string name="servers_folder_name">Nome cartella</string>
+    <string name="servers_rename_folder">Rinomina cartella</string>
+    <string name="servers_remove_folder">Rimuovi cartella</string>
+    <string name="servers_remove_folder_text">I server in “%s” restano nella tua lista, solo senza cartella.</string>
+    <string name="servers_search">Cerca per nome o indirizzo</string>
+    <string name="servers_no_match">Nessun server corrisponde a “%s”</string>
+    <string name="servers_folder_expand">Mostra cartella</string>
+    <string name="servers_folder_collapse">Nascondi cartella</string>
 </resources>

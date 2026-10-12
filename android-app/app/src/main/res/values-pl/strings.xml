@@ -247,4 +247,18 @@
     <string name="onboarding_name_text">Serwery wyświetlają tę nazwę, dzięki czemu wiesz, które urządzenie ma dostęp. Możesz ją później zmienić w ustawieniach.</string>
     <string name="settings_this_phone">Ten telefon</string>
     <string name="settings_device_name_text">Używana przy parowaniu nowych serwerów. Już sparowane serwery zachowują swoją nazwę.</string>
+    <string name="servers_pinned">Przypięte</string>
+    <string name="servers_pin">Przypnij na górze</string>
+    <string name="servers_unpin">Odepnij</string>
+    <string name="servers_move_to_folder">Przenieś do folderu</string>
+    <string name="servers_no_folder">Bez folderu</string>
+    <string name="servers_new_folder">Nowy folder</string>
+    <string name="servers_folder_name">Nazwa folderu</string>
+    <string name="servers_rename_folder">Zmień nazwę folderu</string>
+    <string name="servers_remove_folder">Usuń folder</string>
+    <string name="servers_remove_folder_text">Serwery z „%s” zostaną na liście, tylko bez folderu.</string>
+    <string name="servers_search">Szukaj po nazwie lub adresie</string>
+    <string name="servers_no_match">Żaden serwer nie pasuje do „%s”</string>
+    <string name="servers_folder_expand">Pokaż folder</string>
+    <string name="servers_folder_collapse">Ukryj folder</string>
 </resources>
