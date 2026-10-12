@@ -15,15 +15,10 @@
         <path android:fillColor="#81C784" android:pathData="M54,31.5L60.25,34.625L54,37.75L47.75,34.625ZM41.5,44L47.75,47.125L41.5,50.25L35.25,47.125Z" />
         <!-- Prompt >_ -->
         <path
-            android:pathData="M36,60l7,6.5l-7,3M47,73l9,4.5"
-            android:strokeWidth="4"
+            android:pathData="M33,54.10L39,61.96L33,63.82M41.50,69.15L50,73.40"
+            android:strokeWidth="3.6"
             android:strokeColor="#69F0AE"
             android:strokeLineCap="round"
             android:strokeLineJoin="round" />
-        <path
-            android:pathData="M63,74L72,69.5"
-            android:strokeWidth="3"
-            android:strokeColor="#455A64"
-            android:strokeLineCap="round" />
     </group>
 </vector>

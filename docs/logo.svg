@@ -12,8 +12,7 @@
     <path fill="#263238" d="M54,56.5L79,44L79,71L54,83.5Z"/>
     <path fill="#66BB6A" d="M54,31.5L79,44L54,56.5L29,44Z"/>
     <path fill="#81C784" d="M54,31.5L60.25,34.625L54,37.75L47.75,34.625ZM41.5,44L47.75,47.125L41.5,50.25L35.25,47.125Z"/>
-    <path d="M36,60l7,6.5l-7,3M47,73l9,4.5" fill="none" stroke="#69F0AE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M63,74L72,69.5" stroke="#455A64" stroke-width="3" stroke-linecap="round"/>
+    <path d="M33,54.10L39,61.96L33,63.82M41.50,69.15L50,73.40" fill="none" stroke="#69F0AE" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
   </g>
 </svg>
