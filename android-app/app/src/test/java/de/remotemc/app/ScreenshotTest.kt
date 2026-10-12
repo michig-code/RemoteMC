@@ -186,7 +186,7 @@ class ScreenshotTest {
     }
 
     @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen {} }
-    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(), {}, {}) }
+    @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(), {}, {}, versionName = "2.0.0") }
 
     @Test
     @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")

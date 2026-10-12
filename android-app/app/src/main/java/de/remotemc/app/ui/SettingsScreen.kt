@@ -57,7 +57,12 @@ const val SOURCE_URL = "https://github.com/michig-code/main"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit, onBack: () -> Unit) {
+fun SettingsScreen(
+    settings: AppSettings,
+    onChange: ((AppSettings) -> AppSettings) -> Unit,
+    onBack: () -> Unit,
+    versionName: String = BuildConfig.VERSION_NAME,
+) {
     val uri = LocalUriHandler.current
     var licenses by remember { mutableStateOf(false) }
     val currentLanguage = AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore('-')
@@ -129,7 +134,7 @@ fun SettingsScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSetting
                             Column {
                                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleMedium)
                                 Text(
-                                    stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
+                                    stringResource(R.string.settings_version, versionName),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
