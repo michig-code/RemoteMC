@@ -1,6 +1,12 @@
 package de.remotemc.app.ui
 
 import android.annotation.SuppressLint
+import android.os.SystemClock
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -114,7 +120,22 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Last status per server, so the list shows it instantly when you come back to it. */
-private val ProbeCache = java.util.concurrent.ConcurrentHashMap<String, ServerProbe>()
+private val ProbeCache = java.util.concurrent.ConcurrentHashMap<String, Probed>()
+
+private class Probed(val probe: ServerProbe, val at: Long = SystemClock.elapsedRealtime()) {
+    val fresh get() = SystemClock.elapsedRealtime() - at < 2_000
+}
+
+private suspend fun check(server: ServerProfile, probe: suspend (ServerProfile) -> ServerStatus): ServerProbe {
+    val result = try {
+        ServerProbe.Online(probe(server))
+    } catch (e: Exception) {
+        if (e is CancellationException) throw e
+        ServerProbe.Offline(e)
+    }
+    ProbeCache[server.id] = Probed(result)
+    return result
+}
 
 /** Live status shown on a server card. */
 sealed interface ServerProbe {
@@ -164,6 +185,7 @@ private fun buildRows(servers: List<ServerProfile>, query: String, collapsed: Li
 private fun sameSection(a: ServerProfile, b: ServerProfile) =
     a.pinned == b.pinned && (a.pinned || a.folder == b.folder)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServerListScreen(
     servers: List<ServerProfile>,
@@ -193,6 +215,25 @@ fun ServerListScreen(
     val rows = buildRows(servers, query, collapsed)
     val byId = remember(servers) { servers.associateBy { it.id } }
 
+    // Pull down to check all servers again (also those in collapsed folders).
+    var refreshing by remember { mutableStateOf(false) }
+    var refreshTick by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    val refresh: () -> Unit = {
+        if (!refreshing) {
+            refreshing = true
+            haptics.tap()
+            scope.launch {
+                try {
+                    servers.map { async { check(it, probe) } }.awaitAll()
+                } finally {
+                    refreshing = false
+                    refreshTick++
+                }
+            }
+        }
+    }
+
     val listState = rememberLazyListState()
     val reorder = rememberReorderableLazyListState(listState) { from, to ->
         val a = byId[from.key]
@@ -215,7 +256,7 @@ fun ServerListScreen(
             )
         },
     ) { padding ->
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        PullToRefreshBox(refreshing, refresh, Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(
                 Modifier.fillMaxSize().widthIn(max = 720.dp),
                 state = listState,
@@ -264,6 +305,7 @@ fun ServerListScreen(
                                 ServerCard(
                                     server = server,
                                     probe = probe,
+                                    refreshTick = refreshTick,
                                     dragging = dragging,
                                     onOpen = { onOpen(server) },
                                     onRename = { renaming = server },
@@ -508,6 +550,7 @@ private fun ServerCard(
     server: ServerProfile,
     probe: suspend (ServerProfile) -> ServerStatus,
     dragging: Boolean,
+    refreshTick: Int,
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onPin: () -> Unit,
@@ -522,20 +565,20 @@ private fun ServerCard(
     // Keyed on the connection only, so pinning, sorting or renaming does not probe again.
     // Lint misses the assignments inside the loop (false positive).
     @SuppressLint("ProduceStateDoesNotAssignValue")
-    val state by produceState(ProbeCache[server.id] ?: ServerProbe.Loading, server.id, server.baseUrl, server.token, refreshKey) {
-        // Show the last known state right away and refresh it in the background;
-        // only a tap on the status shows "Checking…" again.
-        if (refreshKey > 0 || ProbeCache[server.id] == null) value = ServerProbe.Loading
+    val state by produceState(
+        ProbeCache[server.id]?.probe ?: ServerProbe.Loading,
+        server.id, server.baseUrl, server.token, refreshKey, refreshTick,
+    ) {
+        // Show the last known state right away and refresh it in the background; a tap on the
+        // status shows "Checking…" again. After a pull to refresh the result is already fresh.
+        val cached = ProbeCache[server.id]
+        if (cached != null) value = cached.probe
+        var skipFirst = cached?.fresh == true
+        if (!skipFirst && (refreshKey > 0 || cached == null)) value = ServerProbe.Loading
         while (true) {
-            val result = try {
-                ServerProbe.Online(probe(server))
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                ServerProbe.Offline(e)
-            }
-            ProbeCache[server.id] = result
-            value = result
-            delay(if (result is ServerProbe.Online) 10_000 else 3_000)
+            if (!skipFirst) value = check(server, probe)
+            skipFirst = false
+            delay(if (value is ServerProbe.Online) 10_000 else 3_000)
         }
     }
     val connection = when (state) {
