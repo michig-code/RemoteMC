@@ -24,6 +24,7 @@ import java.net.ConnectException
 import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLHandshakeException
@@ -214,12 +215,20 @@ object Http {
             .build()
     }
 
+    private val pinned = ConcurrentHashMap<Pair<OkHttpClient, String?>, OkHttpClient>()
+
+    /**
+     * Client for one certificate. Reused, so repeated requests (e.g. the status on the server list)
+     * keep their connection open instead of doing a new TCP and TLS handshake each time.
+     */
     fun forProfile(base: OkHttpClient, tls: Boolean, fingerprint: String?): OkHttpClient {
         if (!tls) return base
-        val tm = Tls.PinningTrustManager(fingerprint)
-        return base.newBuilder()
-            .sslSocketFactory(Tls.sslContext(tm).socketFactory, tm)
-            .hostnameVerifier(Tls.hostnameVerifier(fingerprint != null))
-            .build()
+        return pinned.getOrPut(base to fingerprint) {
+            val tm = Tls.PinningTrustManager(fingerprint)
+            base.newBuilder()
+                .sslSocketFactory(Tls.sslContext(tm).socketFactory, tm)
+                .hostnameVerifier(Tls.hostnameVerifier(fingerprint != null))
+                .build()
+        }
     }
 }

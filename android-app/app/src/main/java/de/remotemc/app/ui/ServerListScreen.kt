@@ -108,8 +108,12 @@ import de.remotemc.app.ui.components.tpsColor
 import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.statusTextColor
 import de.remotemc.app.ui.util.rememberHaptics
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+/** Last status per server, so the list shows it instantly when you come back to it. */
+private val ProbeCache = java.util.concurrent.ConcurrentHashMap<String, ServerProbe>()
 
 /** Live status shown on a server card. */
 sealed interface ServerProbe {
@@ -514,18 +518,23 @@ private fun ServerCard(
     var menu by remember { mutableStateOf(false) }
     var refreshKey by remember { mutableIntStateOf(0) }
     val haptics = rememberHaptics()
+    // Keyed on the connection only, so pinning, sorting or renaming does not probe again.
     // Lint misses the assignments inside the loop (false positive).
     @SuppressLint("ProduceStateDoesNotAssignValue")
-    val state by produceState<ServerProbe>(ServerProbe.Loading, server, refreshKey) {
-        value = ServerProbe.Loading
+    val state by produceState(ProbeCache[server.id] ?: ServerProbe.Loading, server.id, server.baseUrl, server.token, refreshKey) {
+        // Show the last known state right away and refresh it in the background;
+        // only a tap on the status shows "Checking…" again.
+        if (refreshKey > 0 || ProbeCache[server.id] == null) value = ServerProbe.Loading
         while (true) {
             val result = try {
                 ServerProbe.Online(probe(server))
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 ServerProbe.Offline(e)
             }
+            ProbeCache[server.id] = result
             value = result
-            delay(15_000)
+            delay(if (result is ServerProbe.Online) 10_000 else 5_000)
         }
     }
     val connection = when (state) {

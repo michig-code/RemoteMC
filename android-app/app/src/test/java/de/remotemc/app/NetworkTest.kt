@@ -5,6 +5,7 @@ import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.net.ApiClient
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.net.EventStream
+import de.remotemc.app.net.Http
 import de.remotemc.app.net.StreamEvent
 import de.remotemc.app.net.Tls
 import kotlinx.coroutines.flow.take
@@ -138,5 +139,13 @@ class NetworkTest {
         assertEquals(1, hello.status.onlinePlayers)
         assertEquals("Hello", (events[1] as StreamEvent.Console).line.message)
         assertEquals("Steve", (events[2] as StreamEvent.Chat).entry.player)
+    }
+
+    @Test
+    fun clientsAreReusedPerCertificate() {
+        val base = okhttp3.OkHttpClient()
+        assertTrue(Http.forProfile(base, true, "abc") === Http.forProfile(base, true, "abc"))
+        assertTrue(Http.forProfile(base, true, "abc") !== Http.forProfile(base, true, "other"))
+        assertTrue(Http.forProfile(base, false, null) === base)
     }
 }
