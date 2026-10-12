@@ -70,8 +70,10 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     val uri = LocalUriHandler.current
     val last = pager.currentPage == pages.lastIndex
 
+    // Surface sets the text colour for the background; without it, plain texts default to black.
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
     Column(
-        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().navigationBarsPadding(),
+        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.End) {
@@ -105,6 +107,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 Text(stringResource(if (last) R.string.onboarding_start else R.string.action_next))
             }
         }
+    }
     }
 }
 
