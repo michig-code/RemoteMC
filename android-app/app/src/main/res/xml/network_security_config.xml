@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Minecraft-Server laufen meist ohne HTTPS (z.B. 192.168.x.x:8765),
+     daher ist unverschlüsseltes HTTP erlaubt. Für Verbindungen über das
+     Internet wird ein HTTPS-Reverse-Proxy empfohlen (siehe README). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

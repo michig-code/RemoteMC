@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Erdblock -->
+    <path android:fillColor="#8D6E63" android:pathData="M30,30h48v48h-48z" />
+    <!-- Grasschicht -->
+    <path android:fillColor="#7CB342" android:pathData="M30,30h48v14h-48z" />
+    <path android:fillColor="#7CB342" android:pathData="M36,44h6v6h-6zM54,44h6v4h-6zM66,44h6v8h-6z" />
+    <!-- Erd-Pixel -->
+    <path android:fillColor="#6D4C41" android:pathData="M38,58h6v6h-6zM58,62h6v6h-6zM46,70h6v4h-6zM68,56h4v4h-4z" />
+</vector>

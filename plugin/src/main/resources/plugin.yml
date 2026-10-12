@@ -1,0 +1,14 @@
+name: McRemote
+version: '${project.version}'
+main: de.mcremote.plugin.McRemotePlugin
+api-version: '1.21'
+description: REST API for the McRemote Android app
+commands:
+  mcremote:
+    description: McRemote connection info and management
+    usage: /mcremote <info|link|newtoken|reload>
+    permission: mcremote.admin
+permissions:
+  mcremote.admin:
+    description: Manage McRemote and view the access token
+    default: op
