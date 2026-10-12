@@ -177,3 +177,31 @@ data class PerformanceHistory(val from: Long, val to: Long, val step: Long, val 
         }
     }
 }
+
+data class Whitelist(val enabled: Boolean, val players: List<String>) {
+    companion object {
+        fun fromJson(o: JSONObject): Whitelist {
+            val arr = o.optJSONArray("players") ?: JSONArray()
+            return Whitelist(o.optBoolean("enabled"), List(arr.length()) { arr.getString(it) })
+        }
+    }
+}
+
+/** A player ban; times in ms, expires null = permanent. */
+data class BanInfo(val name: String, val reason: String?, val source: String?, val created: Long?, val expires: Long?) {
+    companion object {
+        fun listFromJson(o: JSONObject): List<BanInfo> {
+            val arr = o.optJSONArray("bans") ?: JSONArray()
+            return List(arr.length()) {
+                val b = arr.getJSONObject(it)
+                BanInfo(
+                    name = b.getString("name"),
+                    reason = b.optString("reason").takeIf { r -> r.isNotBlank() },
+                    source = b.optString("source").takeIf { r -> r.isNotBlank() },
+                    created = if (b.has("created")) b.getLong("created") else null,
+                    expires = if (b.has("expires")) b.getLong("expires") else null,
+                )
+            }
+        }
+    }
+}

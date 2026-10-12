@@ -339,4 +339,26 @@
     <string name="widget_updated">Updated %s</string>
     <string name="tile_label">Server alerts</string>
     <string name="tile_online" tools:ignore="PluralsCandidate">%1$d/%2$d online</string>
+    <string name="players_tab_online">Online</string>
+    <string name="players_tab_whitelist">Whitelist</string>
+    <string name="players_tab_bans">Banned</string>
+    <string name="whitelist_enabled">Whitelist on</string>
+    <string name="whitelist_enabled_text">Only players on the list can join.</string>
+    <string name="whitelist_disabled_text">Anyone can join. The list is kept for later.</string>
+    <string name="whitelist_name">Player name</string>
+    <string name="whitelist_add">Add</string>
+    <string name="whitelist_empty">Nobody is on the whitelist yet.</string>
+    <string name="whitelist_remove">Remove %s from the whitelist</string>
+    <string name="whitelist_added">%s added to the whitelist</string>
+    <string name="whitelist_removed">%s removed from the whitelist</string>
+    <string name="bans_empty">Nobody is banned.</string>
+    <string name="bans_unban">Unban</string>
+    <string name="bans_unban_confirm">Unban %s?</string>
+    <string name="bans_unban_text">They can join the server again.</string>
+    <string name="bans_unbanned">%s unbanned</string>
+    <string name="bans_since">Banned on %s</string>
+    <string name="bans_until">until %s</string>
+    <string name="bans_by">by %s</string>
+    <string name="error_player_unknown">There is no Minecraft account with this name.</string>
+    <string name="moderation_load_failed">Could not load the list.</string>
 </resources>

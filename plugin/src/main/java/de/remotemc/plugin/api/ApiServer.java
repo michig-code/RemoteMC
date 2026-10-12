@@ -199,11 +199,58 @@ public final class ApiServer {
                 List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
                 return global(() -> Commands.complete(finalBuffer, blocked));
             }
+            case "GET /api/v1/whitelist" -> {
+                require(caller, Role.MODERATOR);
+                return global(Moderation::whitelist);
+            }
+            case "POST /api/v1/whitelist" -> {
+                require(caller, Role.ADMIN);
+                JsonObject body = readBody(ex);
+                if (!body.has("enabled") || !body.get("enabled").isJsonPrimitive()) {
+                    throw ApiException.badRequest("bad_request", "Missing field: enabled");
+                }
+                boolean on = body.get("enabled").getAsBoolean();
+                global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:whitelist " + (on ? "on" : "off")));
+                plugin.audit().log(caller.who(), caller.ip(), "whitelist " + (on ? "on" : "off"));
+                return global(Moderation::whitelist);
+            }
+            case "POST /api/v1/whitelist/add", "POST /api/v1/whitelist/remove" -> {
+                require(caller, Role.MODERATOR);
+                String name = playerName(stringField(readBody(ex), "name", 16));
+                boolean add = path.endsWith("/add");
+                // The vanilla command also looks up players who never joined.
+                boolean listed = global(() -> {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:whitelist " + (add ? "add " : "remove ") + name);
+                    return Moderation.isWhitelisted(name);
+                });
+                if (listed != add) {
+                    throw ApiException.notFound("player_unknown", "No Minecraft account named " + name);
+                }
+                plugin.audit().log(caller.who(), caller.ip(), "whitelist " + (add ? "add " : "remove ") + name);
+                return global(Moderation::whitelist);
+            }
+            case "GET /api/v1/bans" -> {
+                require(caller, Role.MODERATOR);
+                return global(Moderation::bans);
+            }
             case "POST /api/v1/command" -> {
                 require(caller, Role.ADMIN);
                 return runCommand(caller, stringField(readBody(ex), "command", 1024));
             }
             default -> {
+                if (method.equals("POST") && parts.length == 6 && parts[3].equals("bans") && parts[5].equals("pardon")) {
+                    require(caller, Role.MODERATOR);
+                    String name = playerName(parts[4]);
+                    boolean stillBanned = global(() -> {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:pardon " + name);
+                        return Moderation.isBanned(name);
+                    });
+                    if (stillBanned) {
+                        throw new ApiException(500, "action_failed", "Could not unban " + name);
+                    }
+                    plugin.audit().log(caller.who(), caller.ip(), "pardon " + name);
+                    return global(Moderation::bans);
+                }
                 if (method.equals("POST") && parts.length == 6 && parts[3].equals("players")) {
                     return playerAction(caller, parts[4], parts[5], readBody(ex));
                 }
@@ -476,6 +523,13 @@ public final class ApiServer {
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────
+
+    private static String playerName(String name) throws ApiException {
+        if (!PLAYER_NAME.matcher(name).matches()) {
+            throw ApiException.badRequest("bad_request", "Invalid player name");
+        }
+        return name;
+    }
 
     private <T> T global(Supplier<T> task) throws Exception {
         return await(plugin.scheduler().global(task));

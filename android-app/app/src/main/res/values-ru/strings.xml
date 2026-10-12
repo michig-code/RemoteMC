@@ -324,4 +324,26 @@
     <string name="widget_updated">Обновлено %s</string>
     <string name="tile_label">Уведомления серверов</string>
     <string name="tile_online">%1$d/%2$d онлайн</string>
+    <string name="players_tab_online">В сети</string>
+    <string name="players_tab_whitelist">Белый список</string>
+    <string name="players_tab_bans">Забаненные</string>
+    <string name="whitelist_enabled">Белый список включён</string>
+    <string name="whitelist_enabled_text">Заходить могут только игроки из списка.</string>
+    <string name="whitelist_disabled_text">Заходить может любой. Список сохранится на будущее.</string>
+    <string name="whitelist_name">Имя игрока</string>
+    <string name="whitelist_add">Добавить</string>
+    <string name="whitelist_empty">В белом списке пока никого нет.</string>
+    <string name="whitelist_remove">Удалить %s из белого списка</string>
+    <string name="whitelist_added">%s: добавлен в белый список</string>
+    <string name="whitelist_removed">%s: удалён из белого списка</string>
+    <string name="bans_empty">Забаненных нет.</string>
+    <string name="bans_unban">Разбанить</string>
+    <string name="bans_unban_confirm">Разбанить %s?</string>
+    <string name="bans_unban_text">Игрок снова сможет заходить на сервер.</string>
+    <string name="bans_unbanned">%s: разбанен</string>
+    <string name="bans_since">Дата бана: %s</string>
+    <string name="bans_until">до %s</string>
+    <string name="bans_by">кем: %s</string>
+    <string name="error_player_unknown">Аккаунта Minecraft с таким именем нет.</string>
+    <string name="moderation_load_failed">Не удалось загрузить список.</string>
 </resources>

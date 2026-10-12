@@ -208,6 +208,38 @@ class ScreenshotTest {
             androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.padding(16.dp)) { HistoryCard({ data }) }
         }
     }
+    private val moderation = de.remotemc.app.ui.ModerationActions(
+        whitelist = { de.remotemc.app.data.Whitelist(true, listOf("Alex_Builds", "flatsch", "Micheeee14", "Notch")) },
+        setWhitelist = { error("unused") },
+        addToWhitelist = { error("unused") },
+        removeFromWhitelist = { error("unused") },
+        bans = {
+            listOf(
+                de.remotemc.app.data.BanInfo("Griefer123", "Griefing at spawn", "Micheeee14", 1_760_000_000_000L, null),
+                de.remotemc.app.data.BanInfo("SpamBot", "Spam", "Server", 1_759_000_000_000L, 1_762_000_000_000L),
+            )
+        },
+        pardon = { error("unused") },
+    )
+
+    @Test fun whitelist() = shot("21_whitelist") {
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            de.remotemc.app.ui.PlayersSection(
+                ServerUiState("Survival", status, players, console, chat, Connection.LIVE, null, false, Role.ADMIN),
+                ServerActions({}, {}, {}, {}, { _, _, _, _ -> }, {}, moderation = moderation), initialView = 1,
+            )
+        }
+    }
+
+    @Test fun bans() = shot("22_bans") {
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            de.remotemc.app.ui.PlayersSection(
+                ServerUiState("Survival", status, players, console, chat, Connection.LIVE, null, false, Role.ADMIN),
+                ServerActions({}, {}, {}, {}, { _, _, _, _ -> }, {}, moderation = moderation), initialView = 2,
+            )
+        }
+    }
+
     @Test fun accentBlue() = shot("18_accent_blue", hue = 212f, content = list())
     @Test fun accentPurpleLight() = shot("19_accent_purple_light", dark = false, hue = 275f) { server(Tab.Dashboard) }
     @Test fun settingsCustomColour() = shot("14b_settings_orange", hue = 24f) {

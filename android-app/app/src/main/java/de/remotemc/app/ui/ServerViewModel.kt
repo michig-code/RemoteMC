@@ -170,6 +170,15 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     }
 
     /** Fills gaps after (re)connecting. */
+    val moderation = ModerationActions(
+        whitelist = { api.whitelist() },
+        setWhitelist = { api.setWhitelist(it) },
+        addToWhitelist = { api.whitelistAdd(it) },
+        removeFromWhitelist = { api.whitelistRemove(it) },
+        bans = { api.bans() },
+        pardon = { api.pardon(it) },
+    )
+
     /** Performance history for the dashboard chart. */
     suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)
 

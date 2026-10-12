@@ -1,5 +1,6 @@
 package de.remotemc.app.net
 
+import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.CommandResult
@@ -12,6 +13,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
+import de.remotemc.app.data.Whitelist
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -47,6 +49,16 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     /** Performance history (plugin 1.0+ with history enabled; otherwise an [ApiError.Http] 404). */
     suspend fun history(range: HistoryRange): PerformanceHistory =
         PerformanceHistory.fromJson(call("GET", "/api/v1/history?range=${range.param}"))
+    suspend fun whitelist(): Whitelist = Whitelist.fromJson(call("GET", "/api/v1/whitelist"))
+    suspend fun setWhitelist(enabled: Boolean): Whitelist =
+        Whitelist.fromJson(call("POST", "/api/v1/whitelist", JSONObject().put("enabled", enabled)))
+    suspend fun whitelistAdd(name: String): Whitelist =
+        Whitelist.fromJson(call("POST", "/api/v1/whitelist/add", JSONObject().put("name", name)))
+    suspend fun whitelistRemove(name: String): Whitelist =
+        Whitelist.fromJson(call("POST", "/api/v1/whitelist/remove", JSONObject().put("name", name)))
+    suspend fun bans(): List<BanInfo> = BanInfo.listFromJson(call("GET", "/api/v1/bans"))
+    suspend fun pardon(name: String): List<BanInfo> =
+        BanInfo.listFromJson(call("POST", "/api/v1/bans/${java.net.URLEncoder.encode(name, "UTF-8")}/pardon"))
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 
     suspend fun console(since: Long): List<ConsoleLine> {

@@ -71,12 +71,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import de.remotemc.app.R
+import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.data.Whitelist
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.ui.components.ConnectionState
 import de.remotemc.app.ui.components.StatusPill
@@ -120,6 +122,18 @@ class ServerActions(
     val onForgetCommand: (String) -> Unit = {},
     /** Loads the performance history; null hides the chart. */
     val loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
+    /** Whitelist and ban list (moderators and admins); null hides them. */
+    val moderation: ModerationActions? = null,
+)
+
+/** Calls for the whitelist and ban list; each returns the updated list. */
+class ModerationActions(
+    val whitelist: suspend () -> Whitelist,
+    val setWhitelist: suspend (Boolean) -> Whitelist,
+    val addToWhitelist: suspend (String) -> Whitelist,
+    val removeFromWhitelist: suspend (String) -> Whitelist,
+    val bans: suspend () -> List<BanInfo>,
+    val pardon: suspend (String) -> List<BanInfo>,
 )
 
 @Composable
@@ -162,6 +176,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onCommandInput = vm::onCommandInput,
             onForgetCommand = vm::forgetCommand,
             loadHistory = vm::performance,
+            moderation = vm.moderation,
         ),
         snackbar = snackbar,
     )
@@ -286,9 +301,7 @@ fun ServerScreenContent(
                             Tab.Dashboard -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
                                 DashboardTab(state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory)
                             }
-                            Tab.Players -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
-                                PlayersTab(state.players, state.role, actions.onPlayerAction)
-                            }
+                            Tab.Players -> PlayersSection(state, actions)
                             Tab.Console -> ConsoleTab(
                                 entries = state.console,
                                 canRunCommands = state.role.atLeast(Role.ADMIN) && state.commandsEnabled,

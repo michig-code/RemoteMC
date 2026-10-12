@@ -308,4 +308,26 @@
     <string name="widget_updated">Güncellendi %s</string>
     <string name="tile_label">Sunucu bildirimleri</string>
     <string name="tile_online">%1$d/%2$d çevrimiçi</string>
+    <string name="players_tab_online">Çevrimiçi</string>
+    <string name="players_tab_whitelist">Beyaz liste</string>
+    <string name="players_tab_bans">Yasaklılar</string>
+    <string name="whitelist_enabled">Beyaz liste açık</string>
+    <string name="whitelist_enabled_text">Yalnızca listedeki oyuncular katılabilir.</string>
+    <string name="whitelist_disabled_text">Herkes katılabilir. Liste daha sonrası için saklanır.</string>
+    <string name="whitelist_name">Oyuncu adı</string>
+    <string name="whitelist_add">Ekle</string>
+    <string name="whitelist_empty">Beyaz listede henüz kimse yok.</string>
+    <string name="whitelist_remove">%s oyuncusunu beyaz listeden çıkar</string>
+    <string name="whitelist_added">Beyaz listeye eklendi: %s</string>
+    <string name="whitelist_removed">Beyaz listeden çıkarıldı: %s</string>
+    <string name="bans_empty">Yasaklı kimse yok.</string>
+    <string name="bans_unban">Yasağı kaldır</string>
+    <string name="bans_unban_confirm">%s için yasak kaldırılsın mı?</string>
+    <string name="bans_unban_text">Sunucuya yeniden katılabilir.</string>
+    <string name="bans_unbanned">Yasak kaldırıldı: %s</string>
+    <string name="bans_since">Yasaklanma: %s</string>
+    <string name="bans_until">%s tarihine kadar</string>
+    <string name="bans_by">Yasaklayan: %s</string>
+    <string name="error_player_unknown">Bu adla bir Minecraft hesabı yok.</string>
+    <string name="moderation_load_failed">Liste yüklenemedi.</string>
 </resources>

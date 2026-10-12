@@ -316,4 +316,26 @@
     <string name="widget_updated">Atualizado %s</string>
     <string name="tile_label">Alertas de servidores</string>
     <string name="tile_online">%1$d/%2$d online</string>
+    <string name="players_tab_online">Online</string>
+    <string name="players_tab_whitelist">Lista de permissões</string>
+    <string name="players_tab_bans">Banidos</string>
+    <string name="whitelist_enabled">Lista de permissões ativada</string>
+    <string name="whitelist_enabled_text">Só jogadores da lista podem entrar.</string>
+    <string name="whitelist_disabled_text">Qualquer um pode entrar. A lista fica guardada para depois.</string>
+    <string name="whitelist_name">Nome do jogador</string>
+    <string name="whitelist_add">Adicionar</string>
+    <string name="whitelist_empty">Ninguém está na lista de permissões ainda.</string>
+    <string name="whitelist_remove">Remover %s da lista de permissões</string>
+    <string name="whitelist_added">%s adicionado à lista de permissões</string>
+    <string name="whitelist_removed">%s removido da lista de permissões</string>
+    <string name="bans_empty">Ninguém está banido.</string>
+    <string name="bans_unban">Desbanir</string>
+    <string name="bans_unban_confirm">Desbanir %s?</string>
+    <string name="bans_unban_text">O jogador poderá entrar no servidor novamente.</string>
+    <string name="bans_unbanned">%s desbanido</string>
+    <string name="bans_since">Banido em %s</string>
+    <string name="bans_until">até %s</string>
+    <string name="bans_by">por %s</string>
+    <string name="error_player_unknown">Não existe nenhuma conta do Minecraft com este nome.</string>
+    <string name="moderation_load_failed">Não foi possível carregar a lista.</string>
 </resources>

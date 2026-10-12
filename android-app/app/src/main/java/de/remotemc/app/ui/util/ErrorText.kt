@@ -19,6 +19,7 @@ fun Context.errorText(e: Throwable): String = when (e) {
         "forbidden" -> getString(R.string.error_forbidden)
         "command_blocked" -> getString(R.string.error_command_blocked)
         "player_offline" -> getString(R.string.error_player_offline)
+        "player_unknown" -> getString(R.string.error_player_unknown)
         "too_large" -> getString(R.string.error_too_large)
         "too_many_streams" -> getString(R.string.error_too_many_streams)
         "timeout" -> getString(R.string.error_server_timeout)

@@ -33,7 +33,8 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 ## Features
 - **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
   players, memory and MSPT over the last hour, day or week
-- **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort
+- **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort;
+  whitelist and ban list with unban
 - **Console** – coloured live server log, commands with their output, suggestions while typing
   (from the server's own tab completion) and your recently used commands
 - **Server list** – hold and drag to sort or to move servers between folders, pin to the top, search by name or address
@@ -128,6 +129,11 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | GET | `/api/v1/status` | viewer | TPS, MSPT, memory, players, worlds |
 | GET | `/api/v1/history?range=1h\|24h\|7d` | viewer | Up to 360 averaged points: `[time, tps, mspt, memoryMb, players]` |
 | GET | `/api/v1/players` | viewer | Online players |
+| GET | `/api/v1/whitelist` | moderator | `{"enabled", "players"}` |
+| POST | `/api/v1/whitelist` | admin | `{"enabled"}` turns it on or off |
+| POST | `/api/v1/whitelist/add` · `/remove` | moderator | `{"name"}` |
+| GET | `/api/v1/bans` | moderator | Player bans with reason, source, created, expires |
+| POST | `/api/v1/bans/<name>/pardon` | moderator | Unban |
 | GET | `/api/v1/chat?since=<id>` | viewer | Chat, joins and leaves |
 | GET | `/api/v1/events` | viewer | Server-Sent Events: `hello`, `status`, `chat`, `console` (moderator+) |
 | GET | `/api/v1/console?since=<id>` | moderator | Console lines |

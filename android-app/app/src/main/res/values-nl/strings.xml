@@ -308,4 +308,26 @@
     <string name="widget_updated">Bijgewerkt %s</string>
     <string name="tile_label">Servermeldingen</string>
     <string name="tile_online">%1$d/%2$d online</string>
+    <string name="players_tab_online">Online</string>
+    <string name="players_tab_whitelist">Whitelist</string>
+    <string name="players_tab_bans">Verbannen</string>
+    <string name="whitelist_enabled">Whitelist aan</string>
+    <string name="whitelist_enabled_text">Alleen spelers op de lijst kunnen joinen.</string>
+    <string name="whitelist_disabled_text">Iedereen kan joinen. De lijst blijft bewaard voor later.</string>
+    <string name="whitelist_name">Spelernaam</string>
+    <string name="whitelist_add">Toevoegen</string>
+    <string name="whitelist_empty">Er staat nog niemand op de whitelist.</string>
+    <string name="whitelist_remove">%s van de whitelist verwijderen</string>
+    <string name="whitelist_added">%s toegevoegd aan de whitelist</string>
+    <string name="whitelist_removed">%s verwijderd van de whitelist</string>
+    <string name="bans_empty">Niemand is verbannen.</string>
+    <string name="bans_unban">Unbannen</string>
+    <string name="bans_unban_confirm">%s unbannen?</string>
+    <string name="bans_unban_text">Deze speler kan weer op de server joinen.</string>
+    <string name="bans_unbanned">%s unbanned</string>
+    <string name="bans_since">Verbannen op %s</string>
+    <string name="bans_until">tot %s</string>
+    <string name="bans_by">door %s</string>
+    <string name="error_player_unknown">Er bestaat geen Minecraft-account met deze naam.</string>
+    <string name="moderation_load_failed">Kan de lijst niet laden.</string>
 </resources>
