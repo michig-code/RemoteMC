@@ -52,7 +52,7 @@ import de.remotemc.app.R
 import de.remotemc.app.ui.components.AppLogo
 import kotlinx.coroutines.launch
 
-const val PLUGIN_DOWNLOAD_URL = "https://github.com/michig-code/main/releases/latest"
+const val PLUGIN_DOWNLOAD_URL = "https://github.com/michig-code/RemoteMC/releases/latest"
 
 private data class Page(val icon: ImageVector?, val title: Int, val text: Int, val command: String? = null)
 

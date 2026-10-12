@@ -53,7 +53,7 @@ import de.remotemc.app.ui.components.AppLogo
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.SectionTitle
 
-const val SOURCE_URL = "https://github.com/michig-code/main"
+const val SOURCE_URL = "https://github.com/michig-code/RemoteMC"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

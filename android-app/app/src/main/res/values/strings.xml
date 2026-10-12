@@ -16,7 +16,6 @@
     <string name="action_save">Save</string>
     <string name="action_send">Send</string>
     <string name="action_skip">Skip</string>
-    <string name="action_undo">Undo</string>
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_title">Your server in your pocket</string>
@@ -168,8 +167,6 @@
     <string name="chat_empty_title">Quiet here</string>
     <string name="chat_empty_text">Chat messages, joins and leaves appear here live.</string>
     <string name="chat_input_hint">Message to all players…</string>
-    <string name="chat_sending">Sending to all players…</string>
-    <string name="chat_cancelled">Message cancelled</string>
     <string name="chat_joined">%s joined</string>
     <string name="chat_left">%s left</string>
     <string name="chat_from_server">Server · %s</string>

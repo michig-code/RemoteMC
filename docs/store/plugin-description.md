@@ -29,4 +29,4 @@ watch performance, read the live console, chat with players and run commands –
 | `/remotemc token list` / `revoke <name>` | Paired devices / revoke access |
 | `/remotemc reload` | Reload the config |
 
-Alias: `/rmc`. Source code and app download: https://github.com/michig-code/main
+Alias: `/rmc`. Source code and app download: https://github.com/michig-code/RemoteMC

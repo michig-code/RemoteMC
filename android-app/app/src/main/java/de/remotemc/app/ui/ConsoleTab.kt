@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -102,19 +103,20 @@ fun ConsoleTab(
     val scope = rememberCoroutineScope()
     val haptics = rememberHaptics()
 
+    // The list is laid out from the bottom (reverseLayout): when the keyboard opens and the
+    // terminal gets smaller, the newest lines stay visible – like in a messenger.
+    val reversed = entries.asReversed()
     val atBottom by remember {
-        derivedStateOf {
-            val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            last >= listState.layoutInfo.totalItemsCount - 2
-        }
+        derivedStateOf { listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 48 }
     }
-    // Follow new output while the user is at the bottom.
-    var initialScrollDone by rememberSaveable { mutableStateOf(false) }
+    // Follow new output unless the user scrolled up to read older lines.
+    var follow by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress to atBottom }
+            .collect { (scrolling, bottom) -> if (scrolling) follow = bottom }
+    }
     LaunchedEffect(entries.size) {
-        if (entries.isNotEmpty() && (atBottom || !initialScrollDone)) {
-            listState.scrollToItem(entries.size - 1)
-            initialScrollDone = true
-        }
+        if (follow && entries.isNotEmpty()) listState.scrollToItem(0)
     }
 
     fun setInput(text: String) {
@@ -155,8 +157,14 @@ fun ConsoleTab(
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
-                items(entries, key = { it.key }) { line -> ConsoleLineView(line) }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(12.dp),
+                reverseLayout = true,
+                verticalArrangement = Arrangement.Top, // short logs start at the top like before
+            ) {
+                items(reversed, key = { it.key }) { line -> ConsoleLineView(line) }
             }
             androidx.compose.animation.AnimatedVisibility(
                 visible = !atBottom && entries.isNotEmpty(),
@@ -165,7 +173,10 @@ fun ConsoleTab(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
             ) {
                 SmallFloatingActionButton(
-                    onClick = { scope.launch { listState.animateScrollToItem(entries.size - 1) } },
+                    onClick = {
+                        follow = true
+                        scope.launch { listState.animateScrollToItem(0) }
+                    },
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.console_scroll_down)) }
             }

@@ -47,8 +47,11 @@ import java.util.Date
 fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) -> Unit, skins: Map<String, String> = emptyMap()) {
     var input by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
+    // Laid out from the bottom so the newest messages stay visible when the keyboard opens.
+    val reversed = entries.asReversed()
     LaunchedEffect(entries.size) {
-        if (entries.isNotEmpty()) listState.animateScrollToItem(entries.size - 1)
+        val nearBottom = listState.firstVisibleItemIndex <= 1
+        if (entries.isNotEmpty() && nearBottom) listState.animateScrollToItem(0)
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -62,8 +65,9 @@ fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) ->
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
+                reverseLayout = true,
             ) {
-                items(entries, key = { "${it.id}-${it.time}" }) { entry ->
+                items(reversed, key = { "${it.id}-${it.time}" }) { entry ->
                     when (entry.type) {
                         ChatEntry.Type.JOIN, ChatEntry.Type.QUIT -> SystemLine(entry, Modifier.animateItem())
                         else -> ChatBubble(entry, skins[entry.player], Modifier.animateItem())

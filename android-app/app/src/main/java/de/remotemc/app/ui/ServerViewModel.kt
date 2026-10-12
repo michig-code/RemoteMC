@@ -90,7 +90,6 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     private var localCounter = 0L
     private val historyMutex = Mutex()
     private val reconnect = Channel<Unit>(Channel.CONFLATED)
-    private var pendingBroadcast: Job? = null
 
     private val messageChannel = Channel<UiText>(Channel.BUFFERED)
     val messages = messageChannel.receiveAsFlow()
@@ -308,23 +307,16 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         usageHint = null
     }
 
-    /** Sends after a short delay so the message can still be undone from the snackbar. */
+    /** Sends right away; the message shows up in the chat via the live stream. */
     fun broadcast(message: String) {
         if (message.isBlank()) return
-        pendingBroadcast?.cancel()
-        pendingBroadcast = viewModelScope.launch {
-            delay(UNDO_WINDOW_MS)
+        viewModelScope.launch {
             try {
                 api.broadcast(message)
             } catch (e: Exception) {
                 messageChannel.send(UiText.Error(e))
             }
         }
-    }
-
-    fun cancelBroadcast() {
-        pendingBroadcast?.cancel()
-        pendingBroadcast = null
     }
 
     fun playerAction(player: String, action: String, body: JSONObject = JSONObject(), success: UiText) {
@@ -337,9 +329,5 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 messageChannel.send(UiText.Error(e))
             }
         }
-    }
-
-    companion object {
-        const val UNDO_WINDOW_MS = 4_000L
     }
 }

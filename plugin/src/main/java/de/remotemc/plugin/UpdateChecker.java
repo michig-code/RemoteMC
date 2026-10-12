@@ -12,7 +12,7 @@ import java.time.Duration;
 /** Looks up the latest GitHub release once at startup (off the main thread). */
 final class UpdateChecker {
 
-    static final String RELEASES_API = "https://api.github.com/repos/michig-code/main/releases/latest";
+    static final String RELEASES_API = "https://api.github.com/repos/michig-code/RemoteMC/releases/latest";
 
     record Update(String version, String url) {}
 
@@ -21,7 +21,9 @@ final class UpdateChecker {
     /** Returns the newer release, or null if up to date / unreachable. */
     static Update check(String currentVersion) {
         try {
-            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5))
+                    .followRedirects(HttpClient.Redirect.NORMAL) // survives repository renames
+                    .build();
             HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASES_API))
                     .timeout(Duration.ofSeconds(10))
                     .header("Accept", "application/vnd.github+json")

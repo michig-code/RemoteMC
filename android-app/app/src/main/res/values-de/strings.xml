@@ -13,7 +13,6 @@
     <string name="action_save">Speichern</string>
     <string name="action_send">Senden</string>
     <string name="action_skip">Überspringen</string>
-    <string name="action_undo">Rückgängig</string>
 
     <string name="onboarding_welcome_title">Dein Server in der Hosentasche</string>
     <string name="onboarding_welcome_text">Sieh, wer online ist, behalte die Leistung im Blick, chatte mit Spielern und führe Befehle aus – live und verschlüsselt.</string>
@@ -155,8 +154,6 @@
     <string name="chat_empty_title">Noch ruhig hier</string>
     <string name="chat_empty_text">Chatnachrichten, Beitritte und Abmeldungen erscheinen hier live.</string>
     <string name="chat_input_hint">Nachricht an alle Spieler…</string>
-    <string name="chat_sending">Wird an alle Spieler gesendet…</string>
-    <string name="chat_cancelled">Nachricht abgebrochen</string>
     <string name="chat_joined">%s ist beigetreten</string>
     <string name="chat_left">%s hat das Spiel verlassen</string>
     <string name="chat_from_server">Server · %s</string>

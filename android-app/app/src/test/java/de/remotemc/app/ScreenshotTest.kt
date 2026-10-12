@@ -84,7 +84,7 @@ class ScreenshotTest {
         ChatEntry(4, 3000, ChatEntry.Type.BROADCAST, "Pixel 8", "Restart at 4:00 am"),
         ChatEntry(5, 4000, ChatEntry.Type.QUIT, "Notch", ""),
     )
-    private val actions = ServerActions({}, {}, {}, {}, {}, { _, _, _, _ -> }, {})
+    private val actions = ServerActions({}, {}, {}, {}, { _, _, _, _ -> }, {})
     private val servers = listOf(
         ServerProfile(name = "Survival", host = "mc.example.com", token = "x"),
         ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", role = Role.MODERATOR),

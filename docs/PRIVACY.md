@@ -16,4 +16,4 @@ RemoteMC (the Android app and the server plugin) does not collect, sell or share
   (time, device name, IP address, action) in the plugin folder on your server.
 - Checks GitHub once at startup for a newer release (can be disabled with `update-check: false`).
 
-Questions: open an issue at https://github.com/michig-code/main/issues
+Questions: open an issue at https://github.com/michig-code/RemoteMC/issues

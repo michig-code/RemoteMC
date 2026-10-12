@@ -4,7 +4,7 @@ main: de.remotemc.plugin.RemoteMCPlugin
 api-version: '1.20'
 folia-supported: true
 description: Manage your server from your phone with the RemoteMC app
-website: https://github.com/michig-code/main
+website: https://github.com/michig-code/RemoteMC
 commands:
   remotemc:
     description: Pair the RemoteMC app and manage access

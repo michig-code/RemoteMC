@@ -43,10 +43,8 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -57,7 +55,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,7 +81,6 @@ import de.remotemc.app.ui.components.StatusPill
 import de.remotemc.app.ui.util.UiText
 import de.remotemc.app.ui.util.errorText
 import de.remotemc.app.ui.util.rememberHaptics
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 enum class Tab(@StringRes val label: Int, val icon: ImageVector, val minRole: Role) {
@@ -116,7 +112,6 @@ class ServerActions(
     val onRefresh: () -> Unit,
     val onCommand: (String) -> Unit,
     val onBroadcast: (String) -> Unit,
-    val onUndoBroadcast: () -> Unit,
     val onPlayerAction: (player: String, action: String, body: JSONObject, success: UiText) -> Unit,
     val onRepair: () -> Unit,
     val onCommandInput: (String) -> Unit = {},
@@ -158,7 +153,6 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onRefresh = vm::refresh,
             onCommand = vm::runCommand,
             onBroadcast = vm::broadcast,
-            onUndoBroadcast = vm::cancelBroadcast,
             onPlayerAction = { p, a, b, s -> vm.playerAction(p, a, b, s) },
             onRepair = onRepair,
             onCommandInput = vm::onCommandInput,
@@ -181,7 +175,6 @@ fun ServerScreenContent(
     val tab = if (selected in tabs) selected else Tab.Dashboard
     val wide = LocalConfiguration.current.screenWidthDp >= 600
     val haptics = rememberHaptics()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val connection = when (state.connection) {
@@ -200,17 +193,6 @@ fun ServerScreenContent(
     val broadcast: (String) -> Unit = { message ->
         actions.onBroadcast(message)
         haptics.success()
-        scope.launch {
-            val result = snackbar.showSnackbar(
-                context.getString(R.string.chat_sending),
-                actionLabel = context.getString(R.string.action_undo),
-                duration = SnackbarDuration.Short,
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                actions.onUndoBroadcast()
-                snackbar.showSnackbar(context.getString(R.string.chat_cancelled))
-            }
-        }
     }
 
     Scaffold(

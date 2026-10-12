@@ -11,7 +11,7 @@ Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kost
 </p>
 
 ## Einrichtung
-1. **Plugin:** `RemoteMC-x.y.z.jar` aus den [Releases](https://github.com/michig-code/main/releases) in den
+1. **Plugin:** `RemoteMC-x.y.z.jar` aus den [Releases](https://github.com/michig-code/RemoteMC/releases) in den
    `plugins/`-Ordner legen und den Server neu starten (Paper, Purpur, Folia oder Spigot ab 1.20.6).
 2. **Port:** TCP-Port **8765** in Firewall/Router freigeben – oder in `plugins/RemoteMC/config.yml` unter
    `api.port` einen Zusatzport deines Hosters eintragen und `/remotemc reload` ausführen.

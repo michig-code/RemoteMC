@@ -28,7 +28,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 - **Polish** – light/dark theme, Material You, tablet layout, English & German, haptics, accessibility
 
 ## Quick start
-1. **Plugin:** download `RemoteMC-x.y.z.jar` from the [releases](https://github.com/michig-code/main/releases),
+1. **Plugin:** download `RemoteMC-x.y.z.jar` from the [releases](https://github.com/michig-code/RemoteMC/releases),
    put it into `plugins/` and restart the server.
 2. **Port:** open TCP port **8765** in your firewall/router (or set `api.port` to an extra port your host gives you).
 3. **App:** install `RemoteMC-App-x.y.z.apk` from the releases (allow “install unknown apps”).
