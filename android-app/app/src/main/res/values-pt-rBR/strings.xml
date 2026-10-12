@@ -265,4 +265,38 @@
     <string name="color_red">Vermelho</string>
     <string name="color_orange">Laranja</string>
     <string name="color_gold">Dourado</string>
+    <string name="settings_notifications">Notificações</string>
+    <string name="settings_notify_enable">Notificações em segundo plano</string>
+    <string name="settings_notify_enable_text">O RemoteMC fica conectado aos seus servidores e avisa você. Uma pequena notificação permanente aparece enquanto ele está ativo.</string>
+    <string name="settings_notify_permission">As notificações estão bloqueadas. Permita-as para o RemoteMC nas configurações do sistema.</string>
+    <string name="settings_notify_offline">Servidor offline ou online de novo</string>
+    <string name="settings_notify_offline_text">Após 30 segundos sem conexão</string>
+    <string name="settings_notify_tps">TPS baixo</string>
+    <string name="settings_notify_tps_text">Abaixo de %d TPS</string>
+    <string name="settings_notify_joins">Entrada de jogadores</string>
+    <string name="settings_notify_players">Apenas estes jogadores</string>
+    <string name="settings_notify_players_hint">Nomes separados por vírgulas; vazio = todos</string>
+    <string name="settings_notify_mentions">Menções no chat</string>
+    <string name="settings_notify_words">Palavras para monitorar</string>
+    <string name="settings_notify_words_hint">Ex.: seu nome, separadas por vírgulas</string>
+    <string name="servers_notify_on">Ativar notificações</string>
+    <string name="servers_notify_off">Desativar notificações</string>
+    <string name="servers_notify_muted">Notificações desativadas</string>
+    <string name="channel_status">Status do servidor</string>
+    <string name="channel_performance">Desempenho</string>
+    <string name="channel_players">Jogadores</string>
+    <string name="channel_chat">Menções no chat</string>
+    <string name="channel_watcher">Conexão em segundo plano</string>
+    <string name="notif_offline_title">%s está offline</string>
+    <string name="notif_offline_text">Sem conexão há 30 segundos.</string>
+    <string name="notif_online_title">%s está online de novo</string>
+    <string name="notif_tps_title">%s está com lag</string>
+    <string name="notif_tps_text">%.1f TPS</string>
+    <string name="notif_join_title">%1$s entrou em %2$s</string>
+    <string name="notif_mention_title">%1$s em %2$s</string>
+    <plurals name="notif_watching">
+        <item quantity="one">Monitorando %d servidor</item>
+        <item quantity="many">Monitorando %d servidores</item>
+        <item quantity="other">Monitorando %d servidores</item>
+    </plurals>
 </resources>

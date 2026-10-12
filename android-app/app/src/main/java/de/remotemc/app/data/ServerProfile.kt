@@ -30,6 +30,8 @@ data class ServerProfile(
     val pinned: Boolean = false,
     /** Folder in the server list; blank = no folder. */
     val folder: String = "",
+    /** Background notifications for this server (when they are on in the settings). */
+    val notify: Boolean = true,
 ) {
     val baseUrl: String
         get() {
@@ -57,6 +59,7 @@ data class ServerProfile(
         .put("deviceName", deviceName)
         .put("pinned", pinned)
         .put("folder", folder)
+        .put("notify", notify)
 
     companion object {
         fun fromJson(o: JSONObject) = ServerProfile(
@@ -72,6 +75,7 @@ data class ServerProfile(
             deviceName = o.optString("deviceName"),
             pinned = o.optBoolean("pinned", false),
             folder = o.optString("folder"),
+            notify = o.optBoolean("notify", true),
         )
     }
 }

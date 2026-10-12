@@ -195,6 +195,17 @@ class ScreenshotTest {
     @Test fun settingsCustomColour() = shot("14b_settings_orange", hue = 24f) {
         SettingsScreen(AppSettings(deviceName = "Pixel 8", accentHue = 24f), {}, {}, versionName = "1.0.0")
     }
+    @Test
+    @Config(qualifiers = "de-w400dp-h2400dp-xxhdpi")
+    fun settingsNotifications() = shot("14c_settings_notifications_de") {
+        SettingsScreen(
+            AppSettings(
+                deviceName = "Pixel 8",
+                alerts = de.remotemc.app.data.AlertSettings(enabled = true, joins = true, players = "flatsch, Micheeee14", words = "Michi"),
+            ),
+            {}, {}, versionName = "1.0.0",
+        )
+    }
     @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "1.0.0") }
 
     @Test

@@ -272,4 +272,39 @@
     <string name="color_red">Красный</string>
     <string name="color_orange">Оранжевый</string>
     <string name="color_gold">Золотой</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_notify_enable">Фоновые уведомления</string>
+    <string name="settings_notify_enable_text">RemoteMC остаётся подключённым к вашим серверам и оповещает вас. Пока он работает, отображается небольшое постоянное уведомление.</string>
+    <string name="settings_notify_permission">Уведомления заблокированы. Разрешите их для RemoteMC в настройках системы.</string>
+    <string name="settings_notify_offline">Сервер офлайн или снова онлайн</string>
+    <string name="settings_notify_offline_text">После 30 секунд без соединения</string>
+    <string name="settings_notify_tps">Низкий TPS</string>
+    <string name="settings_notify_tps_text">Ниже %d TPS</string>
+    <string name="settings_notify_joins">Вход игроков</string>
+    <string name="settings_notify_players">Только эти игроки</string>
+    <string name="settings_notify_players_hint">Имена через запятую; пусто = все</string>
+    <string name="settings_notify_mentions">Упоминания в чате</string>
+    <string name="settings_notify_words">Отслеживаемые слова</string>
+    <string name="settings_notify_words_hint">Например, ваше имя, через запятую</string>
+    <string name="servers_notify_on">Включить уведомления</string>
+    <string name="servers_notify_off">Выключить уведомления</string>
+    <string name="servers_notify_muted">Уведомления выключены</string>
+    <string name="channel_status">Статус сервера</string>
+    <string name="channel_performance">Производительность</string>
+    <string name="channel_players">Игроки</string>
+    <string name="channel_chat">Упоминания в чате</string>
+    <string name="channel_watcher">Фоновое соединение</string>
+    <string name="notif_offline_title">%s офлайн</string>
+    <string name="notif_offline_text">Нет соединения 30 секунд.</string>
+    <string name="notif_online_title">%s снова онлайн</string>
+    <string name="notif_tps_title">%s лагает</string>
+    <string name="notif_tps_text">%.1f TPS</string>
+    <string name="notif_join_title">%1$s теперь на %2$s</string>
+    <string name="notif_mention_title">%1$s на %2$s</string>
+    <plurals name="notif_watching">
+        <item quantity="one">Отслеживается %d сервер</item>
+        <item quantity="few">Отслеживаются %d сервера</item>
+        <item quantity="many">Отслеживаются %d серверов</item>
+        <item quantity="other">Отслеживаются %d сервера</item>
+    </plurals>
 </resources>

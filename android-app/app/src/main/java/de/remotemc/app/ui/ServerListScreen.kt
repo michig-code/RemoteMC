@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CreateNewFolder
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.FolderOff
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Search
@@ -159,6 +161,8 @@ fun ServerListScreen(
     onRenameFolder: (old: String, new: String) -> Unit = { _, _ -> },
     onRemoveFolder: (String) -> Unit = {},
     onReorder: (List<ServerProfile>) -> Unit = {},
+    onToggleNotify: (ServerProfile) -> Unit = {},
+    alertsOn: Boolean = false,
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
     initialQuery: String = "",
 ) {
@@ -269,6 +273,8 @@ fun ServerListScreen(
                                     onRename = { renaming = server },
                                     onPin = { onPin(server, !server.pinned) },
                                     onMoveToFolder = { moving = server },
+                                    alertsOn = alertsOn,
+                                    onToggleNotify = { onToggleNotify(server) },
                                     onRepair = { onRepair(server) },
                                     onDelete = { deleting = server },
                                     // Hold a server to drag it; not while searching, the list is filtered then.
@@ -513,6 +519,8 @@ private fun ServerCard(
     onRename: () -> Unit,
     onPin: () -> Unit,
     onMoveToFolder: () -> Unit,
+    alertsOn: Boolean,
+    onToggleNotify: () -> Unit,
     onRepair: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -582,6 +590,13 @@ private fun ServerCard(
                                 Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary,
                             )
                         }
+                        if (alertsOn && !server.notify) {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                Icons.Outlined.NotificationsOff, stringResource(R.string.servers_notify_muted),
+                                Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         if (server.role != Role.ADMIN) {
                             Spacer(Modifier.width(6.dp))
                             Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
@@ -603,6 +618,15 @@ private fun ServerCard(
                             leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
                             onClick = { menu = false; onPin() },
                         )
+                        if (alertsOn) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(if (server.notify) R.string.servers_notify_off else R.string.servers_notify_on)) },
+                                leadingIcon = {
+                                    Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null)
+                                },
+                                onClick = { menu = false; onToggleNotify() },
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.servers_move_to_folder)) },
                             leadingIcon = { Icon(Icons.AutoMirrored.Outlined.DriveFileMove, null) },

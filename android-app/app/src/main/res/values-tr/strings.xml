@@ -258,4 +258,37 @@
     <string name="color_red">Kırmızı</string>
     <string name="color_orange">Turuncu</string>
     <string name="color_gold">Altın</string>
+    <string name="settings_notifications">Bildirimler</string>
+    <string name="settings_notify_enable">Arka plan bildirimleri</string>
+    <string name="settings_notify_enable_text">RemoteMC sunucularına bağlı kalır ve seni uyarır. Çalışırken küçük, kalıcı bir bildirim görünür.</string>
+    <string name="settings_notify_permission">Bildirimler engellendi. Sistem ayarlarından RemoteMC için izin ver.</string>
+    <string name="settings_notify_offline">Sunucu çevrimdışı veya tekrar çevrimiçi</string>
+    <string name="settings_notify_offline_text">30 saniye bağlantı olmadığında</string>
+    <string name="settings_notify_tps">Düşük TPS</string>
+    <string name="settings_notify_tps_text">%d TPS\'nin altında</string>
+    <string name="settings_notify_joins">Oyuncu katılımları</string>
+    <string name="settings_notify_players">Yalnızca bu oyuncular</string>
+    <string name="settings_notify_players_hint">Adları virgülle ayır; boş = herkes</string>
+    <string name="settings_notify_mentions">Sohbette bahsedilmeler</string>
+    <string name="settings_notify_words">Takip edilecek kelimeler</string>
+    <string name="settings_notify_words_hint">Ör. adın, virgülle ayrılmış</string>
+    <string name="servers_notify_on">Bildirimleri aç</string>
+    <string name="servers_notify_off">Bildirimleri kapat</string>
+    <string name="servers_notify_muted">Bildirimler kapalı</string>
+    <string name="channel_status">Sunucu durumu</string>
+    <string name="channel_performance">Performans</string>
+    <string name="channel_players">Oyuncular</string>
+    <string name="channel_chat">Sohbette bahsedilmeler</string>
+    <string name="channel_watcher">Arka plan bağlantısı</string>
+    <string name="notif_offline_title">%s çevrimdışı</string>
+    <string name="notif_offline_text">30 saniyedir bağlantı yok.</string>
+    <string name="notif_online_title">%s tekrar çevrimiçi</string>
+    <string name="notif_tps_title">%s kasıyor</string>
+    <string name="notif_tps_text">%.1f TPS</string>
+    <string name="notif_join_title">%1$s, %2$s sunucusuna katıldı</string>
+    <string name="notif_mention_title">%1$s, %2$s üzerinde</string>
+    <plurals name="notif_watching">
+        <item quantity="one">%d sunucu izleniyor</item>
+        <item quantity="other">%d sunucu izleniyor</item>
+    </plurals>
 </resources>

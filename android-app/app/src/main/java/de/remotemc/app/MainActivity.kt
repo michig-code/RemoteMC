@@ -33,6 +33,7 @@ import androidx.navigation.navArgument
 import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ThemeMode
+import de.remotemc.app.notify.WatchService
 import de.remotemc.app.data.suggestedDeviceName
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
@@ -114,6 +115,12 @@ private fun AppNavigation(
     val context = LocalContext.current
     val repo = context.app.servers
     val servers by repo.servers.collectAsState()
+    val settings by context.app.settings.settings.collectAsState()
+
+    // Background notifications: start the service while the app is open; it stops itself when not needed.
+    LaunchedEffect(settings.alerts.enabled, servers.map { it.id to it.notify }) {
+        WatchService.sync(context)
+    }
 
     LaunchedEffect(pendingLink, pendingServer) {
         when {
@@ -166,6 +173,8 @@ private fun AppNavigation(
                 onRenameFolder = repo::renameFolder,
                 onRemoveFolder = repo::removeFolder,
                 onReorder = repo::setOrder,
+                onToggleNotify = { repo.upsert(it.copy(notify = !it.notify)) },
+                alertsOn = settings.alerts.enabled,
             )
         }
         composable(

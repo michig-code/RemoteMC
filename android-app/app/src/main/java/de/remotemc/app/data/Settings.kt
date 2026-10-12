@@ -17,7 +17,25 @@ data class AppSettings(
     val deviceName: String = "",
     /** Hue (0–360) of the app's colour theme; null = the classic RemoteMC green. */
     val accentHue: Float? = null,
+    val alerts: AlertSettings = AlertSettings(),
 )
+
+/** What to be notified about while the app is in the background. */
+data class AlertSettings(
+    val enabled: Boolean = false,
+    val offline: Boolean = true,
+    val lowTps: Boolean = true,
+    val tpsThreshold: Int = 15,
+    val joins: Boolean = false,
+    /** Comma-separated player names for join alerts; empty = everyone. */
+    val players: String = "",
+    val mentions: Boolean = true,
+    /** Comma-separated words that count as a mention, e.g. your name. */
+    val words: String = "",
+) {
+    val playerList get() = players.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    val wordList get() = words.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+}
 
 class SettingsStore(private val prefs: SharedPreferences) {
 
@@ -34,6 +52,16 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putBoolean("onboardingDone", next.onboardingDone)
             putString("deviceName", next.deviceName)
             putFloat("accentHue", next.accentHue ?: -1f)
+            next.alerts.let {
+                putBoolean("alerts.enabled", it.enabled)
+                putBoolean("alerts.offline", it.offline)
+                putBoolean("alerts.lowTps", it.lowTps)
+                putInt("alerts.tpsThreshold", it.tpsThreshold)
+                putBoolean("alerts.joins", it.joins)
+                putString("alerts.players", it.players)
+                putBoolean("alerts.mentions", it.mentions)
+                putString("alerts.words", it.words)
+            }
         }
     }
 
@@ -44,6 +72,16 @@ class SettingsStore(private val prefs: SharedPreferences) {
         onboardingDone = prefs.getBoolean("onboardingDone", false),
         deviceName = prefs.getString("deviceName", "").orEmpty(),
         accentHue = prefs.getFloat("accentHue", -1f).takeIf { it >= 0f },
+        alerts = AlertSettings(
+            enabled = prefs.getBoolean("alerts.enabled", false),
+            offline = prefs.getBoolean("alerts.offline", true),
+            lowTps = prefs.getBoolean("alerts.lowTps", true),
+            tpsThreshold = prefs.getInt("alerts.tpsThreshold", 15),
+            joins = prefs.getBoolean("alerts.joins", false),
+            players = prefs.getString("alerts.players", "").orEmpty(),
+            mentions = prefs.getBoolean("alerts.mentions", true),
+            words = prefs.getString("alerts.words", "").orEmpty(),
+        ),
     )
 }
 

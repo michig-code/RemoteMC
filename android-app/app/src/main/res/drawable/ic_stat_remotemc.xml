@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar icon: the logo block in one colour -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="56"
+    android:viewportHeight="56">
+    <group android:translateX="-26" android:translateY="-28.5">
+        <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.6" android:pathData="M29,44L54,56.5L54,83.5L29,71Z" />
+        <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.4" android:pathData="M54,56.5L79,44L79,71L54,83.5Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M54,31.5L79,44L54,56.5L29,44Z" />
+    </group>
+</vector>

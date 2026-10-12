@@ -1,6 +1,17 @@
 package de.remotemc.app.ui
 
 import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import de.remotemc.app.data.AlertSettings
+import kotlin.math.roundToInt
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -163,6 +174,11 @@ fun SettingsScreen(
                             AccentPicker(settings.accentHue) { hue -> onChange { it.copy(accentHue = hue) } }
                         }
                     }
+                }
+
+                SectionTitle(stringResource(R.string.settings_notifications))
+                McCard(Modifier.fillMaxWidth()) {
+                    AlertSettingsCard(settings.alerts) { change -> onChange { it.copy(alerts = change(it.alerts)) } }
                 }
 
                 SectionTitle(stringResource(R.string.settings_language))
@@ -353,5 +369,90 @@ private fun Swatch(fill: Brush, label: String, selected: Boolean, onClick: () ->
         contentAlignment = Alignment.Center,
     ) {
         if (selected) Icon(Icons.Default.Check, null, tint = Color.White)
+    }
+}
+
+@Composable
+private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) -> AlertSettings) -> Unit) {
+    val context = LocalContext.current
+    var blocked by remember { mutableStateOf(!NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        blocked = !granted
+        if (granted) onChange { it.copy(enabled = true) }
+    }
+    Column(Modifier.padding(vertical = 8.dp)) {
+        SwitchRow(
+            stringResource(R.string.settings_notify_enable),
+            stringResource(R.string.settings_notify_enable_text),
+            alerts.enabled,
+        ) { on ->
+            if (on && Build.VERSION.SDK_INT >= 33 &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                onChange { it.copy(enabled = on) }
+            }
+        }
+        if (alerts.enabled && blocked) {
+            Text(
+                stringResource(R.string.settings_notify_permission),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
+        AnimatedVisibility(alerts.enabled) {
+            Column {
+                HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                SwitchRow(
+                    stringResource(R.string.settings_notify_offline),
+                    stringResource(R.string.settings_notify_offline_text),
+                    alerts.offline,
+                ) { v -> onChange { it.copy(offline = v) } }
+                SwitchRow(
+                    stringResource(R.string.settings_notify_tps),
+                    stringResource(R.string.settings_notify_tps_text, alerts.tpsThreshold),
+                    alerts.lowTps,
+                ) { v -> onChange { it.copy(lowTps = v) } }
+                if (alerts.lowTps) {
+                    Slider(
+                        value = alerts.tpsThreshold.toFloat(),
+                        onValueChange = { v -> onChange { it.copy(tpsThreshold = v.roundToInt()) } },
+                        valueRange = 5f..19f,
+                        steps = 13,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+                SwitchRow(
+                    stringResource(R.string.settings_notify_joins),
+                    stringResource(R.string.settings_notify_players_hint),
+                    alerts.joins,
+                ) { v -> onChange { it.copy(joins = v) } }
+                if (alerts.joins) {
+                    OutlinedTextField(
+                        value = alerts.players,
+                        onValueChange = { v -> onChange { it.copy(players = v.take(300)) } },
+                        label = { Text(stringResource(R.string.settings_notify_players)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    )
+                }
+                SwitchRow(
+                    stringResource(R.string.settings_notify_mentions),
+                    stringResource(R.string.settings_notify_words_hint),
+                    alerts.mentions,
+                ) { v -> onChange { it.copy(mentions = v) } }
+                if (alerts.mentions) {
+                    OutlinedTextField(
+                        value = alerts.words,
+                        onValueChange = { v -> onChange { it.copy(words = v.take(300)) } },
+                        label = { Text(stringResource(R.string.settings_notify_words)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    )
+                }
+            }
+        }
     }
 }

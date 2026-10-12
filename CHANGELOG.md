@@ -27,5 +27,8 @@ First public release of **RemoteMC**.
   and actions; coloured console with your recent commands and Minecraft-like suggestions; chat
 - Server list: hold a server and drag it to sort it, into or out of a folder, from folder to
   folder or into "Pinned"; pin servers to the top, group them in folders, search by name or address
+- Background notifications (optional): server offline / back online, low TPS, player joins
+  (all or chosen players) and chat mentions; per server on or off. Works without Google
+  services through a live connection with a small permanent notification
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)

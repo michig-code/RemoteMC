@@ -258,4 +258,37 @@
     <string name="color_red">Rood</string>
     <string name="color_orange">Oranje</string>
     <string name="color_gold">Goud</string>
+    <string name="settings_notifications">Meldingen</string>
+    <string name="settings_notify_enable">Meldingen op de achtergrond</string>
+    <string name="settings_notify_enable_text">RemoteMC blijft verbonden met je servers en waarschuwt je. Zolang dit actief is, staat er een kleine permanente melding.</string>
+    <string name="settings_notify_permission">Meldingen zijn geblokkeerd. Sta ze toe voor RemoteMC in de systeeminstellingen.</string>
+    <string name="settings_notify_offline">Server offline of weer online</string>
+    <string name="settings_notify_offline_text">Na 30 seconden zonder verbinding</string>
+    <string name="settings_notify_tps">Lage TPS</string>
+    <string name="settings_notify_tps_text">Onder %d TPS</string>
+    <string name="settings_notify_joins">Spelers die joinen</string>
+    <string name="settings_notify_players">Alleen deze spelers</string>
+    <string name="settings_notify_players_hint">Namen gescheiden door komma\'s; leeg = iedereen</string>
+    <string name="settings_notify_mentions">Vermeldingen in de chat</string>
+    <string name="settings_notify_words">Woorden om in de gaten te houden</string>
+    <string name="settings_notify_words_hint">Bijv. je naam, gescheiden door komma\'s</string>
+    <string name="servers_notify_on">Meldingen aanzetten</string>
+    <string name="servers_notify_off">Meldingen uitzetten</string>
+    <string name="servers_notify_muted">Meldingen uit</string>
+    <string name="channel_status">Serverstatus</string>
+    <string name="channel_performance">Prestaties</string>
+    <string name="channel_players">Spelers</string>
+    <string name="channel_chat">Vermeldingen in de chat</string>
+    <string name="channel_watcher">Achtergrondverbinding</string>
+    <string name="notif_offline_title">%s is offline</string>
+    <string name="notif_offline_text">30 seconden geen verbinding.</string>
+    <string name="notif_online_title">%s is weer online</string>
+    <string name="notif_tps_title">%s laggt</string>
+    <string name="notif_tps_text">%.1f TPS</string>
+    <string name="notif_join_title">%1$s is %2$s gejoind</string>
+    <string name="notif_mention_title">%1$s op %2$s</string>
+    <plurals name="notif_watching">
+        <item quantity="one">%d server in de gaten gehouden</item>
+        <item quantity="other">%d servers in de gaten gehouden</item>
+    </plurals>
 </resources>

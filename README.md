@@ -36,6 +36,8 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 - **Console** – coloured live server log, commands with their output, suggestions while typing
   (from the server's own tab completion) and your recently used commands
 - **Server list** – hold and drag to sort or to move servers between folders, pin to the top, search by name or address
+- **Notifications** – server offline or back online, low TPS, player joins, mentions in chat
+  (optional; a live connection in the background, no Google services needed)
 - **Chat** – chat, joins and leaves as they happen; send messages to all players
 - **Pairing in seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
 - **Security** – built-in HTTPS with certificate pinning, one token per device (stored hashed on the
