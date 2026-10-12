@@ -1,107 +1,137 @@
-# RemoteMC – Minecraft-Server per Android-App verwalten
+# RemoteMC
 
-Dieses Repository enthält zwei Teile:
+Manage your Minecraft server from your phone – live, encrypted and free.
+**[Deutsche Version](README.de.md)**
 
-| Ordner | Inhalt |
+| Folder | What it is |
 |---|---|
-| [`plugin/`](plugin) | Paper-Plugin (1.21+), das eine abgesicherte REST-API auf deinem Server öffnet |
-| [`android-app/`](android-app) | Android-App (Kotlin / Jetpack Compose, ab Android 8), die sich mit dieser API verbindet |
+| [`plugin/`](plugin) | Server plugin for Paper, Purpur, Folia and Spigot (Minecraft 1.20.6 – 26.x) |
+| [`android-app/`](android-app) | Android app (Android 8+, Kotlin / Jetpack Compose) |
 
 <p>
-  <img src="docs/screenshots/01_list.png" width="200" alt="Serverliste">
-  <img src="docs/screenshots/03_dashboard.png" width="200" alt="Übersicht">
-  <img src="docs/screenshots/05_players.png" width="200" alt="Spieler">
-  <img src="docs/screenshots/06_console.png" width="200" alt="Konsole">
-  <img src="docs/screenshots/07_chat.png" width="200" alt="Chat">
-  <img src="docs/screenshots/04_dashboard_light.png" width="200" alt="Heller Modus">
+  <img src="docs/screenshots/01_servers.png" width="190" alt="Server list">
+  <img src="docs/screenshots/03_dashboard.png" width="190" alt="Dashboard">
+  <img src="docs/screenshots/05_players.png" width="190" alt="Players">
+  <img src="docs/screenshots/06_console.png" width="190" alt="Console">
+  <img src="docs/screenshots/12_pair_confirm.png" width="190" alt="Pairing">
 </p>
 
-## Funktionen der App
+## Features
+- **Dashboard** – TPS gauge, MSPT, memory, uptime, TPS history and worlds, updated live
+- **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort
+- **Console** – live server log, commands with their output, quick commands
+- **Chat** – chat, joins and leaves as they happen; broadcast with undo
+- **Pairing in seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
+- **Security** – built-in HTTPS with certificate pinning, one token per device (stored hashed on the
+  server, encrypted in the Android Keystore on the phone), roles, lockout, audit log
+- **Polish** – light/dark theme, Material You, tablet layout, English & German, haptics, accessibility
 
-- **Serverliste:** Live-Status jedes Servers (online/offline, Spieler, TPS), mehrere Server, Einrichtung per Link
-- **Übersicht:** animierte TPS-Anzeige, MSPT, Arbeitsspeicher, Laufzeit, TPS-Verlauf (1/5/15 min), Welten
-- **Spieler:** Spielerköpfe, Position, Leben, Spielmodus und Ping. Per Antippen: Nachricht, Heilen, OP, Spielmodus, Kicken, Bannen
-- **Konsole:** Live-Konsole mit Zeitstempeln und Farben, Befehle mit Rückgabe, Schnellbefehle
-- **Chat:** Chatverlauf als Sprechblasen, Nachrichten an alle senden
-- **Aktualisieren:** auf den Online/Offline-Status tippen oder nach unten ziehen
-- Eigenes Logo, Splash-Screen, Animationen, dunkles und helles Design (folgt der Systemeinstellung)
+## Quick start
+1. **Plugin:** download `RemoteMC-x.y.z.jar` from the [releases](https://github.com/michig-code/main/releases),
+   put it into `plugins/` and restart the server.
+2. **Port:** open TCP port **8765** in your firewall/router (or set `api.port` to an extra port your host gives you).
+3. **App:** install `RemoteMC-App-x.y.z.apk` from the releases (allow “install unknown apps”).
+4. **Pair:** run `/remotemc pair` in game or in the console and scan the QR code with the app.
+   Without a camera: tap “Enter code” and type the address, port and 6-digit code.
 
-## Installation
+> Upgrading from McRemote 1.x? Remove `McRemote-1.0.0.jar`. RemoteMC takes over its config and token on first start.
 
-### 1. Plugin auf dem Server
+## Commands
+Permission `remotemc.admin` (default: OP), alias `/rmc`.
 
-1. Bauen: `cd plugin && mvn package` → `plugin/target/RemoteMC-1.0.0.jar`
-   (oder die fertige Datei aus dem GitHub-Actions-Artefakt **RemoteMC-plugin** nehmen)
-2. Die JAR in den Ordner `plugins/` deines **Paper**-Servers (oder Purpur/Pufferfish) legen und den Server starten.
-3. Beim ersten Start wird `plugins/RemoteMC/config.yml` angelegt und ein zufälliger **Token** erzeugt.
-4. Den Port (Standard **8765**, TCP) in der Firewall freigeben. Für den Zugriff von außerhalb deines Heimnetzes zusätzlich eine Portweiterleitung im Router einrichten.
+| Command | Description |
+|---|---|
+| `/remotemc pair [admin\|moderator\|viewer]` | One-time pairing code + QR code (default role: admin) |
+| `/remotemc info` | API status, port, certificate fingerprint, paired devices |
+| `/remotemc token create <name> [role]` | Token for scripts or manual setup (shown once) |
+| `/remotemc token list` | Paired devices and when they were last used |
+| `/remotemc token revoke <name>` | Revoke a device's access |
+| `/remotemc reload` | Reload `config.yml` |
 
-### 2. App auf dem Handy
+### Roles
+| Role | Can |
+|---|---|
+| viewer | see status, players and chat |
+| moderator | + read the console, chat, message / heal / game mode / kick / ban players |
+| admin | + run console commands, OP / DeOP |
 
-1. Bauen: `cd android-app && ./gradlew assembleRelease` → `app/build/outputs/apk/release/app-release.apk`
-   (oder das Artefakt **RemoteMC-app** aus GitHub Actions nehmen)
-2. Die APK aufs Handy kopieren und installieren („Installation aus unbekannten Quellen“ erlauben).
-
-### 3. Verbinden
-
-**Variante A – per Link (empfohlen):**
-Im Spiel oder in der Konsole `/remotemc link` eingeben. Mit einem Klick auf den Link landet er in der Zwischenablage. In der App auf **+ Server** → **Link aus Zwischenablage** tippen → **Speichern**.
-Öffnest du den Link direkt auf dem Handy, startet die App automatisch mit den richtigen Daten.
-
-**Variante B – manuell:** Adresse/IP, Port und Token (aus `/remotemc info` oder der `config.yml`) eintragen.
-
-Tippe vor dem Speichern auf **Verbindung testen**.
-
-## Konfiguration (`plugins/RemoteMC/config.yml`)
-
+## Configuration (`plugins/RemoteMC/config.yml`)
 ```yaml
+language: en              # en, de
 api:
-  host: 0.0.0.0          # Interface, auf dem gelauscht wird
-  port: 8765             # API-Port
-  public-address: ""     # Domain/IP für /remotemc link (leer = server-ip)
-  token: "..."           # wird automatisch erzeugt
-
+  host: 0.0.0.0
+  port: 8765
+  public-address: ""      # domain/IP for QR codes; empty = server-ip or LAN address
+  tls: true               # built-in HTTPS; only disable behind your own HTTPS reverse proxy
 security:
-  max-failed-attempts: 5 # falsche Tokens bis zur Sperre
-  lockout-seconds: 300   # Sperrdauer pro IP
-  allow-commands: true   # Konsolenbefehle aus der App erlauben
-  blocked-commands:      # Befehle, die die App nicht ausführen darf
-    - stop
-    - restart
-
+  max-failed-attempts: 5
+  lockout-seconds: 300
+  pairing-code-minutes: 5
+  allow-commands: true
+  blocked-commands: [stop, restart]
 console:
-  buffer-size: 500       # zwischengespeicherte Konsolenzeilen
+  buffer-size: 500
+audit-log: true
+update-check: true
 ```
 
-Nach Änderungen: `/remotemc reload`
+## Security
+- Traffic is encrypted with TLS. The plugin creates its own certificate (`tls.p12`); the QR code contains
+  its SHA-256 fingerprint, so the app trusts exactly that certificate. When pairing by hand, the app shows a
+  short code (e.g. `AB12-CD34`) to compare with the server console.
+- Each phone gets its own token. The server stores only hashes; revoke a phone with `/remotemc token revoke`.
+- If the certificate ever changes, the app refuses to connect and asks you to pair again.
+- Deleting `tls.p12` creates a new certificate – all devices then have to pair again.
+- Behind a reverse proxy, all requests come from the proxy's IP; the lockout then applies to everyone.
 
-### Befehle (Permission `remotemc.admin`, Standard: OP)
+## Compatibility
+Tested with the end-to-end suite in [`plugin/integration-test`](plugin/integration-test):
 
-| Befehl | Beschreibung |
+| Server | Result |
 |---|---|
-| `/remotemc info` | Status, Port und Token (Token anklicken = kopieren) |
-| `/remotemc link` | Verbindungslink für die App |
-| `/remotemc newtoken` | Neuen Token erzeugen; alte Verbindungen werden ungültig |
-| `/remotemc reload` | Config neu laden und API neu starten |
+| Paper 1.20.6 | ✅ all API and player checks |
+| Paper 1.21.4 | ✅ all API and player checks |
+| Paper 26.3 (Java 25) | ✅ all API checks |
+| Folia 1.21.4 | ✅ all checks; TPS is not reported (Folia ticks per region) |
+| Spigot 1.21.4 | ✅ all checks; no TPS, command output appears in the console stream |
 
-## Sicherheit
+## API
+JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>", "message": "…"}`.
 
-- Jede Anfrage braucht den Token (`Authorization: Bearer <token>`). Nach zu vielen Fehlversuchen wird die IP gesperrt.
-- Der Token hat **volle Konsolenrechte**. Gib ihn nicht weiter. Falls er doch bekannt wird: `/remotemc newtoken`.
-- Die API spricht standardmäßig **unverschlüsseltes HTTP**. Im Heimnetz ist das in Ordnung. Über das Internet sollte HTTPS davor:
-  zum Beispiel ein Reverse-Proxy (Caddy/nginx) auf eine Domain oder ein Tunnel (Tailscale, Cloudflare Tunnel). In der App dann **HTTPS** aktivieren und den Proxy-Port eintragen.
-  Beispiel mit Caddy: `mc-api.example.de { reverse_proxy 127.0.0.1:8765 }`
-
-## API-Referenz
-
-| Methode | Pfad | Body | Beschreibung |
+| Method | Path | Role | Description |
 |---|---|---|---|
-| GET | `/api/ping` | – | Plugin-Version (ohne Token) |
-| GET | `/api/status` | – | TPS, RAM, Spielerzahl, Welten |
-| GET | `/api/players` | – | Online-Spieler |
-| GET | `/api/console?since=<id>` | – | Neue Konsolenzeilen |
-| POST | `/api/command` | `{"command":"time set day"}` | Befehl ausführen, Ausgabe zurück |
-| POST | `/api/chat` | `{"message":"Hallo"}` | Broadcast an alle |
-| POST | `/api/players/<name>/<aktion>` | je nach Aktion | `kick`, `ban` (`reason`), `op`, `deop`, `heal`, `gamemode` (`mode`), `message` (`message`) |
+| GET | `/api/v1/ping` | – | Plugin version and API version |
+| POST | `/api/v1/pair` | – | `{"code","device"}` → `{"token","name","role"}` |
+| GET | `/api/v1/me` | viewer | Name and role of this token |
+| GET | `/api/v1/status` | viewer | TPS, MSPT, memory, players, worlds |
+| GET | `/api/v1/players` | viewer | Online players |
+| GET | `/api/v1/chat?since=<id>` | viewer | Chat, joins and leaves |
+| GET | `/api/v1/events` | viewer | Server-Sent Events: `hello`, `status`, `chat`, `console` (moderator+) |
+| GET | `/api/v1/console?since=<id>` | moderator | Console lines |
+| POST | `/api/v1/chat` | moderator | `{"message"}` broadcast |
+| POST | `/api/v1/players/<name>/<action>` | moderator | `kick`, `ban` (`reason`), `heal`, `gamemode` (`mode`), `message` (`message`); `op`/`deop` need admin |
+| POST | `/api/v1/command` | admin | `{"command"}` → `{"success","output"}` |
 
-Beispiel: `curl -H "Authorization: Bearer TOKEN" http://server:8765/api/status`
+## Development
+```bash
+cd plugin && mvn package                      # plugin + unit tests → target/RemoteMC-*.jar
+cd android-app && ./gradlew lintDebug testDebugUnitTest assembleRelease
+./gradlew testDebugUnitTest -Proborazzi.test.record=true   # update screenshots after UI changes
+```
+CI (`.github/workflows/build.yml`) runs unit tests, an end-to-end test against a real Paper server,
+Android lint and a screenshot comparison.
+
+### Releasing
+Push a tag like `v2.0.1`. The release workflow builds both parts, creates a GitHub release and – if
+configured – publishes the plugin to Modrinth and Hangar.
+
+| Secret / variable | Purpose |
+|---|---|
+| `RMC_KEYSTORE_BASE64`, `RMC_KEYSTORE_PASSWORD`, `RMC_KEY_ALIAS`, `RMC_KEY_PASSWORD` | Sign the APK (otherwise a debug key is used) |
+| `MODRINTH_TOKEN` + variable `MODRINTH_PROJECT_ID` | Upload to Modrinth |
+| `HANGAR_TOKEN` + variable `HANGAR_PROJECT` | Upload to Hangar |
+
+SpigotMC has no upload API; upload the jar there by hand. Store texts are in [`docs/store`](docs/store),
+the privacy policy in [`docs/PRIVACY.md`](docs/PRIVACY.md).
+
+RemoteMC is not affiliated with Mojang or Microsoft.

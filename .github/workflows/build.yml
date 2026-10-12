@@ -15,12 +15,39 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
-      - run: mvn -B package
+      - name: Build and unit tests
+        run: mvn -B package
         working-directory: plugin
       - uses: actions/upload-artifact@v4
         with:
           name: RemoteMC-plugin
           path: plugin/target/RemoteMC-*.jar
+          if-no-files-found: error
+
+  plugin-e2e:
+    # Starts a real Paper server with the plugin and runs the API checks against it.
+    needs: plugin
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: mvn -B -q package -DskipTests
+        working-directory: plugin
+      - name: Paper 1.21.4 end-to-end
+        working-directory: plugin/integration-test
+        run: |
+          ./mkserver.sh paper 1.21.4 "$RUNNER_TEMP/paper"
+          ./srv.sh start "$RUNNER_TEMP/paper" &
+          ./srv.sh wait "$RUNNER_TEMP/paper"
+          python3 apitest.py "$RUNNER_TEMP/paper"
+      - name: Server log
+        if: always()
+        run: tail -n 200 "$RUNNER_TEMP/paper/server.log" || true
 
   android:
     runs-on: ubuntu-latest
@@ -31,9 +58,19 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew assembleRelease
+      - name: Lint, unit tests and screenshot comparison
+        run: ./gradlew lintDebug testDebugUnitTest -Proborazzi.test.verify=true
+        working-directory: android-app
+      - name: Release build
+        run: ./gradlew assembleRelease
         working-directory: android-app
       - uses: actions/upload-artifact@v4
         with:
           name: RemoteMC-app
           path: android-app/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshot-diffs
+          path: android-app/app/build/outputs/roborazzi

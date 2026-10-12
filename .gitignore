@@ -5,3 +5,7 @@ android-app/app/build/
 android-app/local.properties
 .idea/
 *.iml
+
+# integration test bot
+plugin/integration-test/bot/node_modules/
+plugin/integration-test/bot/package-lock.json

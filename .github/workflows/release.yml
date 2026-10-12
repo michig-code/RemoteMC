@@ -1,0 +1,85 @@
+name: Release
+
+# Push a tag like v2.0.0 to publish the plugin and the app.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      # Optional: set these secrets/variables to also publish the plugin there.
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build plugin
+        working-directory: plugin
+        run: mvn -B package -Drevision="${GITHUB_REF_NAME#v}"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build app (signed when the keystore secrets are set)
+        working-directory: android-app
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RMC_KEYSTORE_BASE64 }}
+          RMC_KEYSTORE_PASSWORD: ${{ secrets.RMC_KEYSTORE_PASSWORD }}
+          RMC_KEY_ALIAS: ${{ secrets.RMC_KEY_ALIAS }}
+          RMC_KEY_PASSWORD: ${{ secrets.RMC_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            export RMC_KEYSTORE_FILE="$RUNNER_TEMP/release.jks"
+          else
+            echo "::warning::No signing secrets set – the APK is signed with a debug key."
+          fi
+          ./gradlew assembleRelease -Prmc.version="${GITHUB_REF_NAME#v}"
+          cp app/build/outputs/apk/release/app-release.apk "../RemoteMC-App-${GITHUB_REF_NAME#v}.apk"
+
+      - name: GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            plugin/target/RemoteMC-*.jar
+            RemoteMC-App-*.apk
+
+      - name: Publish plugin to Modrinth
+        if: ${{ env.MODRINTH_TOKEN != '' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: plugin/target/RemoteMC-*.jar
+          loaders: paper purpur folia spigot bukkit
+          game-versions: ">=1.20.6"
+          version: ${{ github.ref_name }}
+          changelog-file: CHANGELOG.md
+
+      - name: Publish plugin to Hangar
+        if: ${{ env.HANGAR_TOKEN != '' }}
+        env:
+          HANGAR_PROJECT: ${{ vars.HANGAR_PROJECT }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          JWT=$(curl -sf -X POST "https://hangar.papermc.io/api/v1/authenticate?apiKey=$HANGAR_TOKEN" | jq -r .token)
+          JAR=$(ls plugin/target/RemoteMC-*.jar | grep -v original)
+          jq -n --arg v "$VERSION" '{version: $v, channel: "Release", description: "See GitHub release notes",
+            files: [{platforms: ["PAPER"]}], pluginDependencies: {}, platformDependencies: {PAPER: ["1.20.6-1.21.11"]}}' > meta.json
+          curl -sf -X POST "https://hangar.papermc.io/api/v1/projects/$HANGAR_PROJECT/upload" \
+            -H "Authorization: $JWT" \
+            -F "versionUpload=@meta.json;type=application/json" \
+            -F "files=@$JAR"
