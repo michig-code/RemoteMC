@@ -3,6 +3,8 @@ package de.remotemc.app.net
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.CommandResult
+import de.remotemc.app.data.HistoryRange
+import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.PairResult
 import de.remotemc.app.data.PlayerInfo
@@ -42,6 +44,9 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     suspend fun ping(): PingInfo = ping(client, profile.baseUrl)
     suspend fun me(): Session = Session.fromJson(call("GET", "/api/v1/me"))
     suspend fun status(): ServerStatus = ServerStatus.fromJson(call("GET", "/api/v1/status"))
+    /** Performance history (plugin 1.0+ with history enabled; otherwise an [ApiError.Http] 404). */
+    suspend fun history(range: HistoryRange): PerformanceHistory =
+        PerformanceHistory.fromJson(call("GET", "/api/v1/history?range=${range.param}"))
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 
     suspend fun console(since: Long): List<ConsoleLine> {

@@ -17,6 +17,7 @@ import de.remotemc.plugin.live.ChatBuffer;
 import de.remotemc.plugin.live.ConsoleBuffer;
 import de.remotemc.plugin.live.EventHub;
 import de.remotemc.plugin.live.Formatting;
+import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -151,6 +152,18 @@ public final class ApiServer {
             }
             case "GET /api/v1/status" -> {
                 return global(() -> plugin.snapshots().status());
+            }
+            case "GET /api/v1/history" -> {
+                History history = plugin.history();
+                if (history == null) {
+                    throw new ApiException(404, "history_disabled", "The performance history is turned off in the config");
+                }
+                long range = switch (String.valueOf(param(ex, "range"))) {
+                    case "1h" -> 60L * 60 * 1000;
+                    case "7d" -> History.KEEP_MS;
+                    default -> 24L * 60 * 60 * 1000;
+                };
+                return history.json(range, 360, System.currentTimeMillis());
             }
             case "GET /api/v1/players" -> {
                 JsonObject o = new JsonObject();
@@ -502,6 +515,19 @@ public final class ApiServer {
             }
         }
         return "";
+    }
+
+    private static String param(HttpExchange ex, String key) {
+        String q = ex.getRequestURI().getRawQuery();
+        if (q != null) {
+            for (String pair : q.split("&")) {
+                String[] kv = pair.split("=", 2);
+                if (kv[0].equals(key) && kv.length > 1) {
+                    return kv[1];
+                }
+            }
+        }
+        return null;
     }
 
     private static long longParam(HttpExchange ex, String key) {

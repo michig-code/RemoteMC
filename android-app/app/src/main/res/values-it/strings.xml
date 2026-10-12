@@ -299,4 +299,15 @@
         <item quantity="many">Monitoraggio di %d server</item>
         <item quantity="other">Monitoraggio di %d server</item>
     </plurals>
+    <string name="history_title">Cronologia</string>
+    <string name="history_1h">1 h</string>
+    <string name="history_24h">24 h</string>
+    <string name="history_7d">7 giorni</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Giocatori</string>
+    <string name="history_metric_memory">Memoria</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">media %1$s · min %2$s · max %3$s</string>
+    <string name="history_empty">Ancora nessun dato: il plugin registra un valore al minuto.</string>
+    <string name="history_failed">Impossibile caricare la cronologia.</string>
 </resources>

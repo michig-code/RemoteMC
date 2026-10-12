@@ -10,6 +10,7 @@ import de.remotemc.plugin.live.ChatBuffer;
 import de.remotemc.plugin.live.ConsoleBuffer;
 import de.remotemc.plugin.live.EventHub;
 import de.remotemc.plugin.live.GameListener;
+import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.live.PaperChatListener;
 import de.remotemc.plugin.live.Snapshots;
 import de.remotemc.plugin.live.SpigotChatListener;
@@ -62,6 +63,8 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     private TlsManager tls;
     private ApiServer api;
     private Runnable statusTask;
+    private Runnable historyTask;
+    private History history;
     private ScheduledExecutorService housekeeping;
     private volatile UpdateChecker.Update update;
 
@@ -113,6 +116,19 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
             return t;
         });
         housekeeping.scheduleAtFixedRate(tokens::saveIfDirty, 5, 5, TimeUnit.MINUTES);
+        // Performance history: measure on the server thread every minute, save off it.
+        if (getConfig().getBoolean("history", true)) {
+            ScheduledExecutorService saver = housekeeping;
+            history = new History(new File(getDataFolder(), "history.csv"), getLogger());
+            historyTask = scheduler.repeat(() -> {
+                double[] tps = Platform.tps();
+                Runtime rt = Runtime.getRuntime();
+                History.Sample sample = new History.Sample(System.currentTimeMillis(),
+                        tps.length == 0 ? -1 : Math.min(20.0, tps[0]), Platform.mspt(),
+                        (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024, Bukkit.getOnlinePlayers().size());
+                saver.execute(() -> history.add(sample));
+            }, 1200L);
+        }
         if (getConfig().getBoolean("update-check", true)) {
             housekeeping.execute(() -> {
                 update = UpdateChecker.check(getDescription().getVersion());
@@ -128,6 +144,9 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     public void onDisable() {
         if (statusTask != null) {
             statusTask.run();
+        }
+        if (historyTask != null) {
+            historyTask.run();
         }
         stopApi();
         if (console != null) {
@@ -194,6 +213,9 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     public ChatBuffer chat() { return chat; }
     public Snapshots snapshots() { return snapshots; }
     public Scheduler scheduler() { return scheduler; }
+
+    /** Null when the history is turned off in the config. */
+    public History history() { return history; }
     public TlsManager tls() { return tls; }
 
     /** Tells admins that a device was paired. */

@@ -41,5 +41,9 @@ console:
 # Log every action performed through the app to plugins/RemoteMC/audit.log
 audit-log: true
 
+# Remember TPS, tick time, memory and player count for 7 days (one value per minute,
+# plugins/RemoteMC/history.csv) so the app can show charts.
+history: true
+
 # Tell admins on join when a new RemoteMC version is available.
 update-check: true

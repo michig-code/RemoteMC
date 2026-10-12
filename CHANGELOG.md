@@ -13,6 +13,8 @@ First public release of **RemoteMC**.
 - Console lines and command output keep their colours; command suggestions via
   `/api/v1/commands` and `/api/v1/complete`
 - Access tokens, pairing codes and console QR codes never appear in the console stream
+- Performance history: TPS, tick time, memory and players once a minute for 7 days
+  (`history.csv`, `GET /api/v1/history?range=1h|24h|7d`, `history: false` turns it off)
 - Supports Paper, Purpur, Folia and Spigot from 1.20.6 up to 26.x
 - Messages in English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese,
   Turkish and Russian; update check
@@ -23,7 +25,7 @@ First public release of **RemoteMC**.
   and used for every pairing
 - Encrypted storage of access tokens (Android Keystore)
 - Live connection with automatic reconnect and offline fallback
-- Overview with TPS, MSPT, memory and worlds; players with search, sorting, real skin heads
+- Overview with TPS, MSPT, memory and worlds, and charts of the last hour, day or week; players with search, sorting, real skin heads
   and actions; coloured console with your recent commands and Minecraft-like suggestions; chat
 - Server list: hold a server and drag it to sort it, into or out of a folder, from folder to
   folder or into "Pinned"; pin servers to the top, group them in folders, search by name or address

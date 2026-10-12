@@ -31,7 +31,8 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
-- **Dashboard** – TPS gauge, MSPT, memory, uptime, TPS history and worlds, updated live
+- **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
+  players, memory and MSPT over the last hour, day or week
 - **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort
 - **Console** – coloured live server log, commands with their output, suggestions while typing
   (from the server's own tab completion) and your recently used commands
@@ -124,6 +125,7 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | POST | `/api/v1/pair` | – | `{"code","device"}` → `{"token","name","role"}` |
 | GET | `/api/v1/me` | viewer | Name and role of this token |
 | GET | `/api/v1/status` | viewer | TPS, MSPT, memory, players, worlds |
+| GET | `/api/v1/history?range=1h\|24h\|7d` | viewer | Up to 360 averaged points: `[time, tps, mspt, memoryMb, players]` |
 | GET | `/api/v1/players` | viewer | Online players |
 | GET | `/api/v1/chat?since=<id>` | viewer | Chat, joins and leaves |
 | GET | `/api/v1/events` | viewer | Server-Sent Events: `hello`, `status`, `chat`, `console` (moderator+) |

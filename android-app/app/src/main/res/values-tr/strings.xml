@@ -291,4 +291,15 @@
         <item quantity="one">%d sunucu izleniyor</item>
         <item quantity="other">%d sunucu izleniyor</item>
     </plurals>
+    <string name="history_title">Geçmiş</string>
+    <string name="history_1h">1 sa</string>
+    <string name="history_24h">24 sa</string>
+    <string name="history_7d">7 gün</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Oyuncular</string>
+    <string name="history_metric_memory">Bellek</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">ort. %1$s · min. %2$s · maks. %3$s</string>
+    <string name="history_empty">Henüz veri yok – eklenti dakikada bir değer kaydeder.</string>
+    <string name="history_failed">Geçmiş yüklenemedi.</string>
 </resources>

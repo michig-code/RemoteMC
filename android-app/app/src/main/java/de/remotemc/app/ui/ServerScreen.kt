@@ -73,6 +73,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import de.remotemc.app.R
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.HistoryRange
+import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.net.ApiError
@@ -116,6 +118,8 @@ class ServerActions(
     val onRepair: () -> Unit,
     val onCommandInput: (String) -> Unit = {},
     val onForgetCommand: (String) -> Unit = {},
+    /** Loads the performance history; null hides the chart. */
+    val loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
 )
 
 @Composable
@@ -157,6 +161,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onRepair = onRepair,
             onCommandInput = vm::onCommandInput,
             onForgetCommand = vm::forgetCommand,
+            loadHistory = vm::performance,
         ),
         snackbar = snackbar,
     )
@@ -279,7 +284,7 @@ fun ServerScreenContent(
                     ) { current ->
                         when (current) {
                             Tab.Dashboard -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
-                                DashboardTab(state.status, state.error?.let { context.errorText(it) }, wide)
+                                DashboardTab(state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory)
                             }
                             Tab.Players -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
                                 PlayersTab(state.players, state.role, actions.onPlayerAction)

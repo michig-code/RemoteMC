@@ -322,4 +322,15 @@
         <item quantity="one">Watching %d server</item>
         <item quantity="other">Watching %d servers</item>
     </plurals>
+    <string name="history_title">History</string>
+    <string name="history_1h">1 h</string>
+    <string name="history_24h">24 h</string>
+    <string name="history_7d">7 days</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Players</string>
+    <string name="history_metric_memory">Memory</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">avg %1$s · min %2$s · max %3$s</string>
+    <string name="history_empty">No data yet – the plugin records one value per minute.</string>
+    <string name="history_failed">Could not load the history.</string>
 </resources>

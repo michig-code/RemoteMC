@@ -152,3 +152,28 @@ data class Session(
 data class CommandResult(val success: Boolean, val captured: Boolean, val output: List<String>, val formatted: List<String> = emptyList())
 
 data class PairResult(val token: String, val name: String, val role: Role)
+
+/** Time span of the performance history. */
+enum class HistoryRange(val param: String) { HOUR("1h"), DAY("24h"), WEEK("7d") }
+
+/** One averaged point of the performance history; tps/mspt are null if the server does not report them. */
+data class HistoryPoint(val time: Long, val tps: Double?, val mspt: Double?, val memoryMb: Long, val players: Int)
+
+data class PerformanceHistory(val from: Long, val to: Long, val step: Long, val points: List<HistoryPoint>) {
+    companion object {
+        fun fromJson(o: JSONObject): PerformanceHistory {
+            val arr = o.optJSONArray("points") ?: JSONArray()
+            val points = List(arr.length()) {
+                val p = arr.getJSONArray(it)
+                HistoryPoint(
+                    time = p.getLong(0),
+                    tps = p.getDouble(1).takeIf { v -> v >= 0 },
+                    mspt = p.getDouble(2).takeIf { v -> v >= 0 },
+                    memoryMb = p.getLong(3),
+                    players = p.getInt(4),
+                )
+            }
+            return PerformanceHistory(o.optLong("from"), o.optLong("to"), o.optLong("step", 60_000), points)
+        }
+    }
+}

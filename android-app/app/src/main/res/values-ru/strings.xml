@@ -307,4 +307,15 @@
         <item quantity="many">Отслеживаются %d серверов</item>
         <item quantity="other">Отслеживаются %d сервера</item>
     </plurals>
+    <string name="history_title">История</string>
+    <string name="history_1h">1 ч</string>
+    <string name="history_24h">24 ч</string>
+    <string name="history_7d">7 дней</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Игроки</string>
+    <string name="history_metric_memory">Память</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">сред. %1$s · мин. %2$s · макс. %3$s</string>
+    <string name="history_empty">Пока нет данных – плагин записывает одно значение в минуту.</string>
+    <string name="history_failed">Не удалось загрузить историю.</string>
 </resources>

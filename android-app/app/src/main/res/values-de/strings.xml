@@ -305,4 +305,15 @@
         <item quantity="one">%d Server wird überwacht</item>
         <item quantity="other">%d Server werden überwacht</item>
     </plurals>
+    <string name="history_title">Verlauf</string>
+    <string name="history_1h">1 Std.</string>
+    <string name="history_24h">24 Std.</string>
+    <string name="history_7d">7 Tage</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Spieler</string>
+    <string name="history_metric_memory">Arbeitsspeicher</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">Ø %1$s · min. %2$s · max. %3$s</string>
+    <string name="history_empty">Noch keine Daten – das Plugin speichert einen Wert pro Minute.</string>
+    <string name="history_failed">Verlauf konnte nicht geladen werden.</string>
 </resources>

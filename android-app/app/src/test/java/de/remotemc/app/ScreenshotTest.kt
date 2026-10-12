@@ -13,7 +13,10 @@ import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.WorldInfo
 import de.remotemc.app.net.PingInfo
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import de.remotemc.app.ui.Connection
+import de.remotemc.app.ui.HistoryCard
 import de.remotemc.app.ui.ConsoleEntry
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerActions
@@ -190,6 +193,21 @@ class ScreenshotTest {
 
     @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen("Pixel 8", {}) }
     @Test fun onboardingName() = shot("13b_onboarding_name") { OnboardingScreen("Pixel 8", {}, onlyName = true) }
+    @Test fun history() = shot("20_history") {
+        val now = 1_760_000_000_000L
+        val points = (0 until 288).map { i ->
+            val t = now - (288 - i) * 300_000L
+            val lag = if (i in 150..170) 7.0 else 0.0
+            de.remotemc.app.data.HistoryPoint(
+                t, if (i in 200..215) null else 19.6 - lag - (i % 7) * 0.1, 8.0 + lag * 4, 2800L + (i % 40) * 20,
+                (3 + 8 * kotlin.math.sin(i / 288.0 * 2 * Math.PI).coerceAtLeast(0.0)).toInt(),
+            )
+        }.filterIndexed { i, _ -> i !in 230..245 } // server was off
+        val data = de.remotemc.app.data.PerformanceHistory(now - 86_400_000L, now, 300_000L, points)
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.padding(16.dp)) { HistoryCard({ data }) }
+        }
+    }
     @Test fun accentBlue() = shot("18_accent_blue", hue = 212f, content = list())
     @Test fun accentPurpleLight() = shot("19_accent_purple_light", dark = false, hue = 275f) { server(Tab.Dashboard) }
     @Test fun settingsCustomColour() = shot("14b_settings_orange", hue = 24f) {

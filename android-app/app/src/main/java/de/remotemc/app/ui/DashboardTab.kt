@@ -42,6 +42,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
+import de.remotemc.app.data.HistoryRange
+import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.WorldInfo
 import de.remotemc.app.ui.components.AnimatedBar
@@ -57,7 +59,12 @@ import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.statusTextColor
 
 @Composable
-fun DashboardTab(status: ServerStatus?, error: String?, wide: Boolean = false) {
+fun DashboardTab(
+    status: ServerStatus?,
+    error: String?,
+    wide: Boolean = false,
+    loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = null,
+) {
     if (status == null) {
         if (error != null) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
@@ -84,6 +91,7 @@ fun DashboardTab(status: ServerStatus?, error: String?, wide: Boolean = false) {
                     HeroCard(status, Modifier.staggeredAppear(0))
                     MemoryCard(status, Modifier.staggeredAppear(2))
                     TpsHistoryCard(status.tps, Modifier.staggeredAppear(3))
+                    loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(4)) }
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GaugeRow(status, Modifier.staggeredAppear(1))
@@ -95,6 +103,7 @@ fun DashboardTab(status: ServerStatus?, error: String?, wide: Boolean = false) {
             GaugeRow(status, Modifier.staggeredAppear(1))
             MemoryCard(status, Modifier.staggeredAppear(4))
             TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
+            loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(6)) }
             Worlds(status.worlds)
         }
         Spacer(Modifier.height(8.dp))

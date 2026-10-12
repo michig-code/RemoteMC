@@ -299,4 +299,15 @@
         <item quantity="many">Vigilando %d servidores</item>
         <item quantity="other">Vigilando %d servidores</item>
     </plurals>
+    <string name="history_title">Historial</string>
+    <string name="history_1h">1 h</string>
+    <string name="history_24h">24 h</string>
+    <string name="history_7d">7 días</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Jugadores</string>
+    <string name="history_metric_memory">Memoria</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">media %1$s · mín. %2$s · máx. %3$s</string>
+    <string name="history_empty">Aún no hay datos: el plugin guarda un valor por minuto.</string>
+    <string name="history_failed">No se pudo cargar el historial.</string>
 </resources>

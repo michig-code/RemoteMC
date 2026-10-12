@@ -299,4 +299,15 @@
         <item quantity="many">%d serveurs surveillés</item>
         <item quantity="other">%d serveurs surveillés</item>
     </plurals>
+    <string name="history_title">Historique</string>
+    <string name="history_1h">1 h</string>
+    <string name="history_24h">24 h</string>
+    <string name="history_7d">7 jours</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Joueurs</string>
+    <string name="history_metric_memory">Mémoire</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">moy. %1$s · min. %2$s · max. %3$s</string>
+    <string name="history_empty">Pas encore de données – le plugin enregistre une valeur par minute.</string>
+    <string name="history_failed">Impossible de charger l’historique.</string>
 </resources>

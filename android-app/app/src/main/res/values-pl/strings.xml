@@ -307,4 +307,15 @@
         <item quantity="many">Obserwowanych %d serwerów</item>
         <item quantity="other">Obserwowane %d serwera</item>
     </plurals>
+    <string name="history_title">Historia</string>
+    <string name="history_1h">1 godz.</string>
+    <string name="history_24h">24 godz.</string>
+    <string name="history_7d">7 dni</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Gracze</string>
+    <string name="history_metric_memory">Pamięć</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">śr. %1$s · min. %2$s · maks. %3$s</string>
+    <string name="history_empty">Brak danych – plugin zapisuje jedną wartość na minutę.</string>
+    <string name="history_failed">Nie udało się wczytać historii.</string>
 </resources>

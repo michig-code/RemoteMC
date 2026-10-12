@@ -11,7 +11,7 @@ echo "online-mode=false" >> /tmp/rmc-paper/server.properties
 ./srv.sh start /tmp/rmc-paper &                  # start it (java on PATH; Java 25 for 26.x)
 ./srv.sh wait /tmp/rmc-paper
 
-python3 apitest.py /tmp/rmc-paper                # 31 API checks (TLS pinning, pairing, roles, SSE, audit, lockout)
+python3 apitest.py /tmp/rmc-paper                # 38 API checks (TLS pinning, pairing, roles, SSE, audit, lockout)
 (cd bot && npm install)
 ./srv.sh cmd /tmp/rmc-paper "rmc token create tester admin"   # copy the token from the console
 python3 playertest.py /tmp/rmc-paper <token> 1.21.4            # 11 checks with a bot player (map QR, kick, heal, chat…)

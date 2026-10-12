@@ -102,6 +102,9 @@ c = conn(); c.request("POST", "/api/v1/command", body="{nope", headers={"Authori
 check("invalid json", r.status == 400 and d.get("error") == "invalid_json", d)
 st, d = req("GET", "/api/status", admin)
 check("unversioned path still works", st == 200, d)
+for rng in ("1h", "24h", "7d"):
+    st, d = req("GET", "/api/v1/history?range=" + rng, admin)
+    check("history " + rng, st == 200 and isinstance(d.get("points"), list) and d.get("step", 0) >= 60000, str(d)[:200])
 
 # 5. roles
 m = console(f"remotemc token create viewer{RUN} viewer", r"(rmc_[A-Za-z0-9_-]{43})")

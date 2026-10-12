@@ -291,4 +291,15 @@
         <item quantity="one">%d server in de gaten gehouden</item>
         <item quantity="other">%d servers in de gaten gehouden</item>
     </plurals>
+    <string name="history_title">Geschiedenis</string>
+    <string name="history_1h">1 u</string>
+    <string name="history_24h">24 u</string>
+    <string name="history_7d">7 dagen</string>
+    <string name="history_metric_tps">TPS</string>
+    <string name="history_metric_players">Spelers</string>
+    <string name="history_metric_memory">Geheugen</string>
+    <string name="history_metric_mspt">MSPT</string>
+    <string name="history_summary">gem. %1$s · min. %2$s · max. %3$s</string>
+    <string name="history_empty">Nog geen gegevens – de plugin slaat elke minuut een waarde op.</string>
+    <string name="history_failed">Geschiedenis kon niet worden geladen.</string>
 </resources>

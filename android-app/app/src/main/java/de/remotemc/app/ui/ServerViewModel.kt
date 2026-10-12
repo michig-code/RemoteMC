@@ -15,6 +15,8 @@ import de.remotemc.app.app
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.ConsoleLine
+import de.remotemc.app.data.HistoryRange
+import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
@@ -168,6 +170,9 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     }
 
     /** Fills gaps after (re)connecting. */
+    /** Performance history for the dashboard chart. */
+    suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)
+
     private suspend fun loadHistory() = historyMutex.withLock {
         runCatching { addChat(api.chat(lastChatId)) }
         if (role.atLeast(Role.MODERATOR)) {

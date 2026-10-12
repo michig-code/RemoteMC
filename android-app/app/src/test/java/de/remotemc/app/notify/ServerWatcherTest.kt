@@ -7,7 +7,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,29 +58,28 @@ class ServerWatcherTest {
 
     @Test
     fun outageAndRecovery() = runBlocking {
-        // A server that is reachable, then goes away, then comes back on the same port.
-        val first = MockWebServer()
-        first.enqueue(sse(hello))
-        first.start()
-        val port = first.port
-        val profile = profile(first)
+        // One server that answers, then drops every connection (down), then answers again.
+        val down = java.util.concurrent.atomic.AtomicBoolean(false)
+        val server = MockWebServer()
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse =
+                if (down.get()) MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START) else sse(hello)
+        }
+        server.start()
+        val profile = profile(server)
         var now = 0L
         val watcher = ServerWatcher(
             { profile }, AlertRules { settings }, { true }, { _, a -> alerts += a }, client,
             clock = { now.also { now += 10_000 } }, minBackoff = 20, maxBackoff = 20,
         )
+        down.set(true)
         val job = launch(kotlinx.coroutines.Dispatchers.IO) { watcher.run() }
-        while (first.requestCount == 0) kotlinx.coroutines.delay(20)
-        first.shutdown() // stream ends, reconnects fail: offline after the (fake) 30 s
-        waitFor(1)
+        waitFor(1) // offline after the (fake) 30 s
         assertEquals(Alert.Offline, alerts[0])
-
-        val again = MockWebServer()
-        again.enqueue(sse(hello))
-        again.start(port)
+        down.set(false)
         waitFor(2)
         job.cancel()
-        again.shutdown()
+        server.shutdown()
         assertEquals(Alert.BackOnline, alerts[1])
     }
 }
