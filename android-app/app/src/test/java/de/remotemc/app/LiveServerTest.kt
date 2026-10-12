@@ -39,6 +39,8 @@ class LiveServerTest {
         assertNotNull(api.status().minecraftVersion)
         val result = api.command("difficulty")
         assertEquals(true, result.success)
+        assert(api.commands().any { it.name == "gamemode" })
+        assertEquals(listOf("creative"), api.complete("gamemode cr"))
 
         val hello = withTimeout(10_000) { EventStream(profile).events().first() }
         assert(hello is StreamEvent.Hello)

@@ -159,6 +159,8 @@
     <string name="console_scroll_down">Jump to latest</string>
     <string name="console_input_hint">Enter a command…</string>
     <string name="console_read_only">Your role can read the console but not run commands.</string>
+    <string name="console_recent">Recent commands</string>
+    <string name="console_recent_forget">Remove from recent commands</string>
     <string name="console_command_failed">Unknown command or it failed</string>
     <string name="console_output_in_log">Command sent – its output appears in the console above.</string>
 

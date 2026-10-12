@@ -1,6 +1,6 @@
 package de.remotemc.app.data
 
-import android.net.Uri
+import androidx.core.net.toUri
 
 /**
  * Contents of a pairing QR code / link from `/remotemc pair`:
@@ -21,7 +21,7 @@ data class ConnectLink(
         private val SCHEMES = setOf("remotemc", "mcremote")
 
         fun parse(text: String): ConnectLink? {
-            val uri = runCatching { Uri.parse(text.trim()) }.getOrNull() ?: return null
+            val uri = runCatching { text.trim().toUri() }.getOrNull() ?: return null
             if (uri.scheme?.lowercase() !in SCHEMES) return null
             val host = uri.host?.removePrefix("[")?.removeSuffix("]")?.takeIf { it.isNotBlank() } ?: return null
             val code = uri.getQueryParameter("code")?.filter(Char::isDigit)?.takeIf { it.length == 6 }

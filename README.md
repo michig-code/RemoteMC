@@ -19,7 +19,8 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 ## Features
 - **Dashboard** – TPS gauge, MSPT, memory, uptime, TPS history and worlds, updated live
 - **Players** – heads, health, ping and location; message, heal, game mode, OP, kick, ban; search and sort
-- **Console** – live server log, commands with their output, quick commands
+- **Console** – coloured live server log, commands with their output, suggestions while typing
+  (from the server's own tab completion) and your recently used commands
 - **Chat** – chat, joins and leaves as they happen; broadcast with undo
 - **Pairing in seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
 - **Security** – built-in HTTPS with certificate pinning, one token per device (stored hashed on the
@@ -81,6 +82,8 @@ update-check: true
   short code (e.g. `AB12-CD34`) to compare with the server console.
 - Each phone gets its own token. The server stores only hashes; revoke a phone with `/remotemc token revoke`.
 - If the certificate ever changes, the app refuses to connect and asks you to pair again.
+- Access tokens, open pairing codes and console QR codes are hidden from the console stream, so a
+  moderator cannot read an admin's credentials there.
 - Deleting `tls.p12` creates a new certificate – all devices then have to pair again.
 - Behind a reverse proxy, all requests come from the proxy's IP; the lockout then applies to everyone.
 
@@ -110,7 +113,9 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | GET | `/api/v1/console?since=<id>` | moderator | Console lines |
 | POST | `/api/v1/chat` | moderator | `{"message"}` broadcast |
 | POST | `/api/v1/players/<name>/<action>` | moderator | `kick`, `ban` (`reason`), `heal`, `gamemode` (`mode`), `message` (`message`); `op`/`deop` need admin |
-| POST | `/api/v1/command` | admin | `{"command"}` → `{"success","output"}` |
+| POST | `/api/v1/command` | admin | `{"command"}` → `{"success","output","formatted"}` (formatted keeps `§` colour codes) |
+| GET | `/api/v1/commands` | admin | Commands the console can run (name, description, usage, aliases) |
+| GET | `/api/v1/complete?buffer=<text>` | admin | Tab completion, e.g. `gamemode cr` → `["creative"]` |
 
 ## Development
 ```bash

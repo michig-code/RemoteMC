@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import de.remotemc.app.R
 import de.remotemc.app.app
 import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
@@ -40,7 +41,12 @@ data class ConsoleEntry(
     val text: String,
     val level: String,
     val time: Long = System.currentTimeMillis(),
+    /** Same text with Minecraft colour codes, if the server sent colours. */
+    val formatted: String? = null,
 )
+
+/** A completion shown above the console input. */
+data class Suggestion(val text: String, val description: String? = null)
 
 enum class Connection { CONNECTING, LIVE, POLLING, OFFLINE }
 
@@ -65,6 +71,17 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     val console = mutableStateListOf<ConsoleEntry>()
     val chat = mutableStateListOf<ChatEntry>()
+
+    /** Recently run commands for this server, newest first. */
+    var history by mutableStateOf(application.app.history.load(profile.id))
+        private set
+    var suggestions by mutableStateOf<List<Suggestion>>(emptyList())
+        private set
+    /** Usage of the command being typed, e.g. "/gamemode <mode> [player]". */
+    var usageHint by mutableStateOf<String?>(null)
+        private set
+    private var commands: List<CommandInfo> = emptyList()
+    private var suggestJob: Job? = null
 
     val role: Role get() = session?.role ?: profile.role
 
@@ -132,6 +149,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 error = null
                 connection = Connection.LIVE
                 loadHistory()
+                loadCommands()
             }
             is StreamEvent.Status -> {
                 status = event.status
@@ -194,7 +212,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 // Server restarted: ids start again at 1.
                 if (line.id == 1L && lastConsoleId > 1) lastConsoleId = 0 else continue
             }
-            console.add(ConsoleEntry("s${line.id}-${line.time}", line.message, line.level, line.time))
+            console.add(ConsoleEntry("s${line.id}-${line.time}", line.message, line.level, line.time, line.formatted))
             lastConsoleId = line.id
         }
         trim(console, 1500)
@@ -216,18 +234,20 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         if (overflow > 0) list.subList(0, overflow).clear()
     }
 
-    private fun local(text: String, level: String) {
-        console.add(ConsoleEntry("l${localCounter++}", text, level))
+    private fun local(text: String, level: String, formatted: String? = null) {
+        console.add(ConsoleEntry("l${localCounter++}", text, level, formatted = formatted))
     }
 
     fun runCommand(command: String) {
         val cmd = command.trim().removePrefix("/")
         if (cmd.isEmpty()) return
         local("> /$cmd", "COMMAND")
+        history = getApplication<Application>().app.history.add(profile.id, cmd)
+        clearSuggestions()
         viewModelScope.launch {
             try {
                 val result = api.command(cmd)
-                result.output.forEach { local(it, "OUTPUT") }
+                result.output.forEachIndexed { i, line -> local(line, "OUTPUT", result.formatted.getOrNull(i)) }
                 if (!result.success) {
                     local(getApplication<Application>().getString(R.string.console_command_failed), "ERROR")
                 } else if (!result.captured && result.output.isEmpty()) {
@@ -237,6 +257,55 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 local(UiText.Error(e).resolve(getApplication()), "ERROR")
             }
         }
+    }
+
+    fun forgetCommand(command: String) {
+        history = getApplication<Application>().app.history.remove(profile.id, command)
+    }
+
+    /** Loads the server's command list once (admins only) for offline-fast suggestions. */
+    fun loadCommands() {
+        if (commands.isNotEmpty() || !role.atLeast(Role.ADMIN)) return
+        viewModelScope.launch { runCatching { commands = api.commands() } }
+    }
+
+    /**
+     * Suggestions like Minecraft's chat: command names from the cached list while typing the
+     * first word, then the server's own tab completion for arguments.
+     */
+    fun onCommandInput(input: String) {
+        suggestJob?.cancel()
+        val text = input.removePrefix("/")
+        if (text.isBlank()) {
+            clearSuggestions()
+            return
+        }
+        val label = text.substringBefore(' ').lowercase()
+        val info = commands.firstOrNull { it.name == label || label in it.aliases }
+        usageHint = info?.usage ?: info?.let { "/${it.name}" }
+        if (' ' !in text) {
+            val local = commands
+                .filter { it.name.startsWith(label) && it.name != label }
+                .sortedBy { it.name.length }
+                .take(8)
+                .map { Suggestion(it.name, it.description) }
+            suggestions = local
+            if (local.isNotEmpty() || commands.isNotEmpty()) return
+        }
+        suggestJob = viewModelScope.launch {
+            delay(150) // debounce while typing
+            val current = text.substringAfterLast(' ')
+            suggestions = runCatching { api.complete(text) }.getOrDefault(emptyList())
+                .filter { it != current }
+                .take(30)
+                .map { Suggestion(it) }
+        }
+    }
+
+    fun clearSuggestions() {
+        suggestJob?.cancel()
+        suggestions = emptyList()
+        usageHint = null
     }
 
     /** Sends after a short delay so the message can still be undone from the snackbar. */

@@ -65,7 +65,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,6 +105,9 @@ data class ServerUiState(
     val refreshing: Boolean,
     val role: Role,
     val commandsEnabled: Boolean = true,
+    val history: List<String> = emptyList(),
+    val suggestions: List<Suggestion> = emptyList(),
+    val usageHint: String? = null,
 )
 
 class ServerActions(
@@ -115,6 +118,8 @@ class ServerActions(
     val onUndoBroadcast: () -> Unit,
     val onPlayerAction: (player: String, action: String, body: JSONObject, success: UiText) -> Unit,
     val onRepair: () -> Unit,
+    val onCommandInput: (String) -> Unit = {},
+    val onForgetCommand: (String) -> Unit = {},
 )
 
 @Composable
@@ -143,6 +148,9 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             refreshing = vm.refreshing,
             role = vm.role,
             commandsEnabled = vm.session?.commandsEnabled ?: true,
+            history = vm.history,
+            suggestions = vm.suggestions,
+            usageHint = vm.usageHint,
         ),
         actions = ServerActions(
             onBack = onBack,
@@ -152,6 +160,8 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onUndoBroadcast = vm::cancelBroadcast,
             onPlayerAction = { p, a, b, s -> vm.playerAction(p, a, b, s) },
             onRepair = onRepair,
+            onCommandInput = vm::onCommandInput,
+            onForgetCommand = vm::forgetCommand,
         ),
         snackbar = snackbar,
     )
@@ -290,7 +300,16 @@ fun ServerScreenContent(
                             Tab.Players -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
                                 PlayersTab(state.players, state.role, actions.onPlayerAction)
                             }
-                            Tab.Console -> ConsoleTab(state.console, state.role.atLeast(Role.ADMIN) && state.commandsEnabled, actions.onCommand)
+                            Tab.Console -> ConsoleTab(
+                                entries = state.console,
+                                canRunCommands = state.role.atLeast(Role.ADMIN) && state.commandsEnabled,
+                                history = state.history,
+                                suggestions = state.suggestions,
+                                usageHint = state.usageHint,
+                                onInput = actions.onCommandInput,
+                                onCommand = actions.onCommand,
+                                onForget = actions.onForgetCommand,
+                            )
                             Tab.Chat -> ChatTab(state.chat, state.role.atLeast(Role.MODERATOR), broadcast)
                         }
                     }

@@ -1,6 +1,7 @@
 package de.remotemc.app.data
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,12 +23,12 @@ class SettingsStore(private val prefs: SharedPreferences) {
     fun update(transform: (AppSettings) -> AppSettings) {
         val next = transform(_settings.value)
         _settings.value = next
-        prefs.edit()
-            .putString("theme", next.theme.name)
-            .putBoolean("dynamicColor", next.dynamicColor)
-            .putBoolean("haptics", next.haptics)
-            .putBoolean("onboardingDone", next.onboardingDone)
-            .apply()
+        prefs.edit {
+            putString("theme", next.theme.name)
+            putBoolean("dynamicColor", next.dynamicColor)
+            putBoolean("haptics", next.haptics)
+            putBoolean("onboardingDone", next.onboardingDone)
+        }
     }
 
     private fun read() = AppSettings(

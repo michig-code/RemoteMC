@@ -6,7 +6,7 @@ watch performance, read the live console, chat with players and run commands –
 ## Features
 - **Live dashboard** – TPS, MSPT, memory, uptime, worlds and players, updated in real time
 - **Player management** – message, heal, change game mode, OP, kick and ban
-- **Live console** – stream the server log and run commands with their output
+- **Live console** – coloured server log, commands with their output and suggestions while typing
 - **Chat** – read the chat and broadcast messages
 - **Pairing in 10 seconds** – `/remotemc pair` shows a QR code on an in-game map or in the console
 - **Secure by default** – built-in HTTPS with certificate pinning, per-device tokens (stored hashed),

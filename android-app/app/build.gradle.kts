@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "de.remotemc.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "de.remotemc.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // Release builds get the version from the git tag (-Prmc.version=2.1.0).
         val version = (project.findProperty("rmc.version") as String?) ?: "2.0.0"
         val (major, minor, patch) = (version.split('.').map { it.takeWhile(Char::isDigit).toIntOrNull() ?: 0 } + listOf(0, 0, 0))
@@ -58,8 +58,9 @@ android {
         buildConfig = true
     }
     lint {
-        // Adaptive icons must stay in mipmap-anydpi-v26 for aapt; dependency updates are handled manually.
-        disable += setOf("ObsoleteSdkInt", "GradleDependency")
+        // Adaptive icons must stay in mipmap-anydpi-v26 for aapt. Version update checks depend on the
+        // day the build runs; Dependabot (.github/dependabot.yml) handles updates instead.
+        disable += setOf("ObsoleteSdkInt", "GradleDependency", "AndroidGradlePluginVersion", "NewerVersionAvailable")
         warningsAsErrors = true
         abortOnError = true
     }

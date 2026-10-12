@@ -6,7 +6,7 @@ online ist, behalte die Leistung im Blick, lies die Live-Konsole, chatte und fü
 ## Funktionen
 - **Live-Übersicht** – TPS, MSPT, RAM, Laufzeit, Welten und Spieler in Echtzeit
 - **Spielerverwaltung** – Nachricht, Heilen, Spielmodus, OP, Kicken, Bannen
-- **Live-Konsole** – Server-Log in Echtzeit, Befehle mit Ausgabe
+- **Live-Konsole** – farbiges Server-Log in Echtzeit, Befehle mit Ausgabe und Vorschlägen
 - **Chat** – mitlesen und Nachrichten an alle senden
 - **Koppeln in 10 Sekunden** – `/remotemc pair` zeigt einen QR-Code auf einer Karte im Spiel oder in der Konsole
 - **Sicher ab Werk** – eingebautes HTTPS mit Zertifikats-Pinning, eigener Token pro Gerät (nur gehasht gespeichert),

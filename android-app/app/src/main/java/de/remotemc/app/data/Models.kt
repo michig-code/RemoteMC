@@ -101,11 +101,18 @@ data class PlayerInfo(
     }
 }
 
-data class ConsoleLine(val id: Long, val time: Long, val level: String, val message: String) {
+/** [formatted] keeps Minecraft colour codes (§a…) when the line has colours. */
+data class ConsoleLine(val id: Long, val time: Long, val level: String, val message: String, val formatted: String? = null) {
     companion object {
-        fun fromJson(o: JSONObject) = ConsoleLine(o.optLong("id"), o.optLong("time"), o.optString("level"), o.optString("message"))
+        fun fromJson(o: JSONObject) = ConsoleLine(
+            o.optLong("id"), o.optLong("time"), o.optString("level"), o.optString("message"),
+            o.optString("formatted").takeIf { it.isNotEmpty() },
+        )
     }
 }
+
+/** A console command known to the server, for suggestions. */
+data class CommandInfo(val name: String, val description: String?, val usage: String?, val aliases: List<String>)
 
 data class ChatEntry(val id: Long, val time: Long, val type: Type, val player: String, val message: String) {
     enum class Type { CHAT, JOIN, QUIT, BROADCAST }
@@ -138,6 +145,7 @@ data class Session(
     }
 }
 
-data class CommandResult(val success: Boolean, val captured: Boolean, val output: List<String>)
+/** [formatted] holds the same lines with colour codes (plugin 2.1+); empty for older plugins. */
+data class CommandResult(val success: Boolean, val captured: Boolean, val output: List<String>, val formatted: List<String> = emptyList())
 
 data class PairResult(val token: String, val name: String, val role: Role)

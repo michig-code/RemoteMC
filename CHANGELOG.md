@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.1.0
+
+### Plugin
+- Console lines and command output keep their colours (`formatted` field with `§` codes)
+- New endpoints `/api/v1/commands` and `/api/v1/complete` for command suggestions
+- Security: access tokens, pairing codes and console QR codes no longer appear in the console
+  stream that moderators can read
+
+### App
+- Coloured console (Minecraft colour codes, plugin prefixes, warnings and errors)
+- Suggestions while typing a command, like Minecraft's chat: command names with descriptions,
+  then the server's own completions for arguments, plus a usage hint
+- The fixed example commands were replaced by your recently used commands (long-press to remove)
+- Targets Android 16 (API 36)
+
 ## 2.0.0
 
 The project is now called **RemoteMC** (previously McRemote).

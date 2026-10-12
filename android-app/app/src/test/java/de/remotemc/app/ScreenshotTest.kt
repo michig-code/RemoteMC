@@ -69,8 +69,13 @@ class ScreenshotTest {
         ConsoleEntry("3", "Steve joined the game", "INFO", 2000),
         ConsoleEntry("4", "<Steve> hi everyone!", "INFO", 3000),
         ConsoleEntry("5", "Can't keep up! Is the server overloaded? Running 2034ms or 40 ticks behind", "WARN", 4000),
-        ConsoleEntry("6", "> /time set day", "COMMAND", 5000),
-        ConsoleEntry("7", "Set the time to 1000", "OUTPUT", 5000),
+        ConsoleEntry("6", "[EssentialsX] Loaded 42 kits", "INFO", 4500),
+        ConsoleEntry("7", "[RemoteMC] Pixel 8 paired as admin.", "INFO", 4600, "§8[§aRemote§2MC§8] §aPixel 8 paired as admin."),
+        ConsoleEntry("8", "> /time set day", "COMMAND", 5000),
+        ConsoleEntry("9", "Set the time to 1000", "OUTPUT", 5000),
+        ConsoleEntry("10", "> /gamemode creative Nobody", "COMMAND", 6000),
+        ConsoleEntry("11", "No player was found", "OUTPUT", 6000, "§cNo player was found"),
+        ConsoleEntry("12", "--------- Help: Index (1/21) --------------------", "OUTPUT", 7000, "§e--------- §fHelp: Index (1/21) §e--------------------"),
     )
     private val chat = listOf(
         ChatEntry(1, 0, ChatEntry.Type.JOIN, "Steve", ""),
@@ -116,7 +121,47 @@ class ScreenshotTest {
     @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
     @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }
     @Test fun players() = shot("05_players") { server(Tab.Players) }
-    @Test fun consoleTab() = shot("06_console") { server(Tab.Console) }
+    @Test fun consoleTab() = shot("06_console") {
+        ServerScreenContent(
+            ServerUiState("Survival", status, players, console, chat, Connection.LIVE, null, false, Role.ADMIN,
+                history = listOf("time set day", "weather clear", "whitelist add Alex_Builds", "save-all")),
+            actions, initialTab = Tab.Console,
+        )
+    }
+
+    @Test fun consoleSuggestions() = shot("06b_console_suggestions") {
+        Scaffoldless {
+            de.remotemc.app.ui.ConsoleTab(
+                entries = console,
+                canRunCommands = true,
+                suggestions = listOf(
+                    de.remotemc.app.ui.Suggestion("gamemode", "Sets a player's game mode"),
+                    de.remotemc.app.ui.Suggestion("gamerule", "Sets or queries a game rule value"),
+                ),
+                usageHint = null,
+                onCommand = {},
+                initialInput = "gam",
+            )
+        }
+    }
+
+    @Test fun consoleArguments() = shot("06c_console_arguments") {
+        Scaffoldless {
+            de.remotemc.app.ui.ConsoleTab(
+                entries = console,
+                canRunCommands = true,
+                suggestions = listOf("adventure", "creative", "spectator", "survival").map { de.remotemc.app.ui.Suggestion(it) },
+                usageHint = "/gamemode <gamemode> [target]",
+                onCommand = {},
+                initialInput = "gamemode ",
+            )
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun Scaffoldless(content: @Composable () -> Unit) =
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) { content() }
     @Test fun chatTab() = shot("07_chat") { server(Tab.Chat) }
     @Test fun viewerRole() = shot("08_viewer") { server(Tab.Dashboard, role = Role.VIEWER, st = status.copy(tps = emptyList(), mspt = null, platform = "Folia")) }
     @Test fun offline() = shot("09_offline") {

@@ -8,7 +8,7 @@ Paper, Purpur, Folia or Spigot server, run /remotemc pair and scan the QR code.
 
 • Live dashboard: TPS, MSPT, memory, uptime and worlds
 • Players: health, ping, location – message, heal, change game mode, kick or ban
-• Live console with command input and quick commands
+• Coloured live console with command suggestions and your recent commands
 • Chat: read along and broadcast messages
 • Several servers, each with its own access you can revoke at any time
 • Secure: encrypted connection with certificate pinning, tokens stored in the Android Keystore

@@ -147,6 +147,8 @@
     <string name="console_scroll_down">Zur neuesten Zeile</string>
     <string name="console_input_hint">Befehl eingeben…</string>
     <string name="console_read_only">Mit deiner Rolle kannst du die Konsole lesen, aber keine Befehle ausführen.</string>
+    <string name="console_recent">Zuletzt verwendete Befehle</string>
+    <string name="console_recent_forget">Aus den letzten Befehlen entfernen</string>
     <string name="console_command_failed">Unbekannter Befehl oder fehlgeschlagen</string>
     <string name="console_output_in_log">Befehl gesendet – die Ausgabe erscheint oben in der Konsole.</string>
 

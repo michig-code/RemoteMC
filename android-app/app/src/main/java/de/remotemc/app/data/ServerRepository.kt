@@ -1,6 +1,7 @@
 package de.remotemc.app.data
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,7 @@ class ServerRepository(private val prefs: SharedPreferences, private val box: Se
         _servers.value = list
         val arr = JSONArray()
         list.forEach { arr.put(it.toJson()) }
-        prefs.edit().putString(KEY, box.encrypt(arr.toString())).apply()
+        prefs.edit { putString(KEY, box.encrypt(arr.toString())) }
     }
 
     private companion object {

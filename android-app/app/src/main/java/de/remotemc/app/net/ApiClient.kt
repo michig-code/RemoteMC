@@ -1,6 +1,7 @@
 package de.remotemc.app.net
 
 import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.CommandResult
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.PairResult
@@ -55,11 +56,38 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     suspend fun command(command: String): CommandResult {
         val o = call("POST", "/api/v1/command", JSONObject().put("command", command))
         val out = o.optJSONArray("output")
+        val formatted = o.optJSONArray("formatted")
         return CommandResult(
             success = o.optBoolean("success"),
             captured = o.optBoolean("captured", true),
             output = if (out == null) emptyList() else List(out.length()) { out.getString(it) },
+            formatted = if (formatted == null) emptyList() else List(formatted.length()) { formatted.getString(it) },
         )
+    }
+
+    /** Commands the server knows (plugin 2.1+; empty list for older plugins). */
+    suspend fun commands(): List<CommandInfo> = try {
+        val arr = call("GET", "/api/v1/commands").getJSONArray("commands")
+        List(arr.length()) {
+            val c = arr.getJSONObject(it)
+            val aliases = c.optJSONArray("aliases")
+            CommandInfo(
+                name = c.getString("name"),
+                description = c.optString("description").takeIf { d -> d.isNotBlank() },
+                usage = c.optString("usage").takeIf { u -> u.isNotBlank() },
+                aliases = if (aliases == null) emptyList() else List(aliases.length()) { i -> aliases.getString(i) },
+            )
+        }
+    } catch (e: ApiError.Http) {
+        if (e.status == 404) emptyList() else throw e
+    }
+
+    /** Server-side tab completion for the last word of [buffer] (plugin 2.1+). */
+    suspend fun complete(buffer: String): List<String> = try {
+        val arr = call("GET", "/api/v1/complete?buffer=" + android.net.Uri.encode(buffer)).getJSONArray("suggestions")
+        List(arr.length()) { arr.getString(it) }
+    } catch (e: ApiError.Http) {
+        if (e.status == 404) emptyList() else throw e
     }
 
     suspend fun broadcast(message: String) {

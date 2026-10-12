@@ -1,37 +1,45 @@
 package de.remotemc.app.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -48,27 +56,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
 import de.remotemc.app.ui.theme.McColors
-import de.remotemc.app.ui.util.rememberHaptics
 import de.remotemc.app.ui.theme.MonoStyle
+import de.remotemc.app.ui.util.MinecraftText
+import de.remotemc.app.ui.util.rememberHaptics
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val quickCommands = listOf("list", "time set day", "weather clear", "save-all", "difficulty", "whitelist list")
 private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
+private val TerminalText = Color(0xFFD5DDD8)
+private val TerminalDim = Color(0xFF56635A)
+private val TerminalAccent = Color(0xFF7CC4FF)
 
 @Composable
-fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: (String) -> Unit) {
-    var input by rememberSaveable { mutableStateOf("") }
+fun ConsoleTab(
+    entries: List<ConsoleEntry>,
+    canRunCommands: Boolean,
+    history: List<String> = emptyList(),
+    suggestions: List<Suggestion> = emptyList(),
+    usageHint: String? = null,
+    onInput: (String) -> Unit = {},
+    onCommand: (String) -> Unit,
+    onForget: (String) -> Unit = {},
+    initialInput: String = "",
+) {
+    var input by remember { mutableStateOf(TextFieldValue(initialInput, TextRange(initialInput.length))) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val haptics = rememberHaptics()
 
     val atBottom by remember {
         derivedStateOf {
@@ -77,7 +109,7 @@ fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: 
         }
     }
     // Follow new output while the user is at the bottom.
-    var initialScrollDone by remember { mutableStateOf(false) }
+    var initialScrollDone by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(entries.size) {
         if (entries.isNotEmpty() && (atBottom || !initialScrollDone)) {
             listState.scrollToItem(entries.size - 1)
@@ -85,13 +117,25 @@ fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: 
         }
     }
 
-    val haptics = rememberHaptics()
+    fun setInput(text: String) {
+        input = TextFieldValue(text, TextRange(text.length))
+        onInput(text)
+    }
 
     fun send() {
-        if (input.isBlank()) return
+        if (input.text.isBlank()) return
         haptics.tap()
-        onCommand(input)
-        input = ""
+        onCommand(input.text)
+        setInput("")
+    }
+
+    /** Replaces the word being typed with [suggestion], like pressing Tab in Minecraft. */
+    fun apply(suggestion: String) {
+        haptics.tap()
+        val text = input.text
+        val cut = text.lastIndexOf(' ')
+        val prefix = if (cut < 0) (if (text.startsWith("/")) "/" else "") else text.substring(0, cut + 1)
+        setInput("$prefix$suggestion ")
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -107,15 +151,11 @@ fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: 
                 Text(
                     stringResource(R.string.console_waiting),
                     style = MonoStyle,
-                    color = Color(0xFF6B7A70),
+                    color = TerminalDim,
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-            ) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
                 items(entries, key = { it.key }) { line -> ConsoleLineView(line) }
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -129,25 +169,28 @@ fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: 
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.console_scroll_down)) }
             }
+            // Suggestions float over the bottom of the terminal, like Minecraft's chat completion.
+            androidx.compose.animation.AnimatedVisibility(
+                visible = canRunCommands && (suggestions.isNotEmpty() || usageHint != null) && input.text.isNotBlank(),
+                enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+            ) {
+                SuggestionPanel(input.text, suggestions, usageHint, ::apply)
+            }
         }
 
         if (canRunCommands) {
-            Row(
-                Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                quickCommands.forEach { cmd ->
-                    AssistChip(
-                        onClick = { haptics.tap(); onCommand(cmd) },
-                        label = { Text("/$cmd", fontFamily = FontFamily.Monospace) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        border = null,
-                    )
-                }
+            AnimatedVisibility(input.text.isEmpty() && history.isNotEmpty()) {
+                RecentCommands(history, onPick = { setInput(it) }, onForget = { haptics.heavy(); onForget(it) })
             }
             CommandInput(
                 value = input,
-                onValueChange = { input = it },
+                onValueChange = {
+                    val changed = it.text != input.text
+                    input = it
+                    if (changed) onInput(it.text)
+                },
                 placeholder = stringResource(R.string.console_input_hint),
                 prefix = "/",
                 onSend = ::send,
@@ -163,20 +206,128 @@ fun ConsoleTab(entries: List<ConsoleEntry>, canRunCommands: Boolean, onCommand: 
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SuggestionPanel(input: String, suggestions: List<Suggestion>, usageHint: String?, onPick: (String) -> Unit) {
+    val typed = input.substringAfterLast(' ').removePrefix("/")
+    Surface(
+        color = Color(0xF0161D19),
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 6.dp,
+        shadowElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(vertical = 6.dp)) {
+            if (usageHint != null) {
+                Text(
+                    usageHint,
+                    style = MonoStyle,
+                    color = TerminalDim,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+                if (suggestions.isNotEmpty()) HorizontalDivider(color = Color(0x22FFFFFF))
+            }
+            LazyColumn(Modifier.heightIn(max = 220.dp)) {
+                items(suggestions, key = { it.text }) { s ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(onClick = { onPick(s.text) })
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            buildAnnotatedString {
+                                // The part already typed is dimmed, the completion stands out (like Minecraft).
+                                val match = s.text.startsWith(typed, ignoreCase = true) && typed.isNotEmpty()
+                                if (match) {
+                                    withStyle(SpanStyle(color = TerminalText)) { append(s.text.take(typed.length)) }
+                                    withStyle(SpanStyle(color = Color(0xFFFFF06B), fontWeight = FontWeight.Bold)) {
+                                        append(s.text.drop(typed.length))
+                                    }
+                                } else {
+                                    withStyle(SpanStyle(color = Color(0xFFFFF06B))) { append(s.text) }
+                                }
+                            },
+                            style = MonoStyle,
+                        )
+                        if (s.description != null) {
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                s.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TerminalDim,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RecentCommands(history: List<String>, onPick: (String) -> Unit, onForget: (String) -> Unit) {
+    val forgetLabel = stringResource(R.string.console_recent_forget)
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        item(key = "icon") {
+            Icon(
+                Icons.Outlined.History,
+                stringResource(R.string.console_recent),
+                Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        items(history, key = { it }) { cmd ->
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = CircleShape,
+                modifier = Modifier
+                    .animateItem()
+                    .clip(CircleShape)
+                    .combinedClickable(onClick = { onPick(cmd) }, onLongClick = { onForget(cmd) })
+                    .semantics { onLongClick(label = forgetLabel) { onForget(cmd); true } },
+            ) {
+                Text(
+                    "/$cmd",
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp).widthIn(max = 220.dp),
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun ConsoleLineView(line: ConsoleEntry) {
-    val color = when (line.level) {
+    val base = when (line.level) {
         "WARN" -> Color(0xFFFFC857)
         "ERROR", "FATAL" -> Color(0xFFFF6B6B)
-        "COMMAND" -> Color(0xFF7CC4FF)
+        "COMMAND" -> TerminalAccent
         "OUTPUT" -> Color(0xFF8BE9A8)
-        else -> Color(0xFFD5DDD8)
+        else -> TerminalText
+    }
+    val text = remember(line.key, line.formatted) {
+        if (line.formatted != null) MinecraftText.parse(line.formatted, base)
+        else MinecraftText.highlightPlain(line.text, base, TerminalAccent)
     }
     // Timestamp in its own column so wrapped lines stay indented under the message.
     Row(Modifier.padding(vertical = 1.dp)) {
-        Text(timeFormat.format(Date(line.time)), style = MonoStyle, color = Color(0xFF56635A))
+        Text(timeFormat.format(Date(line.time)), style = MonoStyle, color = TerminalDim)
         Spacer(Modifier.width(10.dp))
-        Text(line.text, style = MonoStyle, color = color, modifier = Modifier.weight(1f))
+        Text(text, style = MonoStyle, modifier = Modifier.weight(1f))
     }
 }
 
@@ -189,8 +340,25 @@ fun CommandInput(
     onSend: () -> Unit,
     prefix: String? = null,
 ) {
+    CommandInput(
+        value = TextFieldValue(value, TextRange(value.length)),
+        onValueChange = { onValueChange(it.text) },
+        placeholder = placeholder,
+        onSend = onSend,
+        prefix = prefix,
+    )
+}
+
+@Composable
+fun CommandInput(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    placeholder: String,
+    onSend: () -> Unit,
+    prefix: String? = null,
+) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+        Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp, top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TextField(
@@ -200,6 +368,7 @@ fun CommandInput(
             placeholder = { Text(placeholder) },
             prefix = prefix?.let { { Text(it, color = MaterialTheme.colorScheme.primary) } },
             singleLine = true,
+            textStyle = if (prefix != null) MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace) else MaterialTheme.typography.bodyLarge,
             shape = CircleShape,
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -207,10 +376,14 @@ fun CommandInput(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Send,
+                autoCorrectEnabled = prefix == null,
+                capitalization = if (prefix == null) KeyboardCapitalization.Sentences else KeyboardCapitalization.None,
+            ),
             keyboardActions = KeyboardActions(onSend = { onSend() }),
         )
-        FilledIconButton(onClick = onSend, enabled = value.isNotBlank(), modifier = Modifier.padding(start = 8.dp)) {
+        FilledIconButton(onClick = onSend, enabled = value.text.isNotBlank(), modifier = Modifier.padding(start = 8.dp)) {
             Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.action_send))
         }
     }
