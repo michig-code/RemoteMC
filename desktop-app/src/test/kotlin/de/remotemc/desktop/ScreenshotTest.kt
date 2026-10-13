@@ -39,6 +39,7 @@ class ScreenshotTest {
 
     init {
         LoadHeads = false
+        SplitPrefs.save = false
         Locale.setDefault(Locale.ENGLISH)
         model.servers.upsert(survival)
         model.servers.upsert(ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", role = Role.MODERATOR))

@@ -145,8 +145,8 @@ fun FilesPane(session: ServerSession, initialPath: String = "", initialFile: Str
     }
 
     val uploadTitle = stringResource(Res.string.files_upload)
-    Row(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 24.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        McCard(Modifier.weight(1f).fillMaxHeight()) {
+    SplitView("files", 0.42f, Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 24.dp), left = {
+        McCard(Modifier.fillMaxSize()) {
             Column {
                 Row(Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { path = parentPath(path) }, enabled = path.isNotEmpty()) {
@@ -214,7 +214,8 @@ fun FilesPane(session: ServerSession, initialPath: String = "", initialFile: Str
                 }
             }
         }
-        McCard(Modifier.weight(1.3f).fillMaxHeight()) {
+    }, right = {
+        McCard(Modifier.fillMaxSize()) {
             val file = open
             if (file == null) {
                 EmptyState(stringResource(Res.string.files_title), stringResource(Res.string.files_open_failed))
@@ -222,7 +223,7 @@ fun FilesPane(session: ServerSession, initialPath: String = "", initialFile: Str
                 Editor(session, file, onClosed = { open = null })
             }
         }
-    }
+    })
 
     deleting?.let { entry ->
         AlertDialog(

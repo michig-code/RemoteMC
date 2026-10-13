@@ -108,8 +108,8 @@ fun WorldsPane(session: ServerSession) {
             return@Column
         }
         loader.error?.let { ErrorLine(it) }
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SplitView("worlds", 0.48f, Modifier.fillMaxSize(), minLeft = 300.dp, minRight = 260.dp, left = {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -155,7 +155,8 @@ fun WorldsPane(session: ServerSession) {
                     }
                 }
             }
-            McCard(Modifier.weight(1.1f).fillMaxHeight().padding(bottom = 24.dp)) {
+        }, right = {
+            McCard(Modifier.fillMaxSize().padding(bottom = 24.dp)) {
                 Column(Modifier.padding(top = 18.dp, start = 18.dp, end = 18.dp)) {
                     Text(stringResource(Res.string.world_gamerules), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.size(10.dp))
@@ -184,7 +185,7 @@ fun WorldsPane(session: ServerSession) {
                     }
                 }
             }
-        }
+        })
     }
 
     editing?.let { rule ->
