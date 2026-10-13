@@ -537,4 +537,9 @@
     <string name="settings_notify_quiet_text">Sans son ni vibration de %1$s à %2$s</string>
     <string name="settings_notify_quiet_from">De</string>
     <string name="settings_notify_quiet_to">À</string>
+    <string name="widget_online_count">En ligne : %1$d/%2$d</string>
+    <string name="widget_ran">%s exécuté</string>
+    <string name="widget_run_failed">Échec : %s</string>
+    <string name="fav_widget">Bouton sur le widget d\'accueil</string>
+    <string name="fav_widget_hint">Seulement pour les commandes sans espace réservé ni question</string>
 </resources>

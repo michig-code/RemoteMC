@@ -46,6 +46,15 @@ class ShortcutsTest {
     }
 
     @Test
+    fun onlyFavoritesWithoutQuestionsFitTheWidget() {
+        assertEquals(true, Favorite(command = "save-all", widget = true).fitsWidget)
+        assertEquals(false, Favorite(command = "stop", confirm = true).fitsWidget)
+        assertEquals(false, Favorite(command = "kick {player}").fitsWidget)
+        val s = Shortcuts(favorites = listOf(Favorite("f", "save-all", widget = true)))
+        assertEquals(s, Shortcuts.fromJson(JSONObject(s.toJson().toString())))
+    }
+
+    @Test
     fun placeholders() {
         assertEquals(listOf("{player}", "{text}"), Placeholders.find("msg {Spieler} {text} – {player}"))
         assertEquals(listOf("{player}", "{player2}"), Placeholders.find("tp {player} {player2}"))

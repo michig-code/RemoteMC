@@ -552,4 +552,9 @@
     <string name="settings_notify_quiet_text">Bez dźwięku i wibracji od %1$s do %2$s</string>
     <string name="settings_notify_quiet_from">Od</string>
     <string name="settings_notify_quiet_to">Do</string>
+    <string name="widget_online_count">Online: %1$d/%2$d</string>
+    <string name="widget_ran">Wykonano %s</string>
+    <string name="widget_run_failed">Nie powiodło się: %s</string>
+    <string name="fav_widget">Przycisk w widżecie ekranu głównego</string>
+    <string name="fav_widget_hint">Tylko dla poleceń bez symboli zastępczych i bez pytania</string>
 </resources>

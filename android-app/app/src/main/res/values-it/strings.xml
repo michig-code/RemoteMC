@@ -537,4 +537,9 @@
     <string name="settings_notify_quiet_text">Senza suono né vibrazione dalle %1$s alle %2$s</string>
     <string name="settings_notify_quiet_from">Dalle</string>
     <string name="settings_notify_quiet_to">Alle</string>
+    <string name="widget_online_count">Online: %1$d/%2$d</string>
+    <string name="widget_ran">%s eseguito</string>
+    <string name="widget_run_failed">Non riuscito: %s</string>
+    <string name="fav_widget">Pulsante nel widget della schermata Home</string>
+    <string name="fav_widget_hint">Solo per comandi senza segnaposto e senza domanda</string>
 </resources>

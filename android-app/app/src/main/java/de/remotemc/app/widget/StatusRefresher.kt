@@ -32,13 +32,30 @@ class StatusRefresher(context: Context, params: WorkerParameters) : CoroutineWor
                 async { WidgetServer.of(profile, runCatching { ApiClient(profile, Http.quick).status() }.getOrNull()) }
             }.awaitAll()
         }
-        WidgetStore.save(context, WidgetData(results, System.currentTimeMillis()))
+        WidgetStore.save(context, WidgetData(results, System.currentTimeMillis(), actions(context)))
         RemoteMCWidget().updateAll(context)
         TileService.requestListeningState(context, ComponentName(context, AlertsTileService::class.java))
         return Result.success()
     }
 
     companion object {
+        /** Favorites marked for the widget, of all servers (admins only: they run console commands). */
+        fun actions(context: Context): List<WidgetAction> =
+            context.app.servers.servers.value
+                .filter { it.role.atLeast(de.remotemc.app.data.Role.ADMIN) }
+                .flatMap { server ->
+                    context.app.shortcuts.load(server.id).favorites
+                        .filter { it.widget && it.fitsWidget }
+                        .map { WidgetAction(server.id, it.id, "/" + it.command) }
+                }
+
+        /** Redraws the widget after favorites changed, without checking the servers again. */
+        suspend fun updateActions(context: Context) {
+            val data = WidgetStore.load(context)
+            WidgetStore.save(context, data.copy(actions = actions(context)))
+            RemoteMCWidget().updateAll(context)
+        }
+
         private const val PERIODIC = "widget-periodic"
         private const val NOW = "widget-now"
 

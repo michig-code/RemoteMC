@@ -452,6 +452,8 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     fun updateShortcuts(change: (Shortcuts) -> Shortcuts) {
         shortcuts = change(shortcuts)
         getApplication<Application>().app.shortcuts.save(profile.id, shortcuts)
+        // Favorites can be buttons on the home screen widget.
+        viewModelScope.launch { runCatching { de.remotemc.app.widget.StatusRefresher.updateActions(getApplication()) } }
     }
 
     /**

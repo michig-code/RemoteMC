@@ -14,7 +14,12 @@ data class Favorite(
     val command: String,
     /** Ask before running (e.g. for /stop). */
     val confirm: Boolean = false,
-)
+    /** Shown as a button on the home screen widget. */
+    val widget: Boolean = false,
+) {
+    /** The widget runs it without asking anything, so it must need no input. */
+    val fitsWidget: Boolean get() = !confirm && Placeholders.find(command).isEmpty()
+}
 
 /** One command of a macro, run [waitSeconds] after the previous one. */
 data class MacroStep(val command: String, val waitSeconds: Int = 0)
@@ -35,7 +40,7 @@ data class Macro(
 
 data class Shortcuts(val favorites: List<Favorite> = emptyList(), val macros: List<Macro> = emptyList()) {
     fun toJson(): JSONObject = JSONObject()
-        .put("favorites", JSONArray(favorites.map { JSONObject().put("id", it.id).put("command", it.command).put("confirm", it.confirm) }))
+        .put("favorites", JSONArray(favorites.map { JSONObject().put("id", it.id).put("command", it.command).put("confirm", it.confirm).put("widget", it.widget) }))
         .put("macros", JSONArray(macros.map { m ->
             JSONObject().put("id", m.id).put("name", m.name).put("confirm", m.confirm)
                 .put("steps", JSONArray(m.steps.map { JSONObject().put("command", it.command).put("wait", it.waitSeconds) }))
@@ -54,7 +59,7 @@ data class Shortcuts(val favorites: List<Favorite> = emptyList(), val macros: Li
             return Shortcuts(
                 favorites = objects(o.optJSONArray("favorites")).mapNotNull { f ->
                     val command = f.optString("command").trim()
-                    if (command.isEmpty()) null else Favorite(f.optString("id").ifBlank { UUID.randomUUID().toString() }, command, f.optBoolean("confirm"))
+                    if (command.isEmpty()) null else Favorite(f.optString("id").ifBlank { UUID.randomUUID().toString() }, command, f.optBoolean("confirm"), f.optBoolean("widget"))
                 },
                 macros = objects(o.optJSONArray("macros")).mapNotNull { m ->
                     val steps = objects(m.optJSONArray("steps"))

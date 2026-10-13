@@ -110,7 +110,7 @@ Mehrere Spieler auf einmal kicken, eine Nachricht senden oder whitelisten.
 - gebündelt („3 Spieler sind beigetreten“)
 - Schnellantwort auf Chat-Erwähnungen
 
-### B6 – Widget 2.0
+### B6 – Widget 2.0 ✅
 - mehrere Server
 - Größe änderbar
 - Schnellaktion (Favorit oder Makro aus B1)

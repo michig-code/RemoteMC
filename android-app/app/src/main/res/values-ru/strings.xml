@@ -552,4 +552,9 @@
     <string name="settings_notify_quiet_text">Без звука и вибрации с %1$s до %2$s</string>
     <string name="settings_notify_quiet_from">С</string>
     <string name="settings_notify_quiet_to">До</string>
+    <string name="widget_online_count">В сети: %1$d/%2$d</string>
+    <string name="widget_ran">%s выполнено</string>
+    <string name="widget_run_failed">Ошибка: %s</string>
+    <string name="fav_widget">Кнопка на виджете главного экрана</string>
+    <string name="fav_widget_hint">Только для команд без заполнителей и без вопроса</string>
 </resources>

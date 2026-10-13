@@ -24,7 +24,10 @@ data class WidgetServer(
     }
 }
 
-data class WidgetData(val servers: List<WidgetServer>, val updatedAt: Long) {
+/** A favorite command that the widget runs with one tap. */
+data class WidgetAction(val serverId: String, val favoriteId: String, val label: String)
+
+data class WidgetData(val servers: List<WidgetServer>, val updatedAt: Long, val actions: List<WidgetAction> = emptyList()) {
     val onlineCount get() = servers.count { it.online }
 
     fun toJson(): String = JSONObject()
@@ -38,6 +41,11 @@ data class WidgetData(val servers: List<WidgetServer>, val updatedAt: Long) {
                             .put("players", it.players).put("max", it.maxPlayers).put("tps", it.tps ?: -1.0),
                     )
                 }
+            },
+        ).put(
+            "actions",
+            JSONArray().apply {
+                actions.forEach { put(JSONObject().put("server", it.serverId).put("favorite", it.favoriteId).put("label", it.label)) }
             },
         ).toString()
 
@@ -56,6 +64,12 @@ data class WidgetData(val servers: List<WidgetServer>, val updatedAt: Long) {
                     )
                 },
                 o.optLong("updatedAt"),
+                o.optJSONArray("actions")?.let { a ->
+                    List(a.length()) {
+                        val x = a.getJSONObject(it)
+                        WidgetAction(x.getString("server"), x.getString("favorite"), x.getString("label"))
+                    }
+                }.orEmpty(),
             )
         }
     }

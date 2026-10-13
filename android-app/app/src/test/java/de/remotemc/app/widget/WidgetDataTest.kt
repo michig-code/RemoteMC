@@ -17,8 +17,15 @@ class WidgetDataTest {
                 WidgetServer("c", "Test \"server\"", online = false),
             ),
             updatedAt = 123,
+            actions = listOf(WidgetAction("a", "f1", "/save-all"), WidgetAction("b", "f2", "/weather clear")),
         )
         assertEquals(data, WidgetData.fromJson(data.toJson()))
         assertEquals(2, data.onlineCount)
+    }
+
+    @Test
+    fun oldDataWithoutActions() {
+        val old = """{"updatedAt":5,"servers":[{"id":"a","name":"S","online":false}]}"""
+        assertEquals(emptyList<WidgetAction>(), WidgetData.fromJson(old).actions)
     }
 }

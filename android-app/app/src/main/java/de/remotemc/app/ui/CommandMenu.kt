@@ -408,6 +408,8 @@ private fun <T> LazyListScope.shortcutItems(
 private fun FavoriteDialog(initial: Favorite, isNew: Boolean, onSave: (Favorite) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
     var command by remember { mutableStateOf(initial.command) }
     var confirm by remember { mutableStateOf(initial.confirm) }
+    var widget by remember { mutableStateOf(initial.widget) }
+    val fits = Favorite(command = command, confirm = confirm).fitsWidget
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.fav_title)) },
@@ -425,10 +427,20 @@ private fun FavoriteDialog(initial: Favorite, isNew: Boolean, onSave: (Favorite)
                 Text(stringResource(R.string.placeholder_help), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
                 ConfirmSwitch(confirm) { confirm = it }
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.fav_widget))
+                        if (!fits) {
+                            Text(stringResource(R.string.fav_widget_hint), style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Switch(checked = widget && fits, onCheckedChange = { widget = it }, enabled = fits)
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(initial.copy(command = command.trim(), confirm = confirm)) }, enabled = command.isNotBlank()) {
+            TextButton(onClick = { onSave(initial.copy(command = command.trim(), confirm = confirm, widget = widget && fits)) }, enabled = command.isNotBlank()) {
                 Text(stringResource(R.string.action_save))
             }
         },

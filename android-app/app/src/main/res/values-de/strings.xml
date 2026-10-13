@@ -536,4 +536,9 @@
     <string name="settings_notify_quiet_text">Ohne Ton und Vibration von %1$s bis %2$s</string>
     <string name="settings_notify_quiet_from">Von</string>
     <string name="settings_notify_quiet_to">Bis</string>
+    <string name="widget_online_count">Online: %1$d/%2$d</string>
+    <string name="widget_ran">%s ausgeführt</string>
+    <string name="widget_run_failed">Fehlgeschlagen: %s</string>
+    <string name="fav_widget">Knopf auf dem Startbildschirm-Widget</string>
+    <string name="fav_widget_hint">Nur für Befehle ohne Platzhalter und ohne Nachfrage</string>
 </resources>
