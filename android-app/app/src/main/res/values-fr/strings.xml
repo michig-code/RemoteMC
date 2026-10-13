@@ -433,4 +433,6 @@
     <string name="dashboard_card_width">Changer la largeur</string>
     <string name="dashboard_card_hide">Masquer la carte</string>
     <string name="dashboard_card_show">Afficher la carte</string>
+    <string name="settings_animations">Animations</string>
+    <string name="settings_animations_text">Transitions fluides et chiffres animés</string>
 </resources>

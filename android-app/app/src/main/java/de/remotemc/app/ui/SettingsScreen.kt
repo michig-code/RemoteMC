@@ -7,6 +7,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,6 +86,7 @@ import de.remotemc.app.data.AppSettings
 import de.remotemc.app.data.MAX_DEVICE_NAME
 import de.remotemc.app.data.ThemeMode
 import de.remotemc.app.ui.components.AppLogo
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.SectionTitle
 import de.remotemc.app.ui.theme.AccentPresets
@@ -200,8 +207,13 @@ fun SettingsScreen(
 
                 SectionTitle(stringResource(R.string.settings_behaviour))
                 McCard(Modifier.fillMaxWidth()) {
-                    SwitchRow(stringResource(R.string.settings_haptics), stringResource(R.string.settings_haptics_text), settings.haptics) { v ->
-                        onChange { it.copy(haptics = v) }
+                    Column {
+                        SwitchRow(stringResource(R.string.settings_animations), stringResource(R.string.settings_animations_text), settings.animations) { v ->
+                            onChange { it.copy(animations = v) }
+                        }
+                        SwitchRow(stringResource(R.string.settings_haptics), stringResource(R.string.settings_haptics_text), settings.haptics) { v ->
+                            onChange { it.copy(haptics = v) }
+                        }
                     }
                 }
 
@@ -406,7 +418,11 @@ private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) 
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
-        AnimatedVisibility(alerts.enabled) {
+        AnimatedVisibility(
+            alerts.enabled,
+            enter = if (LocalAnimations.current) expandVertically() + fadeIn() else EnterTransition.None,
+            exit = if (LocalAnimations.current) shrinkVertically() + fadeOut() else ExitTransition.None,
+        ) {
             Column {
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 SwitchRow(

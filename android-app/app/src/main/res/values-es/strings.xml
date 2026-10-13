@@ -433,4 +433,6 @@
     <string name="dashboard_card_width">Cambiar ancho</string>
     <string name="dashboard_card_hide">Ocultar tarjeta</string>
     <string name="dashboard_card_show">Mostrar tarjeta</string>
+    <string name="settings_animations">Animaciones</string>
+    <string name="settings_animations_text">Transiciones suaves y números animados</string>
 </resources>

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.PlayerHead
 import de.remotemc.app.ui.theme.McColors
 import java.text.DateFormat
@@ -69,8 +70,8 @@ fun ChatTab(entries: List<ChatEntry>, canSend: Boolean, onBroadcast: (String) ->
             ) {
                 items(reversed, key = { "${it.id}-${it.time}" }) { entry ->
                     when (entry.type) {
-                        ChatEntry.Type.JOIN, ChatEntry.Type.QUIT -> SystemLine(entry, Modifier.animateItem())
-                        else -> ChatBubble(entry, skins[entry.player], Modifier.animateItem())
+                        ChatEntry.Type.JOIN, ChatEntry.Type.QUIT -> SystemLine(entry, Modifier.then(if (LocalAnimations.current) Modifier.animateItem() else Modifier))
+                        else -> ChatBubble(entry, skins[entry.player], Modifier.then(if (LocalAnimations.current) Modifier.animateItem() else Modifier))
                     }
                 }
             }

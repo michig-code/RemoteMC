@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -22,6 +24,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -33,21 +36,21 @@ import androidx.navigation.navArgument
 import de.remotemc.app.data.ConnectLink
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ThemeMode
-import de.remotemc.app.notify.WatchService
-import de.remotemc.app.widget.RemoteMCWidget
-import de.remotemc.app.widget.StatusRefresher
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import de.remotemc.app.data.suggestedDeviceName
+import de.remotemc.app.notify.WatchService
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
 import de.remotemc.app.ui.ServerViewModel
 import de.remotemc.app.ui.SettingsScreen
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.pair.PairScreen
 import de.remotemc.app.ui.pair.PairViewModel
 import de.remotemc.app.ui.pair.ScannerScreen
 import de.remotemc.app.ui.theme.RemoteMCTheme
 import de.remotemc.app.ui.util.LocalHapticsEnabled
+import de.remotemc.app.widget.RemoteMCWidget
+import de.remotemc.app.widget.StatusRefresher
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.DARK -> true
             }
             RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor, accentHue = settings.accentHue) {
-                CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics) {
+                CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics, LocalAnimations provides settings.animations) {
                     AppNavigation(
                         startOnboarding = !settings.onboardingDone || settings.deviceName.isBlank(),
                         pendingLink = pendingLink,
@@ -146,13 +149,14 @@ private fun AppNavigation(
         }
     }
 
+    val animate = LocalAnimations.current
     NavHost(
         navController = nav,
         startDestination = if (startOnboarding) Routes.ONBOARDING else Routes.SERVERS,
-        enterTransition = { slideInHorizontally { it } + fadeIn() },
-        exitTransition = { slideOutHorizontally { -it / 3 } + fadeOut() },
-        popEnterTransition = { slideInHorizontally { -it / 3 } + fadeIn() },
-        popExitTransition = { slideOutHorizontally { it } + fadeOut() },
+        enterTransition = { if (animate) slideInHorizontally { it } + fadeIn() else EnterTransition.None },
+        exitTransition = { if (animate) slideOutHorizontally { -it / 3 } + fadeOut() else ExitTransition.None },
+        popEnterTransition = { if (animate) slideInHorizontally { -it / 3 } + fadeIn() else EnterTransition.None },
+        popExitTransition = { if (animate) slideOutHorizontally { it } + fadeOut() else ExitTransition.None },
     ) {
         composable(Routes.ONBOARDING) {
             val current = context.app.settings.settings.collectAsState().value

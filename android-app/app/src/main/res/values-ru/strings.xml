@@ -441,4 +441,6 @@
     <string name="dashboard_card_width">Изменить ширину</string>
     <string name="dashboard_card_hide">Скрыть карточку</string>
     <string name="dashboard_card_show">Показать карточку</string>
+    <string name="settings_animations">Анимации</string>
+    <string name="settings_animations_text">Плавные переходы и анимированные числа</string>
 </resources>

@@ -105,21 +105,21 @@ fun OverviewPane(
         },
     ) { id ->
         when (id) {
-            "players" -> { m -> Hero(status, m) }
-            "tps" -> { m -> TpsCard(status, m) }
+            "players" -> { m -> Hero(status, m.staggeredAppear(0)) }
+            "tps" -> { m -> TpsCard(status, m.staggeredAppear(1)) }
             "mspt" -> { m ->
                 val mspt = status.mspt
                 Stat(Icons.Outlined.Speed, stringResource(Res.string.dashboard_mspt),
-                    if (mspt != null) stringResource(Res.string.unit_ms, "%.1f".format(mspt)) else "–", m)
+                    if (mspt != null) stringResource(Res.string.unit_ms, "%.1f".format(mspt)) else "–", m.staggeredAppear(2))
             }
-            "uptime" -> { m -> Stat(Icons.Outlined.Schedule, stringResource(Res.string.dashboard_uptime), formatUptime(status.uptimeSeconds), m) }
-            "memory" -> { m -> MemoryCard(status, m) }
-            "history" -> if (loadHistory != null && status.supports("history")) { m -> Box(m) { HistoryCard(loadHistory) } } else null
+            "uptime" -> { m -> Stat(Icons.Outlined.Schedule, stringResource(Res.string.dashboard_uptime), formatUptime(status.uptimeSeconds), m.staggeredAppear(3)) }
+            "memory" -> { m -> MemoryCard(status, m.staggeredAppear(4)) }
+            "history" -> if (loadHistory != null && status.supports("history")) { m -> Box(m.staggeredAppear(5)) { HistoryCard(loadHistory) } } else null
             "worlds" -> { m ->
                 Column(m) {
                     SectionTitle(stringResource(Res.string.dashboard_worlds))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
-                        status.worlds.forEach { WorldCard(it, Modifier.weight(1f).widthIn(min = 220.dp)) }
+                        status.worlds.forEachIndexed { i, w -> WorldCard(w, Modifier.weight(1f).widthIn(min = 220.dp).staggeredAppear(6 + i)) }
                     }
                 }
             }
@@ -157,7 +157,10 @@ private fun Hero(status: ServerStatus, modifier: Modifier) {
             Text("${status.platform} · ${status.minecraftVersion}", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(18.dp))
             Row(verticalAlignment = Alignment.Bottom) {
-                Text("${status.onlinePlayers}", style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+                val players by androidx.compose.animation.core.animateIntAsState(
+                    status.onlinePlayers, motion(androidx.compose.animation.core.tween(600)), label = "players",
+                )
+                Text("$players", style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.width(8.dp))
                 Text(" / ${status.maxPlayers} " + pluralStringResource(Res.plurals.players_label, status.maxPlayers), style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -179,7 +182,12 @@ private fun TpsCard(status: ServerStatus, modifier: Modifier) {
                 Text(stringResource(Res.string.dashboard_tps_unavailable), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
             }
-            val color = tpsColor(tps)
+            val color by androidx.compose.animation.animateColorAsState(tpsColor(tps), motion(), label = "tpsColor")
+            val sweep by androidx.compose.animation.core.animateFloatAsState(
+                (tps / 20.0).toFloat().coerceIn(0f, 1f),
+                motion(androidx.compose.animation.core.spring(dampingRatio = 0.75f, stiffness = androidx.compose.animation.core.Spring.StiffnessVeryLow)),
+                label = "tps",
+            )
             val track = MaterialTheme.colorScheme.surfaceContainerHighest
             Box(Modifier.size(150.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.fillMaxSize()) {
@@ -187,7 +195,7 @@ private fun TpsCard(status: ServerStatus, modifier: Modifier) {
                     val inset = stroke / 2
                     val arc = Size(size.width - stroke, size.height - stroke)
                     drawArc(track, 135f, 270f, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
-                    drawArc(color, 135f, 270f * (tps / 20.0).toFloat().coerceIn(0f, 1f), false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
+                    drawArc(color, 135f, 270f * sweep, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("%.1f".format(tps), style = MaterialTheme.typography.headlineLarge, color = color)

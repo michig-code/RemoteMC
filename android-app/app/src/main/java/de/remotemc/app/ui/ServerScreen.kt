@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -90,6 +92,7 @@ import de.remotemc.app.data.Whitelist
 import de.remotemc.app.data.WorldDetails
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.ui.components.ConnectionState
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.StatusPill
 import de.remotemc.app.ui.util.UiText
 import de.remotemc.app.ui.util.errorText
@@ -341,12 +344,17 @@ fun ServerScreenContent(
             Column(Modifier.weight(1f)) {
                 AccessBanner(state.error, actions.onRepair)
                 Box(Modifier.weight(1f)) {
+                    val animate = LocalAnimations.current
                     AnimatedContent(
                         targetState = tab,
                         transitionSpec = {
                             val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
-                            (slideInHorizontally(tween(280)) { it / 6 * dir } + fadeIn(tween(280)))
-                                .togetherWith(slideOutHorizontally(tween(200)) { -it / 6 * dir } + fadeOut(tween(200)))
+                            if (!animate) {
+                                EnterTransition.None togetherWith ExitTransition.None
+                            } else {
+                                (slideInHorizontally(tween(280)) { it / 6 * dir } + fadeIn(tween(280)))
+                                    .togetherWith(slideOutHorizontally(tween(200)) { -it / 6 * dir } + fadeOut(tween(200)))
+                            }
                         },
                         label = "tab",
                     ) { current ->
@@ -405,7 +413,12 @@ private fun AccessBanner(error: Throwable?, onRepair: () -> Unit) {
         error is ApiError.Http && error.code == "invalid_token" -> R.string.banner_token_revoked
         else -> null
     }
-    AnimatedVisibility(message != null, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+    val animate = LocalAnimations.current
+    AnimatedVisibility(
+        message != null,
+        enter = if (animate) expandVertically() + fadeIn() else EnterTransition.None,
+        exit = if (animate) shrinkVertically() + fadeOut() else ExitTransition.None,
+    ) {
         Surface(
             color = MaterialTheme.colorScheme.errorContainer,
             shape = MaterialTheme.shapes.large,

@@ -1,6 +1,7 @@
 package de.remotemc.desktop
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.automirrored.outlined.Send
@@ -102,7 +104,9 @@ private fun OnlinePlayers(session: ServerSession) {
             contentPadding = PaddingValues(24.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items(players, key = { it.uuid.ifBlank { it.name } }) { p -> PlayerCard(p) { selected = p.name } }
+            itemsIndexed(players, key = { _, it -> it.uuid.ifBlank { it.name } }) { i, p ->
+                Box(Modifier.staggeredAppear(i)) { PlayerCard(p) { selected = p.name } }
+            }
         }
     }
     selected?.let { name ->

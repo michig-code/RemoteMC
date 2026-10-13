@@ -12,6 +12,8 @@ data class AppSettings(
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = false,
     val haptics: Boolean = true,
+    /** Transitions, moving numbers and the like; off = everything changes instantly. */
+    val animations: Boolean = true,
     val onboardingDone: Boolean = false,
     /** Name of this phone, used for every pairing (shown on the server in /remotemc token list). */
     val deviceName: String = "",
@@ -34,6 +36,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putString("theme", next.theme.name)
             putBoolean("dynamicColor", next.dynamicColor)
             putBoolean("haptics", next.haptics)
+            putBoolean("animations", next.animations)
             putBoolean("onboardingDone", next.onboardingDone)
             putString("deviceName", next.deviceName)
             putFloat("accentHue", next.accentHue ?: -1f)
@@ -55,6 +58,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         theme = runCatching { ThemeMode.valueOf(prefs.getString("theme", null)!!) }.getOrDefault(ThemeMode.SYSTEM),
         dynamicColor = prefs.getBoolean("dynamicColor", false),
         haptics = prefs.getBoolean("haptics", true),
+        animations = prefs.getBoolean("animations", true),
         onboardingDone = prefs.getBoolean("onboardingDone", false),
         deviceName = prefs.getString("deviceName", "").orEmpty(),
         accentHue = prefs.getFloat("accentHue", -1f).takeIf { it >= 0f },

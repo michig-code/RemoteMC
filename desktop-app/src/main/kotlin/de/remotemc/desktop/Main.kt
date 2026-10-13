@@ -1,5 +1,13 @@
 package de.remotemc.desktop
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -133,33 +141,46 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
             if (tabs != null && controls != null) {
                 TitleBar(model, tabs, controls, onAdd = { tabs.showHome(); screen = Screen.Pair(null) })
             }
-            Box(Modifier.weight(1f).fillMaxWidth()) {
-                val activeTab = tabs?.active
-                if (tabs != null && activeTab != null) {
-                    // Each tab keeps its own state (pane, scroll position) while others are shown.
-                    saveable.SaveableStateProvider(activeTab) {
-                        val session = tabs.session(activeTab)
-                        if (session != null) ServerContent(session, onBack = tabs::showHome)
+            val animate = LocalAnimations.current
+            // A server tab or one of the screens (server list, pairing, settings); switching fades over.
+            val target: Any = tabs?.active?.let { "tab:$it" } ?: screen
+            AnimatedContent(
+                targetState = target,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                transitionSpec = {
+                    if (!animate) EnterTransition.None togetherWith ExitTransition.None
+                    else (fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.985f)) togetherWith fadeOut(tween(120))
+                },
+                label = "screen",
+            ) { shown ->
+                Box(Modifier.fillMaxSize()) {
+                    if (shown is String && tabs != null) {
+                        val id = shown.removePrefix("tab:")
+                        // Each tab keeps its own state (area, scroll position) while others are shown.
+                        saveable.SaveableStateProvider(id) {
+                            val session = tabs.session(id)
+                            if (session != null) ServerContent(session, onBack = tabs::showHome)
+                        }
+                        return@Box
                     }
-                    return@Box
-                }
-                when (val s = screen) {
-                    Screen.Servers -> ServerListScreen(
-                        model,
-                        onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
-                        onAdd = { screen = Screen.Pair(it) },
-                        onSettings = { screen = Screen.Settings },
-                    )
-                    is Screen.Pair -> PairScreen(model, s.link, onDone = { id ->
-                        screen = Screen.Servers
-                        if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
-                    })
-                    is Screen.Server -> {
-                        val profile = model.servers.get(s.id)
-                        if (profile == null) screen = Screen.Servers
-                        else ServerScreen(model, profile, onBack = { screen = Screen.Servers })
+                    when (val s = shown as Screen) {
+                        Screen.Servers -> ServerListScreen(
+                            model,
+                            onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
+                            onAdd = { screen = Screen.Pair(it) },
+                            onSettings = { screen = Screen.Settings },
+                        )
+                        is Screen.Pair -> PairScreen(model, s.link, onDone = { id ->
+                            screen = Screen.Servers
+                            if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
+                        })
+                        is Screen.Server -> {
+                            val profile = model.servers.get(s.id)
+                            if (profile == null) screen = Screen.Servers
+                            else ServerScreen(model, profile, onBack = { screen = Screen.Servers })
+                        }
+                        Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
                     }
-                    Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
                 }
             }
         }

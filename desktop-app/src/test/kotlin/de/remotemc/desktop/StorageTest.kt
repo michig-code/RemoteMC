@@ -35,6 +35,8 @@ class StorageTest {
         val alerts = AlertSettings(enabled = true, lowTps = false, tpsThreshold = 12, joins = true, players = "Steve, Alex", words = "Michi")
         settings.update { it.copy(alerts = alerts) }
         assertEquals(alerts, SettingsStore(File(dir, "settings.json")).settings.value.alerts)
+        settings.update { it.copy(animations = false) }
+        assertEquals(false, SettingsStore(File(dir, "settings.json")).settings.value.animations)
 
         val history = CommandHistory(File(dir, "h.json"))
         history.add("s", "time set day")

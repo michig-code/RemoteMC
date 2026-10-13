@@ -2,6 +2,8 @@ package de.remotemc.app.ui.pair
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -13,10 +15,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -76,6 +78,7 @@ import de.remotemc.app.data.MAX_DEVICE_NAME
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.net.Tls
 import de.remotemc.app.ui.components.AppLogo
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.statusTextColor
@@ -116,10 +119,14 @@ fun PairScreen(
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding(), contentAlignment = Alignment.TopCenter) {
+            val animate = LocalAnimations.current
             AnimatedContent(
                 targetState = step,
                 contentKey = { it::class },
-                transitionSpec = { (slideInHorizontally { it / 5 } + fadeIn()).togetherWith(fadeOut()) },
+                transitionSpec = {
+                    if (animate) (slideInHorizontally { it / 5 } + fadeIn()).togetherWith(fadeOut())
+                    else EnterTransition.None togetherWith ExitTransition.None
+                },
                 label = "pairStep",
                 modifier = Modifier.widthIn(max = 560.dp),
             ) { s ->

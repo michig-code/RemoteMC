@@ -456,4 +456,6 @@
     <string name="dashboard_card_width">Change width</string>
     <string name="dashboard_card_hide">Hide card</string>
     <string name="dashboard_card_show">Show card</string>
+    <string name="settings_animations">Animations</string>
+    <string name="settings_animations_text">Smooth transitions and moving numbers</string>
 </resources>

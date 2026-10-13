@@ -56,6 +56,7 @@ import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.Whitelist
 import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.PlayerHead
 import de.remotemc.app.ui.util.errorText
@@ -208,7 +209,7 @@ private fun WhitelistView(moderation: ModerationActions, canToggle: Boolean) {
                 item(key = "empty") { EmptyLine(stringResource(R.string.whitelist_empty)) }
             }
             items(list.players, key = { it.lowercase() }) { player ->
-                McCard(Modifier.fillMaxWidth().animateItem()) {
+                McCard(Modifier.fillMaxWidth().then(if (LocalAnimations.current) Modifier.animateItem() else Modifier)) {
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         PlayerHead(player, 36.dp)
                         Spacer(Modifier.width(12.dp))
@@ -249,7 +250,7 @@ private fun BansView(moderation: ModerationActions) {
                 item(key = "empty") { EmptyLine(stringResource(R.string.bans_empty)) }
             }
             items(list, key = { it.name.lowercase() }) { ban ->
-                McCard(Modifier.fillMaxWidth().animateItem()) {
+                McCard(Modifier.fillMaxWidth().then(if (LocalAnimations.current) Modifier.animateItem() else Modifier)) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         PlayerHead(ban.name, 40.dp)
                         Spacer(Modifier.width(12.dp))

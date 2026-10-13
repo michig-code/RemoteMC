@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,9 +26,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsOff
-import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Speed
@@ -165,11 +166,13 @@ fun ServerListScreen(
                         }
                     }
                 }
-                items(shown, key = { it.id }) { server ->
-                    ServerCard(
-                        server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
-                        alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
-                    )
+                itemsIndexed(shown, key = { _, it -> it.id }) { index, server ->
+                    Box(Modifier.staggeredAppear(index)) {
+                        ServerCard(
+                            server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
+                            alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
+                        )
+                    }
                 }
             }
         }

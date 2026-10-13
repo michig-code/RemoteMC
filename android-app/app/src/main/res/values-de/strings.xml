@@ -439,4 +439,6 @@
     <string name="dashboard_card_width">Breite ändern</string>
     <string name="dashboard_card_hide">Karte ausblenden</string>
     <string name="dashboard_card_show">Karte einblenden</string>
+    <string name="settings_animations">Animationen</string>
+    <string name="settings_animations_text">Weiche Übergänge und mitlaufende Zahlen</string>
 </resources>

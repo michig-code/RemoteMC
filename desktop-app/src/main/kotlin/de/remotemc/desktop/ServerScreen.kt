@@ -1,5 +1,14 @@
 package de.remotemc.desktop
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +26,10 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Public
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,7 +117,22 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
             Column(Modifier.fillMaxSize()) {
                 TopBar(session)
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    when (if (pane in panes) pane else Pane.OVERVIEW) {
+                    val animate = LocalAnimations.current
+                    // Switching areas slides up or down, following the order in the side bar.
+                    AnimatedContent(
+                        targetState = if (pane in panes) pane else Pane.OVERVIEW,
+                        transitionSpec = {
+                            if (!animate) {
+                                EnterTransition.None togetherWith ExitTransition.None
+                            } else {
+                                val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
+                                (slideInVertically(tween(260)) { it / 12 * dir } + fadeIn(tween(260)))
+                                    .togetherWith(slideOutVertically(tween(180)) { -it / 12 * dir } + fadeOut(tween(180)))
+                            }
+                        },
+                        label = "pane",
+                    ) { shown ->
+                    when (shown) {
                         Pane.OVERVIEW -> OverviewPane(session)
                         Pane.PLAYERS -> PlayersPane(session, playersView)
                         Pane.CONSOLE -> ConsolePane(session)
@@ -117,6 +141,7 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                         Pane.PLUGINS -> PluginsPane(session)
                         Pane.SCHEDULES -> SchedulesPane(session)
                         Pane.FILES -> FilesPane(session)
+                    }
                     }
                 }
             }

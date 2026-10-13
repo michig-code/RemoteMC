@@ -425,4 +425,6 @@
     <string name="dashboard_card_width">Breedte wijzigen</string>
     <string name="dashboard_card_hide">Kaart verbergen</string>
     <string name="dashboard_card_show">Kaart tonen</string>
+    <string name="settings_animations">Animaties</string>
+    <string name="settings_animations_text">Vloeiende overgangen en bewegende cijfers</string>
 </resources>

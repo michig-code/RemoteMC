@@ -1,5 +1,6 @@
 package de.remotemc.app.ui.components
 
+import android.net.Uri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -41,12 +42,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.composed
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -54,24 +54,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import de.remotemc.app.ui.util.SkinFaceTransformation
 import de.remotemc.app.R
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.statusTextColor
+import de.remotemc.app.ui.util.SkinFaceTransformation
 
 enum class ConnectionState { Connecting, Online, Offline }
 
@@ -93,6 +93,14 @@ fun AppLogo(size: Dp, modifier: Modifier = Modifier) {
     }
 }
 
+/** False when the user turned animations off in the settings. */
+val LocalAnimations = androidx.compose.runtime.staticCompositionLocalOf { true }
+
+/** [spec], or an instant change when animations are off. */
+@Composable
+fun <T> motion(spec: androidx.compose.animation.core.AnimationSpec<T> = spring()): androidx.compose.animation.core.AnimationSpec<T> =
+    if (LocalAnimations.current) spec else androidx.compose.animation.core.snap()
+
 /** Small dot that pulses while online / connecting. */
 @Composable
 fun PulsingDot(state: ConnectionState, size: Dp = 10.dp) {
@@ -102,8 +110,10 @@ fun PulsingDot(state: ConnectionState, size: Dp = 10.dp) {
             ConnectionState.Offline -> McColors.Offline
             ConnectionState.Connecting -> McColors.Warning
         },
+        motion(),
         label = "dotColor",
     )
+    val animate = LocalAnimations.current
     val transition = rememberInfiniteTransition(label = "pulse")
     val pulse by transition.animateFloat(
         initialValue = 0f,
@@ -112,7 +122,7 @@ fun PulsingDot(state: ConnectionState, size: Dp = 10.dp) {
         label = "pulseProgress",
     )
     Box(Modifier.size(size * 2.2f), contentAlignment = Alignment.Center) {
-        if (state != ConnectionState.Offline) {
+        if (state != ConnectionState.Offline && animate) {
             Box(
                 Modifier
                     .size(size * (1f + pulse * 1.2f))
@@ -144,6 +154,7 @@ fun StatusPill(
             ConnectionState.Offline -> McColors.Offline.copy(alpha = 0.16f)
             ConnectionState.Connecting -> McColors.Warning.copy(alpha = 0.16f)
         },
+        motion(),
         label = "pillColor",
     )
     Row(
@@ -202,7 +213,7 @@ fun McCard(
 /** Integer that counts up/down smoothly when it changes. */
 @Composable
 fun AnimatedCounter(value: Int, style: androidx.compose.ui.text.TextStyle, color: Color = Color.Unspecified) {
-    val animated by animateIntAsState(value, tween(600, easing = FastOutSlowInEasing), label = "counter")
+    val animated by animateIntAsState(value, motion(tween(600, easing = FastOutSlowInEasing)), label = "counter")
     Text(animated.toString(), style = style, color = color)
 }
 
@@ -211,10 +222,10 @@ fun AnimatedCounter(value: Int, style: androidx.compose.ui.text.TextStyle, color
 fun TpsGauge(tps: Double?, modifier: Modifier = Modifier, stroke: Dp = 10.dp) {
     val fraction by animateFloatAsState(
         ((tps ?: 0.0) / 20.0).toFloat().coerceIn(0f, 1f),
-        spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow),
+        motion(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow)),
         label = "tps",
     )
-    val color by animateColorAsState(tps?.let(::tpsColor) ?: MaterialTheme.colorScheme.outline, label = "tpsColor")
+    val color by animateColorAsState(tps?.let(::tpsColor) ?: MaterialTheme.colorScheme.outline, motion(), label = "tpsColor")
     val track = MaterialTheme.colorScheme.surfaceContainerHighest
     val description = tps?.let { stringResource(R.string.dashboard_tps_description, it) } ?: stringResource(R.string.dashboard_tps_unavailable)
     Box(modifier.clearAndSetSemantics { contentDescription = description }, contentAlignment = Alignment.Center) {
@@ -241,7 +252,7 @@ fun tpsColor(tps: Double) = when {
 /** Horizontal animated bar, e.g. for RAM usage. */
 @Composable
 fun AnimatedBar(fraction: Float, color: Color, modifier: Modifier = Modifier, height: Dp = 10.dp) {
-    val animated by animateFloatAsState(fraction.coerceIn(0f, 1f), tween(800, easing = FastOutSlowInEasing), label = "bar")
+    val animated by animateFloatAsState(fraction.coerceIn(0f, 1f), motion(tween(800, easing = FastOutSlowInEasing)), label = "bar")
     val track = MaterialTheme.colorScheme.surfaceContainerHighest
     Box(
         modifier
@@ -329,9 +340,10 @@ fun Badge(text: String, color: Color, modifier: Modifier = Modifier) {
 @Composable
 fun Shimmer(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "shimmer")
-    val x by transition.animateFloat(
+    val moving by transition.animateFloat(
         -1f, 2f, infiniteRepeatable(tween(1300, easing = LinearEasing), RepeatMode.Restart), label = "x",
     )
+    val x = if (LocalAnimations.current) moving else 0.5f
     val base = MaterialTheme.colorScheme.surfaceContainerHigh
     val highlight = MaterialTheme.colorScheme.surfaceContainerHighest
     Box(
@@ -399,10 +411,11 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
 
 /** Fades and slides content in, delayed by [index] for a staggered list entrance. */
 fun Modifier.staggeredAppear(index: Int): Modifier = composed {
+    if (!LocalAnimations.current) return@composed this
     val progress = remember { androidx.compose.animation.core.Animatable(0f) }
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(index.coerceAtMost(10) * 55L)
-        progress.animateTo(1f, tween(420, easing = FastOutSlowInEasing))
+        // The delay is part of the animation (frame driven), no separate timer.
+        progress.animateTo(1f, tween(420, delayMillis = index.coerceAtMost(10) * 55, easing = FastOutSlowInEasing))
     }
     graphicsLayer {
         alpha = progress.value

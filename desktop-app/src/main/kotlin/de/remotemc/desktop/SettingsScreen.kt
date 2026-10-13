@@ -1,6 +1,12 @@
 package de.remotemc.desktop
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -100,6 +106,14 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                         )
                     }
                 }
+                SectionTitle(stringResource(Res.string.settings_behaviour))
+                McCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(vertical = 8.dp)) {
+                        SwitchRow(stringResource(Res.string.settings_animations), stringResource(Res.string.settings_animations_text), settings.animations) { v ->
+                            model.settings.update { it.copy(animations = v) }
+                        }
+                    }
+                }
                 SectionTitle(stringResource(Res.string.settings_notifications))
                 McCard(Modifier.fillMaxWidth()) {
                     AlertSettingsCard(settings.alerts) { change -> model.settings.update { it.copy(alerts = change(it.alerts)) } }
@@ -130,7 +144,11 @@ private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) 
         SwitchRow(stringResource(Res.string.settings_notifications), stringResource(Res.string.desktop_notify_text), alerts.enabled) { on ->
             onChange { it.copy(enabled = on) }
         }
-        AnimatedVisibility(alerts.enabled) {
+        AnimatedVisibility(
+            alerts.enabled,
+            enter = if (LocalAnimations.current) expandVertically() + fadeIn() else EnterTransition.None,
+            exit = if (LocalAnimations.current) shrinkVertically() + fadeOut() else ExitTransition.None,
+        ) {
             Column {
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 SwitchRow(stringResource(Res.string.settings_notify_offline), stringResource(Res.string.settings_notify_offline_text), alerts.offline) { v ->

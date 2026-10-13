@@ -22,7 +22,7 @@ class EditableOverviewTest {
         val defaults = DashboardLayout(listOf("a", "b", "c").map { DashCard(it, CardSize.FULL) })
         var saved: DashboardLayout? = null
         val scene = ImageComposeScene(800, 900, Density(1f)) {
-            RemoteMCTheme(DesktopSettings()) {
+            RemoteMCTheme(DesktopSettings(animations = false)) {
                 EditableOverview(defaults, defaults, onChange = { saved = it }, startEditing = true) { _ ->
                     { m -> McCard(m.height(120.dp)) { Box(Modifier) } }
                 }

@@ -36,6 +36,8 @@ First public release of **RemoteMC**.
   history chart, players with all actions, coloured console with suggestions and history, chat
 - File manager with editor (Ctrl+S), add and remove plugins; resizable split views
 - Customizable overview: hold a card, then drag cards, change their width or hide them
+- Animations like on the phone (areas and tabs slide and fade, cards appear one by one, numbers,
+  gauges and bars move smoothly, cards light up under the mouse); can be turned off
 - Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
   server's plugin supports them
 - Windows notifications with the same rules as on the phone; RemoteMC stays in the tray while
@@ -44,6 +46,7 @@ First public release of **RemoteMC**.
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 
 ### App
+- Animations can be turned off in the settings (on by default)
 - Customizable overview: hold a card to move cards, change their width or hide them
 - File manager: browse the server folder, edit config files, upload and delete files; add a plugin
   by picking its .jar, remove plugins

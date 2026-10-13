@@ -425,4 +425,6 @@
     <string name="dashboard_card_width">Genişliği değiştir</string>
     <string name="dashboard_card_hide">Kartı gizle</string>
     <string name="dashboard_card_show">Kartı göster</string>
+    <string name="settings_animations">Animasyonlar</string>
+    <string name="settings_animations_text">Yumuşak geçişler ve hareketli sayılar</string>
 </resources>

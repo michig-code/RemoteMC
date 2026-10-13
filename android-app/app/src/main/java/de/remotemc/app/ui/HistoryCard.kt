@@ -1,6 +1,8 @@
 package de.remotemc.app.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -57,6 +59,7 @@ import de.remotemc.app.data.HistoryPoint
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.net.ApiError
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.McCard
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -166,7 +169,8 @@ fun HistoryCard(load: suspend (HistoryRange) -> PerformanceHistory, modifier: Mo
                 }
             }
             Spacer(Modifier.height(8.dp))
-            AnimatedContent(state, label = "history", transitionSpec = { fadeIn() togetherWith fadeOut() }) { s ->
+            val animate = LocalAnimations.current
+            AnimatedContent(state, label = "history", transitionSpec = { if (animate) fadeIn() togetherWith fadeOut() else EnterTransition.None togetherWith ExitTransition.None }) { s ->
                 when (s) {
                     is Load.Loaded -> ChartWithSummary(s.history, metric)
                     Load.Loading -> Box(Modifier.fillMaxWidth().height(CHART_HEIGHT), contentAlignment = Alignment.Center) {

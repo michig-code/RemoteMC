@@ -1,6 +1,7 @@
 package de.remotemc.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,8 @@ import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.GroupOff
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.RemoveModerator
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
@@ -58,9 +61,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -75,6 +75,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.ui.components.AnimatedBar
 import de.remotemc.app.ui.components.Badge
 import de.remotemc.app.ui.components.EmptyState
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.PlayerHead
 import de.remotemc.app.ui.components.staggeredAppear
@@ -118,7 +119,7 @@ fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction, ca
                 item(key = "search") { SearchBar(query, { query = it }, sort, { sort = it }) }
             }
             itemsIndexed(shown, key = { _, p -> p.uuid }) { i, p ->
-                PlayerCard(p, Modifier.animateItem().staggeredAppear(i)) { selected = p.name }
+                PlayerCard(p, Modifier.then(if (LocalAnimations.current) Modifier.animateItem() else Modifier).staggeredAppear(i)) { selected = p.name }
             }
             if (shown.isEmpty()) {
                 item(key = "nomatch") {

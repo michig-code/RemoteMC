@@ -109,8 +109,9 @@ fun RemoteMCTheme(settings: DesktopSettings, content: @Composable () -> Unit) {
             small = RoundedCornerShape(10.dp), medium = RoundedCornerShape(16.dp),
             large = RoundedCornerShape(24.dp), extraLarge = RoundedCornerShape(32.dp),
         ),
-        content = content,
-    )
+    ) {
+        androidx.compose.runtime.CompositionLocalProvider(LocalAnimations provides settings.animations, content = content)
+    }
 }
 
 fun tpsColor(tps: Double) = when {

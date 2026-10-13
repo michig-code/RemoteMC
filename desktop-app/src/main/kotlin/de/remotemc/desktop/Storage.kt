@@ -82,6 +82,8 @@ data class DesktopSettings(
     val deviceName: String = defaultDeviceName(),
     /** Windows notifications; while on, closing the window keeps RemoteMC in the tray. */
     val alerts: AlertSettings = AlertSettings(),
+    /** Transitions, moving numbers and the like; off = everything changes instantly. */
+    val animations: Boolean = true,
 )
 
 fun defaultDeviceName(): String =
@@ -100,7 +102,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             .put("tpsThreshold", a.tpsThreshold).put("joins", a.joins).put("players", a.players)
             .put("mentions", a.mentions).put("words", a.words)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
-            .put("alerts", alerts)
+            .put("alerts", alerts).put("animations", next.animations)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -110,6 +112,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             theme = runCatching { ThemeMode.valueOf(o.getString("theme")) }.getOrDefault(ThemeMode.SYSTEM),
             accentHue = o.optDouble("accentHue", -1.0).takeIf { it >= 0 }?.toFloat(),
             deviceName = o.optString("deviceName").ifBlank { defaultDeviceName() },
+            animations = o.optBoolean("animations", true),
             alerts = o.optJSONObject("alerts")?.let { a ->
                 AlertSettings(
                     enabled = a.optBoolean("enabled", false),

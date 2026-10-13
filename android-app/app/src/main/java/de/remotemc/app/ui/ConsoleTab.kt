@@ -3,6 +3,8 @@ package de.remotemc.app.ui
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -80,14 +82,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
+import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.MonoStyle
 import de.remotemc.app.ui.util.MinecraftText
 import de.remotemc.app.ui.util.rememberHaptics
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlinx.coroutines.launch
 
 private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
 private val TerminalText = Color(0xFFD5DDD8)
@@ -110,6 +113,7 @@ fun ConsoleTab(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val haptics = rememberHaptics()
+    val animate = LocalAnimations.current
 
     // The list is laid out from the bottom (reverseLayout): when the keyboard opens and the
     // terminal gets smaller, the newest lines stay visible – like in a messenger.
@@ -194,8 +198,8 @@ fun ConsoleTab(
             }
             androidx.compose.animation.AnimatedVisibility(
                 visible = !atBottom && entries.isNotEmpty(),
-                enter = fadeIn() + scaleIn(),
-                exit = fadeOut() + scaleOut(),
+                enter = if (animate) fadeIn() + scaleIn() else EnterTransition.None,
+                exit = if (animate) fadeOut() + scaleOut() else ExitTransition.None,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
             ) {
                 SmallFloatingActionButton(
@@ -209,8 +213,8 @@ fun ConsoleTab(
             // Suggestions float over the bottom of the terminal, like Minecraft's chat completion.
             androidx.compose.animation.AnimatedVisibility(
                 visible = canRunCommands && (suggestions.isNotEmpty() || usageHint != null) && input.text.isNotBlank(),
-                enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut(),
+                enter = if (animate) expandVertically(expandFrom = Alignment.Bottom) + fadeIn() else EnterTransition.None,
+                exit = if (animate) shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut() else ExitTransition.None,
                 modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
             ) {
                 SuggestionPanel(input.text, suggestions, usageHint, ::apply)
@@ -218,7 +222,11 @@ fun ConsoleTab(
         }
 
         if (canRunCommands) {
-            AnimatedVisibility(input.text.isEmpty() && history.isNotEmpty()) {
+            AnimatedVisibility(
+                input.text.isEmpty() && history.isNotEmpty(),
+                enter = if (animate) expandVertically() + fadeIn() else EnterTransition.None,
+                exit = if (animate) shrinkVertically() + fadeOut() else ExitTransition.None,
+            ) {
                 RecentCommands(history, onPick = { setInput(it) }, onForget = { haptics.heavy(); onForget(it) })
             }
             CommandInput(
@@ -329,7 +337,7 @@ private fun RecentCommands(history: List<String>, onPick: (String) -> Unit, onFo
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = CircleShape,
                 modifier = Modifier
-                    .animateItem()
+                    .then(if (LocalAnimations.current) Modifier.animateItem() else Modifier)
                     .clip(CircleShape)
                     .combinedClickable(onClick = { onPick(cmd) }, onLongClick = { onForget(cmd) })
                     .semantics { onLongClick(label = forgetLabel) { onForget(cmd); true } },
