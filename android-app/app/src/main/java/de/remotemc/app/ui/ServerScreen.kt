@@ -53,6 +53,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +73,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import de.remotemc.app.R
+import de.remotemc.app.app
 import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
 import de.remotemc.app.data.FileList
@@ -116,6 +118,8 @@ data class ServerUiState(
     val history: List<String> = emptyList(),
     val suggestions: List<Suggestion> = emptyList(),
     val usageHint: String? = null,
+    /** Saved overview layout ([de.remotemc.app.data.DashboardLayout.encode]). */
+    val dashboardLayout: String = "",
 )
 
 class ServerActions(
@@ -139,6 +143,8 @@ class ServerActions(
     val schedules: ScheduleActions? = null,
     /** Server folder and plugin files (admins); null hides them. */
     val files: FileActions? = null,
+    /** Saves the overview layout after the user changed it. */
+    val onDashboardLayout: (String) -> Unit = {},
 )
 
 /** Files in the server folder; paths are relative to it ("" = the folder itself). */
@@ -181,6 +187,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
     val snackbar = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val settings by context.app.settings.settings.collectAsState()
 
     // Stay connected only while the screen is visible.
     LaunchedEffect(vm) {
@@ -205,6 +212,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             history = vm.history,
             suggestions = vm.suggestions,
             usageHint = vm.usageHint,
+            dashboardLayout = settings.dashboard,
         ),
         actions = ServerActions(
             onBack = onBack,
@@ -221,6 +229,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             loadPlugins = vm::plugins,
             schedules = vm.scheduleActions,
             files = vm.fileActions,
+            onDashboardLayout = { text -> context.app.settings.update { it.copy(dashboard = text) } },
         ),
         snackbar = snackbar,
     )
@@ -352,6 +361,8 @@ fun ServerScreenContent(
                                         state.role.atLeast(Role.ADMIN) && state.commandsEnabled && state.status?.supports("schedules") == true
                                     },
                                     actions.files?.takeIf { state.role.atLeast(Role.ADMIN) && state.status?.supports("files") == true },
+                                    layoutText = state.dashboardLayout,
+                                    onLayout = actions.onDashboardLayout,
                                 )
                             }
                             Tab.Players -> PlayersSection(state, actions)

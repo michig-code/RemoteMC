@@ -102,6 +102,12 @@ class ScreenshotTest {
             FilesPane(s, initialFile = "server.properties")
         }
     }
+    @Test fun overviewEdit() = shot("17_overview_edit") {
+        val s = session()
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            OverviewPane(s, loadHistory = null, startEditing = true)
+        }
+    }
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
 }

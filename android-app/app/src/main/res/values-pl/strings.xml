@@ -434,4 +434,11 @@
     <string name="error_file_locked">Plik jest używany lub chroniony przed zapisem (na serwerach Windows załadowany plugin można usunąć dopiero po zatrzymaniu).</string>
     <string name="error_file_exists">Coś o tej nazwie już istnieje.</string>
     <string name="settings_show_guide">Pokaż przewodnik startowy</string>
+    <string name="dashboard_edit_title">Dostosuj przegląd</string>
+    <string name="dashboard_edit_hint">Przytrzymaj kartę i przeciągnij, aby ją przesunąć. Przyciskami zmienisz jej szerokość lub ją ukryjesz.</string>
+    <string name="dashboard_edit_reset">Przywróć</string>
+    <string name="dashboard_edit_done">Gotowe</string>
+    <string name="dashboard_card_width">Zmień szerokość</string>
+    <string name="dashboard_card_hide">Ukryj kartę</string>
+    <string name="dashboard_card_show">Pokaż kartę</string>
 </resources>

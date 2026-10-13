@@ -5,4 +5,5 @@
     <string name="tray_open">RemoteMC öffnen</string>
     <string name="tray_quit">Beenden</string>
     <string name="tray_running">RemoteMC läuft im Infobereich weiter und benachrichtigt dich.</string>
+    <string name="desktop_dashboard_edit_hint">Ziehe eine Karte, um sie zu verschieben. Mit den Knöpfen änderst du die Breite oder blendest sie aus.</string>
 </resources>

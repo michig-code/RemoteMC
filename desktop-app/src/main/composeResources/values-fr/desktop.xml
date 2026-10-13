@@ -5,4 +5,5 @@
     <string name="tray_open">Ouvrir RemoteMC</string>
     <string name="tray_quit">Quitter</string>
     <string name="tray_running">RemoteMC reste dans la zone de notification et vous préviendra.</string>
+    <string name="desktop_dashboard_edit_hint">Faites glisser une carte pour la déplacer. Les boutons changent sa largeur ou la masquent.</string>
 </resources>

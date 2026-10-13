@@ -34,7 +34,8 @@ First public release of **RemoteMC**.
 ### Windows app (new)
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
-- File manager with editor (Ctrl+S), add and remove plugins
+- File manager with editor (Ctrl+S), add and remove plugins; resizable split views
+- Customizable overview: hold a card, then drag cards, change their width or hide them
 - Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
   server's plugin supports them
 - Windows notifications with the same rules as on the phone; RemoteMC stays in the tray while
@@ -43,6 +44,7 @@ First public release of **RemoteMC**.
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 
 ### App
+- Customizable overview: hold a card to move cards, change their width or hide them
 - File manager: browse the server folder, edit config files, upload and delete files; add a plugin
   by picking its .jar, remove plugins
 - Console text can be selected and copied; a button copies the whole console

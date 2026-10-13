@@ -5,4 +5,5 @@
     <string name="tray_open">Open RemoteMC</string>
     <string name="tray_quit">Quit</string>
     <string name="tray_running">RemoteMC keeps running in the tray and will notify you.</string>
+    <string name="desktop_dashboard_edit_hint">Drag a card to move it. Use the buttons to change its width or hide it.</string>
 </resources>

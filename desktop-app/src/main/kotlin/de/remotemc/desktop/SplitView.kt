@@ -36,7 +36,7 @@ import org.json.JSONObject
 import java.awt.Cursor
 import java.io.File
 
-/** Divider positions the user chose, per split view (layout.json next to the settings). */
+/** Layout choices on this PC: divider positions and the overview cards (layout.json next to the settings). */
 object SplitPrefs {
     /** Screenshot tests turn saving off. */
     var save = true
@@ -47,6 +47,17 @@ object SplitPrefs {
 
     fun set(key: String, value: Float) {
         data.put(key, value.toDouble())
+        write()
+    }
+
+    fun text(key: String): String = data.optString(key)
+
+    fun setText(key: String, value: String) {
+        data.put(key, value)
+        write()
+    }
+
+    private fun write() {
         if (save) runCatching { file.writeText(data.toString()) }
     }
 }

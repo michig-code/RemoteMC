@@ -38,6 +38,8 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
+- **Your overview** – hold a card to rearrange the overview: drag cards, make them full, half or
+  a third wide, or hide them (phone and PC, saved per device)
 - **Files and plugins** – browse the server folder, edit config files, upload and delete files;
   add a plugin by picking its .jar or remove one (admins; `security.allow-files: false` turns it off;
   RemoteMC's own folder with the tokens is never reachable)

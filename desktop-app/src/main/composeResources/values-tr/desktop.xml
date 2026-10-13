@@ -5,4 +5,5 @@
     <string name="tray_open">RemoteMC’yi aç</string>
     <string name="tray_quit">Çık</string>
     <string name="tray_running">RemoteMC sistem tepsisinde çalışmaya devam ediyor ve seni bilgilendirecek.</string>
+    <string name="desktop_dashboard_edit_hint">Bir kartı sürükleyerek taşı. Düğmelerle genişliğini değiştir veya gizle.</string>
 </resources>

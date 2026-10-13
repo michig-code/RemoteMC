@@ -426,4 +426,11 @@
     <string name="error_file_locked">Le fichier est utilisé ou protégé en écriture (sur un serveur Windows, un plugin chargé ne peut être supprimé qu’après l’arrêt).</string>
     <string name="error_file_exists">Un élément porte déjà ce nom.</string>
     <string name="settings_show_guide">Revoir le guide de démarrage</string>
+    <string name="dashboard_edit_title">Personnaliser l’aperçu</string>
+    <string name="dashboard_edit_hint">Maintenez une carte et faites-la glisser pour la déplacer. Les boutons changent sa largeur ou la masquent.</string>
+    <string name="dashboard_edit_reset">Réinitialiser</string>
+    <string name="dashboard_edit_done">Terminé</string>
+    <string name="dashboard_card_width">Changer la largeur</string>
+    <string name="dashboard_card_hide">Masquer la carte</string>
+    <string name="dashboard_card_show">Afficher la carte</string>
 </resources>

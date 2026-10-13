@@ -426,4 +426,11 @@
     <string name="error_file_locked">El archivo está en uso o protegido contra escritura (en servidores Windows, un plugin cargado no se puede borrar hasta detener el servidor).</string>
     <string name="error_file_exists">Ya existe algo con este nombre.</string>
     <string name="settings_show_guide">Ver la guía de inicio</string>
+    <string name="dashboard_edit_title">Personalizar resumen</string>
+    <string name="dashboard_edit_hint">Mantén pulsada una tarjeta y arrástrala para moverla. Con los botones cambias su ancho o la ocultas.</string>
+    <string name="dashboard_edit_reset">Restablecer</string>
+    <string name="dashboard_edit_done">Listo</string>
+    <string name="dashboard_card_width">Cambiar ancho</string>
+    <string name="dashboard_card_hide">Ocultar tarjeta</string>
+    <string name="dashboard_card_show">Mostrar tarjeta</string>
 </resources>

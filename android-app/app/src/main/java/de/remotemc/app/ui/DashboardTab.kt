@@ -25,13 +25,13 @@ import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.SystemUpdate
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -48,6 +49,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
+import de.remotemc.app.data.CardSize
+import de.remotemc.app.data.DashCard
+import de.remotemc.app.data.DashboardLayout
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.PluginInfo
@@ -75,6 +79,9 @@ fun DashboardTab(
     loadPlugins: (suspend () -> List<PluginInfo>)? = null,
     schedules: ScheduleActions? = null,
     files: FileActions? = null,
+    layoutText: String = "",
+    onLayout: (String) -> Unit = {},
+    startEditing: Boolean = false,
 ) {
     var showFiles by rememberSaveable { mutableStateOf(false) }
     if (showFiles && files != null) FilesScreen(files, onDismiss = { showFiles = false })
@@ -103,42 +110,44 @@ fun DashboardTab(
         return
     }
 
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        if (wide) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (status.features.isEmpty()) PluginUpdateCard()
-                    HeroCard(status, Modifier.staggeredAppear(0))
-                    MemoryCard(status, Modifier.staggeredAppear(2))
-                    TpsHistoryCard(status.tps, Modifier.staggeredAppear(3))
-                    loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(4)) }
-                }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    GaugeRow(status, Modifier.staggeredAppear(1))
-                    Worlds(status.worlds, onWorld)
-            schedules?.let { SchedulesRow { showSchedules = true } }
-            loadPlugins?.let { PluginsRow { showPlugins = true } }
-            files?.let { FilesRow { showFiles = true } }
-                }
+    val defaults = DashboardLayout(if (wide) WideDefaults else PhoneDefaults)
+    val layout = remember(layoutText, wide) { DashboardLayout.decode(layoutText, defaults.cards) }
+    EditableDashboard(
+        layout = layout,
+        defaults = defaults,
+        columns = if (wide) 6 else 2,
+        onChange = { onLayout(it.encode()) },
+        startEditing = startEditing,
+        header = {
+            if (status.features.isEmpty()) {
+                item(key = "update", span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { PluginUpdateCard() }
             }
-        } else {
-            if (status.features.isEmpty()) PluginUpdateCard()
-            HeroCard(status, Modifier.staggeredAppear(0))
-            GaugeRow(status, Modifier.staggeredAppear(1))
-            MemoryCard(status, Modifier.staggeredAppear(4))
-            TpsHistoryCard(status.tps, Modifier.staggeredAppear(5))
-            loadHistory?.let { HistoryCard(it, Modifier.staggeredAppear(6)) }
-            Worlds(status.worlds, onWorld)
-            schedules?.let { SchedulesRow { showSchedules = true } }
-            loadPlugins?.let { PluginsRow { showPlugins = true } }
-            files?.let { FilesRow { showFiles = true } }
+        },
+    ) { id ->
+        when (id) {
+            "players" -> { m -> HeroCard(status, m.staggeredAppear(0)) }
+            "gauges" -> { m -> GaugeRow(status, m.staggeredAppear(1)) }
+            "memory" -> { m -> MemoryCard(status, m.staggeredAppear(2)) }
+            "tps_trend" -> { m -> TpsHistoryCard(status.tps, m.staggeredAppear(3)) }
+            "history" -> loadHistory?.let { load -> { m -> HistoryCard(load, m.staggeredAppear(4)) } }
+            "worlds" -> { m -> Column(m, verticalArrangement = Arrangement.spacedBy(12.dp)) { Worlds(status.worlds, onWorld) } }
+            "schedules" -> schedules?.let { { m -> Box(m) { SchedulesRow { showSchedules = true } } } }
+            "plugins" -> loadPlugins?.let { { m -> Box(m) { PluginsRow { showPlugins = true } } } }
+            "files" -> files?.let { { m -> Box(m) { FilesRow { showFiles = true } } } }
+            else -> null
         }
-        Spacer(Modifier.height(8.dp))
     }
 }
+
+/** Overview cards and their default widths (phones: one per row; tablets: side by side). */
+private val PhoneDefaults = listOf("players", "gauges", "memory", "tps_trend", "history", "worlds", "schedules", "plugins", "files")
+    .map { DashCard(it, CardSize.FULL) }
+private val WideDefaults = listOf(
+    DashCard("players", CardSize.HALF), DashCard("gauges", CardSize.HALF),
+    DashCard("memory", CardSize.HALF), DashCard("tps_trend", CardSize.HALF),
+    DashCard("history", CardSize.FULL), DashCard("worlds", CardSize.FULL),
+    DashCard("schedules", CardSize.THIRD), DashCard("plugins", CardSize.THIRD), DashCard("files", CardSize.THIRD),
+)
 
 @Composable
 private fun Worlds(worlds: List<WorldInfo>, onOpen: ((String) -> Unit)?) {

@@ -29,6 +29,7 @@ kotlin {
             "de/remotemc/app/data/ServerProfile.kt",
             "de/remotemc/app/data/ConnectLink.kt",
             "de/remotemc/app/data/AlertSettings.kt",
+            "de/remotemc/app/data/DashboardLayout.kt",
             "de/remotemc/app/notify/AlertRules.kt",
             "de/remotemc/app/notify/ServerWatcher.kt",
             "de/remotemc/app/ui/util/MinecraftText.kt",
@@ -47,6 +48,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     implementation("org.json:json:20240303") // same API as Android's built-in org.json
     implementation("net.java.dev.jna:jna-platform:5.15.0") // Windows DPAPI for the stored tokens
+    implementation("sh.calvin.reorderable:reorderable:2.5.1") // drag cards on the overview (same as the phone)
 
     testImplementation(kotlin("test"))
 }

@@ -434,4 +434,11 @@
     <string name="error_file_locked">Файл используется или защищён от записи (на серверах Windows загруженный плагин можно удалить только после остановки).</string>
     <string name="error_file_exists">Объект с таким именем уже существует.</string>
     <string name="settings_show_guide">Показать вводное руководство</string>
+    <string name="dashboard_edit_title">Настроить обзор</string>
+    <string name="dashboard_edit_hint">Удерживайте карточку и перетащите её. Кнопками можно изменить ширину или скрыть её.</string>
+    <string name="dashboard_edit_reset">Сбросить</string>
+    <string name="dashboard_edit_done">Готово</string>
+    <string name="dashboard_card_width">Изменить ширину</string>
+    <string name="dashboard_card_hide">Скрыть карточку</string>
+    <string name="dashboard_card_show">Показать карточку</string>
 </resources>

@@ -426,4 +426,11 @@
     <string name="error_file_locked">Il file è in uso o protetto da scrittura (sui server Windows un plugin caricato si può eliminare solo dopo l’arresto).</string>
     <string name="error_file_exists">Esiste già qualcosa con questo nome.</string>
     <string name="settings_show_guide">Mostra la guida iniziale</string>
+    <string name="dashboard_edit_title">Personalizza panoramica</string>
+    <string name="dashboard_edit_hint">Tieni premuta una scheda e trascinala per spostarla. Con i pulsanti ne cambi la larghezza o la nascondi.</string>
+    <string name="dashboard_edit_reset">Ripristina</string>
+    <string name="dashboard_edit_done">Fatto</string>
+    <string name="dashboard_card_width">Cambia larghezza</string>
+    <string name="dashboard_card_hide">Nascondi scheda</string>
+    <string name="dashboard_card_show">Mostra scheda</string>
 </resources>

@@ -18,6 +18,8 @@ data class AppSettings(
     /** Hue (0–360) of the app's colour theme; null = the classic RemoteMC green. */
     val accentHue: Float? = null,
     val alerts: AlertSettings = AlertSettings(),
+    /** Order, width and visibility of the overview cards ([DashboardLayout.encode]); empty = default. */
+    val dashboard: String = "",
 )
 
 class SettingsStore(private val prefs: SharedPreferences) {
@@ -35,6 +37,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putBoolean("onboardingDone", next.onboardingDone)
             putString("deviceName", next.deviceName)
             putFloat("accentHue", next.accentHue ?: -1f)
+            putString("dashboard", next.dashboard)
             next.alerts.let {
                 putBoolean("alerts.enabled", it.enabled)
                 putBoolean("alerts.offline", it.offline)
@@ -55,6 +58,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         onboardingDone = prefs.getBoolean("onboardingDone", false),
         deviceName = prefs.getString("deviceName", "").orEmpty(),
         accentHue = prefs.getFloat("accentHue", -1f).takeIf { it >= 0f },
+        dashboard = prefs.getString("dashboard", "").orEmpty(),
         alerts = AlertSettings(
             enabled = prefs.getBoolean("alerts.enabled", false),
             offline = prefs.getBoolean("alerts.offline", true),

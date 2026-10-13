@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.SystemUpdate
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -48,8 +48,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.remotemc.app.data.CardSize
+import de.remotemc.app.data.DashCard
+import de.remotemc.app.data.DashboardLayout
 import de.remotemc.app.data.HistoryPoint
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
@@ -67,7 +71,11 @@ import java.util.Date
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OverviewPane(session: ServerSession, loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = { session.client.history(it) }) {
+fun OverviewPane(
+    session: ServerSession,
+    loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = { session.client.history(it) },
+    startEditing: Boolean = false,
+) {
     val status = session.status
     if (status == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -82,37 +90,62 @@ fun OverviewPane(session: ServerSession, loadHistory: (suspend (HistoryRange) ->
         }
         return
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        if (status.features.isEmpty()) {
-            val uri = LocalUriHandler.current
-            McCard(Modifier.fillMaxWidth(), onClick = { uri.openUri("https://github.com/michig-code/RemoteMC/releases/latest") }) {
-                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.SystemUpdate, null, tint = McColors.Gold)
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(stringResource(Res.string.plugin_update_title), style = MaterialTheme.typography.titleSmall)
-                        Text(stringResource(Res.string.plugin_update_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    val defaults = DashboardLayout(OverviewDefaults)
+    var layoutText by remember { mutableStateOf(SplitPrefs.text("overview")) }
+    val layout = remember(layoutText) { DashboardLayout.decode(layoutText, OverviewDefaults) }
+    val uri = LocalUriHandler.current
+    EditableOverview(
+        layout, defaults,
+        onChange = { layoutText = it.encode(); SplitPrefs.setText("overview", layoutText) },
+        startEditing = startEditing,
+        header = {
+            if (status.features.isEmpty()) {
+                item(key = "update", span = { GridItemSpan(maxLineSpan) }) { PluginUpdateHint { uri.openUri("https://github.com/michig-code/RemoteMC/releases/latest") } }
+            }
+        },
+    ) { id ->
+        when (id) {
+            "players" -> { m -> Hero(status, m) }
+            "tps" -> { m -> TpsCard(status, m) }
+            "mspt" -> { m ->
+                val mspt = status.mspt
+                Stat(Icons.Outlined.Speed, stringResource(Res.string.dashboard_mspt),
+                    if (mspt != null) stringResource(Res.string.unit_ms, "%.1f".format(mspt)) else "–", m)
+            }
+            "uptime" -> { m -> Stat(Icons.Outlined.Schedule, stringResource(Res.string.dashboard_uptime), formatUptime(status.uptimeSeconds), m) }
+            "memory" -> { m -> MemoryCard(status, m) }
+            "history" -> if (loadHistory != null && status.supports("history")) { m -> Box(m) { HistoryCard(loadHistory) } } else null
+            "worlds" -> { m ->
+                Column(m) {
+                    SectionTitle(stringResource(Res.string.dashboard_worlds))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
+                        status.worlds.forEach { WorldCard(it, Modifier.weight(1f).widthIn(min = 220.dp)) }
                     }
                 }
             }
+            else -> null
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Hero(status, Modifier.weight(1.4f))
-            TpsCard(status, Modifier.weight(1f))
+    }
+}
+
+/** Overview cards and their default widths (of 6 columns). */
+private val OverviewDefaults = listOf(
+    DashCard("players", CardSize.HALF), DashCard("tps", CardSize.HALF),
+    DashCard("mspt", CardSize.THIRD), DashCard("uptime", CardSize.THIRD), DashCard("memory", CardSize.THIRD),
+    DashCard("history", CardSize.FULL), DashCard("worlds", CardSize.FULL),
+)
+
+@Composable
+private fun PluginUpdateHint(onClick: () -> Unit) {
+    McCard(Modifier.fillMaxWidth(), onClick = onClick) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.SystemUpdate, null, tint = McColors.Gold)
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(stringResource(Res.string.plugin_update_title), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(Res.string.plugin_update_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
-            val mspt = status.mspt
-            Stat(Icons.Outlined.Speed, stringResource(Res.string.dashboard_mspt),
-                if (mspt != null) stringResource(Res.string.unit_ms, "%.1f".format(mspt)) else "–", Modifier.weight(1f))
-            Stat(Icons.Outlined.Schedule, stringResource(Res.string.dashboard_uptime), formatUptime(status.uptimeSeconds), Modifier.weight(1f))
-            MemoryCard(status, Modifier.weight(1f))
-        }
-        if (loadHistory != null && status.supports("history")) HistoryCard(loadHistory)
-        SectionTitle(stringResource(Res.string.dashboard_worlds))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
-            status.worlds.forEach { WorldCard(it, Modifier.weight(1f).widthIn(min = 220.dp)) }
-        }
-        Spacer(Modifier.height(12.dp))
     }
 }
 

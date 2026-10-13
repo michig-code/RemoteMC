@@ -258,6 +258,12 @@ class ScreenshotTest {
         upload = { dir, _ -> "$dir/Plugin.jar" },
     )
 
+    @Test fun dashboardEdit() = shot("26_dashboard_edit") {
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            de.remotemc.app.ui.DashboardTab(status, null, startEditing = true, layoutText = "players:full,-tps_trend:full,gauges:half,memory:half")
+        }
+    }
+
     @Test fun files() = shot("24_files") { de.remotemc.app.ui.FolderView(fileActions, "", {}, {}, {}) }
     @Test fun fileEditor() = shot("25_file_editor") { de.remotemc.app.ui.FileEditor(fileActions, "server.properties") {} }
 
