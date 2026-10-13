@@ -159,6 +159,43 @@ for rng in ("1h", "24h", "7d"):
     st, d = req("GET", "/api/v1/history?range=" + rng, admin)
     check("history " + rng, st == 200 and isinstance(d.get("points"), list) and d.get("step", 0) >= 60000, str(d)[:200])
 
+# 4b. files (server folder)
+def upload(path, data, token):
+    c = conn()
+    c.request("POST", "/api/v1/files/upload?path=" + path, body=data,
+              headers={"Content-Type": "application/octet-stream", "Authorization": "Bearer " + token})
+    r = c.getresponse()
+    return r.status, json.loads(r.read().decode() or "{}")
+
+st, d = req("GET", "/api/v1/files", admin)
+names = [e["name"] for e in d.get("entries", [])]
+check("file list of the server folder", st == 200 and "plugins" in names and "server.properties" in names, names[:10])
+st, d = req("GET", "/api/v1/files?path=plugins", admin)
+names = [e["name"] for e in d.get("entries", [])]
+check("RemoteMC's own folder is hidden", st == 200 and "RemoteMC" not in names and any(n.endswith(".jar") for n in names), names)
+st, d = req("GET", "/api/v1/files/content?path=plugins/RemoteMC/config.yml", admin)
+check("RemoteMC's own files are unreachable", st == 403, d)
+st, d = req("GET", "/api/v1/files?path=..", admin)
+check("no paths outside the server folder", st == 403, d)
+st, d = req("GET", "/api/v1/files/content?path=server.properties", admin)
+check("read a text file", st == 200 and "motd=" in d.get("content", ""), str(d)[:120])
+st, d = req("POST", "/api/v1/files/mkdir", admin, {"path": f"rmc-test-{RUN}"})
+check("create a folder", st == 200 and d.get("dir") is True, d)
+st, d = req("POST", "/api/v1/files/content", admin, {"path": f"rmc-test-{RUN}/notes.txt", "content": "hällo\n" * 1000})
+st2, d2 = req("GET", f"/api/v1/files/content?path=rmc-test-{RUN}/notes.txt", admin)
+check("save and read back a text file", st == 200 and d2.get("content") == "hällo\n" * 1000, (st, str(d)[:100]))
+blob = bytes(range(256)) * 4096  # 1 MB, binary
+st, d = upload(f"rmc-test-{RUN}/blob.bin", blob, admin)
+check("upload a binary file", st == 200 and d.get("size") == len(blob), d)
+st, d = req("GET", f"/api/v1/files/content?path=rmc-test-{RUN}/blob.bin", admin)
+check("binary files are not opened as text", st == 415 and d.get("error") == "binary_file", d)
+st, d = req("POST", "/api/v1/files/delete", admin, {"path": f"rmc-test-{RUN}"})
+st2, _ = req("GET", f"/api/v1/files?path=rmc-test-{RUN}", admin)
+check("delete a folder with its files", st == 200 and st2 == 404, d)
+st, d = req("GET", "/api/v1/plugins", admin)
+own = next((p for p in d.get("plugins", []) if p["name"] == "RemoteMC"), {})
+check("plugin list names the JAR file", re.fullmatch(r"plugins/[^/]+\.jar", own.get("file", "")) is not None, own)
+
 # 5. roles
 m = console(f"remotemc token create viewer{RUN} viewer", r"(rmc_[A-Za-z0-9_-]{43})")
 check("token create prints token", m)
@@ -181,6 +218,8 @@ st, d = req("POST", "/api/v1/command", mod, {"command": "list"})
 check("moderator cannot run commands", st == 403, d)
 st, d = req("GET", "/api/v1/console", mod)
 check("moderator can read console", st == 200, d)
+st, d = req("GET", "/api/v1/files", mod)
+check("moderator cannot access files", st == 403, d)
 if LEGACY:
     st, d = req("GET", "/api/v1/me", LEGACY)
     check("migrated McRemote token works", st == 200 and d.get("name") == "Legacy token", d)

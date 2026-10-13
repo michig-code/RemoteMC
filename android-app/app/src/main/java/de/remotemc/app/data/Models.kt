@@ -251,6 +251,8 @@ data class PluginInfo(
     val enabled: Boolean,
     val description: String?,
     val authors: List<String>,
+    /** Its JAR relative to the server folder (plugin 1.0 with file access), for removing it. */
+    val file: String? = null,
 ) {
     companion object {
         fun listFromJson(o: JSONObject): List<PluginInfo> {
@@ -262,10 +264,51 @@ data class PluginInfo(
                     p.getString("name"), p.optString("version"), p.optBoolean("enabled", true),
                     p.optString("description").takeIf { d -> d.isNotBlank() },
                     List(authors.length()) { i -> authors.getString(i) },
+                    p.optString("file").takeIf { f -> f.isNotBlank() },
                 )
             }
         }
     }
+}
+
+/** A file or folder in the server folder; [path] is relative to it with "/" separators. */
+data class FileEntry(val path: String, val name: String, val dir: Boolean, val size: Long, val modified: Long) {
+    companion object {
+        fun fromJson(o: JSONObject, parent: String? = null): FileEntry {
+            val name = o.optString("name")
+            val path = parent?.let { if (it.isEmpty()) name else "$it/$name" } ?: o.optString("path")
+            return FileEntry(path, name, o.optBoolean("dir"), o.optLong("size"), o.optLong("modified"))
+        }
+    }
+}
+
+/** Contents of one folder (folders first). */
+data class FileList(val path: String, val entries: List<FileEntry>) {
+    companion object {
+        fun fromJson(o: JSONObject): FileList {
+            val path = o.optString("path")
+            val arr = o.optJSONArray("entries") ?: JSONArray()
+            return FileList(path, List(arr.length()) { FileEntry.fromJson(arr.getJSONObject(it), path) })
+        }
+    }
+}
+
+/** A text file opened for editing. */
+data class TextFile(val path: String, val content: String, val modified: Long) {
+    companion object {
+        fun fromJson(o: JSONObject) = TextFile(o.optString("path"), o.optString("content"), o.optLong("modified"))
+    }
+}
+
+/** Parent of a server-relative path ("" for the server folder). */
+fun parentPath(path: String): String = path.substringBeforeLast('/', "")
+
+/** "1.4 MB" etc. */
+fun formatSize(bytes: Long): String = when {
+    bytes < 1024 -> "$bytes B"
+    bytes < 1024 * 1024 -> "%.1f KB".format(bytes / 1024.0)
+    bytes < 1024L * 1024 * 1024 -> "%.1f MB".format(bytes / (1024.0 * 1024))
+    else -> "%.1f GB".format(bytes / (1024.0 * 1024 * 1024))
 }
 
 /** A scheduled console command: every [minutes], or daily at [time] ("HH:mm", server time zone). */

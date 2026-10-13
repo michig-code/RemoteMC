@@ -21,6 +21,9 @@ First public release of **RemoteMC**.
 - `GET /api/v1/plugins`: installed plugins with version, authors and state (moderator)
 - Scheduled commands every N minutes or daily at a time, with an optional countdown in the chat
   (`schedules.json`, `/api/v1/schedules`, admin; blocked commands stay blocked)
+- Server folder for admins: list, read and save text files, upload (e.g. plugin JARs), delete and
+  create folders (`/api/v1/files…`); stays inside the server folder, never reaches RemoteMC's own
+  files, every change in the audit log; `security.allow-files: false` turns it off
 - Teleport players to the spawn or to another player (also on Folia); play time in the player list;
   world spawn in the world details
 - Supports Paper, Purpur, Folia and Spigot from 1.20.6 up to 26.x
@@ -31,6 +34,7 @@ First public release of **RemoteMC**.
 ### Windows app (new)
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
+- File manager with editor (Ctrl+S), add and remove plugins
 - Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
   server's plugin supports them
 - Windows notifications with the same rules as on the phone; RemoteMC stays in the tray while
@@ -39,6 +43,9 @@ First public release of **RemoteMC**.
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 
 ### App
+- File manager: browse the server folder, edit config files, upload and delete files; add a plugin
+  by picking its .jar, remove plugins
+- Console text can be selected and copied; a button copies the whole console
 - Pairing by QR code or 6-digit code, with a security check; the phone's name is asked once
   and used for every pairing
 - Encrypted storage of access tokens (Android Keystore)

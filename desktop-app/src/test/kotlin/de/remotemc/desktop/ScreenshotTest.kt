@@ -5,6 +5,8 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.FileEntry
+import de.remotemc.app.data.FileList
 import de.remotemc.app.data.GameRuleInfo
 import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.ScheduleInfo
@@ -16,6 +18,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
+import de.remotemc.app.data.TextFile
 import de.remotemc.app.data.WorldInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +47,7 @@ class ScreenshotTest {
 
     private val sample = ServerStatus(
         "Welcome to Michi's survival server!", "git-Paper-123", "1.21.4", "Paper", "1.0.0", 3, 20, listOf(19.8, 19.6, 17.2), 12.4,
-        2850, 4096, 90_000, features = setOf("history", "moderation", "worlds", "plugins", "schedules", "teleport"), worlds = listOf(WorldInfo("world", "NORMAL", 2, 812, 1450), WorldInfo("world_nether", "NETHER", 1, 120, 230), WorldInfo("world_the_end", "THE_END", 0, 40, 12)),
+        2850, 4096, 90_000, features = setOf("history", "moderation", "worlds", "plugins", "schedules", "teleport", "files"), worlds = listOf(WorldInfo("world", "NORMAL", 2, 812, 1450), WorldInfo("world_nether", "NETHER", 1, 120, 230), WorldInfo("world_the_end", "THE_END", 0, 40, 12)),
     )
     private val samplePlayers = listOf(
         PlayerInfo("Steve", "1", "world", 120, 64, -340, 20.0, 20.0, 18, 30, 24, "SURVIVAL", true),
@@ -91,6 +94,13 @@ class ScreenshotTest {
     @Test fun plugins() = shot("12_plugins") { ServerContent(session(), {}, Pane.PLUGINS) }
     @Test fun schedules() = shot("13_schedules") { ServerContent(session(), {}, Pane.SCHEDULES) }
     @Test fun chatShort() = shot("14_chat_short") { ServerContent(session(sampleChat.takeLast(1)), {}, Pane.CHAT) }
+    @Test fun files() = shot("15_files") { ServerContent(session(), {}, Pane.FILES) }
+    @Test fun filesEditor() = shot("16_file_editor") {
+        val s = session()
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            FilesPane(s, initialFile = "server.properties")
+        }
+    }
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
 }
@@ -118,10 +128,10 @@ private class SampleManagement(private val now: Long) : Management {
     )
     override suspend fun worldAction(name: String, action: String, body: JSONObject) = world(name)
     override suspend fun plugins() = listOf(
-        PluginInfo("RemoteMC", "1.0.0", true, "Manage your server from your phone and PC", listOf("michig-code")),
-        PluginInfo("EssentialsX", "2.21.0", true, "Provides an essential, core set of commands for Bukkit.", listOf("zenexer", "md_5")),
-        PluginInfo("LuckPerms", "5.4.145", true, "A permissions plugin", listOf("Luck")),
-        PluginInfo("WorldEdit", "7.3.9", true, "In-game Minecraft map editor", listOf("EngineHub")),
+        PluginInfo("RemoteMC", "1.0.0", true, "Manage your server from your phone and PC", listOf("michig-code"), "plugins/RemoteMC-1.0.0.jar"),
+        PluginInfo("EssentialsX", "2.21.0", true, "Provides an essential, core set of commands for Bukkit.", listOf("zenexer", "md_5"), "plugins/EssentialsX-2.21.0.jar"),
+        PluginInfo("LuckPerms", "5.4.145", true, "A permissions plugin", listOf("Luck"), "plugins/LuckPerms-Bukkit-5.4.145.jar"),
+        PluginInfo("WorldEdit", "7.3.9", true, "In-game Minecraft map editor", listOf("EngineHub"), "plugins/worldedit-bukkit-7.3.9.jar"),
         PluginInfo("OldPlugin", "0.3", false, null, emptyList()),
     )
     override suspend fun schedules() = ScheduleList(
@@ -134,4 +144,24 @@ private class SampleManagement(private val now: Long) : Management {
     )
     override suspend fun saveSchedule(task: ScheduleInfo) = schedules()
     override suspend fun scheduleAction(id: String, action: String) = schedules()
+    override suspend fun files(path: String) = FileList(
+        path,
+        listOf(
+            FileEntry("logs", "logs", true, 0, now), FileEntry("plugins", "plugins", true, 0, now),
+            FileEntry("world", "world", true, 0, now), FileEntry("world_nether", "world_nether", true, 0, now),
+            FileEntry("banned-players.json", "banned-players.json", false, 312, now), FileEntry("bukkit.yml", "bukkit.yml", false, 1_204, now),
+            FileEntry("paper-1.21.4.jar", "paper-1.21.4.jar", false, 52_428_800, now), FileEntry("server.properties", "server.properties", false, 1_402, now),
+            FileEntry("spigot.yml", "spigot.yml", false, 5_120, now),
+        ),
+    )
+    override suspend fun readFile(path: String) = TextFile(
+        path,
+        "#Minecraft server properties\nmotd=Welcome to Michi's survival server!\nmax-players=20\ndifficulty=normal\npvp=true\n" +
+            "view-distance=10\nsimulation-distance=8\nwhite-list=true\nonline-mode=true\nspawn-protection=16\n",
+        now,
+    )
+    override suspend fun writeFile(path: String, content: String) {}
+    override suspend fun deleteFile(path: String) {}
+    override suspend fun createFolder(path: String) {}
+    override suspend fun uploadFile(path: String, file: java.io.File) {}
 }

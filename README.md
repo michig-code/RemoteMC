@@ -38,6 +38,9 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 <p><img src="docs/screenshots/16_tablet.png" width="776" alt="Tablet layout"></p>
 
 ## Features
+- **Files and plugins** – browse the server folder, edit config files, upload and delete files;
+  add a plugin by picking its .jar or remove one (admins; `security.allow-files: false` turns it off;
+  RemoteMC's own folder with the tokens is never reachable)
 - **Scheduled tasks** – commands every N minutes or daily, with a countdown in the chat (admins)
 - **Worlds** – time, weather, difficulty and game rules per world at a tap (admins)
 - **Dashboard** – TPS gauge, MSPT, memory, uptime and worlds, updated live, plus charts of TPS,
@@ -70,7 +73,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 The same server control on the PC: server list with live status, pairing with the code or a pasted
 `remotemc://` link (with the same certificate check), overview with TPS, memory and history chart,
 players with all actions, whitelist and ban list, world settings (time, weather, difficulty, game
-rules), plugin list, scheduled tasks, coloured console with suggestions (Tab) and history (↑/↓), chat.
+rules), plugin list with add/remove, file manager with editor, scheduled tasks, coloured console with suggestions (Tab) and history (↑/↓), chat.
 Windows notifications (server offline, low TPS, player joins, mentions) with RemoteMC staying in the
 tray when you close the window. Colour themes and all 10 languages. Access tokens are stored with
 Windows DPAPI.
@@ -164,7 +167,12 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | GET | `/api/v1/schedules` | admin | Scheduled commands with their next run, server time zone |
 | POST | `/api/v1/schedules` | admin | Create or update: `{"id"?, "name", "command", "type": "interval"\|"daily", "minutes", "time", "warn", "enabled"}` |
 | POST | `/api/v1/schedules/<id>/run` · `/delete` | admin | Run now or delete |
-| GET | `/api/v1/plugins` | moderator | Installed plugins: name, version, enabled, description, authors |
+| GET | `/api/v1/plugins` | moderator | Installed plugins: name, version, enabled, description, authors, `file` (its JAR) |
+| GET | `/api/v1/files?path=` | admin | Folder contents (folders first): name, dir, size, modified |
+| GET | `/api/v1/files/content?path=` | admin | A text file up to 1 MB |
+| POST | `/api/v1/files/content` | admin | Save a text file: `{"path", "content"}` |
+| POST | `/api/v1/files/upload?path=` | admin | Upload a file (raw body, up to 200 MB), e.g. `plugins/MyPlugin.jar` |
+| POST | `/api/v1/files/delete` · `/mkdir` | admin | `{"path"}`; deleting a folder removes everything in it |
 | GET | `/api/v1/worlds/<world>` | admin | Time, weather, difficulty, game rules |
 | POST | `/api/v1/worlds/<world>/time` · `weather` · `difficulty` · `gamerule` | admin | `{"time": "day"}`, `{"weather": "rain"}`, `{"difficulty": "hard"}`, `{"rule", "value"}` |
 | POST | `/api/v1/bans/<name>/pardon` | moderator | Unban |

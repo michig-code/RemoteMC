@@ -233,6 +233,34 @@ class ScreenshotTest {
         }
     }
 
+    private val fileActions = de.remotemc.app.ui.FileActions(
+        list = { path ->
+            val now = 1_760_000_000_000L
+            if (path.isEmpty()) {
+                de.remotemc.app.data.FileList("", listOf(
+                    de.remotemc.app.data.FileEntry("logs", "logs", true, 0, now),
+                    de.remotemc.app.data.FileEntry("plugins", "plugins", true, 0, now),
+                    de.remotemc.app.data.FileEntry("world", "world", true, 0, now),
+                    de.remotemc.app.data.FileEntry("banned-players.json", "banned-players.json", false, 312, now),
+                    de.remotemc.app.data.FileEntry("bukkit.yml", "bukkit.yml", false, 1_204, now),
+                    de.remotemc.app.data.FileEntry("paper-1.21.4.jar", "paper-1.21.4.jar", false, 52_428_800, now),
+                    de.remotemc.app.data.FileEntry("server.properties", "server.properties", false, 1_402, now),
+                ))
+            } else {
+                de.remotemc.app.data.FileList(path, emptyList())
+            }
+        },
+        read = { de.remotemc.app.data.TextFile(it, "#Minecraft server properties\nmotd=Welcome to Michi's server!\nmax-players=20\ndifficulty=normal\npvp=true\nview-distance=10\nwhite-list=true\nonline-mode=true\n", 0) },
+        write = { _, _ -> },
+        delete = {},
+        createFolder = {},
+        nameOf = { "Plugin.jar" },
+        upload = { dir, _ -> "$dir/Plugin.jar" },
+    )
+
+    @Test fun files() = shot("24_files") { de.remotemc.app.ui.FolderView(fileActions, "", {}, {}, {}) }
+    @Test fun fileEditor() = shot("25_file_editor") { de.remotemc.app.ui.FileEditor(fileActions, "server.properties") {} }
+
     @Test fun whitelist() = shot("21_whitelist") {
         androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
             de.remotemc.app.ui.PlayersSection(

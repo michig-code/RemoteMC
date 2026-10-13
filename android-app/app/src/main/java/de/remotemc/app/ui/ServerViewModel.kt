@@ -3,6 +3,8 @@ package de.remotemc.app.ui
 import android.app.Application
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +29,7 @@ import de.remotemc.app.net.ApiError
 import de.remotemc.app.net.EventStream
 import de.remotemc.app.net.StreamEvent
 import de.remotemc.app.ui.util.UiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -34,6 +37,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
@@ -192,6 +196,35 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         run = { api.scheduleAction(it, "run") },
         delete = { api.scheduleAction(it, "delete") },
     )
+
+    val fileActions = FileActions(
+        list = { api.files(it) },
+        read = { api.readFile(it) },
+        write = { path, content -> api.writeFile(path, content) },
+        delete = { api.deleteFile(it) },
+        createFolder = { api.createFolder(it) },
+        nameOf = { uri -> documentInfo(uri).first },
+        upload = { dir, uri ->
+            val (name, size) = documentInfo(uri)
+            val path = if (dir.isEmpty()) name else "$dir/$name"
+            val resolver = getApplication<Application>().contentResolver
+            api.uploadFile(path, size) { resolver.openInputStream(uri) ?: throw java.io.FileNotFoundException(uri.toString()) }
+            path
+        },
+    )
+
+    /** Display name (made safe as a file name) and size (-1 = unknown) of a picked document. */
+    private suspend fun documentInfo(uri: Uri): Pair<String, Long> = withContext(Dispatchers.IO) {
+        val resolver = getApplication<Application>().contentResolver
+        val info = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use { c ->
+            if (c.moveToFirst()) {
+                (c.getString(0) ?: "upload") to (if (c.isNull(1)) -1L else c.getLong(1))
+            } else {
+                null
+            }
+        } ?: ((uri.lastPathSegment ?: "upload") to -1L)
+        info.first.replace(Regex("[\\\\/:*?\"<>|\\p{Cntrl}]"), "_").trim().ifEmpty { "upload" } to info.second
+    }
 
     /** Performance history for the dashboard chart. */
     suspend fun performance(range: HistoryRange): PerformanceHistory = api.history(range)

@@ -7,6 +7,8 @@ import de.remotemc.app.data.CommandResult
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.ConsoleLine
+import de.remotemc.app.data.FileEntry
+import de.remotemc.app.data.FileList
 import de.remotemc.app.data.PairResult
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.PluginInfo
@@ -16,6 +18,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
+import de.remotemc.app.data.TextFile
 import de.remotemc.app.data.Whitelist
 import de.remotemc.app.data.WorldDetails
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +28,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.source
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -79,6 +84,29 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     /** [action]: run or delete. */
     suspend fun scheduleAction(id: String, action: String): ScheduleList =
         ScheduleList.fromJson(call("POST", "/api/v1/schedules/${enc(id)}/$action"))
+    suspend fun files(path: String): FileList = FileList.fromJson(call("GET", "/api/v1/files?path=${enc(path)}"))
+    suspend fun readFile(path: String): TextFile = TextFile.fromJson(call("GET", "/api/v1/files/content?path=${enc(path)}"))
+    suspend fun writeFile(path: String, content: String): FileEntry =
+        FileEntry.fromJson(call("POST", "/api/v1/files/content", JSONObject().put("path", path).put("content", content)))
+    suspend fun deleteFile(path: String) {
+        call("POST", "/api/v1/files/delete", JSONObject().put("path", path))
+    }
+    suspend fun createFolder(path: String): FileEntry = FileEntry.fromJson(call("POST", "/api/v1/files/mkdir", JSONObject().put("path", path)))
+
+    /** Uploads [length] bytes from [open] to [path] (replacing a file there), e.g. a plugin JAR. */
+    suspend fun uploadFile(path: String, length: Long, open: () -> java.io.InputStream): FileEntry {
+        val body = object : RequestBody() {
+            override fun contentType() = "application/octet-stream".toMediaType()
+            override fun contentLength() = length
+            override fun writeTo(sink: okio.BufferedSink) {
+                open().use { sink.writeAll(it.source()) }
+            }
+        }
+        // Large files take longer than the usual timeouts allow.
+        val slow = client.newBuilder().writeTimeout(5, TimeUnit.MINUTES).readTimeout(2, TimeUnit.MINUTES).build()
+        return FileEntry.fromJson(execute(slow, profile.baseUrl, "POST", "/api/v1/files/upload?path=${enc(path)}", profile.token, null, body))
+    }
+
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 
     suspend fun console(since: Long): List<ConsoleLine> {
@@ -187,13 +215,14 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
             path: String,
             token: String?,
             body: JSONObject?,
+            raw: RequestBody? = null,
         ): JSONObject = withContext(Dispatchers.IO) {
             val url = (baseUrl + path).toHttpUrlOrNull() ?: throw ApiError.Unreachable("Invalid address")
             // POST needs a body even for actions without parameters (delete, run, unban).
             val payload = body ?: if (method == "POST" || method == "PUT" || method == "PATCH") JSONObject() else null
             val request = Request.Builder()
                 .url(url)
-                .method(method, payload?.toString()?.toRequestBody(JSON))
+                .method(method, raw ?: payload?.toString()?.toRequestBody(JSON))
                 .header("Accept", "application/json")
                 .apply { if (token != null) header("Authorization", "Bearer $token") }
                 .build()

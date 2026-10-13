@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Group
@@ -61,6 +62,7 @@ enum class Pane(val label: StringResource, val icon: ImageVector, val minRole: R
     WORLDS(Res.string.dashboard_worlds, Icons.Outlined.Public, Role.ADMIN, "worlds"),
     PLUGINS(Res.string.dashboard_plugins, Icons.Outlined.Extension, Role.MODERATOR, "plugins"),
     SCHEDULES(Res.string.schedules_title, Icons.Outlined.Schedule, Role.ADMIN, "schedules"),
+    FILES(Res.string.files_title, Icons.Outlined.FolderOpen, Role.ADMIN, "files"),
 }
 
 @Composable
@@ -113,6 +115,7 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                         Pane.WORLDS -> WorldsPane(session)
                         Pane.PLUGINS -> PluginsPane(session)
                         Pane.SCHEDULES -> SchedulesPane(session)
+                        Pane.FILES -> FilesPane(session)
                     }
                 }
             }

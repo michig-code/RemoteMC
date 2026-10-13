@@ -62,6 +62,7 @@ public final class ApiServer {
     private final AtomicInteger openStreams = new AtomicInteger();
     private HttpServer server;
     private ExecutorService executor;
+    private FileManager files;
 
     /** Authenticated caller of a request. */
     private record Caller(String name, Role role, String ip) {
@@ -75,6 +76,9 @@ public final class ApiServer {
     }
 
     public void start() throws IOException {
+        // The server folder; RemoteMC's own folder (tokens, TLS key, audit log) stays out of reach.
+        java.io.File dataFolder = plugin.getDataFolder().getAbsoluteFile();
+        files = new FileManager(dataFolder.getParentFile().getParentFile().toPath(), dataFolder.toPath());
         String host = plugin.getConfig().getString("api.host", "0.0.0.0");
         int port = plugin.getConfig().getInt("api.port", 8765);
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -233,7 +237,53 @@ public final class ApiServer {
             }
             case "GET /api/v1/plugins" -> {
                 require(caller, Role.MODERATOR);
-                return global(ApiServer::plugins);
+                return global(() -> plugins(files));
+            }
+            case "GET /api/v1/files" -> {
+                requireFiles(caller);
+                return files.list(pathParam(ex));
+            }
+            case "GET /api/v1/files/content" -> {
+                requireFiles(caller);
+                return files.read(pathParam(ex));
+            }
+            case "POST /api/v1/files/content" -> {
+                requireFiles(caller);
+                JsonObject body = readBody(ex, 8 * FileManager.MAX_TEXT);
+                String file = stringField(body, "path", 1024);
+                if (!body.has("content") || !body.get("content").isJsonPrimitive()) {
+                    throw ApiException.badRequest("bad_request", "Missing field 'content'");
+                }
+                JsonObject result = files.write(file, body.get("content").getAsString());
+                plugin.audit().log(caller.who(), caller.ip(), "file saved: " + file);
+                return result;
+            }
+            case "POST /api/v1/files/upload" -> {
+                requireFiles(caller);
+                String file = pathParam(ex);
+                long length = longHeader(ex, "Content-Length");
+                JsonObject result;
+                try (InputStream in = ex.getRequestBody()) {
+                    result = files.upload(file, in, length);
+                }
+                plugin.audit().log(caller.who(), caller.ip(), "file uploaded: " + file + " (" + result.get("size").getAsLong() + " bytes)");
+                return result;
+            }
+            case "POST /api/v1/files/delete" -> {
+                requireFiles(caller);
+                String file = stringField(readBody(ex), "path", 1024);
+                files.delete(file);
+                plugin.audit().log(caller.who(), caller.ip(), "file deleted: " + file);
+                JsonObject o = new JsonObject();
+                o.addProperty("deleted", file);
+                return o;
+            }
+            case "POST /api/v1/files/mkdir" -> {
+                requireFiles(caller);
+                String file = stringField(readBody(ex), "path", 1024);
+                JsonObject result = files.mkdir(file);
+                plugin.audit().log(caller.who(), caller.ip(), "folder created: " + file);
+                return result;
             }
             case "GET /api/v1/schedules" -> {
                 require(caller, Role.ADMIN);
@@ -653,7 +703,7 @@ public final class ApiServer {
     }
 
     @SuppressWarnings("deprecation") // getDescription works on Paper and Spigot alike
-    private static JsonObject plugins() {
+    private static JsonObject plugins(FileManager files) {
         JsonArray arr = new JsonArray();
         org.bukkit.plugin.Plugin[] all = Bukkit.getPluginManager().getPlugins();
         java.util.Arrays.sort(all, java.util.Comparator.comparing(p -> p.getName().toLowerCase(Locale.ROOT)));
@@ -670,6 +720,10 @@ public final class ApiServer {
             o.add("authors", authors);
             if (p.getDescription().getWebsite() != null) {
                 o.addProperty("website", p.getDescription().getWebsite());
+            }
+            String file = pluginFile(p, files);
+            if (file != null) {
+                o.addProperty("file", file); // so admins can remove it in the app
             }
             arr.add(o);
         }
@@ -730,6 +784,47 @@ public final class ApiServer {
         return "";
     }
 
+    /** The plugin's JAR relative to the server folder, if it can be found there. */
+    private static String pluginFile(org.bukkit.plugin.Plugin p, FileManager files) {
+        try {
+            java.security.CodeSource source = p.getClass().getProtectionDomain().getCodeSource();
+            if (source == null || files == null) {
+                return null;
+            }
+            java.nio.file.Path jar = java.nio.file.Path.of(source.getLocation().toURI());
+            // Paper loads a remapped copy from plugins/.paper-remapped/; the file to manage is the original.
+            for (java.nio.file.Path p2 = jar.getParent(); p2 != null; p2 = p2.getParent()) {
+                if (p2.getFileName() != null && p2.getFileName().toString().equals(".paper-remapped")) {
+                    jar = p2.getParent().resolve(jar.getFileName());
+                    break;
+                }
+            }
+            return java.nio.file.Files.isRegularFile(jar) ? files.relativeOrNull(jar) : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void requireFiles(Caller caller) throws ApiException {
+        require(caller, Role.ADMIN);
+        if (!plugin.getConfig().getBoolean("security.allow-files", true)) {
+            throw ApiException.forbidden("File access is disabled in config.yml");
+        }
+    }
+
+    private static String pathParam(HttpExchange ex) {
+        String raw = param(ex, "path");
+        return raw == null ? "" : java.net.URLDecoder.decode(raw, StandardCharsets.UTF_8);
+    }
+
+    private static long longHeader(HttpExchange ex, String name) {
+        try {
+            return Long.parseLong(ex.getRequestHeaders().getFirst(name));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     private static String param(HttpExchange ex, String key) {
         String q = ex.getRequestURI().getRawQuery();
         if (q != null) {
@@ -761,9 +856,13 @@ public final class ApiServer {
     }
 
     private static JsonObject readBody(HttpExchange ex) throws IOException, ApiException {
+        return readBody(ex, MAX_BODY);
+    }
+
+    private static JsonObject readBody(HttpExchange ex, int max) throws IOException, ApiException {
         try (InputStream in = ex.getRequestBody()) {
-            byte[] data = in.readNBytes(MAX_BODY + 1);
-            if (data.length > MAX_BODY) {
+            byte[] data = in.readNBytes(max + 1);
+            if (data.length > max) {
                 throw new ApiException(413, "too_large", "Request too large");
             }
             if (data.length == 0) {

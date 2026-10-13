@@ -29,6 +29,9 @@ security:
   pairing-code-minutes: 5
   # Allow admin devices to run console commands.
   allow-commands: true
+  # Allow admin devices to manage the server folder: browse, edit text files, upload and delete
+  # files (e.g. install or remove plugins). RemoteMC's own folder is never accessible.
+  allow-files: true
   # Commands that can never be run from the app (label only, without "/").
   blocked-commands:
     - stop

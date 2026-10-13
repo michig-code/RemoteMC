@@ -74,11 +74,14 @@ fun DashboardTab(
     worldActions: WorldActions? = null,
     loadPlugins: (suspend () -> List<PluginInfo>)? = null,
     schedules: ScheduleActions? = null,
+    files: FileActions? = null,
 ) {
+    var showFiles by rememberSaveable { mutableStateOf(false) }
+    if (showFiles && files != null) FilesScreen(files, onDismiss = { showFiles = false })
     var showSchedules by rememberSaveable { mutableStateOf(false) }
     if (showSchedules && schedules != null) SchedulesSheet(schedules) { showSchedules = false }
     var showPlugins by rememberSaveable { mutableStateOf(false) }
-    if (showPlugins && loadPlugins != null) PluginsSheet(loadPlugins) { showPlugins = false }
+    if (showPlugins && loadPlugins != null) PluginsSheet(loadPlugins, files) { showPlugins = false }
     var openWorld by rememberSaveable { mutableStateOf<String?>(null) }
     val onWorld: ((String) -> Unit)? = worldActions?.let { { name: String -> openWorld = name } }
     if (worldActions != null) {
@@ -118,6 +121,7 @@ fun DashboardTab(
                     Worlds(status.worlds, onWorld)
             schedules?.let { SchedulesRow { showSchedules = true } }
             loadPlugins?.let { PluginsRow { showPlugins = true } }
+            files?.let { FilesRow { showFiles = true } }
                 }
             }
         } else {
@@ -130,6 +134,7 @@ fun DashboardTab(
             Worlds(status.worlds, onWorld)
             schedules?.let { SchedulesRow { showSchedules = true } }
             loadPlugins?.let { PluginsRow { showPlugins = true } }
+            files?.let { FilesRow { showFiles = true } }
         }
         Spacer(Modifier.height(8.dp))
     }

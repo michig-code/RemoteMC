@@ -1,5 +1,7 @@
 package de.remotemc.app.ui
 
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -30,13 +32,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
@@ -57,9 +62,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
@@ -76,10 +84,10 @@ import de.remotemc.app.ui.theme.McColors
 import de.remotemc.app.ui.theme.MonoStyle
 import de.remotemc.app.ui.util.MinecraftText
 import de.remotemc.app.ui.util.rememberHaptics
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
 private val TerminalText = Color(0xFFD5DDD8)
@@ -157,14 +165,32 @@ fun ConsoleTab(
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-                reverseLayout = true,
-                verticalArrangement = Arrangement.Top, // short logs start at the top like before
-            ) {
-                items(reversed, key = { it.key }) { line -> ConsoleLineView(line) }
+            // Long-press a line to select and copy text; the button copies the whole log.
+            SelectionContainer {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+                    reverseLayout = true,
+                    verticalArrangement = Arrangement.Top, // short logs start at the top like before
+                ) {
+                    items(reversed, key = { it.key }) { line -> ConsoleLineView(line) }
+                }
+            }
+            if (entries.isNotEmpty()) {
+                val clipboard = LocalClipboardManager.current
+                val context = LocalContext.current
+                val copied = stringResource(R.string.console_copied)
+                IconButton(
+                    onClick = {
+                        haptics.tap()
+                        clipboard.setText(AnnotatedString(entries.joinToString("\n") { it.text }))
+                        // Android 13+ shows its own confirmation for copied text.
+                        if (Build.VERSION.SDK_INT < 33) Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+                        .background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
+                ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.console_copy), tint = TerminalDim) }
             }
             androidx.compose.animation.AnimatedVisibility(
                 visible = !atBottom && entries.isNotEmpty(),

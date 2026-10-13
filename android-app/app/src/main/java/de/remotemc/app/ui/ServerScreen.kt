@@ -1,5 +1,6 @@
 package de.remotemc.app.ui
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -15,9 +16,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -25,14 +26,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.GppMaybe
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,24 +64,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import de.remotemc.app.R
 import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
-import de.remotemc.app.data.PlayerInfo
-import de.remotemc.app.data.PluginInfo
-import de.remotemc.app.data.ScheduleInfo
-import de.remotemc.app.data.ScheduleList
+import de.remotemc.app.data.FileList
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
+import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.Role
+import de.remotemc.app.data.ScheduleInfo
+import de.remotemc.app.data.ScheduleList
 import de.remotemc.app.data.ServerStatus
+import de.remotemc.app.data.TextFile
 import de.remotemc.app.data.Whitelist
 import de.remotemc.app.data.WorldDetails
 import de.remotemc.app.net.ApiError
@@ -134,6 +137,21 @@ class ServerActions(
     val loadPlugins: (suspend () -> List<PluginInfo>)? = null,
     /** Scheduled commands (admins); null hides them. */
     val schedules: ScheduleActions? = null,
+    /** Server folder and plugin files (admins); null hides them. */
+    val files: FileActions? = null,
+)
+
+/** Files in the server folder; paths are relative to it ("" = the folder itself). */
+class FileActions(
+    val list: suspend (String) -> FileList,
+    val read: suspend (String) -> TextFile,
+    val write: suspend (path: String, content: String) -> Unit,
+    val delete: suspend (String) -> Unit,
+    val createFolder: suspend (String) -> Unit,
+    /** File name of a picked document. */
+    val nameOf: suspend (Uri) -> String,
+    /** Uploads the picked document into the folder [dir]; returns its new path. */
+    val upload: suspend (dir: String, uri: Uri) -> String,
 )
 
 class ScheduleActions(
@@ -202,6 +220,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             worlds = vm.worldActions,
             loadPlugins = vm::plugins,
             schedules = vm.scheduleActions,
+            files = vm.fileActions,
         ),
         snackbar = snackbar,
     )
@@ -332,6 +351,7 @@ fun ServerScreenContent(
                                     actions.schedules?.takeIf {
                                         state.role.atLeast(Role.ADMIN) && state.commandsEnabled && state.status?.supports("schedules") == true
                                     },
+                                    actions.files?.takeIf { state.role.atLeast(Role.ADMIN) && state.status?.supports("files") == true },
                                 )
                             }
                             Tab.Players -> PlayersSection(state, actions)

@@ -134,6 +134,11 @@ suspend fun errorText(e: Throwable): String = when (e) {
         "too_many_streams" -> getString(Res.string.error_too_many_streams)
         "timeout" -> getString(Res.string.error_server_timeout)
         "not_found" -> getString(Res.string.error_needs_plugin_update)
+        "file_not_found" -> getString(Res.string.error_file_not_found)
+        "binary_file" -> getString(Res.string.error_binary_file)
+        "file_too_large" -> getString(Res.string.error_file_too_large)
+        "file_locked" -> getString(Res.string.error_file_locked)
+        "file_exists" -> getString(Res.string.error_file_exists)
         else -> e.message?.takeIf { it.isNotBlank() } ?: getString(Res.string.error_http, e.status)
     }
     else -> e.message ?: getString(Res.string.error_unknown)

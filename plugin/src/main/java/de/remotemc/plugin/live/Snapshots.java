@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 /** Builds the status and player JSON. Call on the main / global region thread. */
 public final class Snapshots {
 
-    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport"};
+    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport", "files"};
 
     private final long startedAt = System.currentTimeMillis();
     private final String pluginVersion;
