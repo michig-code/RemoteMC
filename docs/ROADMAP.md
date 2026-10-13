@@ -115,10 +115,10 @@ Mehrere Spieler auf einmal kicken, eine Nachricht senden oder whitelisten.
 - Größe änderbar
 - Schnellaktion (Favorit oder Makro aus B1)
 
-### B7 – Offline-Modus
+### B7 – Offline-Modus ✅
 Die letzten Daten werden mit Zeitstempel angezeigt statt nur einer Fehlermeldung. Baut auf A1 auf.
 
-### B8 – Mehr Rückgängig
+### B8 – Mehr Rückgängig ✅
 - Entbannen nach Bann
 - Whitelist-Entfernung
 - Papierkorb für gelöschte Dateien (24 h, im Plugin)

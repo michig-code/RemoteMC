@@ -61,7 +61,9 @@ class ApiManagement(private val api: () -> ApiClient) : Management {
     override suspend fun writeFile(path: String, content: String) {
         api().writeFile(path, content)
     }
-    override suspend fun deleteFile(path: String) = api().deleteFile(path)
+    override suspend fun deleteFile(path: String) {
+        api().deleteFile(path)
+    }
     override suspend fun createFolder(path: String) {
         api().createFolder(path)
     }

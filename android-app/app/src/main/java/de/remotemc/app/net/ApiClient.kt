@@ -89,9 +89,13 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     suspend fun readFile(path: String): TextFile = TextFile.fromJson(call("GET", "/api/v1/files/content?path=${enc(path)}"))
     suspend fun writeFile(path: String, content: String): FileEntry =
         FileEntry.fromJson(call("POST", "/api/v1/files/content", JSONObject().put("path", path).put("content", content)))
-    suspend fun deleteFile(path: String) {
-        call("POST", "/api/v1/files/delete", JSONObject().put("path", path))
-    }
+    /** Deletes; returns the trash id to restore it with (plugin with a trash), or null. */
+    suspend fun deleteFile(path: String): String? =
+        call("POST", "/api/v1/files/delete", JSONObject().put("path", path)).optString("trash").takeIf { it.isNotBlank() }
+
+    /** Puts a deleted file back (for a day after deleting). */
+    suspend fun restoreFile(trash: String): FileEntry =
+        FileEntry.fromJson(call("POST", "/api/v1/files/restore", JSONObject().put("trash", trash)))
     suspend fun createFolder(path: String): FileEntry = FileEntry.fromJson(call("POST", "/api/v1/files/mkdir", JSONObject().put("path", path)))
 
     /** Uploads [length] bytes from [open] to [path] (replacing a file there), e.g. a plugin JAR. */

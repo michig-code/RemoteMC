@@ -542,4 +542,6 @@
     <string name="widget_run_failed">Error: %s</string>
     <string name="fav_widget">Botón en el widget de inicio</string>
     <string name="fav_widget_hint">Solo para comandos sin marcadores ni pregunta</string>
+    <string name="action_undo">Deshacer</string>
+    <string name="files_restored">%s restaurado</string>
 </resources>

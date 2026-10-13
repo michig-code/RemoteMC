@@ -527,4 +527,6 @@
     <string name="widget_run_failed">Başarısız: %s</string>
     <string name="fav_widget">Ana ekran widget\'ında düğme</string>
     <string name="fav_widget_hint">Yalnızca yer tutucusuz ve sorusuz komutlar için</string>
+    <string name="action_undo">Geri al</string>
+    <string name="files_restored">%s geri yüklendi</string>
 </resources>

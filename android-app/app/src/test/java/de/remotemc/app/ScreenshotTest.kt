@@ -331,7 +331,7 @@ class ScreenshotTest {
         },
         read = { de.remotemc.app.data.TextFile(it, "#Minecraft server properties\nmotd=Welcome to Michi's server!\nmax-players=20\ndifficulty=normal\npvp=true\nview-distance=10\nwhite-list=true\nonline-mode=true\n", 0) },
         write = { _, _ -> },
-        delete = {},
+        delete = { null },
         createFolder = {},
         nameOf = { "Plugin.jar" },
         upload = { dir, _ -> "$dir/Plugin.jar" },

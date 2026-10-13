@@ -39,6 +39,10 @@ public final class FileManager {
 
     private final Path root;
     private final List<Path> hidden = new ArrayList<>();
+    /** Deleted files wait here for [TRASH_KEEP_MILLIS] (inside a hidden folder); null = delete at once. */
+    private Path trash;
+    public static final long TRASH_KEEP_MILLIS = 24L * 60 * 60 * 1000;
+    private static final String ORIGIN = ".origin";
 
     /** [hidden]: folders or files that are never listed or touched (e.g. plugins/RemoteMC). */
     public FileManager(Path root, Path... hidden) throws IOException {
@@ -47,6 +51,13 @@ public final class FileManager {
             Path abs = h.isAbsolute() ? h : this.root.resolve(h);
             this.hidden.add(Files.exists(abs) ? abs.toRealPath() : abs.normalize());
         }
+    }
+
+    /** Deleted files are moved into [dir] (must be in a hidden folder) and can be restored for a day. */
+    public void useTrash(Path dir) throws IOException {
+        Files.createDirectories(dir);
+        trash = dir.toRealPath();
+        purgeTrash(System.currentTimeMillis());
     }
 
     /** Resolves a relative path safely; "" is the server folder itself. */
@@ -220,8 +231,11 @@ public final class FileManager {
         return info(file);
     }
 
-    /** Deletes a file or a folder with everything in it. */
-    public void delete(String relative) throws ApiException, IOException {
+    /**
+     * Deletes a file or a folder with everything in it. With a trash it is moved there instead
+     * and the id to restore it is returned; null when it was deleted for good.
+     */
+    public String delete(String relative) throws ApiException, IOException {
         Path p = resolve(relative);
         if (p.equals(root)) {
             throw ApiException.forbidden("The server folder itself cannot be deleted");
@@ -234,6 +248,79 @@ public final class FileManager {
                 throw ApiException.forbidden("This folder contains RemoteMC's own files");
             }
         }
+        if (trash != null) {
+            purgeTrash(System.currentTimeMillis());
+            String id = System.currentTimeMillis() + "-" + Long.toHexString(Double.doubleToLongBits(Math.random()) & 0xffffff);
+            Path slot = trash.resolve(id);
+            Files.createDirectories(slot);
+            try {
+                Files.move(p, slot.resolve(p.getFileName().toString()));
+                Files.writeString(slot.resolve(ORIGIN), relative(p));
+                return id;
+            } catch (IOException e) {
+                // Another drive or the file is in use: fall back to deleting it.
+                deleteTree(slot);
+            }
+        }
+        deleteNow(p, relative);
+        return null;
+    }
+
+    /** Puts a deleted file back where it was; fails if something new is there now. */
+    public JsonObject restore(String id) throws ApiException, IOException {
+        if (trash == null || id == null || !id.matches("[0-9]{1,20}-[0-9a-f]{1,8}")) {
+            throw ApiException.notFound("not_in_trash", "Nothing to restore");
+        }
+        Path slot = trash.resolve(id);
+        Path origin = slot.resolve(ORIGIN);
+        if (!Files.isRegularFile(origin)) {
+            throw ApiException.notFound("not_in_trash", "Nothing to restore (it may be older than a day)");
+        }
+        Path target = resolve(Files.readString(origin).strip());
+        if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
+            throw new ApiException(409, "file_exists", "Something new is there now: " + relative(target));
+        }
+        Path saved = slot.resolve(target.getFileName().toString());
+        Files.createDirectories(target.getParent());
+        Files.move(saved, target);
+        deleteTree(slot);
+        return info(target);
+    }
+
+    /** Removes trash entries older than a day. */
+    void purgeTrash(long now) {
+        if (trash == null) {
+            return;
+        }
+        try (Stream<Path> entries = Files.list(trash)) {
+            for (Path slot : (Iterable<Path>) entries::iterator) {
+                String name = slot.getFileName().toString();
+                long time;
+                try {
+                    time = Long.parseLong(name.substring(0, Math.max(0, name.indexOf('-'))));
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                if (now - time > TRASH_KEEP_MILLIS) {
+                    deleteTree(slot);
+                }
+            }
+        } catch (IOException ignored) {
+            // tried again with the next delete
+        }
+    }
+
+    private static void deleteTree(Path p) {
+        try (Stream<Path> walk = Files.walk(p)) {
+            for (Path q : (Iterable<Path>) walk.sorted(Comparator.reverseOrder())::iterator) {
+                Files.deleteIfExists(q);
+            }
+        } catch (IOException ignored) {
+            // best effort
+        }
+    }
+
+    private void deleteNow(Path p, String relative) throws ApiException, IOException {
         try {
             if (Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)) {
                 try (Stream<Path> walk = Files.walk(p)) {

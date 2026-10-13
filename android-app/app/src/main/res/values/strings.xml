@@ -558,4 +558,6 @@
     <string name="widget_run_failed">Failed: %s</string>
     <string name="fav_widget">Button on the home screen widget</string>
     <string name="fav_widget_hint">Only for commands without placeholders and without a question</string>
+    <string name="action_undo">Undo</string>
+    <string name="files_restored">%s restored</string>
 </resources>

@@ -120,4 +120,33 @@ class FileManagerTest {
             assertTrue(s.noneMatch(p -> p.getFileName().toString().startsWith(".remotemc-")));
         }
     }
+
+    @Test
+    void deletedFilesCanBeRestoredForADay() throws Exception {
+        files.useTrash(server.resolve("plugins/RemoteMC/trash"));
+        String id = files.delete("plugins/Essentials");
+        assertTrue(id != null && id.matches("[0-9]+-[0-9a-f]+"), id);
+        assertFalse(Files.exists(server.resolve("plugins/Essentials")));
+        // The trash is inside RemoteMC's hidden folder: not listed, not reachable.
+        assertFalse(files.list("plugins").toString().contains("RemoteMC"));
+        assertEquals(403, status(() -> files.list("plugins/RemoteMC/trash")));
+
+        files.restore(id);
+        assertEquals("motd: hi\n", Files.readString(server.resolve("plugins/Essentials/config.yml")));
+        assertEquals(404, status(() -> files.restore(id))); // only once
+
+        String again = files.delete("server.properties");
+        Files.writeString(server.resolve("server.properties"), "new");
+        assertEquals(409, status(() -> files.restore(again))); // something new is there now
+        assertEquals(404, status(() -> files.restore("../../etc")));
+    }
+
+    @Test
+    void trashIsEmptiedAfterADay() throws Exception {
+        files.useTrash(server.resolve("plugins/RemoteMC/trash"));
+        String id = files.delete("server.properties");
+        files.purgeTrash(System.currentTimeMillis() + FileManager.TRASH_KEEP_MILLIS + 1000);
+        assertEquals(404, status(() -> files.restore(id)));
+        assertFalse(Files.exists(server.resolve("plugins/RemoteMC/trash/" + id)));
+    }
 }

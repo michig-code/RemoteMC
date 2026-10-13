@@ -83,11 +83,15 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     var refreshing by mutableStateOf(false)
         private set
     /**
-     * When the shown data was saved, while it still comes from the last visit (instant start);
-     * null once the server answered.
+     * How old the shown data is while it is not live: saved at the last visit (instant start) or
+     * last received before the connection was lost; null while the server answers.
      */
     var cachedAt by mutableStateOf<Long?>(null)
         private set
+    /** Time of the last data from the server (for [cachedAt] when the connection drops). */
+    private var lastLiveAt = 0L
+    /** True while only restored data is shown; it is not saved again then. */
+    private var restoredOnly = false
 
     val console = mutableStateListOf<ConsoleEntry>()
     val chat = mutableStateListOf<ChatEntry>()
@@ -135,7 +139,10 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     private val restore: Job
     private val reconnect = Channel<Unit>(Channel.CONFLATED)
 
-    private val messageChannel = Channel<UiText>(Channel.BUFFERED)
+    /** A message for the snackbar, optionally with "Undo". */
+    data class Notice(val text: UiText, val undo: (() -> Unit)? = null)
+
+    private val messageChannel = Channel<Notice>(Channel.BUFFERED)
     val messages = messageChannel.receiveAsFlow()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
@@ -158,6 +165,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     private fun restore(snapshot: ServerSnapshot) {
         if (status != null) return
         cachedAt = snapshot.savedAt
+        restoredOnly = true
         snapshot.session?.let { session = it }
         status = snapshot.status
         players = snapshot.players
@@ -188,7 +196,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     /** Remembers what is shown now for the next visit. */
     private suspend fun saveSnapshot() {
         val shownStatus = status ?: return
-        if (cachedAt != null) return // nothing new since the last visit
+        if (restoredOnly) return // nothing new since the last visit
         val snapshot = ServerSnapshot(
             savedAt = System.currentTimeMillis(),
             session = session,
@@ -209,6 +217,13 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     /** Called once live data replaces the restored data. */
     private fun live() {
         cachedAt = null
+        restoredOnly = false
+        lastLiveAt = System.currentTimeMillis()
+    }
+
+    /** The server stopped answering: the data on screen keeps its age. */
+    private fun stale() {
+        if (cachedAt == null && status != null && lastLiveAt > 0) cachedAt = lastLiveAt
     }
 
     override fun onCleared() {
@@ -270,6 +285,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
             is StreamEvent.Status -> {
                 status = event.status
                 players = event.players
+                lastLiveAt = System.currentTimeMillis()
                 saveSnapshotSometimes()
             }
             is StreamEvent.Console -> addConsole(listOf(event.line))
@@ -293,6 +309,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         removeFromWhitelist = { api.whitelistRemove(it) },
         bans = { api.bans() },
         pardon = { api.pardon(it) },
+        ban = { name, reason -> api.playerAction(name, "ban", JSONObject().put("reason", reason)) },
     )
 
     val worldActions = WorldActions(
@@ -316,6 +333,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         read = { api.readFile(it) },
         write = { path, content -> api.writeFile(path, content) },
         delete = { api.deleteFile(it) },
+        restore = { api.restoreFile(it) },
         createFolder = { api.createFolder(it) },
         nameOf = { uri -> documentInfo(uri).first },
         upload = { dir, uri ->
@@ -364,6 +382,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         } catch (e: Exception) {
             error = e
             connection = Connection.OFFLINE
+            stale()
         }
     }
 
@@ -575,7 +594,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
             try {
                 api.broadcast(message)
             } catch (e: Exception) {
-                messageChannel.send(UiText.Error(e))
+                messageChannel.send(Notice(UiText.Error(e)))
             }
         }
     }
@@ -584,10 +603,11 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         viewModelScope.launch {
             try {
                 api.playerAction(player, action, body)
-                messageChannel.send(success)
+                // A ban can be taken back right away.
+                messageChannel.send(Notice(success, undo = if (action == "ban") ({ unban(listOf(player)) }) else null))
                 pollOnce()
             } catch (e: Exception) {
-                messageChannel.send(UiText.Error(e))
+                messageChannel.send(Notice(UiText.Error(e)))
             }
         }
     }
@@ -609,11 +629,28 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                     failed += name
                 }
             }
+            val done = players - failed.toSet()
             messageChannel.send(
-                if (failed.isEmpty()) UiText.Plural(R.plurals.players_batch_done, players.size)
-                else UiText.Res(R.string.players_batch_failed, listOf(failed.joinToString(", "))),
+                Notice(
+                    if (failed.isEmpty()) UiText.Plural(R.plurals.players_batch_done, players.size)
+                    else UiText.Res(R.string.players_batch_failed, listOf(failed.joinToString(", "))),
+                    undo = if (action == "ban" && done.isNotEmpty()) ({ unban(done) }) else null,
+                ),
             )
             pollOnce()
+        }
+    }
+
+    /** Takes bans back (the "Undo" of a ban). */
+    private fun unban(players: List<String>) {
+        viewModelScope.launch {
+            val failed = players.filter { runCatching { api.pardon(it) }.isFailure }
+            messageChannel.send(
+                Notice(
+                    if (failed.isEmpty()) UiText.Res(R.string.bans_unbanned, listOf(players.joinToString(", ")))
+                    else UiText.Res(R.string.players_batch_failed, listOf(failed.joinToString(", "))),
+                ),
+            )
         }
     }
 

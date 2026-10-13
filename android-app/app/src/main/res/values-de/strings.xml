@@ -541,4 +541,6 @@
     <string name="widget_run_failed">Fehlgeschlagen: %s</string>
     <string name="fav_widget">Knopf auf dem Startbildschirm-Widget</string>
     <string name="fav_widget_hint">Nur für Befehle ohne Platzhalter und ohne Nachfrage</string>
+    <string name="action_undo">Rückgängig</string>
+    <string name="files_restored">%s wiederhergestellt</string>
 </resources>

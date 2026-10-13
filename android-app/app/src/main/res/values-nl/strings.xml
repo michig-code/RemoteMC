@@ -527,4 +527,6 @@
     <string name="widget_run_failed">Mislukt: %s</string>
     <string name="fav_widget">Knop op de startschermwidget</string>
     <string name="fav_widget_hint">Alleen voor opdrachten zonder plaatshouders en zonder vraag</string>
+    <string name="action_undo">Ongedaan maken</string>
+    <string name="files_restored">%s hersteld</string>
 </resources>

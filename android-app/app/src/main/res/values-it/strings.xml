@@ -542,4 +542,6 @@
     <string name="widget_run_failed">Non riuscito: %s</string>
     <string name="fav_widget">Pulsante nel widget della schermata Home</string>
     <string name="fav_widget_hint">Solo per comandi senza segnaposto e senza domanda</string>
+    <string name="action_undo">Annulla</string>
+    <string name="files_restored">%s ripristinato</string>
 </resources>

@@ -557,4 +557,6 @@
     <string name="widget_run_failed">Nie powiodło się: %s</string>
     <string name="fav_widget">Przycisk w widżecie ekranu głównego</string>
     <string name="fav_widget_hint">Tylko dla poleceń bez symboli zastępczych i bez pytania</string>
+    <string name="action_undo">Cofnij</string>
+    <string name="files_restored">Przywrócono %s</string>
 </resources>

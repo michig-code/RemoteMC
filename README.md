@@ -177,7 +177,8 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | GET | `/api/v1/files/content?path=` | admin | A text file up to 1 MB |
 | POST | `/api/v1/files/content` | admin | Save a text file: `{"path", "content"}` |
 | POST | `/api/v1/files/upload?path=` | admin | Upload a file (raw body, up to 200 MB), e.g. `plugins/MyPlugin.jar` |
-| POST | `/api/v1/files/delete` · `/mkdir` | admin | `{"path"}`; deleting a folder removes everything in it |
+| POST | `/api/v1/files/delete` · `/mkdir` | admin | `{"path"}`; deleting a folder removes everything in it. Deleted files go to a trash for 24 h (`plugins/RemoteMC/trash`); the answer has its `trash` id |
+| POST | `/api/v1/files/restore` | admin | `{"trash"}`: puts a deleted file or folder back (fails with `file_exists` if something new is there) |
 | GET | `/api/v1/worlds/<world>` | admin | Time, weather, difficulty, game rules |
 | POST | `/api/v1/worlds/<world>/time` · `weather` · `difficulty` · `gamerule` | admin | `{"time": "day"}`, `{"weather": "rain"}`, `{"difficulty": "hard"}`, `{"rule", "value"}` |
 | POST | `/api/v1/bans/<name>/pardon` | moderator | Unban |

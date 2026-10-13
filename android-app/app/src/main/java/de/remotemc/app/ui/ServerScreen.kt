@@ -172,12 +172,15 @@ class FileActions(
     val list: suspend (String) -> FileList,
     val read: suspend (String) -> TextFile,
     val write: suspend (path: String, content: String) -> Unit,
-    val delete: suspend (String) -> Unit,
+    /** Returns the trash id when the file can be restored, else null. */
+    val delete: suspend (String) -> String?,
     val createFolder: suspend (String) -> Unit,
     /** File name of a picked document. */
     val nameOf: suspend (Uri) -> String,
     /** Uploads the picked document into the folder [dir]; returns its new path. */
     val upload: suspend (dir: String, uri: Uri) -> String,
+    /** Restores a deleted file by its trash id. */
+    val restore: suspend (String) -> Unit = {},
 )
 
 class ScheduleActions(
@@ -200,6 +203,8 @@ class ModerationActions(
     val removeFromWhitelist: suspend (String) -> Whitelist,
     val bans: suspend () -> List<BanInfo>,
     val pardon: suspend (String) -> List<BanInfo>,
+    /** Bans again (to undo an unban); [reason] may be empty. */
+    val ban: suspend (name: String, reason: String) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -214,7 +219,18 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) { vm.runConnection() }
     }
     LaunchedEffect(vm) {
-        vm.messages.collect { snackbar.showSnackbar(it.resolve(context)) }
+        vm.messages.collect { notice ->
+            val undo = notice.undo
+            if (undo == null) {
+                snackbar.showSnackbar(notice.text.resolve(context))
+            } else {
+                val result = snackbar.showSnackbar(
+                    notice.text.resolve(context), actionLabel = context.getString(R.string.action_undo),
+                    duration = androidx.compose.material3.SnackbarDuration.Long,
+                )
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) undo()
+            }
+        }
     }
 
     ServerScreenContent(

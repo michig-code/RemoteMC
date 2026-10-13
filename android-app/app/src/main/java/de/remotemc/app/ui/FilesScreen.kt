@@ -46,6 +46,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -291,7 +293,31 @@ internal fun FolderView(
             confirmButton = {
                 TextButton(onClick = {
                     deleting = null
-                    run("…", { context.getString(R.string.files_deleted, entry.name) }) { actions.delete(entry.path); entry.path }
+                    scope.launch {
+                        busy = "…"
+                        try {
+                            val trash = actions.delete(entry.path)
+                            haptics.success()
+                            tick++
+                            busy = null
+                            // Deleted files wait a day in the plugin's trash: offer to take it back.
+                            val result = snackbar.showSnackbar(
+                                context.getString(R.string.files_deleted, entry.name),
+                                actionLabel = if (trash != null) context.getString(R.string.action_undo) else null,
+                                duration = if (trash != null) SnackbarDuration.Long else SnackbarDuration.Short,
+                            )
+                            if (trash != null && result == SnackbarResult.ActionPerformed) {
+                                run("…", { context.getString(R.string.files_restored, entry.name) }) { actions.restore(trash); entry.path }
+                            }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            haptics.error()
+                            snackbar.showSnackbar(context.errorText(e))
+                        } finally {
+                            if (busy == "…") busy = null
+                        }
+                    }
                 }) { Text(stringResource(R.string.files_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.action_cancel)) } },

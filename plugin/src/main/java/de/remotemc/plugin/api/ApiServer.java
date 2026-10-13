@@ -80,6 +80,8 @@ public final class ApiServer {
         // The server folder; RemoteMC's own folder (tokens, TLS key, audit log) stays out of reach.
         java.io.File dataFolder = plugin.getDataFolder().getAbsoluteFile();
         files = new FileManager(dataFolder.getParentFile().getParentFile().toPath(), dataFolder.toPath());
+        // Deleted files stay restorable for a day (in RemoteMC's own, hidden folder).
+        files.useTrash(dataFolder.toPath().resolve("trash"));
         String host = plugin.getConfig().getString("api.host", "0.0.0.0");
         int port = plugin.getConfig().getInt("api.port", 8765);
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -286,11 +288,21 @@ public final class ApiServer {
             case "POST /api/v1/files/delete" -> {
                 requireFiles(caller);
                 String file = stringField(readBody(ex), "path", 1024);
-                files.delete(file);
+                String trashId = files.delete(file);
                 plugin.audit().log(caller.who(), caller.ip(), "file deleted: " + file);
                 JsonObject o = new JsonObject();
                 o.addProperty("deleted", file);
+                if (trashId != null) {
+                    o.addProperty("trash", trashId); // restorable for a day
+                }
                 return o;
+            }
+            case "POST /api/v1/files/restore" -> {
+                requireFiles(caller);
+                String id = stringField(readBody(ex), "trash", 64);
+                JsonObject restored = files.restore(id);
+                plugin.audit().log(caller.who(), caller.ip(), "file restored: " + restored.get("path").getAsString());
+                return restored;
             }
             case "POST /api/v1/files/mkdir" -> {
                 requireFiles(caller);

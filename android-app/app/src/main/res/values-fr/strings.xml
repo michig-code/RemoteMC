@@ -542,4 +542,6 @@
     <string name="widget_run_failed">Échec : %s</string>
     <string name="fav_widget">Bouton sur le widget d\'accueil</string>
     <string name="fav_widget_hint">Seulement pour les commandes sans espace réservé ni question</string>
+    <string name="action_undo">Annuler</string>
+    <string name="files_restored">%s restauré</string>
 </resources>

@@ -127,8 +127,10 @@ private class Loader<T>(val scope: kotlinx.coroutines.CoroutineScope) {
     var error by mutableStateOf<Throwable?>(null)
     var busy by mutableStateOf(false)
     var message by mutableStateOf<String?>(null)
+    /** Takes the last change back; shown as "Undo" next to [message]. */
+    var undo by mutableStateOf<(() -> Unit)?>(null)
 
-    fun run(onDone: (T) -> String? = { null }, call: suspend () -> T) {
+    fun run(onDone: (T) -> String? = { null }, undoWith: (() -> Unit)? = null, call: suspend () -> T) {
         scope.launch {
             busy = true
             try {
@@ -136,6 +138,7 @@ private class Loader<T>(val scope: kotlinx.coroutines.CoroutineScope) {
                 data = result
                 error = null
                 message = onDone(result)
+                undo = undoWith
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -214,7 +217,7 @@ private fun WhitelistView(moderation: ModerationActions, canToggle: Boolean) {
                 }
             }
             loader.error?.let { e -> item(key = "error") { ErrorLine(context.errorText(e)) } }
-            loader.message?.let { m -> item(key = "message") { Text(m, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium) } }
+            loader.message?.let { m -> item(key = "message") { MessageLine(m, loader.undo) } }
             if (list.players.isEmpty()) {
                 item(key = "empty") { EmptyLine(stringResource(R.string.whitelist_empty)) }
             }
@@ -227,7 +230,10 @@ private fun WhitelistView(moderation: ModerationActions, canToggle: Boolean) {
                         IconButton(
                             onClick = {
                                 haptics.tap()
-                                loader.run({ context.getString(R.string.whitelist_removed, player) }) { moderation.removeFromWhitelist(player) }
+                                loader.run(
+                                    { context.getString(R.string.whitelist_removed, player) },
+                                    undoWith = { loader.run({ context.getString(R.string.whitelist_added, player) }) { moderation.addToWhitelist(player) } },
+                                ) { moderation.removeFromWhitelist(player) }
                             },
                             enabled = !loader.busy,
                         ) { Icon(Icons.Outlined.Close, stringResource(R.string.whitelist_remove, player)) }
@@ -255,7 +261,7 @@ private fun BansView(moderation: ModerationActions) {
                 return@LazyColumn
             }
             loader.error?.let { e -> item(key = "error") { ErrorLine(context.errorText(e)) } }
-            loader.message?.let { m -> item(key = "message") { Text(m, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium) } }
+            loader.message?.let { m -> item(key = "message") { MessageLine(m, loader.undo) } }
             if (list.isEmpty()) {
                 item(key = "empty") { EmptyLine(stringResource(R.string.bans_empty)) }
             }
@@ -295,7 +301,16 @@ private fun BansView(moderation: ModerationActions) {
                 TextButton(onClick = {
                     confirm = null
                     haptics.success()
-                    loader.run({ context.getString(R.string.bans_unbanned, ban.name) }) { moderation.pardon(ban.name) }
+                    loader.run(
+                        { context.getString(R.string.bans_unbanned, ban.name) },
+                        // Undo bans again with the old reason.
+                        undoWith = {
+                            loader.run({ context.getString(R.string.players_banned, ban.name) }) {
+                                moderation.ban(ban.name, ban.reason.orEmpty())
+                                moderation.bans()
+                            }
+                        },
+                    ) { moderation.pardon(ban.name) }
                 }) { Text(stringResource(R.string.bans_unban)) }
             },
             dismissButton = { TextButton(onClick = { confirm = null }) { Text(stringResource(R.string.action_cancel)) } },
@@ -330,3 +345,12 @@ private fun EmptyLine(text: String) = Text(
     modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
 )
+
+/** The result of the last change, with "Undo" when it can be taken back. */
+@Composable
+private fun MessageLine(text: String, undo: (() -> Unit)?) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        if (undo != null) TextButton(onClick = undo) { Text(stringResource(R.string.action_undo)) }
+    }
+}

@@ -542,4 +542,6 @@
     <string name="widget_run_failed">Falhou: %s</string>
     <string name="fav_widget">Botão no widget da tela inicial</string>
     <string name="fav_widget_hint">Só para comandos sem marcadores e sem pergunta</string>
+    <string name="action_undo">Desfazer</string>
+    <string name="files_restored">%s restaurado</string>
 </resources>
