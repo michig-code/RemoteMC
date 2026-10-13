@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import de.remotemc.desktop.res.whitelist_added
+import de.remotemc.desktop.res.players_banned
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,7 +112,13 @@ fun WhitelistView(session: ServerSession) {
                     Spacer(Modifier.width(12.dp))
                     Text(player, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                     IconButton(
-                        onClick = { loader.run({ session.notify(getString(Res.string.whitelist_removed, player)) }) { manage.whitelistRemove(player) } },
+                        onClick = {
+                            loader.run({
+                                session.notify(getString(Res.string.whitelist_removed, player), undo = {
+                                    loader.run({ session.notify(getString(Res.string.whitelist_added, player)) }) { manage.whitelistAdd(player) }
+                                })
+                            }) { manage.whitelistRemove(player) }
+                        },
                         enabled = !loader.busy,
                     ) { Icon(Icons.Outlined.Close, stringResource(Res.string.whitelist_remove, player)) }
                 }
@@ -166,7 +174,15 @@ fun BansView(session: ServerSession) {
             confirmButton = {
                 TextButton(onClick = {
                     confirm = null
-                    loader.run({ session.notify(getString(Res.string.bans_unbanned, ban.name)) }) { manage.pardon(ban.name) }
+                    loader.run({
+                        // Undo bans again with the old reason.
+                        session.notify(getString(Res.string.bans_unbanned, ban.name), undo = {
+                            loader.run({ session.notify(getString(Res.string.players_banned, ban.name)) }) {
+                                manage.ban(ban.name, ban.reason.orEmpty())
+                                manage.bans()
+                            }
+                        })
+                    }) { manage.pardon(ban.name) }
                 }) { Text(stringResource(Res.string.bans_unban)) }
             },
             dismissButton = { TextButton(onClick = { confirm = null }) { Text(stringResource(Res.string.action_cancel)) } },

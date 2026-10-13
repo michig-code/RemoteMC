@@ -571,23 +571,6 @@ fun CommandInput(
     }
 }
 
-/**
- * Puts [suggestion] in place of the word at the cursor of [value]. At the end a space follows,
- * ready for the next argument; inside the text the cursor jumps to the next word.
- */
-internal fun completeAt(value: TextFieldValue, suggestion: String): TextFieldValue {
-    val text = value.text
-    val cursor = value.selection.end.coerceIn(0, text.length)
-    val start = if (cursor == 0) 0 else text.lastIndexOf(' ', cursor - 1) + 1
-    val end = text.indexOf(' ', cursor).let { if (it < 0) text.length else it }
-    val slash = if (start == 0 && text.startsWith("/")) "/" else ""
-    val before = text.substring(0, start) + slash + suggestion
-    val after = text.substring(end)
-    val next = if (after.isEmpty()) "$before " else before + after
-    val caret = if (after.isEmpty()) next.length else before.length + 1
-    return TextFieldValue(next, TextRange(caret.coerceAtMost(next.length)))
-}
-
 @Composable
 private fun ConsoleSearchBar(
     query: String,

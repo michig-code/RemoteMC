@@ -23,4 +23,19 @@
     <string name="update_up_to_date">RemoteMC güncel (%1$s).</string>
     <string name="update_checking">Kontrol ediliyor …</string>
     <string name="update_portable_hint">Bu kopya kendini güncelleyemez (taşınabilir sürüm). Yeni sürümü indirme sayfasından al.</string>
+    <string name="players_select_hint_pc">Birden fazla oyuncu seçmek için Ctrl+tıkla veya basılı tut</string>
+    <string name="time_just_now">az önce</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">%d dakika önce</item>
+        <item quantity="other">%d dakika önce</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">%d saat önce</item>
+        <item quantity="other">%d saat önce</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="one">%d gün önce</item>
+        <item quantity="other">%d gün önce</item>
+    </plurals>
+    <string name="settings_notify_quiet_text_pc">%1$s ile %2$s arasında yalnızca çevrimdışı uyarıları görünür</string>
 </resources>

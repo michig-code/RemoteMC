@@ -2,7 +2,10 @@ package de.remotemc.desktop
 
 import com.sun.jna.platform.win32.Crypt32Util
 import de.remotemc.app.data.AlertSettings
+import de.remotemc.app.data.SecureBox
 import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.Shortcuts
+import de.remotemc.app.data.SnapshotStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -103,6 +106,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
         val alerts = JSONObject().put("enabled", a.enabled).put("offline", a.offline).put("lowTps", a.lowTps)
             .put("tpsThreshold", a.tpsThreshold).put("joins", a.joins).put("players", a.players)
             .put("mentions", a.mentions).put("words", a.words)
+            .put("quiet", a.quiet).put("quietFrom", a.quietFrom).put("quietTo", a.quietTo)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
             .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
@@ -126,6 +130,9 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
                     players = a.optString("players"),
                     mentions = a.optBoolean("mentions", true),
                     words = a.optString("words"),
+                    quiet = a.optBoolean("quiet", false),
+                    quietFrom = a.optInt("quietFrom", 22 * 60).coerceIn(0, 1439),
+                    quietTo = a.optInt("quietTo", 7 * 60).coerceIn(0, 1439),
                 )
             } ?: AlertSettings(),
         )
@@ -146,5 +153,67 @@ class CommandHistory(private val file: File = File(AppDirs.dir, "history.json"))
         data.put(serverId, JSONArray(list))
         writePrivate(file, data.toString().toByteArray(Charsets.UTF_8))
         return list
+    }
+}
+
+/** [SecureBox] with Windows DPAPI (like the Keystore on the phone): for the saved snapshots. */
+object DpapiBox : SecureBox {
+    override fun encrypt(plain: String): String =
+        java.util.Base64.getEncoder().encodeToString(Protect.seal(plain.toByteArray(Charsets.UTF_8)))
+
+    override fun decrypt(encrypted: String): String =
+        String(Protect.open(java.util.Base64.getDecoder().decode(encrypted)), Charsets.UTF_8)
+}
+
+/** A small JSON object per server id in one file (favorites and macros, player notes). */
+open class PerServerFile(private val file: File?) {
+    private val data: JSONObject = file?.let { f -> runCatching { JSONObject(f.readText()) }.getOrNull() } ?: JSONObject()
+
+    @Synchronized
+    protected fun read(serverId: String): JSONObject? = data.optJSONObject(serverId)
+
+    @Synchronized
+    protected fun write(serverId: String, value: JSONObject?) {
+        if (value == null) data.remove(serverId) else data.put(serverId, value)
+        file?.let { writePrivate(it, data.toString().toByteArray(Charsets.UTF_8)) }
+    }
+
+    fun delete(serverId: String) = write(serverId, null)
+}
+
+/** Favorites and macros per server (null file: only in memory, for tests). */
+class ShortcutFiles(file: File? = File(AppDirs.dir, "shortcuts.json")) : PerServerFile(file) {
+    fun load(serverId: String): Shortcuts = read(serverId)?.let { runCatching { Shortcuts.fromJson(it) }.getOrNull() } ?: Shortcuts()
+    fun save(serverId: String, shortcuts: Shortcuts) = write(serverId, shortcuts.toJson())
+}
+
+/** Private notes about players, per server, only on this PC. */
+class NoteFiles(file: File? = File(AppDirs.dir, "notes.json")) : PerServerFile(file) {
+    fun get(serverId: String, uuid: String): String = read(serverId)?.optString(uuid).orEmpty()
+    fun set(serverId: String, uuid: String, text: String) {
+        val notes = read(serverId) ?: JSONObject()
+        val clean = text.take(1000)
+        if (clean.isBlank()) notes.remove(uuid) else notes.put(uuid, clean)
+        write(serverId, notes)
+    }
+}
+
+/** Everything kept per server besides its connection data. */
+class ServerExtras(
+    val shortcuts: ShortcutFiles = ShortcutFiles(),
+    val notes: NoteFiles = NoteFiles(),
+    /** Last shown data for an instant start; null: off (tests). */
+    val snapshots: SnapshotStore? = SnapshotStore(File(AppDirs.dir, "snapshots"), DpapiBox),
+) {
+    /** Removes what belongs to a deleted server. */
+    fun forget(serverId: String) {
+        shortcuts.delete(serverId)
+        notes.delete(serverId)
+        snapshots?.delete(serverId)
+    }
+
+    companion object {
+        /** Nothing on disk (screenshot tests). */
+        fun inMemory() = ServerExtras(ShortcutFiles(null), NoteFiles(null), null)
     }
 }

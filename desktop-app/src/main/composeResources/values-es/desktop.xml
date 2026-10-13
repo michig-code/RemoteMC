@@ -23,4 +23,19 @@
     <string name="update_up_to_date">RemoteMC está actualizado (%1$s).</string>
     <string name="update_checking">Comprobando …</string>
     <string name="update_portable_hint">Esta copia no puede actualizarse sola (versión portable). Descarga la nueva versión desde la página de descarga.</string>
+    <string name="players_select_hint_pc">Ctrl+clic o mantén pulsado para seleccionar varios jugadores</string>
+    <string name="time_just_now">ahora mismo</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">hace %d minuto</item>
+        <item quantity="other">hace %d minutos</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">hace %d hora</item>
+        <item quantity="other">hace %d horas</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="one">hace %d día</item>
+        <item quantity="other">hace %d días</item>
+    </plurals>
+    <string name="settings_notify_quiet_text_pc">De %1$s a %2$s solo aparecen avisos de desconexión</string>
 </resources>

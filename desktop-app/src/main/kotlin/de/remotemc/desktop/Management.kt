@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.FileList
+import de.remotemc.app.data.PlayerInventory
 import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.ScheduleInfo
 import de.remotemc.app.data.ScheduleList
@@ -38,9 +39,14 @@ interface Management {
     suspend fun files(path: String): FileList
     suspend fun readFile(path: String): TextFile
     suspend fun writeFile(path: String, content: String)
-    suspend fun deleteFile(path: String)
+    /** Returns the trash id when it can be restored (plugin with a trash), else null. */
+    suspend fun deleteFile(path: String): String?
+    suspend fun restoreFile(trash: String)
     suspend fun createFolder(path: String)
     suspend fun uploadFile(path: String, file: java.io.File)
+    /** Bans (again, to undo an unban). */
+    suspend fun ban(name: String, reason: String)
+    suspend fun inventory(player: String): PlayerInventory
 }
 
 class ApiManagement(private val api: () -> ApiClient) : Management {
@@ -61,9 +67,12 @@ class ApiManagement(private val api: () -> ApiClient) : Management {
     override suspend fun writeFile(path: String, content: String) {
         api().writeFile(path, content)
     }
-    override suspend fun deleteFile(path: String) {
-        api().deleteFile(path)
+    override suspend fun deleteFile(path: String) = api().deleteFile(path)
+    override suspend fun restoreFile(trash: String) {
+        api().restoreFile(trash)
     }
+    override suspend fun ban(name: String, reason: String) = api().playerAction(name, "ban", JSONObject().put("reason", reason))
+    override suspend fun inventory(player: String) = api().inventory(player)
     override suspend fun createFolder(path: String) {
         api().createFolder(path)
     }

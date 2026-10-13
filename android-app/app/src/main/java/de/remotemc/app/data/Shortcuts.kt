@@ -1,7 +1,5 @@
 package de.remotemc.app.data
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
@@ -103,16 +101,6 @@ object Placeholders {
         val kind = match.groupValues[1].lowercase(Locale.ROOT).let { if (it == "spieler") "player" else it }
         return "{$kind${match.groupValues[2]}}"
     }
-}
-
-/** Favorites and macros per server, kept on the device. */
-class ShortcutStore(private val prefs: SharedPreferences) {
-    fun load(serverId: String): Shortcuts =
-        prefs.getString(serverId, null)?.let { runCatching { Shortcuts.fromJson(JSONObject(it)) }.getOrNull() } ?: Shortcuts()
-
-    fun save(serverId: String, shortcuts: Shortcuts) = prefs.edit { putString(serverId, shortcuts.toJson().toString()) }
-
-    fun delete(serverId: String) = prefs.edit { remove(serverId) }
 }
 
 /** The server's commands for the command menu. */

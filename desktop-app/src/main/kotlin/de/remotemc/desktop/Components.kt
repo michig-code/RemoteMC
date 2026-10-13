@@ -248,3 +248,12 @@ fun roleLabel(role: de.remotemc.app.data.Role) = stringResource(
     },
 )
 
+/** "45 min", "12 h 5 min", "3 d 4 h" (same as on the phone). */
+fun formatDuration(seconds: Long): String {
+    val minutes = seconds / 60
+    return when {
+        minutes < 60 -> "$minutes min"
+        minutes < 24 * 60 -> "${minutes / 60} h ${minutes % 60} min"
+        else -> "${minutes / (24 * 60)} d ${minutes / 60 % 24} h"
+    }
+}

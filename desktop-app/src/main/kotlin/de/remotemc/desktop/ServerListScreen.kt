@@ -197,7 +197,7 @@ fun ServerListScreen(
             onDismissRequest = { deleting = null },
             title = { Text(stringResource(Res.string.servers_delete_title)) },
             text = { Text(stringResource(Res.string.servers_delete_text, p.name)) },
-            confirmButton = { TextButton(onClick = { model.servers.delete(p.id); deleting = null }) { Text(stringResource(Res.string.action_remove)) } },
+            confirmButton = { TextButton(onClick = { model.servers.delete(p.id); model.extras.forget(p.id); deleting = null }) { Text(stringResource(Res.string.action_remove)) } },
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(Res.string.action_cancel)) } },
         )
     }

@@ -85,7 +85,7 @@ class Tabs(
         if (isSpecial(id)) return null
         sessions[id]?.let { return it }
         val profile = model.servers.get(id) ?: return null
-        return ServerSession(profile, scope, model.servers, model.history).also {
+        return ServerSession(profile, scope, model.servers, model.history, model.extras).also {
             sessions[id] = it
             if (connect) it.start()
         }

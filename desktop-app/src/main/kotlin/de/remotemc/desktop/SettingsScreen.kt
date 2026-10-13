@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -34,6 +35,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -202,6 +205,33 @@ private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) 
                         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
                     )
                 }
+                SwitchRow(
+                    stringResource(Res.string.settings_notify_quiet),
+                    stringResource(Res.string.settings_notify_quiet_text_pc, clockText(alerts.quietFrom), clockText(alerts.quietTo)),
+                    alerts.quiet,
+                ) { v -> onChange { it.copy(quiet = v) } }
+                if (alerts.quiet) {
+                    Row(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TimeButton(stringResource(Res.string.settings_notify_quiet_from), alerts.quietFrom) { m -> onChange { it.copy(quietFrom = m) } }
+                        TimeButton(stringResource(Res.string.settings_notify_quiet_to), alerts.quietTo) { m -> onChange { it.copy(quietTo = m) } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun clockText(minuteOfDay: Int) = "%02d:%02d".format(minuteOfDay / 60, minuteOfDay % 60)
+
+/** Picks a time in half-hour steps. */
+@Composable
+private fun TimeButton(label: String, minuteOfDay: Int, onPick: (Int) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(onClick = { open = true }) { Text(label + "  " + clockText(minuteOfDay)) }
+        DropdownMenu(open, { open = false }, Modifier.heightIn(max = 320.dp)) {
+            (0 until 24 * 60 step 30).forEach { m ->
+                DropdownMenuItem(text = { Text(clockText(m)) }, onClick = { open = false; onPick(m) })
             }
         }
     }

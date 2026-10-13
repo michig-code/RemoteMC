@@ -1,6 +1,9 @@
 package de.remotemc.desktop
 
+import de.remotemc.app.ui.ConsoleEntry
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import de.remotemc.app.data.BanInfo
@@ -34,7 +37,7 @@ class ScreenshotTest {
     private val dir = Files.createTempDirectory("rmc").toFile()
     private val out = File("build/screenshots").apply { mkdirs() }
 
-    private val model = AppModel(ServerStore(File(dir, "servers.dat")), SettingsStore(File(dir, "settings.json")), CommandHistory(File(dir, "h.json")))
+    private val model = AppModel(ServerStore(File(dir, "servers.dat")), SettingsStore(File(dir, "settings.json")), CommandHistory(File(dir, "h.json")), ServerExtras.inMemory())
     private val survival = ServerProfile(name = "Survival", host = "mc.example.com", token = "x")
 
     init {
@@ -133,6 +136,47 @@ class ScreenshotTest {
             ServerContent(session(), {}, Pane.OVERVIEW)
         }
     }
+    @Test fun playersSelected() = shot("22_players_selected") {
+        val s = session()
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            PlayersPane(s, initialSelection = setOf("Steve", "Notch"))
+        }
+    }
+    @Test fun consoleSearch() = shot("19_console_search") {
+        androidx.compose.material3.Surface { ConsolePane(session(), initialQuery = "server") }
+    }
+
+    @Test fun commandMenu() = shot("20_command_menu") {
+        val s = session().apply {
+            updateShortcuts {
+                de.remotemc.app.data.Shortcuts(
+                    favorites = listOf(de.remotemc.app.data.Favorite("f1", "tp {player} 0 100 0"), de.remotemc.app.data.Favorite("f2", "stop", confirm = true)),
+                    macros = listOf(de.remotemc.app.data.Macro("m1", "Restart", listOf(de.remotemc.app.data.MacroStep("say Restart in 10 s"), de.remotemc.app.data.MacroStep("restart", 10)))),
+                )
+            }
+        }
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.size(620.dp, 560.dp)) {
+            CommandMenuSheet(
+                CommandMenuActions(
+                    listOf(
+                        de.remotemc.app.data.CommandInfo("save-all", "Saves the server to disk", null, emptyList(), "Minecraft"),
+                        de.remotemc.app.data.CommandInfo("tps", "Gets the current ticks per second", null, emptyList(), "Paper"),
+                        de.remotemc.app.data.CommandInfo("lp", "Manage permissions", "/lp user <name> permission set <node>", listOf("perms"), "LuckPerms"),
+                    ),
+                    s.shortcuts, listOf("Steve"), null, s::updateShortcuts, s::runMacro, s::stopMacro,
+                ),
+                "", {}, {}, {}, inSheet = false,
+            )
+        }
+    }
+
+    @Test fun inventory() = shot("21_inventory") {
+        val inv = de.remotemc.app.data.PlayerInventory.fromJson(org.json.JSONObject(SAMPLE_INVENTORY))
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.size(560.dp, 760.dp)) {
+            androidx.compose.material3.Surface { InventoryContent("Steve", { inv }, initial = inv) }
+        }
+    }
+
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
 }
@@ -193,7 +237,25 @@ private class SampleManagement(private val now: Long) : Management {
         now,
     )
     override suspend fun writeFile(path: String, content: String) {}
-    override suspend fun deleteFile(path: String) {}
+    override suspend fun deleteFile(path: String): String? = null
+    override suspend fun restoreFile(trash: String) {}
+    override suspend fun ban(name: String, reason: String) {}
+    override suspend fun inventory(player: String) = de.remotemc.app.data.PlayerInventory.fromJson(org.json.JSONObject(SAMPLE_INVENTORY))
     override suspend fun createFolder(path: String) {}
     override suspend fun uploadFile(path: String, file: java.io.File) {}
 }
+
+/** An inventory as the plugin sends it (Paper 1.21.4). */
+internal const val SAMPLE_INVENTORY = """
+{"selectedSlot":1,
+ "items":[{"id":"minecraft:diamond_sword","amount":1,"enchants":["sharpness 3","unbreaking 2"],"durability":900,"maxDurability":1561,"slot":0},
+          {"id":"minecraft:diamond_pickaxe","amount":1,"durability":200,"maxDurability":1561,"slot":1},
+          {"id":"minecraft:cooked_beef","amount":24,"slot":2},{"id":"minecraft:torch","amount":64,"slot":3},
+          {"id":"minecraft:oak_log","amount":32,"slot":9},{"id":"minecraft:cobblestone","amount":64,"slot":10},
+          {"id":"minecraft:iron_ingot","amount":17,"slot":11},{"id":"minecraft:gold_ingot","amount":5,"slot":12},
+          {"id":"minecraft:redstone","amount":40,"slot":20},{"id":"minecraft:name_tag","amount":1,"name":"Bello","slot":27}],
+ "armor":[{"id":"minecraft:iron_boots","amount":1,"slot":0},{"id":"minecraft:diamond_chestplate","amount":1,"enchants":["protection 4"],"slot":2},
+          {"id":"minecraft:iron_helmet","amount":1,"slot":3}],
+ "offhand":[{"id":"minecraft:shield","amount":1,"durability":300,"maxDurability":336,"slot":0}],
+ "enderChest":[{"id":"minecraft:emerald","amount":5,"slot":0}]}
+"""

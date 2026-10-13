@@ -1,5 +1,9 @@
 package de.remotemc.desktop
 
+import de.remotemc.desktop.res.action_undo
+import org.jetbrains.compose.resources.getString
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -47,6 +51,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -78,7 +84,7 @@ enum class Pane(val label: StringResource, val icon: ImageVector, val minRole: R
 @Composable
 fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
-    val session = remember(profile.id) { ServerSession(profile, scope, model.servers, model.history) }
+    val session = remember(profile.id) { ServerSession(profile, scope, model.servers, model.history, model.extras) }
     DisposableEffect(session) {
         session.start()
         onDispose { session.stop() }
@@ -91,7 +97,17 @@ fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit) {
 fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0) {
     var pane by rememberSaveable { mutableStateOf(initialPane) }
     val snackbar = remember { SnackbarHostState() }
-    LaunchedEffect(session) { for (m in session.messages) snackbar.showSnackbar(m) }
+    LaunchedEffect(session) {
+        for (m in session.messages) {
+            val undo = m.undo
+            if (undo == null) {
+                snackbar.showSnackbar(m.text)
+            } else {
+                val result = snackbar.showSnackbar(m.text, actionLabel = getString(Res.string.action_undo), duration = SnackbarDuration.Long)
+                if (result == SnackbarResult.ActionPerformed) undo()
+            }
+        }
+    }
     val panes = Pane.entries.filter { session.role.atLeast(it.minRole) && (it.feature == null || session.supports(it.feature)) }
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
@@ -161,12 +177,13 @@ private fun TopBar(session: ServerSession) {
                 StatusDot(session.connection, 9.dp)
                 val players = session.status?.onlinePlayers ?: 0
                 val count = pluralStringResource(Res.plurals.players_count, players, players)
+                val cachedAgo = session.cachedAt?.let { relativeTime(it) }
                 Text(
                     when (session.connection) {
                         Conn.LIVE -> stringResource(Res.string.status_live, count)
                         Conn.POLLING -> stringResource(Res.string.status_online, count)
-                        Conn.CONNECTING -> stringResource(Res.string.status_connecting)
-                        Conn.OFFLINE -> stringResource(Res.string.status_offline_retry)
+                        Conn.CONNECTING -> cachedAgo?.let { stringResource(Res.string.status_cached_connecting, it) } ?: stringResource(Res.string.status_connecting)
+                        Conn.OFFLINE -> cachedAgo?.let { stringResource(Res.string.status_cached_offline, it) } ?: stringResource(Res.string.status_offline_retry)
                     },
                     style = MaterialTheme.typography.labelLarge,
                 )
@@ -177,3 +194,21 @@ private fun TopBar(session: ServerSession) {
     }
 }
 
+
+/** "5 minutes ago", kept up to date while shown. */
+@Composable
+private fun relativeTime(time: Long): String {
+    val now by produceState(System.currentTimeMillis(), time) {
+        while (true) {
+            delay(30_000)
+            value = System.currentTimeMillis()
+        }
+    }
+    val minutes = ((now - time).coerceAtLeast(0) / 60_000).toInt()
+    return when {
+        minutes < 1 -> stringResource(Res.string.time_just_now)
+        minutes < 60 -> pluralStringResource(Res.plurals.time_minutes_ago, minutes, minutes)
+        minutes < 24 * 60 -> (minutes / 60).let { pluralStringResource(Res.plurals.time_hours_ago, it, it) }
+        else -> (minutes / (24 * 60)).let { pluralStringResource(Res.plurals.time_days_ago, it, it) }
+    }
+}

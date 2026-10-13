@@ -1,6 +1,6 @@
 # Roadmap: Geschwindigkeit, Komfort und mehr
 
-Gilt für Handy-App und Plugin. Der Windows-Port wartet vorerst.
+Gilt für Handy-App und Plugin. Die Windows-App hat inzwischen fast alles nachgezogen (siehe unten).
 
 Jeder Punkt wird ein eigener Commit mit grünen Tests:
 - Plugin-Tests und API-Checks (Paper und Spigot)
@@ -131,6 +131,12 @@ Für alle, die die App als APK installieren (nicht über einen Store):
 - Download nur von GitHub über HTTPS. Android prüft zusätzlich, dass die neue APK mit demselben Schlüssel signiert ist.
 - In den Einstellungen gibt es „Nach Updates suchen“ und die aktuelle Version.
 - Technik: wie der Updater der Windows-App. Nötig sind die Berechtigung `REQUEST_INSTALL_PACKAGES` und ein `FileProvider` für die heruntergeladene Datei.
+
+---
+
+## Windows-App ✅
+Übernommen vom Handy: Sofortstart aus dem Cache, „Stand vor X“ offline, Befehlsvorschläge mit Cache und Cursor-Ergänzung, Buch-Menü mit Befehlen/Favoriten/Makros, Konsolensuche und -filter (Strg+F), Mehrfachauswahl (Strg+Klick), Spieler-Details mit Notizen und Inventar, Rückgängig (Bann, Whitelist, Papierkorb), Ruhezeiten und gebündelte Beitritte.
+Nicht übernommen: Widget, Schnellantwort in der Benachrichtigung und Vibration (gibt es unter Windows so nicht).
 
 ---
 

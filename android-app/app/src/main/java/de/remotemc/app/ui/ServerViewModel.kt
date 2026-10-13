@@ -49,19 +49,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
-/** One entry in the console tab: a server log line or a local command echo/result. */
-data class ConsoleEntry(
-    val key: String,
-    val text: String,
-    val level: String,
-    val time: Long = System.currentTimeMillis(),
-    /** Same text with Minecraft colour codes, if the server sent colours. */
-    val formatted: String? = null,
-)
-
-/** A completion shown above the console input. */
-data class Suggestion(val text: String, val description: String? = null)
-
 enum class Connection { CONNECTING, LIVE, POLLING, OFFLINE }
 
 class ServerViewModel(application: Application, profile: ServerProfile) : AndroidViewModel(application) {

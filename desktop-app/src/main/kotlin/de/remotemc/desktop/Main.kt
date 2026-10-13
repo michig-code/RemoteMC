@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,6 +60,8 @@ class AppModel(
     val servers: ServerStore = ServerStore(),
     val settings: SettingsStore = SettingsStore(),
     val history: CommandHistory = CommandHistory(),
+    /** Favorites, macros, player notes and snapshots per server. */
+    val extras: ServerExtras = ServerExtras(),
 ) {
     /** Update check and installer (only in the running app, not in tests). */
     var updates: UpdateState? = null
@@ -107,6 +110,8 @@ fun main() = application {
         }
     }
     val tabs = remember { Tabs(model, scope) }
+    // On quitting, each open server saves what it shows (instant start next time).
+    DisposableEffect(tabs) { onDispose { tabs.stopAll() } }
     LaunchedEffect(Unit) {
         model.quit = ::exitApplication
         model.updates = UpdateState(scope) { model.settings.settings.value.autoUpdate }.also { it.start() }

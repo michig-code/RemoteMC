@@ -32,7 +32,14 @@ kotlin {
             "de/remotemc/app/data/DashboardLayout.kt",
             "de/remotemc/app/notify/AlertRules.kt",
             "de/remotemc/app/notify/ServerWatcher.kt",
+            "de/remotemc/app/notify/JoinBundle.kt",
             "de/remotemc/app/ui/util/MinecraftText.kt",
+            // Logic shared with the phone: console search, suggestions, favorites/macros, snapshots.
+            "de/remotemc/app/ui/ConsoleModel.kt",
+            "de/remotemc/app/data/CommandCompletion.kt",
+            "de/remotemc/app/data/Shortcuts.kt",
+            "de/remotemc/app/data/ServerSnapshot.kt",
+            "de/remotemc/app/data/SecureBox.kt",
         )
     }
 }

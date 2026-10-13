@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import de.remotemc.desktop.res.files_restored
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -235,7 +236,28 @@ fun FilesPane(session: ServerSession, initialPath: String = "", initialFile: Str
                 TextButton(onClick = {
                     deleting = null
                     if (open?.startsWith(entry.path) == true) open = null
-                    run("…", { getString(Res.string.files_deleted, entry.name) }) { manage.deleteFile(entry.path) }
+                    scope.launch {
+                        busy = "…"
+                        try {
+                            val trash = manage.deleteFile(entry.path)
+                            tick++
+                            // Deleted files wait a day in the plugin's trash: offer to take it back.
+                            session.notify(
+                                getString(Res.string.files_deleted, entry.name),
+                                undo = trash?.let { id ->
+                                    {
+                                        run("…", { getString(Res.string.files_restored, entry.name) }) { manage.restoreFile(id) }
+                                    }
+                                },
+                            )
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            session.notify(errorText(e))
+                        } finally {
+                            busy = null
+                        }
+                    }
                 }) { Text(stringResource(Res.string.files_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(Res.string.action_cancel)) } },

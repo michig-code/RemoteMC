@@ -1,5 +1,40 @@
 package de.remotemc.desktop
 
+import androidx.compose.ui.Alignment
+import de.remotemc.desktop.res.menu_open
+import de.remotemc.desktop.res.macro_stop
+import de.remotemc.desktop.res.macro_running
+import de.remotemc.desktop.res.console_suggestions_offline
+import de.remotemc.desktop.res.console_no_lines
+import de.remotemc.desktop.res.console_copy
+import de.remotemc.desktop.res.console_copied
+import de.remotemc.desktop.res.console_filter_errors
+import de.remotemc.desktop.res.console_filter_warnings
+import de.remotemc.desktop.res.console_filter_all
+import de.remotemc.desktop.res.console_match_next
+import de.remotemc.desktop.res.console_match_previous
+import de.remotemc.desktop.res.console_no_matches
+import de.remotemc.desktop.res.console_search
+import de.remotemc.app.ui.completeAt
+import de.remotemc.app.ui.LevelFilter
+import de.remotemc.app.ui.ConsoleSearch
+import de.remotemc.app.ui.ConsoleEntry
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,28 +93,48 @@ import java.util.Date
 private val TimeFormat = SimpleDateFormat("HH:mm:ss")
 
 private fun levelColor(level: String) = when (level) {
-    "WARN" -> McColors.Warning
-    "ERROR" -> McColors.Offline
+    "WARN", "WARNING" -> McColors.Warning
+    "ERROR", "FATAL", "SEVERE" -> McColors.Offline
     "COMMAND" -> Color(0xFF8BE9FD)
     else -> Color(0xFFD7DED9)
 }
 
 @Composable
-fun ConsolePane(session: ServerSession) {
+fun ConsolePane(session: ServerSession, initialQuery: String = "", initialLevel: LevelFilter = LevelFilter.ALL, initialMenu: Int? = null) {
     val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboardManager.current
     val canRun = session.role.atLeast(Role.ADMIN) && session.session?.commandsEnabled != false
+    val copiedText = stringResource(Res.string.console_copied)
     var input by remember { mutableStateOf(TextFieldValue("")) }
     var historyIndex by remember { mutableIntStateOf(-1) }
-    LaunchedEffect(session.console.size) {
-        if (session.console.isNotEmpty()) list.scrollToItem(session.console.size - 1)
+    var menuOpen by remember { mutableStateOf(initialMenu != null) }
+    // Search highlights and jumps, the level filter hides lines.
+    var query by remember { mutableStateOf(initialQuery) }
+    var level by remember { mutableStateOf(initialLevel) }
+    val searchFocus = remember { FocusRequester() }
+    val shown = remember(session.console.size, session.console.lastOrNull()?.key, level) { ConsoleSearch.filter(session.console, level) }
+    val matches = remember(shown, query) { ConsoleSearch.matches(shown, query) }
+    var current by remember(query, level) { mutableIntStateOf(-1) }
+    val selected = if (matches.isEmpty()) -1 else if (current in matches.indices) current else matches.lastIndex
+    val selectedKey = matches.getOrNull(selected)?.let { shown[it].key }
+
+    LaunchedEffect(shown.size) {
+        if (query.isBlank() && shown.isNotEmpty()) list.scrollToItem(shown.size - 1)
+    }
+    LaunchedEffect(selected, matches.size, query) {
+        matches.getOrNull(selected)?.let { list.animateScrollToItem((it - 3).coerceAtLeast(0)) }
     }
 
+    fun setInput(text: String) {
+        input = TextFieldValue(text, TextRange(text.length))
+        session.onCommandInput(text)
+    }
+
+    /** Puts the suggestion in place of the word at the cursor (like Tab in Minecraft). */
     fun accept(text: String) {
-        val current = input.text.removePrefix("/")
-        val before = current.substringBeforeLast(' ', "")
-        val next = (if (before.isEmpty()) text else "$before $text") + " "
-        input = TextFieldValue(next, TextRange(next.length))
-        session.onCommandInput(next)
+        input = completeAt(input, text)
+        session.onCommandInput(input.text.take(input.selection.end))
     }
 
     fun send() {
@@ -88,21 +143,79 @@ fun ConsolePane(session: ServerSession) {
         historyIndex = -1
     }
 
-    Column(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 16.dp)) {
+    fun step(by: Int) {
+        if (matches.isNotEmpty()) current = (selected + by + matches.size) % matches.size
+    }
+
+    Column(
+        Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 16.dp).onPreviewKeyEvent { e ->
+            // Ctrl+F: search the console.
+            if (e.type == KeyEventType.KeyDown && e.isCtrlPressed && e.key == Key.F) {
+                scope.launch { runCatching { searchFocus.requestFocus() } }
+                true
+            } else false
+        },
+    ) {
+        Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                query, { query = it },
+                placeholder = { Text(stringResource(Res.string.console_search)) },
+                leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                trailingIcon = {
+                    when {
+                        matches.isNotEmpty() -> Text("${selected + 1}/${matches.size}", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(end = 12.dp))
+                        query.isNotBlank() -> Text(stringResource(Res.string.console_no_matches), color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(end = 12.dp))
+                    }
+                },
+                singleLine = true,
+                modifier = Modifier.width(360.dp).focusRequester(searchFocus).onPreviewKeyEvent { e ->
+                    if (e.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                    when (e.key) {
+                        Key.Enter -> { step(if (e.isShiftPressed) 1 else -1); true }
+                        Key.Escape -> { query = ""; true }
+                        else -> false
+                    }
+                },
+            )
+            IconButton(onClick = { step(-1) }, enabled = matches.isNotEmpty()) { Icon(Icons.Default.KeyboardArrowUp, stringResource(Res.string.console_match_previous)) }
+            IconButton(onClick = { step(1) }, enabled = matches.isNotEmpty()) { Icon(Icons.Default.KeyboardArrowDown, stringResource(Res.string.console_match_next)) }
+            Spacer(Modifier.width(8.dp))
+            LevelFilter.entries.forEach { f ->
+                FilterChip(
+                    selected = level == f, onClick = { level = f },
+                    label = {
+                        Text(stringResource(when (f) {
+                            LevelFilter.ALL -> Res.string.console_filter_all
+                            LevelFilter.WARNINGS -> Res.string.console_filter_warnings
+                            LevelFilter.ERRORS -> Res.string.console_filter_errors
+                        }))
+                    },
+                    modifier = Modifier.padding(end = 6.dp),
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            // Copies what is found or shown (the PC's way of "share").
+            IconButton(onClick = {
+                val lines = if (query.isBlank()) shown else matches.map { shown[it] }
+                if (lines.isNotEmpty()) {
+                    clipboard.setText(AnnotatedString(ConsoleSearch.shareText(lines)))
+                    session.notify(copiedText)
+                }
+            }) { Icon(Icons.Outlined.ContentCopy, stringResource(Res.string.console_copy)) }
+        }
         Surface(Modifier.weight(1f).fillMaxWidth(), color = McColors.Terminal, shape = RoundedCornerShape(16.dp)) {
             SelectionContainer {
                 LazyColumn(state = list, contentPadding = PaddingValues(16.dp)) {
-                    if (session.console.isEmpty()) item { Text(stringResource(Res.string.console_waiting), color = Color.Gray, fontFamily = FontFamily.Monospace) }
-                    items(session.console, key = { it.key }) { e ->
-                        val base = levelColor(e.level)
-                        Row {
-                            if (e.time > 0) Text(TimeFormat.format(Date(e.time)) + "  ", color = Color(0xFF6B7A71), fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+                    if (shown.isEmpty()) {
+                        item {
                             Text(
-                                if (e.formatted != null) MinecraftText.parse(e.formatted!!, base) else MinecraftText.parse(e.text, base),
-                                fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 18.sp,
+                                stringResource(if (session.console.isEmpty()) Res.string.console_waiting else Res.string.console_no_lines),
+                                color = Color.Gray, fontFamily = FontFamily.Monospace,
                             )
                         }
                     }
+                    items(shown, key = { it.key }) { e -> ConsoleRow(e, query, e.key == selectedKey) }
                 }
             }
         }
@@ -110,10 +223,14 @@ fun ConsolePane(session: ServerSession) {
             Text(stringResource(Res.string.console_read_only), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp))
             return@Column
         }
-        if (session.suggestions.isNotEmpty() || session.usageHint != null) {
+        if (session.suggestions.isNotEmpty() || session.usageHint != null || session.suggestionsOffline) {
             Surface(Modifier.fillMaxWidth().padding(top = 8.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(12.dp)) {
                 Column(Modifier.heightIn(max = 220.dp).padding(vertical = 6.dp)) {
                     session.usageHint?.let { Text(it, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) }
+                    if (session.suggestionsOffline) {
+                        Text(stringResource(Res.string.console_suggestions_offline), style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp))
+                    }
                     LazyColumn {
                         items(session.suggestions) { s ->
                             Row(Modifier.fillMaxWidth().clickable { accept(s.text) }.padding(horizontal = 14.dp, vertical = 5.dp)) {
@@ -125,17 +242,29 @@ fun ConsolePane(session: ServerSession) {
                 }
             }
         }
+        session.runningMacro?.let { name ->
+            Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(Res.string.macro_running, name), color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                TextButton(onClick = session::stopMacro) { Text(stringResource(Res.string.macro_stop)) }
+            }
+        }
         if (session.history.isNotEmpty()) {
             LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(session.history) { cmd ->
-                    AssistChip(onClick = { input = TextFieldValue(cmd, TextRange(cmd.length)); session.onCommandInput(cmd) }, label = { Text("/$cmd", fontFamily = FontFamily.Monospace) })
+                    AssistChip(onClick = { setInput(cmd) }, label = { Text("/$cmd", fontFamily = FontFamily.Monospace) })
                 }
             }
         }
         Row(Modifier.padding(top = 8.dp)) {
             OutlinedTextField(
                 input,
-                { input = it; historyIndex = -1; session.onCommandInput(it.text) },
+                {
+                    // Moving the cursor to another word changes the suggestions too.
+                    val changed = it.text != input.text || it.selection.end != input.selection.end
+                    input = it
+                    historyIndex = -1
+                    if (changed) session.onCommandInput(it.text.take(it.selection.end))
+                },
                 placeholder = { Text(stringResource(Res.string.console_input_hint)) },
                 prefix = { Text("/", color = MaterialTheme.colorScheme.primary) },
                 singleLine = true,
@@ -160,11 +289,63 @@ fun ConsolePane(session: ServerSession) {
                     }
                 },
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(4.dp))
+            // Book: all commands, favorites and macros.
+            IconButton(onClick = { menuOpen = true }, modifier = Modifier.padding(top = 6.dp)) {
+                Icon(Icons.AutoMirrored.Outlined.MenuBook, stringResource(Res.string.menu_open))
+            }
             IconButton(onClick = ::send, enabled = input.text.isNotBlank(), modifier = Modifier.padding(top = 6.dp)) {
                 Icon(Icons.AutoMirrored.Outlined.Send, stringResource(Res.string.action_send))
             }
         }
+    }
+
+    if (menuOpen) {
+        CommandMenuSheet(
+            menu = CommandMenuActions(
+                commands = session.commands,
+                shortcuts = session.shortcuts,
+                players = session.players.map { it.name },
+                runningMacro = session.runningMacro,
+                onShortcuts = session::updateShortcuts,
+                onRunMacro = session::runMacro,
+                onStopMacro = session::stopMacro,
+            ),
+            currentInput = input.text,
+            onInsert = { setInput(it) },
+            onRun = { session.runCommand(it) },
+            onDismiss = { menuOpen = false },
+            initialTab = initialMenu ?: 0,
+        )
+    }
+}
+
+/** Parsed once per line and kept while the line is in the log. */
+private val parsedLines = object : LinkedHashMap<String, AnnotatedString>(2048, 0.75f, true) {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, AnnotatedString>?) = size > 4000
+}
+
+@Composable
+private fun ConsoleRow(e: ConsoleEntry, highlight: String, current: Boolean) {
+    val base = levelColor(e.level)
+    val plain = remember(e.key, e.formatted) {
+        synchronized(parsedLines) {
+            parsedLines.getOrPut(e.key) { MinecraftText.parse(e.formatted ?: e.text, base) }
+        }
+    }
+    val text = remember(plain, highlight, current) {
+        val ranges = ConsoleSearch.ranges(plain.text, highlight)
+        if (ranges.isEmpty()) plain else AnnotatedString.Builder(plain).apply {
+            val style = SpanStyle(
+                background = if (current) Color(0xFFFFC857) else Color(0x66FFC857),
+                color = if (current) Color(0xFF1B1B1B) else Color.Unspecified,
+            )
+            ranges.forEach { addStyle(style, it.first, it.last + 1) }
+        }.toAnnotatedString()
+    }
+    Row {
+        if (e.time > 0) Text(TimeFormat.format(Date(e.time)) + "  ", color = Color(0xFF6B7A71), fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+        Text(text, fontFamily = FontFamily.Monospace, fontSize = 13.sp, lineHeight = 18.sp)
     }
 }
 

@@ -23,4 +23,25 @@
     <string name="update_up_to_date">RemoteMC обновлён (%1$s).</string>
     <string name="update_checking">Проверка …</string>
     <string name="update_portable_hint">Эта копия не может обновиться сама (портативная версия). Скачайте новую версию со страницы загрузки.</string>
+    <string name="players_select_hint_pc">Ctrl+клик или удержание — выбрать нескольких игроков</string>
+    <string name="time_just_now">только что</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">%d минуту назад</item>
+        <item quantity="few">%d минуты назад</item>
+        <item quantity="many">%d минут назад</item>
+        <item quantity="other">%d минуты назад</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">%d час назад</item>
+        <item quantity="few">%d часа назад</item>
+        <item quantity="many">%d часов назад</item>
+        <item quantity="other">%d часа назад</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="one">%d день назад</item>
+        <item quantity="few">%d дня назад</item>
+        <item quantity="many">%d дней назад</item>
+        <item quantity="other">%d дня назад</item>
+    </plurals>
+    <string name="settings_notify_quiet_text_pc">С %1$s до %2$s показываются только оповещения об отключении</string>
 </resources>
