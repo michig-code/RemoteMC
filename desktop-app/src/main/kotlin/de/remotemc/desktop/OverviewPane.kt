@@ -92,7 +92,7 @@ fun OverviewPane(session: ServerSession, loadHistory: (suspend (HistoryRange) ->
             Stat(Icons.Outlined.Schedule, stringResource(Res.string.dashboard_uptime), formatUptime(status.uptimeSeconds), Modifier.weight(1f))
             MemoryCard(status, Modifier.weight(1f))
         }
-        if (loadHistory != null) HistoryCard(loadHistory)
+        if (loadHistory != null && status.supports("history")) HistoryCard(loadHistory)
         SectionTitle(stringResource(Res.string.dashboard_worlds))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
             status.worlds.forEach { WorldCard(it, Modifier.weight(1f).widthIn(min = 220.dp)) }

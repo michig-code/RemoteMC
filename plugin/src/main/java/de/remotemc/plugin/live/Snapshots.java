@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 /** Builds the status and player JSON. Call on the main / global region thread. */
 public final class Snapshots {
 
+    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport"};
+
     private final long startedAt = System.currentTimeMillis();
     private final String pluginVersion;
 
@@ -25,6 +27,12 @@ public final class Snapshots {
         o.addProperty("minecraftVersion", Platform.minecraftVersion());
         o.addProperty("platform", Platform.name());
         o.addProperty("pluginVersion", pluginVersion);
+        // What this plugin version can do, so apps hide what an older plugin lacks.
+        JsonArray features = new JsonArray();
+        for (String f : FEATURES) {
+            features.add(f);
+        }
+        o.add("features", features);
         o.addProperty("onlinePlayers", Bukkit.getOnlinePlayers().size());
         o.addProperty("maxPlayers", Bukkit.getMaxPlayers());
 

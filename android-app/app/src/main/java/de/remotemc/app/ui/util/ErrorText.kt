@@ -25,6 +25,7 @@ fun Context.errorText(e: Throwable): String = when (e) {
         "too_large" -> getString(R.string.error_too_large)
         "too_many_streams" -> getString(R.string.error_too_many_streams)
         "timeout" -> getString(R.string.error_server_timeout)
+        "not_found" -> getString(R.string.error_needs_plugin_update)
         else -> e.message?.takeIf { it.isNotBlank() } ?: getString(R.string.error_http, e.status)
     }
     else -> e.message ?: getString(R.string.error_unknown)

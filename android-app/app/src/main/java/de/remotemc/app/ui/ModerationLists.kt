@@ -75,7 +75,8 @@ private enum class PlayersView(val label: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayersSection(state: ServerUiState, actions: ServerActions, initialView: Int = 0) {
-    val moderation = actions.moderation?.takeIf { state.role.atLeast(Role.MODERATOR) }
+    // Only plugins that have the whitelist / ban list endpoints (older ones show players only).
+    val moderation = actions.moderation?.takeIf { state.role.atLeast(Role.MODERATOR) && state.status?.supports("moderation") == true }
     var view by rememberSaveable { mutableStateOf(PlayersView.entries[initialView]) }
     Column(Modifier.fillMaxSize()) {
         if (moderation != null) {
@@ -101,7 +102,7 @@ fun PlayersSection(state: ServerUiState, actions: ServerActions, initialView: In
         }
         when (if (moderation == null) PlayersView.ONLINE else view) {
             PlayersView.ONLINE -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
-                PlayersTab(state.players, state.role, actions.onPlayerAction)
+                PlayersTab(state.players, state.role, actions.onPlayerAction, canTeleport = state.status?.supports("teleport") == true)
             }
             PlayersView.WHITELIST -> WhitelistView(moderation!!, canToggle = state.role.atLeast(Role.ADMIN))
             PlayersView.BANS -> BansView(moderation!!)

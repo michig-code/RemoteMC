@@ -27,7 +27,11 @@ data class ServerStatus(
     val memoryMaxMb: Long,
     val uptimeSeconds: Long,
     val worlds: List<WorldInfo>,
+    /** Features of the plugin (empty for plugins older than this list): history, moderation, … */
+    val features: Set<String> = emptySet(),
 ) {
+    fun supports(feature: String) = feature in features
+
     companion object {
         fun fromJson(o: JSONObject): ServerStatus {
             val tps = o.optJSONArray("tps") ?: JSONArray()
@@ -56,6 +60,7 @@ data class ServerStatus(
                         entities = w.optInt("entities", -1),
                     )
                 },
+                features = o.optJSONArray("features")?.let { f -> List(f.length()) { f.getString(it) }.toSet() }.orEmpty(),
             )
         }
     }

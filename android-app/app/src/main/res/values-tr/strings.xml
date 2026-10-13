@@ -381,4 +381,5 @@
     <string name="players_teleport_to">%s oyuncusunu ışınla…</string>
     <string name="players_teleport_spawn">Doğma noktası</string>
     <string name="players_teleported">Işınlandı: %s</string>
+    <string name="error_needs_plugin_update">Bunun için daha yeni bir RemoteMC eklentisi gerekiyor. Sunucunda güncelle.</string>
 </resources>

@@ -36,7 +36,7 @@ class ScreenshotTest {
 
     private val sample = ServerStatus(
         "Welcome to Michi's survival server!", "git-Paper-123", "1.21.4", "Paper", "1.0.0", 3, 20, listOf(19.8, 19.6, 17.2), 12.4,
-        2850, 4096, 90_000, listOf(WorldInfo("world", "NORMAL", 2, 812, 1450), WorldInfo("world_nether", "NETHER", 1, 120, 230), WorldInfo("world_the_end", "THE_END", 0, 40, 12)),
+        2850, 4096, 90_000, features = setOf("history", "moderation", "worlds", "plugins", "schedules", "teleport"), worlds = listOf(WorldInfo("world", "NORMAL", 2, 812, 1450), WorldInfo("world_nether", "NETHER", 1, 120, 230), WorldInfo("world_the_end", "THE_END", 0, 40, 12)),
     )
     private val samplePlayers = listOf(
         PlayerInfo("Steve", "1", "world", 120, 64, -340, 20.0, 20.0, 18, 30, 24, "SURVIVAL", true),

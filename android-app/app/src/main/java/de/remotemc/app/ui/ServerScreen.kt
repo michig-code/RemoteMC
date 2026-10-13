@@ -325,10 +325,13 @@ fun ServerScreenContent(
                         when (current) {
                             Tab.Dashboard -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
                                 DashboardTab(
-                                    state.status, state.error?.let { context.errorText(it) }, wide, actions.loadHistory,
-                                    actions.worlds?.takeIf { state.role.atLeast(Role.ADMIN) },
-                                    actions.loadPlugins?.takeIf { state.role.atLeast(Role.MODERATOR) },
-                                    actions.schedules?.takeIf { state.role.atLeast(Role.ADMIN) && state.commandsEnabled },
+                                    state.status, state.error?.let { context.errorText(it) }, wide,
+                                    actions.loadHistory?.takeIf { state.status?.supports("history") == true },
+                                    actions.worlds?.takeIf { state.role.atLeast(Role.ADMIN) && state.status?.supports("worlds") == true },
+                                    actions.loadPlugins?.takeIf { state.role.atLeast(Role.MODERATOR) && state.status?.supports("plugins") == true },
+                                    actions.schedules?.takeIf {
+                                        state.role.atLeast(Role.ADMIN) && state.commandsEnabled && state.status?.supports("schedules") == true
+                                    },
                                 )
                             }
                             Tab.Players -> PlayersSection(state, actions)

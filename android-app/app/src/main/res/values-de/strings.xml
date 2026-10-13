@@ -395,4 +395,5 @@
     <string name="players_teleport_to">%s teleportieren zu …</string>
     <string name="players_teleport_spawn">Spawn</string>
     <string name="players_teleported">%s teleportiert</string>
+    <string name="error_needs_plugin_update">Dafür braucht es ein neueres RemoteMC-Plugin. Bitte aktualisiere es auf deinem Server.</string>
 </resources>

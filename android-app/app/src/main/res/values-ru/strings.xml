@@ -397,4 +397,5 @@
     <string name="players_teleport_to">Телепортировать %s к…</string>
     <string name="players_teleport_spawn">Точка появления</string>
     <string name="players_teleported">%s: телепортирован</string>
+    <string name="error_needs_plugin_update">Для этого нужен более новый плагин RemoteMC. Обновите его на сервере.</string>
 </resources>

@@ -148,7 +148,9 @@ private fun PlayerDialog(session: ServerSession, p: PlayerInfo, others: List<Str
                 val opText = stringResource(if (p.op) Res.string.players_deopped else Res.string.players_opped, p.name)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Action(Icons.Outlined.Favorite, stringResource(Res.string.players_heal), McColors.Heart) { act("heal", JSONObject(), healed) }
-                    Action(Icons.Outlined.MyLocation, stringResource(Res.string.players_teleport), McColors.End) { teleport = true }
+                    if (session.status?.supports("teleport") == true) {
+                        Action(Icons.Outlined.MyLocation, stringResource(Res.string.players_teleport), McColors.End) { teleport = true }
+                    }
                     if (session.role.atLeast(Role.ADMIN)) {
                         Action(Icons.Outlined.Shield, stringResource(if (p.op) Res.string.players_deop else Res.string.players_make_op), McColors.Gold) {
                             act(if (p.op) "deop" else "op", JSONObject(), opText)

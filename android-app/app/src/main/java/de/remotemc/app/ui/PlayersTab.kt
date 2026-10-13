@@ -89,7 +89,7 @@ typealias PlayerAction = (player: String, action: String, body: JSONObject, succ
 private enum class SortBy(val label: Int) { NAME(R.string.players_sort_name), PING(R.string.players_sort_ping), WORLD(R.string.players_sort_world) }
 
 @Composable
-fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction) {
+fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction, canTeleport: Boolean = true) {
     var selected by remember { mutableStateOf<String?>(null) }
     var query by rememberSaveable { mutableStateOf("") }
     var sort by rememberSaveable { mutableStateOf(SortBy.NAME) }
@@ -135,7 +135,7 @@ fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction) {
     // Look the player up again so the sheet shows fresh data and closes if they leave.
     selected?.let { name ->
         val player = players.firstOrNull { it.name == name }
-        if (player == null) selected = null else PlayerSheet(player, role, players.map { it.name } - name, onAction) { selected = null }
+        if (player == null) selected = null else PlayerSheet(player, role, players.map { it.name } - name, canTeleport, onAction) { selected = null }
     }
 }
 
@@ -246,7 +246,7 @@ private fun PingIndicator(ping: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, onAction: PlayerAction, onDismiss: () -> Unit) {
+private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTeleport: Boolean, onAction: PlayerAction, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf<String?>(null) }
     var teleport by remember { mutableStateOf(false) }
@@ -358,8 +358,10 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, onActio
                             UiText.Res(if (p.op) R.string.players_deopped else R.string.players_opped, listOf(p.name)))
                     }
                 }
-                ActionButton(Icons.Outlined.MyLocation, stringResource(R.string.players_teleport), McColors.End) {
-                    teleport = true
+                if (canTeleport) {
+                    ActionButton(Icons.Outlined.MyLocation, stringResource(R.string.players_teleport), McColors.End) {
+                        teleport = true
+                    }
                 }
                 ActionButton(Icons.AutoMirrored.Outlined.Logout, stringResource(R.string.players_kick), McColors.Warning) {
                     haptics.heavy(); confirm = "kick"

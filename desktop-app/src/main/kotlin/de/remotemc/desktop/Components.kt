@@ -133,6 +133,7 @@ suspend fun errorText(e: Throwable): String = when (e) {
         "too_large" -> getString(Res.string.error_too_large)
         "too_many_streams" -> getString(Res.string.error_too_many_streams)
         "timeout" -> getString(Res.string.error_server_timeout)
+        "not_found" -> getString(Res.string.error_needs_plugin_update)
         else -> e.message?.takeIf { it.isNotBlank() } ?: getString(Res.string.error_http, e.status)
     }
     else -> e.message ?: getString(Res.string.error_unknown)

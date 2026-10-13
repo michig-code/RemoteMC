@@ -55,6 +55,7 @@ class ScreenshotTest {
         minecraftVersion = "1.21.4", platform = "Paper", pluginVersion = "1.0.0",
         onlinePlayers = 3, maxPlayers = 20, tps = listOf(19.8, 19.6, 17.2), mspt = 12.4,
         memoryUsedMb = 2860, memoryMaxMb = 4096, uptimeSeconds = 93_000,
+        features = setOf("history", "moderation", "worlds", "plugins", "schedules", "teleport"),
         worlds = listOf(
             WorldInfo("world", "NORMAL", 2, 812, 1530),
             WorldInfo("world_nether", "NETHER", 1, 210, 340),
@@ -221,6 +222,16 @@ class ScreenshotTest {
         },
         pardon = { error("unused") },
     )
+
+    /** An older plugin without the feature list: only online players, no whitelist / ban tabs. */
+    @Test fun olderPlugin() = shot("23_older_plugin") {
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            de.remotemc.app.ui.PlayersSection(
+                ServerUiState("Survival", status.copy(features = emptySet()), players, console, chat, Connection.LIVE, null, false, Role.ADMIN),
+                ServerActions({}, {}, {}, {}, { _, _, _, _ -> }, {}, moderation = moderation),
+            )
+        }
+    }
 
     @Test fun whitelist() = shot("21_whitelist") {
         androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
