@@ -20,6 +20,7 @@ import de.remotemc.app.data.Whitelist
 import de.remotemc.app.data.WorldDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.ConnectionPool
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -243,6 +244,10 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
 object Http {
     val base: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            // The plugin's server drops connections that are idle for about 30 s. Over mobile data its
+            // close can arrive just after the app sent the next request on that connection, which then
+            // fails ("unreachable"); so idle connections are let go earlier, before the server does it.
+            .connectionPool(ConnectionPool(5, 20, TimeUnit.SECONDS))
             .connectTimeout(6, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
