@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.CropSquare
 import androidx.compose.material.icons.outlined.FilterNone
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -72,7 +73,16 @@ interface WindowControls {
     /** Ends RemoteMC completely (also from the tray), e.g. before an update is installed. */
     fun quit() = close()
 
-    /** The part of the bar that moves the window when dragged. */
+    /** The mouse was pressed on the title bar and starts moving: remember where. */
+    fun dragStart() {}
+
+    /** The mouse moved while dragging: move the window along. */
+    fun dragMove() {}
+
+    /** Dragging ended (the window may snap to a screen edge). */
+    fun dragEnd() {}
+
+    /** The empty part of the bar (double-click maximizes; the whole bar drags the window). */
     @Composable
     fun DragArea(modifier: Modifier, content: @Composable BoxScope.() -> Unit)
 }
@@ -81,10 +91,11 @@ val TitleBarHeight = 42.dp
 
 /** RemoteMC's own title bar: logo, the server list, a tab per open server and the window buttons. */
 @Composable
-fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls, onAdd: () -> Unit) {
+fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
     val servers = model.servers.servers.value
     Row(
-        Modifier.fillMaxWidth().height(TitleBarHeight).background(MaterialTheme.colorScheme.surfaceContainerLowest),
+        Modifier.fillMaxWidth().height(TitleBarHeight).background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .windowDrag(controls),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(Modifier.width(10.dp))
@@ -97,19 +108,37 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls, onAdd: () ->
             onClick = tabs::showHome,
         )
         tabs.open.forEach { id ->
-            val profile = servers.firstOrNull { it.id == id } ?: return@forEach
-            val session = tabs.existing(id)
             Spacer(Modifier.width(4.dp))
-            Tab(
-                title = profile.name,
-                selected = tabs.active == id,
-                leading = { session?.let { StatusDot(it.connection, 4.dp) } },
-                onClick = { tabs.open(id) },
-                onClose = { tabs.close(id) },
-            )
+            when (id) {
+                Tabs.SETTINGS -> Tab(
+                    title = stringResource(Res.string.settings_title),
+                    selected = tabs.active == id,
+                    leading = { Icon(Icons.Outlined.Settings, null, Modifier.size(16.dp)) },
+                    onClick = { tabs.open(id) },
+                    onClose = { tabs.close(id) },
+                )
+                Tabs.PAIR -> Tab(
+                    title = stringResource(Res.string.servers_add),
+                    selected = tabs.active == id,
+                    leading = { Icon(Icons.Outlined.Add, null, Modifier.size(16.dp)) },
+                    onClick = { tabs.open(id) },
+                    onClose = { tabs.close(id) },
+                )
+                else -> {
+                    val profile = servers.firstOrNull { it.id == id } ?: return@forEach
+                    val session = tabs.existing(id)
+                    Tab(
+                        title = profile.name,
+                        selected = tabs.active == id,
+                        leading = { session?.let { StatusDot(it.connection, 4.dp) } },
+                        onClick = { tabs.open(id) },
+                        onClose = { tabs.close(id) },
+                    )
+                }
+            }
         }
         Spacer(Modifier.width(4.dp))
-        BarButton(Icons.Outlined.Add, stringResource(Res.string.servers_add), onClick = onAdd)
+        BarButton(Icons.Outlined.Add, stringResource(Res.string.servers_add), onClick = { tabs.openSpecial(Tabs.PAIR) })
         // Empty space: drag to move the window, double-click to maximize.
         controls.DragArea(Modifier.weight(1f).fillMaxHeight()) {
             Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onDoubleTap = { controls.toggleMaximize() }) })
@@ -122,6 +151,10 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls, onAdd: () ->
                 Spacer(Modifier.width(8.dp))
             }
         }
+        BarButton(Icons.Outlined.Settings, stringResource(Res.string.settings_title), selected = tabs.active == Tabs.SETTINGS) {
+            tabs.openSpecial(Tabs.SETTINGS)
+        }
+        Spacer(Modifier.width(6.dp))
         BarButton(Icons.Outlined.Remove, stringResource(Res.string.window_minimize), wide = true, onClick = controls::minimize)
         BarButton(
             if (controls.maximized) Icons.Outlined.FilterNone else Icons.Outlined.CropSquare,
@@ -129,6 +162,34 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls, onAdd: () ->
             wide = true, onClick = controls::toggleMaximize,
         )
         BarButton(Icons.Outlined.Close, stringResource(Res.string.action_close), wide = true, danger = true, onClick = controls::close)
+    }
+}
+
+/**
+ * Holding the mouse anywhere on the bar and moving it drags the window (also on a tab, like in a
+ * browser); a click without moving still reaches the tab or button.
+ */
+private fun Modifier.windowDrag(controls: WindowControls): Modifier = pointerInput(controls) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        var dragging = false
+        while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+            if (!change.pressed) {
+                if (dragging) controls.dragEnd()
+                break
+            }
+            if (!dragging && (change.position - down.position).getDistance() > viewConfiguration.touchSlop) {
+                dragging = true
+                controls.dragStart()
+            }
+            if (dragging) {
+                controls.dragMove()
+                // Moving means dragging: the tab under the mouse is not clicked afterwards.
+                event.changes.forEach { it.consume() }
+            }
+        }
     }
 }
 
@@ -187,18 +248,28 @@ private fun Tab(
 }
 
 @Composable
-private fun BarButton(icon: ImageVector, label: String, wide: Boolean = false, danger: Boolean = false, onClick: () -> Unit) {
+private fun BarButton(icon: ImageVector, label: String, wide: Boolean = false, danger: Boolean = false, selected: Boolean = false, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     Box(
         Modifier.fillMaxHeight().width(if (wide) 46.dp else 36.dp)
-            .background(if (hovered) (if (danger) Color(0xFFC42B1C) else MaterialTheme.colorScheme.surfaceContainerHigh) else Color.Transparent)
+            .background(
+                when {
+                    hovered && danger -> Color(0xFFC42B1C)
+                    hovered || selected -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    else -> Color.Transparent
+                },
+            )
             .hoverable(interaction)
             .clickable(interactionSource = interaction, indication = null, onClickLabel = label, onClick = onClick)
             .pointerHoverIcon(PointerIcon.Default),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, label, Modifier.size(if (wide) 16.dp else 18.dp), tint = if (hovered && danger) Color.White else MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(icon, label, Modifier.size(if (wide) 16.dp else 18.dp), tint = when {
+            hovered && danger -> Color.White
+            selected -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        })
     }
 }
 

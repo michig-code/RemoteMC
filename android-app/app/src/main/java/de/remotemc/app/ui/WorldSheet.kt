@@ -43,6 +43,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,12 +58,29 @@ import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
 import de.remotemc.app.data.GameRuleInfo
 import de.remotemc.app.data.WorldDetails
+import de.remotemc.app.data.daylightCycle
+import de.remotemc.app.data.timeAfter
 import de.remotemc.app.ui.components.SectionTitle
 import de.remotemc.app.ui.util.errorText
 import de.remotemc.app.ui.util.rememberHaptics
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+
+/** The world's time, counting on between fetches like the in-game clock. */
+@Composable
+private fun liveTime(d: WorldDetails): Long {
+    val fetchedAt = remember(d) { System.currentTimeMillis() }
+    var now by remember(d) { mutableLongStateOf(fetchedAt) }
+    LaunchedEffect(d) {
+        while (d.daylightCycle) {
+            delay(500)
+            now = System.currentTimeMillis()
+        }
+    }
+    return d.timeAfter(now - fetchedAt)
+}
 
 /** Minecraft time (0 = 06:00) as a clock: "18:30". */
 internal fun clockTime(ticks: Long): String {
@@ -117,6 +135,13 @@ fun WorldSheet(world: String, actions: WorldActions, onDismiss: () -> Unit) {
     }
 
     LaunchedEffect(world) { run { actions.load(world) } }
+    // Fetch the real time again now and then (someone may change it in the game).
+    LaunchedEffect(world) {
+        while (true) {
+            delay(10_000)
+            if (!busy) runCatching { actions.load(world) }.onSuccess { details = it }
+        }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         val d = details
@@ -145,7 +170,7 @@ fun WorldSheet(world: String, actions: WorldActions, onDismiss: () -> Unit) {
             }
 
             item(key = "time") {
-                SectionTitle(stringResource(R.string.world_time) + " · " + clockTime(d.time))
+                SectionTitle(stringResource(R.string.world_time) + " · " + clockTime(liveTime(d)))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Times.forEach { (id, label, icon) ->
                         AssistChip(

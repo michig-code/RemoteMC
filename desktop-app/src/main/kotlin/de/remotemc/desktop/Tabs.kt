@@ -7,8 +7,9 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * Servers open as tabs in the title bar. Each open server keeps its connection (console, chat,
- * status) while another tab is shown; closing the tab ends it. [active] null = the server list.
+ * Everything opens as a tab in the title bar: servers (by id), the settings ([SETTINGS]) and
+ * adding a server ([PAIR]). Each open server keeps its connection (console, chat, status) while
+ * another tab is shown; closing the tab ends it. [active] null = the server list.
  */
 class Tabs(
     private val model: AppModel,
@@ -20,18 +21,30 @@ class Tabs(
     var active by mutableStateOf<String?>(null)
         private set
     private val sessions = mutableMapOf<String, ServerSession>()
+    /** remotemc:// link to start the "add server" tab with (pasted or from the clipboard). */
+    var pairLink by mutableStateOf<String?>(null)
+        private set
 
     init {
         if (persist) {
-            SplitPrefs.text("tabs").split(',').filter { it.isNotBlank() && model.servers.get(it) != null }.distinct().forEach {
+            SplitPrefs.text("tabs").split(',').filter { it == SETTINGS || (it.isNotBlank() && model.servers.get(it) != null) }.distinct().forEach {
                 open += it
                 session(it)
             }
         }
     }
 
+    /** Opens (or shows) the settings or the "add server" tab. */
+    fun openSpecial(key: String, link: String? = null) {
+        if (key == PAIR) pairLink = link
+        if (key !in open) open += key
+        active = key
+        save()
+    }
+
     /** Shows the server, opening a tab for it if needed. */
     fun open(id: String) {
+        if (isSpecial(id)) return openSpecial(id)
         if (model.servers.get(id) == null) return
         if (id !in open) open += id
         session(id)
@@ -69,6 +82,7 @@ class Tabs(
 
     /** The live connection of an open tab (started on first use). */
     fun session(id: String): ServerSession? {
+        if (isSpecial(id)) return null
         sessions[id]?.let { return it }
         val profile = model.servers.get(id) ?: return null
         return ServerSession(profile, scope, model.servers, model.history).also {
@@ -79,7 +93,7 @@ class Tabs(
 
     /** Closes tabs of servers that were removed from the list. */
     fun prune() {
-        open.filter { model.servers.get(it) == null }.forEach(::close)
+        open.filter { !isSpecial(it) && model.servers.get(it) == null }.forEach(::close)
     }
 
     fun stopAll() {
@@ -88,6 +102,13 @@ class Tabs(
     }
 
     private fun save() {
-        if (persist) SplitPrefs.setText("tabs", open.joinToString(","))
+        // The "add server" tab is not worth bringing back after a restart.
+        if (persist) SplitPrefs.setText("tabs", open.filter { it != PAIR }.joinToString(","))
+    }
+
+    companion object {
+        const val SETTINGS = "@settings"
+        const val PAIR = "@pair"
+        fun isSpecial(key: String) = key.startsWith("@")
     }
 }

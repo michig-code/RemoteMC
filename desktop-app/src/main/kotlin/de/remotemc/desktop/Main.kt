@@ -123,7 +123,7 @@ fun main() = application {
     ) {
         window.minimumSize = java.awt.Dimension(820, 560)
         LaunchedEffect(visible) { if (visible) window.toFront() }
-        val controls = remember { AwtWindowControls(this, close, quit = ::exitApplication) }
+        val controls = remember { AwtWindowControls(this, close, quit = ::exitApplication, animations = { model.settings.settings.value.animations }) }
         App(model, tabs = tabs, controls = controls)
         ResizeEdges(window)
     }
@@ -149,7 +149,7 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
     RemoteMCTheme(settings) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             if (tabs != null && controls != null) {
-                TitleBar(model, tabs, controls, onAdd = { tabs.showHome(); screen = Screen.Pair(null) })
+                TitleBar(model, tabs, controls)
             }
             val animate = LocalAnimations.current
             // A server tab or one of the screens (server list, pairing, settings); switching fades over.
@@ -168,8 +168,14 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                         val id = shown.removePrefix("tab:")
                         // Each tab keeps its own state (area, scroll position) while others are shown.
                         saveable.SaveableStateProvider(id) {
-                            val session = tabs.session(id)
-                            if (session != null) ServerContent(session, onBack = tabs::showHome)
+                            when (id) {
+                                Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) })
+                                Tabs.PAIR -> PairScreen(model, tabs.pairLink, onDone = { newId ->
+                                    tabs.close(Tabs.PAIR)
+                                    if (newId != null) tabs.open(newId)
+                                })
+                                else -> tabs.session(id)?.let { ServerContent(it, onBack = tabs::showHome) }
+                            }
                         }
                         return@Box
                     }
@@ -177,8 +183,8 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                         Screen.Servers -> ServerListScreen(
                             model,
                             onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
-                            onAdd = { screen = Screen.Pair(it) },
-                            onSettings = { screen = Screen.Settings },
+                            onAdd = { link -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, link) else screen = Screen.Pair(link) },
+                            onSettings = { if (tabs != null) tabs.openSpecial(Tabs.SETTINGS) else screen = Screen.Settings },
                         )
                         is Screen.Pair -> PairScreen(model, s.link, onDone = { id ->
                             screen = Screen.Servers

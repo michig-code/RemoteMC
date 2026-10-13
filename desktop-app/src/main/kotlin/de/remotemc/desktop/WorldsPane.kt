@@ -43,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,10 +53,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.data.GameRuleInfo
+import de.remotemc.app.data.WorldDetails
+import de.remotemc.app.data.daylightCycle
+import de.remotemc.app.data.timeAfter
 import de.remotemc.desktop.res.*
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
+
+/** The world's time, counting on between fetches like the in-game clock. */
+@Composable
+private fun liveTime(d: WorldDetails): Long {
+    val fetchedAt = remember(d) { System.currentTimeMillis() }
+    var now by remember(d) { mutableStateOf(fetchedAt) }
+    LaunchedEffect(d) {
+        while (d.daylightCycle) {
+            delay(500)
+            now = System.currentTimeMillis()
+        }
+    }
+    return d.timeAfter(now - fetchedAt)
+}
 
 /** Minecraft time (0 = 06:00) as a clock: "18:30". */
 fun clockTime(ticks: Long): String {
@@ -83,6 +102,13 @@ fun WorldsPane(session: ServerSession) {
     val world = selected?.takeIf { it in worlds } ?: worlds.firstOrNull() ?: return
     val manage = session.manage
     val (loader, reload) = rememberLoader(world) { manage.world(world) }
+    // Fetch the real time again now and then (someone may change it in the game).
+    LaunchedEffect(world) {
+        while (true) {
+            delay(10_000)
+            if (!loader.busy) runCatching { loader.data = manage.world(world) }
+        }
+    }
     var query by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf<GameRuleInfo?>(null) }
     fun change(action: String, body: JSONObject) = loader.run { manage.worldAction(world, action, body) }
@@ -114,7 +140,7 @@ fun WorldsPane(session: ServerSession) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(Res.string.world_time), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            Text(clockTime(d.time), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+                            Text(clockTime(liveTime(d)), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
                         }
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Times.forEach { (id, label, icon) ->

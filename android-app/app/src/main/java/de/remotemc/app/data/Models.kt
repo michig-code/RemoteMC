@@ -271,6 +271,13 @@ data class PluginInfo(
     }
 }
 
+/** True while the day/night cycle runs (the game rule is on; newer versions call it advance_time). */
+val WorldDetails.daylightCycle: Boolean
+    get() = gameRules.firstOrNull { it.name == "doDaylightCycle" || it.name == "advance_time" }?.value != "false"
+
+/** World time [elapsedMs] after it was fetched: 20 ticks per second while the cycle runs. */
+fun WorldDetails.timeAfter(elapsedMs: Long): Long = if (daylightCycle) time + elapsedMs.coerceAtLeast(0) / 50 else time
+
 /** A file or folder in the server folder; [path] is relative to it with "/" separators. */
 data class FileEntry(val path: String, val name: String, val dir: Boolean, val size: Long, val modified: Long) {
     companion object {

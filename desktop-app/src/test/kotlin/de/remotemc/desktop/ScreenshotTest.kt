@@ -124,11 +124,12 @@ class ScreenshotTest {
         val tabs = androidx.compose.runtime.remember {
             Tabs(model, CoroutineScope(Dispatchers.Unconfined), persist = false, connect = false).apply {
                 model.servers.servers.value.forEach { open(it.id) }
+                openSpecial(Tabs.SETTINGS)
                 open(model.servers.servers.value.first().id)
             }
         }
         androidx.compose.foundation.layout.Column {
-            TitleBar(model, tabs, fakeWindow, onAdd = {})
+            TitleBar(model, tabs, fakeWindow)
             ServerContent(session(), {}, Pane.OVERVIEW)
         }
     }
