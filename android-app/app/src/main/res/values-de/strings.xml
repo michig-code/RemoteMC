@@ -45,6 +45,8 @@
     <string name="status_offline_short">Offline</string>
     <string name="status_offline_retry">Offline · Tippen zum Wiederholen</string>
     <string name="status_connecting">Verbinde…</string>
+    <string name="status_cached_connecting">Stand %1$s · verbinde…</string>
+    <string name="status_cached_offline">Offline · Stand %1$s</string>
     <string name="status_checking">Prüfe…</string>
     <plurals name="players_count">
         <item quantity="one">%d Spieler</item>

@@ -42,6 +42,8 @@
     <string name="status_offline_short">Offline</string>
     <string name="status_offline_retry">Offline · tik om opnieuw te proberen</string>
     <string name="status_connecting">Verbinden…</string>
+    <string name="status_cached_connecting">Stand van %1$s · verbinden…</string>
+    <string name="status_cached_offline">Offline · stand van %1$s</string>
     <string name="status_checking">Controleren…</string>
     <plurals name="players_count">
         <item quantity="one">%d speler</item>

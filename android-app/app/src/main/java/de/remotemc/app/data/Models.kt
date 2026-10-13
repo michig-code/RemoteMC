@@ -32,6 +32,26 @@ data class ServerStatus(
 ) {
     fun supports(feature: String) = feature in features
 
+    /** Same fields as the plugin sends (for the saved snapshot, see [ServerSnapshot]). */
+    fun toJson(): JSONObject = JSONObject()
+        .put("motd", motd)
+        .put("version", version)
+        .put("minecraftVersion", minecraftVersion)
+        .put("platform", platform)
+        .put("pluginVersion", pluginVersion)
+        .put("onlinePlayers", onlinePlayers)
+        .put("maxPlayers", maxPlayers)
+        .put("tps", JSONArray(tps))
+        .put("mspt", mspt ?: -1.0)
+        .put("memoryUsedMb", memoryUsedMb)
+        .put("memoryMaxMb", memoryMaxMb)
+        .put("uptimeSeconds", uptimeSeconds)
+        .put("worlds", JSONArray(worlds.map {
+            JSONObject().put("name", it.name).put("environment", it.environment).put("players", it.players)
+                .put("loadedChunks", it.loadedChunks).put("entities", it.entities)
+        }))
+        .put("features", JSONArray(features.sorted()))
+
     companion object {
         fun fromJson(o: JSONObject): ServerStatus {
             val tps = o.optJSONArray("tps") ?: JSONArray()
@@ -85,6 +105,13 @@ data class PlayerInfo(
     /** Total time played on this server in seconds; -1 if unknown. */
     val playtime: Long = -1,
 ) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("name", name).put("uuid", uuid).put("world", world)
+        .put("x", x).put("y", y).put("z", z)
+        .put("health", health).put("maxHealth", maxHealth).put("food", food).put("level", level)
+        .put("ping", ping).put("gameMode", gameMode).put("op", op)
+        .put("skin", skin.orEmpty()).put("playtime", playtime)
+
     companion object {
         fun listFromJson(arr: JSONArray?): List<PlayerInfo> {
             if (arr == null) return emptyList()
@@ -114,6 +141,9 @@ data class PlayerInfo(
 
 /** [formatted] keeps Minecraft colour codes (§a…) when the line has colours. */
 data class ConsoleLine(val id: Long, val time: Long, val level: String, val message: String, val formatted: String? = null) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id).put("time", time).put("level", level).put("message", message).put("formatted", formatted.orEmpty())
+
     companion object {
         fun fromJson(o: JSONObject) = ConsoleLine(
             o.optLong("id"), o.optLong("time"), o.optString("level"), o.optString("message"),
@@ -123,10 +153,29 @@ data class ConsoleLine(val id: Long, val time: Long, val level: String, val mess
 }
 
 /** A console command known to the server, for suggestions. */
-data class CommandInfo(val name: String, val description: String?, val usage: String?, val aliases: List<String>)
+data class CommandInfo(val name: String, val description: String?, val usage: String?, val aliases: List<String>) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("name", name).put("description", description.orEmpty()).put("usage", usage.orEmpty())
+        .put("aliases", JSONArray(aliases))
+
+    companion object {
+        fun fromJson(c: JSONObject): CommandInfo {
+            val aliases = c.optJSONArray("aliases")
+            return CommandInfo(
+                name = c.getString("name"),
+                description = c.optString("description").takeIf { it.isNotBlank() },
+                usage = c.optString("usage").takeIf { it.isNotBlank() },
+                aliases = if (aliases == null) emptyList() else List(aliases.length()) { aliases.getString(it) },
+            )
+        }
+    }
+}
 
 data class ChatEntry(val id: Long, val time: Long, val type: Type, val player: String, val message: String) {
     enum class Type { CHAT, JOIN, QUIT, BROADCAST }
+
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id).put("time", time).put("type", type.name.lowercase()).put("player", player).put("message", message)
 
     companion object {
         fun fromJson(o: JSONObject) = ChatEntry(
@@ -146,6 +195,10 @@ data class Session(
     val commandsEnabled: Boolean,
     val capturesCommandOutput: Boolean,
 ) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("name", name).put("role", role.name.lowercase())
+        .put("commandsEnabled", commandsEnabled).put("capturesCommandOutput", capturesCommandOutput)
+
     companion object {
         fun fromJson(o: JSONObject) = Session(
             name = o.optString("name"),

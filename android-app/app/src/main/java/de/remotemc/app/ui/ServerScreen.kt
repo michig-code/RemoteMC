@@ -1,5 +1,6 @@
 package de.remotemc.app.ui
 
+import android.icu.text.RelativeDateTimeFormatter
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
@@ -58,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -97,6 +99,7 @@ import de.remotemc.app.ui.components.StatusPill
 import de.remotemc.app.ui.util.UiText
 import de.remotemc.app.ui.util.errorText
 import de.remotemc.app.ui.util.rememberHaptics
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 
 enum class Tab(@StringRes val label: Int, val icon: ImageVector, val minRole: Role) {
@@ -123,6 +126,8 @@ data class ServerUiState(
     val usageHint: String? = null,
     /** Saved overview layout ([de.remotemc.app.data.DashboardLayout.encode]). */
     val dashboardLayout: String = "",
+    /** When the shown data was saved, while it still comes from the last visit. */
+    val cachedAt: Long? = null,
 )
 
 class ServerActions(
@@ -216,6 +221,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             suggestions = vm.suggestions,
             usageHint = vm.usageHint,
             dashboardLayout = settings.dashboard,
+            cachedAt = vm.cachedAt,
         ),
         actions = ServerActions(
             onBack = onBack,
@@ -259,11 +265,14 @@ fun ServerScreenContent(
         Connection.CONNECTING -> ConnectionState.Connecting
     }
     val players = state.status?.onlinePlayers ?: 0
+    val cachedAgo = state.cachedAt?.let { relativeTime(it) }
     val statusText = when (state.connection) {
         Connection.LIVE -> stringResource(R.string.status_live, pluralStringResource(R.plurals.players_count, players, players))
         Connection.POLLING -> stringResource(R.string.status_online, pluralStringResource(R.plurals.players_count, players, players))
-        Connection.OFFLINE -> stringResource(R.string.status_offline_retry)
-        Connection.CONNECTING -> stringResource(R.string.status_connecting)
+        Connection.OFFLINE ->
+            if (cachedAgo != null) stringResource(R.string.status_cached_offline, cachedAgo) else stringResource(R.string.status_offline_retry)
+        Connection.CONNECTING ->
+            if (cachedAgo != null) stringResource(R.string.status_cached_connecting, cachedAgo) else stringResource(R.string.status_connecting)
     }
 
     val broadcast: (String) -> Unit = { message ->
@@ -442,6 +451,27 @@ private fun AccessBanner(error: Throwable?, onRepair: () -> Unit) {
                     ),
                 ) { Text(stringResource(R.string.action_pair_again)) }
             }
+        }
+    }
+}
+
+/** "5 minutes ago" in the app language, kept up to date while shown. */
+@Composable
+private fun relativeTime(time: Long): String {
+    val now by produceState(System.currentTimeMillis(), time) {
+        while (true) {
+            delay(30_000)
+            value = System.currentTimeMillis()
+        }
+    }
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(locale) { RelativeDateTimeFormatter.getInstance(locale) }.let { format ->
+        val minutes = (now - time).coerceAtLeast(0) / 60_000
+        when {
+            minutes < 1 -> format.format(RelativeDateTimeFormatter.Direction.PLAIN, RelativeDateTimeFormatter.AbsoluteUnit.NOW)
+            minutes < 60 -> format.format(minutes.toDouble(), RelativeDateTimeFormatter.Direction.LAST, RelativeDateTimeFormatter.RelativeUnit.MINUTES)
+            minutes < 24 * 60 -> format.format((minutes / 60).toDouble(), RelativeDateTimeFormatter.Direction.LAST, RelativeDateTimeFormatter.RelativeUnit.HOURS)
+            else -> format.format((minutes / (24 * 60)).toDouble(), RelativeDateTimeFormatter.Direction.LAST, RelativeDateTimeFormatter.RelativeUnit.DAYS)
         }
     }
 }

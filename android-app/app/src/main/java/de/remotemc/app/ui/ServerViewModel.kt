@@ -22,6 +22,7 @@ import de.remotemc.app.data.PerformanceHistory
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
+import de.remotemc.app.data.ServerSnapshot
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
 import de.remotemc.app.net.ApiClient
@@ -31,6 +32,7 @@ import de.remotemc.app.net.StreamEvent
 import de.remotemc.app.ui.util.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -74,6 +76,12 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         private set
     var refreshing by mutableStateOf(false)
         private set
+    /**
+     * When the shown data was saved, while it still comes from the last visit (instant start);
+     * null once the server answered.
+     */
+    var cachedAt by mutableStateOf<Long?>(null)
+        private set
 
     val console = mutableStateListOf<ConsoleEntry>()
     val chat = mutableStateListOf<ChatEntry>()
@@ -87,6 +95,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     var usageHint by mutableStateOf<String?>(null)
         private set
     private var commands: List<CommandInfo> = emptyList()
+    private var commandsLoaded = false
     private var suggestJob: Job? = null
 
     val role: Role get() = session?.role ?: profile.role
@@ -95,6 +104,13 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     private var lastChatId = 0L
     private var localCounter = 0L
     private val historyMutex = Mutex()
+    /** Console/chat lines restored from the snapshot; the first load after it skips them. */
+    private var restoredConsole: Set<Pair<Long, Long>> = emptySet()
+    private var restoredChat: Set<Pair<Long, Long>> = emptySet()
+    /** Time of the newest restored line; older lines from the server are already shown or cut off. */
+    private var restoredConsoleUntil = 0L
+    private var restoredChatUntil = 0L
+    private val restore: Job
     private val reconnect = Channel<Unit>(Channel.CONFLATED)
 
     private val messageChannel = Channel<UiText>(Channel.BUFFERED)
@@ -110,6 +126,67 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         runCatching {
             application.getSystemService<ConnectivityManager>()?.registerDefaultNetworkCallback(networkCallback)
         }
+        restore = viewModelScope.launch {
+            val snapshot = withContext(Dispatchers.IO) { application.app.snapshots.load(profile.id) } ?: return@launch
+            restore(snapshot)
+        }
+    }
+
+    /** Shows the last visit's data until the server answers (only if nothing live arrived yet). */
+    private fun restore(snapshot: ServerSnapshot) {
+        if (status != null) return
+        cachedAt = snapshot.savedAt
+        snapshot.session?.let { session = it }
+        status = snapshot.status
+        players = snapshot.players
+        if (commands.isEmpty()) commands = snapshot.commands
+        if (console.isEmpty()) {
+            snapshot.console.forEach { line ->
+                console.add(ConsoleEntry("s${line.id}-${line.time}", line.message, line.level, line.time, line.formatted))
+            }
+            restoredConsole = snapshot.console.mapTo(HashSet()) { it.id to it.time }
+            restoredConsoleUntil = snapshot.console.maxOfOrNull { it.time } ?: 0L
+        }
+        if (chat.isEmpty()) {
+            chat.addAll(snapshot.chat)
+            restoredChat = snapshot.chat.mapTo(HashSet()) { it.id to it.time }
+            restoredChatUntil = snapshot.chat.maxOfOrNull { it.time } ?: 0L
+        }
+    }
+
+    private var lastSave = System.currentTimeMillis()
+
+    /** Also saves while the screen stays open, in case the app is killed without notice. */
+    private suspend fun saveSnapshotSometimes() {
+        if (System.currentTimeMillis() - lastSave < SAVE_EVERY_MS) return
+        lastSave = System.currentTimeMillis()
+        saveSnapshot()
+    }
+
+    /** Remembers what is shown now for the next visit. */
+    private suspend fun saveSnapshot() {
+        val shownStatus = status ?: return
+        if (cachedAt != null) return // nothing new since the last visit
+        val snapshot = ServerSnapshot(
+            savedAt = System.currentTimeMillis(),
+            session = session,
+            status = shownStatus,
+            players = players,
+            console = console.filter { it.key.startsWith("s") }.takeLast(ServerSnapshot.MAX_CONSOLE).mapNotNull { it.toLine() },
+            chat = chat.takeLast(ServerSnapshot.MAX_CHAT),
+            commands = commands,
+        )
+        withContext(Dispatchers.IO) { getApplication<Application>().app.snapshots.save(profile.id, snapshot) }
+    }
+
+    private fun ConsoleEntry.toLine(): ConsoleLine? {
+        val id = key.removePrefix("s").substringBefore('-').toLongOrNull() ?: return null
+        return ConsoleLine(id, time, level, text, formatted)
+    }
+
+    /** Called once live data replaces the restored data. */
+    private fun live() {
+        cachedAt = null
     }
 
     override fun onCleared() {
@@ -123,6 +200,16 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
      * polling while the stream is unavailable, with growing back-off between attempts.
      */
     suspend fun runConnection() {
+        restore.join() // first show the last visit, then connect
+        try {
+            connectLoop()
+        } finally {
+            // Leaving the screen (or the app): keep what is shown for an instant start next time.
+            withContext(NonCancellable) { saveSnapshot() }
+        }
+    }
+
+    private suspend fun connectLoop() {
         var failures = 0
         while (true) {
             try {
@@ -135,6 +222,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
             }
             failures++
             pollOnce()
+            saveSnapshotSometimes()
             if (connection != Connection.OFFLINE) connection = Connection.POLLING
             val wait = when {
                 error is ApiError.Http && (error as ApiError.Http).code == "invalid_token" -> 30_000L
@@ -151,6 +239,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 onSession(event.session)
                 status = event.status
                 players = event.players
+                live()
                 error = null
                 connection = Connection.LIVE
                 loadHistory()
@@ -159,6 +248,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
             is StreamEvent.Status -> {
                 status = event.status
                 players = event.players
+                saveSnapshotSometimes()
             }
             is StreamEvent.Console -> addConsole(listOf(event.line))
             is StreamEvent.Chat -> addChat(listOf(event.entry))
@@ -243,6 +333,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
             if (session == null) runCatching { onSession(api.me()) }
             status = s
             players = p
+            live()
             error = null
             if (connection != Connection.LIVE) connection = Connection.POLLING
             loadHistory()
@@ -268,6 +359,10 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     private fun addConsole(lines: List<ConsoleLine>) {
         for (line in lines) {
+            if (line.time < restoredConsoleUntil || line.id to line.time in restoredConsole) {
+                lastConsoleId = maxOf(lastConsoleId, line.id)
+                continue
+            }
             if (line.id <= lastConsoleId) {
                 // Server restarted: ids start again at 1.
                 if (line.id == 1L && lastConsoleId > 1) lastConsoleId = 0 else continue
@@ -280,6 +375,10 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     private fun addChat(entries: List<ChatEntry>) {
         for (entry in entries) {
+            if (entry.time < restoredChatUntil || entry.id to entry.time in restoredChat) {
+                lastChatId = maxOf(lastChatId, entry.id)
+                continue
+            }
             if (entry.id <= lastChatId) {
                 if (entry.id == 1L && lastChatId > 1) lastChatId = 0 else continue
             }
@@ -325,8 +424,9 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     /** Loads the server's command list once (admins only) for offline-fast suggestions. */
     fun loadCommands() {
-        if (commands.isNotEmpty() || !role.atLeast(Role.ADMIN)) return
-        viewModelScope.launch { runCatching { commands = api.commands() } }
+        // Restored commands are shown at once but still refreshed once (cheap: ETag).
+        if (commandsLoaded || !role.atLeast(Role.ADMIN)) return
+        viewModelScope.launch { runCatching { commands = api.commands() }.onSuccess { commandsLoaded = true } }
     }
 
     /**
@@ -390,5 +490,9 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 messageChannel.send(UiText.Error(e))
             }
         }
+    }
+
+    private companion object {
+        const val SAVE_EVERY_MS = 60_000L
     }
 }

@@ -134,16 +134,7 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     /** Commands the server knows (plugin 2.1+; empty list for older plugins). */
     suspend fun commands(): List<CommandInfo> = try {
         val arr = call("GET", "/api/v1/commands").getJSONArray("commands")
-        List(arr.length()) {
-            val c = arr.getJSONObject(it)
-            val aliases = c.optJSONArray("aliases")
-            CommandInfo(
-                name = c.getString("name"),
-                description = c.optString("description").takeIf { d -> d.isNotBlank() },
-                usage = c.optString("usage").takeIf { u -> u.isNotBlank() },
-                aliases = if (aliases == null) emptyList() else List(aliases.length()) { i -> aliases.getString(i) },
-            )
-        }
+        List(arr.length()) { CommandInfo.fromJson(arr.getJSONObject(it)) }
     } catch (e: ApiError.Http) {
         if (e.status == 404) emptyList() else throw e
     }

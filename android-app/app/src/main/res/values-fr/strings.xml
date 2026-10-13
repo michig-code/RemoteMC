@@ -43,6 +43,8 @@
     <string name="status_offline_short">Hors ligne</string>
     <string name="status_offline_retry">Hors ligne · toucher pour réessayer</string>
     <string name="status_connecting">Connexion…</string>
+    <string name="status_cached_connecting">Données : %1$s · connexion…</string>
+    <string name="status_cached_offline">Hors ligne · données : %1$s</string>
     <string name="status_checking">Vérification…</string>
     <plurals name="players_count">
         <item quantity="one">%d joueur</item>

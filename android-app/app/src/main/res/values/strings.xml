@@ -51,6 +51,8 @@
     <string name="status_offline_short">Offline</string>
     <string name="status_offline_retry">Offline · tap to retry</string>
     <string name="status_connecting">Connecting…</string>
+    <string name="status_cached_connecting">Last seen %1$s · connecting…</string>
+    <string name="status_cached_offline">Offline · last seen %1$s</string>
     <string name="status_checking">Checking…</string>
     <plurals name="players_count">
         <item quantity="one">%d player</item>

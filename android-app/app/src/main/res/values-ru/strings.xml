@@ -44,6 +44,8 @@
     <string name="status_offline_short">Офлайн</string>
     <string name="status_offline_retry">Офлайн · нажмите, чтобы повторить</string>
     <string name="status_connecting">Подключение…</string>
+    <string name="status_cached_connecting">Данные: %1$s · подключение…</string>
+    <string name="status_cached_offline">Офлайн · данные: %1$s</string>
     <string name="status_checking">Проверка…</string>
     <plurals name="players_count">
         <item quantity="one">%d игрок</item>

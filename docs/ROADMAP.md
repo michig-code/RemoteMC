@@ -22,7 +22,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 
 | # | Feature | Nutzen |
 |---|---|---|
-| A1 | **Sofortstart aus dem Cache:** Die letzten Werte (Status, Spieler, Konsole, Verlauf) werden lokal gespeichert und beim Öffnen sofort angezeigt, danach im Hintergrund aktualisiert. | Kein leerer Bildschirm und kein Ladekreis beim Öffnen |
+| A1 ✅ | **Sofortstart aus dem Cache:** Die letzten Werte (Status, Spieler, Konsole, Verlauf) werden lokal gespeichert und beim Öffnen sofort angezeigt, danach im Hintergrund aktualisiert. | Kein leerer Bildschirm und kein Ladekreis beim Öffnen |
 | A2 ✅ | **GZIP-Komprimierung** der Plugin-Antworten (Konsole, Verlauf, Dateilisten, Plugin-Liste) | 70–90 % weniger Daten im Mobilnetz |
 | A3 ✅ | **ETag / 304 „unverändert“** für Whitelist, Banns, Plugins, Welten, Aufgaben, Dateien und Befehlsliste | Bei unveränderten Listen geht fast nichts übers Netz |
 | A4 | **Nur Änderungen über den Live-Stream (SSE):** Spieler kommt oder geht, TPS-Änderung usw. statt ganzer Status-Pakete | Weniger Akku und Daten, flüssigere Anzeige |
