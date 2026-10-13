@@ -476,4 +476,14 @@
     <string name="placeholder_title">Compila</string>
     <string name="placeholder_player">Giocatore</string>
     <string name="placeholder_text">Testo</string>
+    <string name="console_search">Cerca nella console</string>
+    <string name="console_search_hint">Cerca…</string>
+    <string name="console_no_lines">Nessuna riga per questo filtro</string>
+    <string name="console_no_matches">Nessun risultato</string>
+    <string name="console_match_previous">Risultato precedente</string>
+    <string name="console_match_next">Risultato successivo</string>
+    <string name="console_filter_all">Tutto</string>
+    <string name="console_filter_warnings">Avvisi</string>
+    <string name="console_filter_errors">Errori</string>
+    <string name="console_share">Condividi righe</string>
 </resources>

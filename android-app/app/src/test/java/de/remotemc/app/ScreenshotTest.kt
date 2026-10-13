@@ -193,6 +193,18 @@ class ScreenshotTest {
         menuCommands, menuShortcuts, players.map { it.name }, running, {}, { _, _ -> }, {},
     )
 
+    @Test fun consoleSearch() = shot("06h_console_search") {
+        Scaffoldless {
+            de.remotemc.app.ui.ConsoleTab(entries = console, canRunCommands = true, onCommand = {}, initialSearch = "server")
+        }
+    }
+
+    @Test fun consoleWarnings() = shot("06i_console_warnings", dark = false) {
+        Scaffoldless {
+            de.remotemc.app.ui.ConsoleTab(entries = console, canRunCommands = true, onCommand = {}, initialLevel = de.remotemc.app.ui.LevelFilter.WARNINGS)
+        }
+    }
+
     @Test fun commandMenu() = shot("06d_command_menu") {
         de.remotemc.app.ui.CommandMenuSheet(menu(), "", {}, {}, {}, inSheet = false)
     }

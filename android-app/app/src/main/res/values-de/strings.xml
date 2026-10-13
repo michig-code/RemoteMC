@@ -481,4 +481,14 @@
     <string name="placeholder_title">Ausfüllen</string>
     <string name="placeholder_player">Spieler</string>
     <string name="placeholder_text">Text</string>
+    <string name="console_search">Konsole durchsuchen</string>
+    <string name="console_search_hint">Suchen…</string>
+    <string name="console_no_lines">Keine Zeilen für diesen Filter</string>
+    <string name="console_no_matches">Keine Treffer</string>
+    <string name="console_match_previous">Vorheriger Treffer</string>
+    <string name="console_match_next">Nächster Treffer</string>
+    <string name="console_filter_all">Alle</string>
+    <string name="console_filter_warnings">Warnungen</string>
+    <string name="console_filter_errors">Fehler</string>
+    <string name="console_share">Zeilen teilen</string>
 </resources>

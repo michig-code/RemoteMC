@@ -89,7 +89,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
   - Favoriten und Makros lassen sich optional als Kachel auf die Übersicht legen.
 - **Technik:** `/api/v1/commands` liefert zusätzlich Plugin und „darf ausführen“ pro Token. Die Antwort wird wie in B0 zwischengespeichert.
 
-### B2 – Konsole durchsuchen und filtern
+### B2 – Konsole durchsuchen und filtern ✅
 - Volltextsuche
 - Filter für WARN/ERROR
 - an eine Zeile springen

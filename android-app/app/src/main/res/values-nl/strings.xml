@@ -467,4 +467,14 @@
     <string name="placeholder_title">Invullen</string>
     <string name="placeholder_player">Speler</string>
     <string name="placeholder_text">Tekst</string>
+    <string name="console_search">Console doorzoeken</string>
+    <string name="console_search_hint">Zoeken…</string>
+    <string name="console_no_lines">Geen regels voor dit filter</string>
+    <string name="console_no_matches">Geen resultaten</string>
+    <string name="console_match_previous">Vorig resultaat</string>
+    <string name="console_match_next">Volgend resultaat</string>
+    <string name="console_filter_all">Alles</string>
+    <string name="console_filter_warnings">Waarschuwingen</string>
+    <string name="console_filter_errors">Fouten</string>
+    <string name="console_share">Regels delen</string>
 </resources>

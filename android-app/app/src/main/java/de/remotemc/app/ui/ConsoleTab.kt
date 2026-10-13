@@ -36,6 +36,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.FilterChip
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -115,6 +120,8 @@ fun ConsoleTab(
     initialInput: String = "",
     /** Gear next to "send": all commands, favorites and macros (null = no gear). */
     menu: CommandMenuActions? = null,
+    initialSearch: String? = null,
+    initialLevel: LevelFilter = LevelFilter.ALL,
 ) {
     var input by remember { mutableStateOf(TextFieldValue(initialInput, TextRange(initialInput.length))) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
@@ -123,9 +130,20 @@ fun ConsoleTab(
     val haptics = rememberHaptics()
     val animate = LocalAnimations.current
 
+    // Search and level filter: the filter hides lines, the search highlights and jumps.
+    var searchOpen by rememberSaveable { mutableStateOf(initialSearch != null || initialLevel != LevelFilter.ALL) }
+    var query by rememberSaveable { mutableStateOf(initialSearch.orEmpty()) }
+    var level by rememberSaveable { mutableStateOf(initialLevel) }
+    val shown = remember(entries.size, entries.lastOrNull()?.key, level) { ConsoleSearch.filter(entries, level) }
+    val matches = remember(shown, query) { ConsoleSearch.matches(shown, query) }
+    // Which match is selected; the newest one at first.
+    var current by remember(query, level) { mutableStateOf(-1) }
+    val selected = if (matches.isEmpty()) -1 else if (current in matches.indices) current else matches.lastIndex
+    val selectedKey = matches.getOrNull(selected)?.let { shown[it].key }
+
     // The list is laid out from the bottom (reverseLayout): when the keyboard opens and the
     // terminal gets smaller, the newest lines stay visible – like in a messenger.
-    val reversed = entries.asReversed()
+    val reversed = shown.asReversed()
     val atBottom by remember {
         derivedStateOf { listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 48 }
     }
@@ -135,8 +153,14 @@ fun ConsoleTab(
         snapshotFlow { listState.isScrollInProgress to atBottom }
             .collect { (scrolling, bottom) -> if (scrolling) follow = bottom }
     }
-    LaunchedEffect(entries.size) {
-        if (follow && entries.isNotEmpty()) listState.scrollToItem(0)
+    LaunchedEffect(shown.size) {
+        if (follow && query.isBlank() && shown.isNotEmpty()) listState.scrollToItem(0)
+    }
+    // Jump to the selected match.
+    LaunchedEffect(selected, matches.size, query) {
+        val index = matches.getOrNull(selected) ?: return@LaunchedEffect
+        follow = false
+        listState.animateScrollToItem((shown.size - 1 - index).coerceAtLeast(0))
     }
 
     fun setInput(text: String) {
@@ -159,6 +183,39 @@ fun ConsoleTab(
     }
 
     Column(Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            searchOpen,
+            enter = if (animate) expandVertically() + fadeIn() else EnterTransition.None,
+            exit = if (animate) shrinkVertically() + fadeOut() else ExitTransition.None,
+        ) {
+            val context = LocalContext.current
+            ConsoleSearchBar(
+                query = query,
+                onQuery = { query = it },
+                level = level,
+                onLevel = { haptics.tap(); level = it },
+                position = if (matches.isEmpty()) null else selected + 1 to matches.size,
+                onPrevious = { if (matches.isNotEmpty()) { haptics.tick(); current = (selected - 1 + matches.size) % matches.size } },
+                onNext = { if (matches.isNotEmpty()) { haptics.tick(); current = (selected + 1) % matches.size } },
+                onShare = {
+                    val lines = if (query.isBlank()) shown else matches.map { shown[it] }
+                    if (lines.isNotEmpty()) {
+                        haptics.tap()
+                        val send = android.content.Intent(android.content.Intent.ACTION_SEND)
+                            .setType("text/plain")
+                            .putExtra(android.content.Intent.EXTRA_TEXT, ConsoleSearch.shareText(lines))
+                        context.startActivity(android.content.Intent.createChooser(send, null))
+                    }
+                },
+                onClose = {
+                    searchOpen = false
+                    query = ""
+                    level = LevelFilter.ALL
+                    follow = true
+                    scope.launch { listState.scrollToItem(0) }
+                },
+            )
+        }
         Box(
             Modifier
                 .weight(1f)
@@ -167,9 +224,9 @@ fun ConsoleTab(
                 .clip(MaterialTheme.shapes.large)
                 .background(McColors.Terminal),
         ) {
-            if (entries.isEmpty()) {
+            if (shown.isEmpty()) {
                 Text(
-                    stringResource(R.string.console_waiting),
+                    stringResource(if (entries.isEmpty()) R.string.console_waiting else R.string.console_no_lines),
                     style = MonoStyle,
                     color = TerminalDim,
                     modifier = Modifier.align(Alignment.Center),
@@ -184,23 +241,33 @@ fun ConsoleTab(
                     reverseLayout = true,
                     verticalArrangement = Arrangement.Top, // short logs start at the top like before
                 ) {
-                    items(reversed, key = { it.key }) { line -> ConsoleLineView(line) }
+                    items(reversed, key = { it.key }) { line ->
+                        ConsoleLineView(line, highlight = query, current = line.key == selectedKey)
+                    }
                 }
             }
             if (entries.isNotEmpty()) {
                 val clipboard = LocalClipboardManager.current
                 val context = LocalContext.current
                 val copied = stringResource(R.string.console_copied)
-                IconButton(
-                    onClick = {
-                        haptics.tap()
-                        clipboard.setText(AnnotatedString(entries.joinToString("\n") { it.text }))
-                        // Android 13+ shows its own confirmation for copied text.
-                        if (Build.VERSION.SDK_INT < 33) Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
-                        .background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
-                ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.console_copy), tint = TerminalDim) }
+                Row(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+                    if (!searchOpen) {
+                        IconButton(
+                            onClick = { haptics.tap(); searchOpen = true },
+                            modifier = Modifier.background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
+                        ) { Icon(Icons.Outlined.Search, stringResource(R.string.console_search), tint = TerminalDim) }
+                    }
+                    IconButton(
+                        onClick = {
+                            haptics.tap()
+                            // Copies what is shown (all lines, or only the filtered ones).
+                            clipboard.setText(AnnotatedString(shown.joinToString("\n") { it.text }))
+                            // Android 13+ shows its own confirmation for copied text.
+                            if (Build.VERSION.SDK_INT < 33) Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
+                    ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.console_copy), tint = TerminalDim) }
+                }
             }
             androidx.compose.animation.AnimatedVisibility(
                 visible = !atBottom && entries.isNotEmpty(),
@@ -403,7 +470,7 @@ private fun RecentCommands(history: List<String>, onPick: (String) -> Unit, onFo
 }
 
 @Composable
-private fun ConsoleLineView(line: ConsoleEntry) {
+private fun ConsoleLineView(line: ConsoleEntry, highlight: String = "", current: Boolean = false) {
     val base = when (line.level) {
         "WARN" -> Color(0xFFFFC857)
         "ERROR", "FATAL" -> Color(0xFFFF6B6B)
@@ -411,9 +478,23 @@ private fun ConsoleLineView(line: ConsoleEntry) {
         "OUTPUT" -> Color(0xFF8BE9A8)
         else -> TerminalText
     }
-    val text = remember(line.key, line.formatted) {
+    val plain = remember(line.key, line.formatted) {
         if (line.formatted != null) MinecraftText.parse(line.formatted, base)
         else MinecraftText.highlightPlain(line.text, base, TerminalAccent)
+    }
+    val text = remember(plain, highlight, current) {
+        val ranges = ConsoleSearch.ranges(plain.text, highlight)
+        if (ranges.isEmpty()) {
+            plain
+        } else {
+            AnnotatedString.Builder(plain).apply {
+                val style = SpanStyle(
+                    background = if (current) Color(0xFFFFC857) else Color(0x66FFC857),
+                    color = if (current) Color(0xFF1B1B1B) else Color.Unspecified,
+                )
+                ranges.forEach { addStyle(style, it.first, it.last + 1) }
+            }.toAnnotatedString()
+        }
     }
     // Timestamp in its own column so wrapped lines stay indented under the message.
     Row(Modifier.padding(vertical = 1.dp)) {
@@ -499,4 +580,73 @@ internal fun completeAt(value: TextFieldValue, suggestion: String): TextFieldVal
     val next = if (after.isEmpty()) "$before " else before + after
     val caret = if (after.isEmpty()) next.length else before.length + 1
     return TextFieldValue(next, TextRange(caret.coerceAtMost(next.length)))
+}
+
+@Composable
+private fun ConsoleSearchBar(
+    query: String,
+    onQuery: (String) -> Unit,
+    level: LevelFilter,
+    onLevel: (LevelFilter) -> Unit,
+    /** Selected match and number of matches; null when there are none. */
+    position: Pair<Int, Int>?,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onShare: () -> Unit,
+    onClose: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextField(
+                value = query,
+                onValueChange = onQuery,
+                placeholder = { Text(stringResource(R.string.console_search_hint)) },
+                leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                trailingIcon = {
+                    when {
+                        position != null -> Text("${position.first}/${position.second}", style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(end = 12.dp))
+                        query.isNotBlank() -> Text(stringResource(R.string.console_no_matches), style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 12.dp))
+                    }
+                },
+                singleLine = true,
+                shape = CircleShape,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, autoCorrectEnabled = false),
+                keyboardActions = KeyboardActions(onSearch = { onPrevious() }),
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = onPrevious, enabled = position != null) {
+                Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.console_match_previous))
+            }
+            IconButton(onClick = onNext, enabled = position != null) {
+                Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.console_match_next))
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                LevelFilter.entries.forEach { f ->
+                    FilterChip(
+                        selected = level == f,
+                        onClick = { onLevel(f) },
+                        label = {
+                            Text(stringResource(when (f) {
+                                LevelFilter.ALL -> R.string.console_filter_all
+                                LevelFilter.WARNINGS -> R.string.console_filter_warnings
+                                LevelFilter.ERRORS -> R.string.console_filter_errors
+                            }))
+                        },
+                    )
+                }
+            }
+            IconButton(onClick = onShare) { Icon(Icons.Outlined.Share, stringResource(R.string.console_share)) }
+            IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, stringResource(R.string.action_close)) }
+        }
+    }
 }

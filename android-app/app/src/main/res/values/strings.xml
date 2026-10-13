@@ -498,4 +498,14 @@
     <string name="placeholder_title">Fill in</string>
     <string name="placeholder_player">Player</string>
     <string name="placeholder_text">Text</string>
+    <string name="console_search">Search console</string>
+    <string name="console_search_hint">Search…</string>
+    <string name="console_no_lines">No lines for this filter</string>
+    <string name="console_no_matches">No matches</string>
+    <string name="console_match_previous">Previous match</string>
+    <string name="console_match_next">Next match</string>
+    <string name="console_filter_all">All</string>
+    <string name="console_filter_warnings">Warnings</string>
+    <string name="console_filter_errors">Errors</string>
+    <string name="console_share">Share lines</string>
 </resources>

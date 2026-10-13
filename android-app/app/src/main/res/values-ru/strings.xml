@@ -485,4 +485,14 @@
     <string name="placeholder_title">Заполнить</string>
     <string name="placeholder_player">Игрок</string>
     <string name="placeholder_text">Текст</string>
+    <string name="console_search">Поиск в консоли</string>
+    <string name="console_search_hint">Поиск…</string>
+    <string name="console_no_lines">Нет строк для этого фильтра</string>
+    <string name="console_no_matches">Ничего не найдено</string>
+    <string name="console_match_previous">Предыдущее совпадение</string>
+    <string name="console_match_next">Следующее совпадение</string>
+    <string name="console_filter_all">Все</string>
+    <string name="console_filter_warnings">Предупреждения</string>
+    <string name="console_filter_errors">Ошибки</string>
+    <string name="console_share">Поделиться строками</string>
 </resources>

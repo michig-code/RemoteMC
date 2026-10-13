@@ -485,4 +485,14 @@
     <string name="placeholder_title">Uzupełnij</string>
     <string name="placeholder_player">Gracz</string>
     <string name="placeholder_text">Tekst</string>
+    <string name="console_search">Szukaj w konsoli</string>
+    <string name="console_search_hint">Szukaj…</string>
+    <string name="console_no_lines">Brak wierszy dla tego filtra</string>
+    <string name="console_no_matches">Brak wyników</string>
+    <string name="console_match_previous">Poprzedni wynik</string>
+    <string name="console_match_next">Następny wynik</string>
+    <string name="console_filter_all">Wszystko</string>
+    <string name="console_filter_warnings">Ostrzeżenia</string>
+    <string name="console_filter_errors">Błędy</string>
+    <string name="console_share">Udostępnij wiersze</string>
 </resources>

@@ -467,4 +467,14 @@
     <string name="placeholder_title">Doldur</string>
     <string name="placeholder_player">Oyuncu</string>
     <string name="placeholder_text">Metin</string>
+    <string name="console_search">Konsolda ara</string>
+    <string name="console_search_hint">Ara…</string>
+    <string name="console_no_lines">Bu filtre için satır yok</string>
+    <string name="console_no_matches">Eşleşme yok</string>
+    <string name="console_match_previous">Önceki eşleşme</string>
+    <string name="console_match_next">Sonraki eşleşme</string>
+    <string name="console_filter_all">Tümü</string>
+    <string name="console_filter_warnings">Uyarılar</string>
+    <string name="console_filter_errors">Hatalar</string>
+    <string name="console_share">Satırları paylaş</string>
 </resources>

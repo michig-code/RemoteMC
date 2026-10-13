@@ -476,4 +476,14 @@
     <string name="placeholder_title">Completar</string>
     <string name="placeholder_player">Jugador</string>
     <string name="placeholder_text">Texto</string>
+    <string name="console_search">Buscar en la consola</string>
+    <string name="console_search_hint">Buscar…</string>
+    <string name="console_no_lines">No hay líneas para este filtro</string>
+    <string name="console_no_matches">Sin resultados</string>
+    <string name="console_match_previous">Resultado anterior</string>
+    <string name="console_match_next">Resultado siguiente</string>
+    <string name="console_filter_all">Todo</string>
+    <string name="console_filter_warnings">Avisos</string>
+    <string name="console_filter_errors">Errores</string>
+    <string name="console_share">Compartir líneas</string>
 </resources>

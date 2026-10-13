@@ -476,4 +476,14 @@
     <string name="placeholder_title">Preencher</string>
     <string name="placeholder_player">Jogador</string>
     <string name="placeholder_text">Texto</string>
+    <string name="console_search">Pesquisar no console</string>
+    <string name="console_search_hint">Pesquisar…</string>
+    <string name="console_no_lines">Nenhuma linha para este filtro</string>
+    <string name="console_no_matches">Nenhum resultado</string>
+    <string name="console_match_previous">Resultado anterior</string>
+    <string name="console_match_next">Próximo resultado</string>
+    <string name="console_filter_all">Tudo</string>
+    <string name="console_filter_warnings">Avisos</string>
+    <string name="console_filter_errors">Erros</string>
+    <string name="console_share">Compartilhar linhas</string>
 </resources>
