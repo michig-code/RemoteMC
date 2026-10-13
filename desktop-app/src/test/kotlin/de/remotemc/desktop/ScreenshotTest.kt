@@ -65,8 +65,8 @@ class ScreenshotTest {
         ChatEntry(3, now, ChatEntry.Type.BROADCAST, "Server", "Restart in 10 minutes"),
     )
 
-    private fun session() = ServerSession(survival, CoroutineScope(Dispatchers.Unconfined), model.servers, model.history).apply {
-        showPreview(sample, samplePlayers, sampleConsole, sampleChat, Session("PC", Role.ADMIN, true, true), listOf("time set day", "weather clear", "save-all"))
+    private fun session(chat: List<ChatEntry> = sampleChat) = ServerSession(survival, CoroutineScope(Dispatchers.Unconfined), model.servers, model.history).apply {
+        showPreview(sample, samplePlayers, sampleConsole, chat, Session("PC", Role.ADMIN, true, true), listOf("time set day", "weather clear", "save-all"))
         manage = SampleManagement(now)
     }
 
@@ -90,6 +90,7 @@ class ScreenshotTest {
     @Test fun worlds() = shot("11_worlds") { ServerContent(session(), {}, Pane.WORLDS) }
     @Test fun plugins() = shot("12_plugins") { ServerContent(session(), {}, Pane.PLUGINS) }
     @Test fun schedules() = shot("13_schedules") { ServerContent(session(), {}, Pane.SCHEDULES) }
+    @Test fun chatShort() = shot("14_chat_short") { ServerContent(session(sampleChat.takeLast(1)), {}, Pane.CHAT) }
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
 }

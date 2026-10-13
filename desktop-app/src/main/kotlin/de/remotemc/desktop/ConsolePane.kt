@@ -178,9 +178,12 @@ fun ChatPane(session: ServerSession) {
         if (session.chat.isEmpty()) {
             Box(Modifier.weight(1f)) { EmptyState(stringResource(Res.string.chat_empty_title), stringResource(Res.string.chat_empty_text)) }
         } else {
-            SelectionContainer(Modifier.weight(1f)) {
-                LazyColumn(state = list, verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
-                    items(session.chat, key = { "${it.id}-${it.time}" }) { e -> ChatRow(e) }
+            // The list takes the free height, so the input stays at the bottom with few messages.
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                SelectionContainer {
+                    LazyColumn(Modifier.fillMaxSize(), state = list, verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
+                        items(session.chat, key = { "${it.id}-${it.time}" }) { e -> ChatRow(e) }
+                    }
                 }
             }
         }
