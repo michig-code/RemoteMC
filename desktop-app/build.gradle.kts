@@ -80,7 +80,9 @@ val syncStrings by tasks.registering(Sync::class) {
     }
     from("src/main/composeResources")
     includeEmptyDirs = false
-    inputs.property("placeholderFormat", 1) // bump when composePlaceholders changes
+    inputs.property("placeholderFormat", 2) // bump when composePlaceholders changes
+    // The strings are UTF-8; without this, Windows reads and writes them as cp1252.
+    filteringCharset = "UTF-8"
     // Compose resources only fill in numbered string placeholders (%1$s). Android's %d, %s,
     // %.1f and %2$.0f become %1$s, %2$s, …; the app formats numbers itself before passing them.
     filesMatching("**/strings.xml") {
