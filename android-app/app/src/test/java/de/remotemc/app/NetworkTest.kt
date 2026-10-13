@@ -58,6 +58,24 @@ class NetworkTest {
     }
 
     @Test
+    fun actionsWithoutParametersArePosted() = runBlocking {
+        val api = ApiClient(profile())
+        server.enqueue(json("""{"schedules":[],"timezone":"Europe/Berlin","now":1}"""))
+        api.scheduleAction("ab12cd34", "delete")
+        server.takeRequest().let {
+            assertEquals("POST", it.method)
+            assertEquals("/api/v1/schedules/ab12cd34/delete", it.path)
+            assertEquals("{}", it.body.readUtf8())
+        }
+        server.enqueue(json("""{"schedules":[],"timezone":"Europe/Berlin","now":1}"""))
+        api.scheduleAction("ab12cd34", "run")
+        assertEquals("/api/v1/schedules/ab12cd34/run", server.takeRequest().path)
+        server.enqueue(json("""{"bans":[]}"""))
+        api.pardon("Griefer42")
+        assertEquals("/api/v1/bans/Griefer42/pardon", server.takeRequest().path)
+    }
+
+    @Test
     fun differentCertificateIsRejected() = runBlocking {
         server.enqueue(json("{}"))
         try {

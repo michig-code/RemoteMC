@@ -21,6 +21,7 @@ import de.remotemc.app.data.WorldDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ConnectionPool
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -187,16 +188,15 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
             token: String?,
             body: JSONObject?,
         ): JSONObject = withContext(Dispatchers.IO) {
-            val request = try {
-                Request.Builder()
-                    .url(baseUrl + path)
-                    .method(method, body?.toString()?.toRequestBody(JSON))
-                    .header("Accept", "application/json")
-                    .apply { if (token != null) header("Authorization", "Bearer $token") }
-                    .build()
-            } catch (e: IllegalArgumentException) {
-                throw ApiError.Unreachable("Invalid address")
-            }
+            val url = (baseUrl + path).toHttpUrlOrNull() ?: throw ApiError.Unreachable("Invalid address")
+            // POST needs a body even for actions without parameters (delete, run, unban).
+            val payload = body ?: if (method == "POST" || method == "PUT" || method == "PATCH") JSONObject() else null
+            val request = Request.Builder()
+                .url(url)
+                .method(method, payload?.toString()?.toRequestBody(JSON))
+                .header("Accept", "application/json")
+                .apply { if (token != null) header("Authorization", "Bearer $token") }
+                .build()
             try {
                 client.newCall(request).execute().use { response ->
                     val text = response.body?.string().orEmpty()
