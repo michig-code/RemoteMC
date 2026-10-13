@@ -525,4 +525,15 @@
     <string name="inventory_hotbar">Schnellleiste</string>
     <string name="inventory_tap_hint">Tippe auf einen Gegenstand für Details</string>
     <string name="inventory_durability">Haltbarkeit %1$d / %2$d</string>
+    <plurals name="notif_joins_title">
+        <item quantity="one">%1$d Spieler auf %2$s beigetreten</item>
+        <item quantity="other">%1$d Spieler auf %2$s beigetreten</item>
+    </plurals>
+    <string name="notif_reply">Antworten</string>
+    <string name="notif_reply_sent">Du: %s</string>
+    <string name="notif_reply_failed">Nicht gesendet: %s</string>
+    <string name="settings_notify_quiet">Ruhezeiten</string>
+    <string name="settings_notify_quiet_text">Ohne Ton und Vibration von %1$s bis %2$s</string>
+    <string name="settings_notify_quiet_from">Von</string>
+    <string name="settings_notify_quiet_to">Bis</string>
 </resources>

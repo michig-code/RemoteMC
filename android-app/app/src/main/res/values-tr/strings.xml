@@ -511,4 +511,15 @@
     <string name="inventory_hotbar">Hızlı erişim çubuğu</string>
     <string name="inventory_tap_hint">Ayrıntılar için bir eşyaya dokun</string>
     <string name="inventory_durability">Dayanıklılık %1$d / %2$d</string>
+    <plurals name="notif_joins_title">
+        <item quantity="one">%2$s sunucusuna %1$d oyuncu katıldı</item>
+        <item quantity="other">%2$s sunucusuna %1$d oyuncu katıldı</item>
+    </plurals>
+    <string name="notif_reply">Yanıtla</string>
+    <string name="notif_reply_sent">Sen: %s</string>
+    <string name="notif_reply_failed">Gönderilmedi: %s</string>
+    <string name="settings_notify_quiet">Sessiz saatler</string>
+    <string name="settings_notify_quiet_text">%1$s ile %2$s arasında ses ve titreşim yok</string>
+    <string name="settings_notify_quiet_from">Başlangıç</string>
+    <string name="settings_notify_quiet_to">Bitiş</string>
 </resources>

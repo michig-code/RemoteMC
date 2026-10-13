@@ -542,4 +542,15 @@
     <string name="inventory_hotbar">Hotbar</string>
     <string name="inventory_tap_hint">Tap an item for details</string>
     <string name="inventory_durability">Durability %1$d / %2$d</string>
+    <plurals name="notif_joins_title">
+        <item quantity="one">%1$d player joined %2$s</item>
+        <item quantity="other">%1$d players joined %2$s</item>
+    </plurals>
+    <string name="notif_reply">Reply</string>
+    <string name="notif_reply_sent">You: %s</string>
+    <string name="notif_reply_failed">Not sent: %s</string>
+    <string name="settings_notify_quiet">Quiet hours</string>
+    <string name="settings_notify_quiet_text">No sound or vibration from %1$s to %2$s</string>
+    <string name="settings_notify_quiet_from">From</string>
+    <string name="settings_notify_quiet_to">To</string>
 </resources>

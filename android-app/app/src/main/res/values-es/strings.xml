@@ -525,4 +525,16 @@
     <string name="inventory_hotbar">Barra rápida</string>
     <string name="inventory_tap_hint">Toca un objeto para ver detalles</string>
     <string name="inventory_durability">Durabilidad %1$d / %2$d</string>
+    <plurals name="notif_joins_title">
+        <item quantity="one">%1$d jugador entró en %2$s</item>
+        <item quantity="many">%1$d jugadores entraron en %2$s</item>
+        <item quantity="other">%1$d jugadores entraron en %2$s</item>
+    </plurals>
+    <string name="notif_reply">Responder</string>
+    <string name="notif_reply_sent">Tú: %s</string>
+    <string name="notif_reply_failed">No enviado: %s</string>
+    <string name="settings_notify_quiet">Horas de silencio</string>
+    <string name="settings_notify_quiet_text">Sin sonido ni vibración de %1$s a %2$s</string>
+    <string name="settings_notify_quiet_from">Desde</string>
+    <string name="settings_notify_quiet_to">Hasta</string>
 </resources>

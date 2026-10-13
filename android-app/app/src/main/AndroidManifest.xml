@@ -51,6 +51,10 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Keeps a connection to the user's own Minecraft servers to notify about outages, lag, player joins and chat mentions; the app has no push service." />
         </service>
+        <!-- "Reply" on chat mention notifications -->
+        <receiver
+            android:name=".notify.ReplyReceiver"
+            android:exported="false" />
         <receiver
             android:name=".notify.BootReceiver"
             android:exported="false">

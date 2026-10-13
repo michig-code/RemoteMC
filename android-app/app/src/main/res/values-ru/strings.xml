@@ -539,4 +539,17 @@
     <string name="inventory_hotbar">Панель быстрого доступа</string>
     <string name="inventory_tap_hint">Нажмите на предмет, чтобы увидеть подробности</string>
     <string name="inventory_durability">Прочность %1$d / %2$d</string>
+    <plurals name="notif_joins_title">
+        <item quantity="one">%1$d игрок зашёл на %2$s</item>
+        <item quantity="few">%1$d игрока зашли на %2$s</item>
+        <item quantity="many">%1$d игроков зашли на %2$s</item>
+        <item quantity="other">%1$d игрока зашли на %2$s</item>
+    </plurals>
+    <string name="notif_reply">Ответить</string>
+    <string name="notif_reply_sent">Вы: %s</string>
+    <string name="notif_reply_failed">Не отправлено: %s</string>
+    <string name="settings_notify_quiet">Тихие часы</string>
+    <string name="settings_notify_quiet_text">Без звука и вибрации с %1$s до %2$s</string>
+    <string name="settings_notify_quiet_from">С</string>
+    <string name="settings_notify_quiet_to">До</string>
 </resources>

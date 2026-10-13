@@ -46,6 +46,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -477,7 +478,41 @@ private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) 
                         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
                     )
                 }
+                val context = LocalContext.current
+                val from = clockText(context, alerts.quietFrom)
+                val to = clockText(context, alerts.quietTo)
+                SwitchRow(
+                    stringResource(R.string.settings_notify_quiet),
+                    stringResource(R.string.settings_notify_quiet_text, from, to),
+                    alerts.quiet,
+                ) { v -> onChange { it.copy(quiet = v) } }
+                if (alerts.quiet) {
+                    Row(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(true, false).forEach { start ->
+                            OutlinedButton(onClick = {
+                                val current = if (start) alerts.quietFrom else alerts.quietTo
+                                android.app.TimePickerDialog(
+                                    context,
+                                    { _, h, m -> onChange { a -> if (start) a.copy(quietFrom = h * 60 + m) else a.copy(quietTo = h * 60 + m) } },
+                                    current / 60, current % 60,
+                                    android.text.format.DateFormat.is24HourFormat(context),
+                                ).show()
+                            }) {
+                                Text(stringResource(if (start) R.string.settings_notify_quiet_from else R.string.settings_notify_quiet_to) + "  " + (if (start) from else to))
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+/** "22:00" or "10:00 PM", as the phone shows times. */
+private fun clockText(context: android.content.Context, minuteOfDay: Int): String {
+    val calendar = java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, minuteOfDay / 60)
+        set(java.util.Calendar.MINUTE, minuteOfDay % 60)
+    }
+    return android.text.format.DateFormat.getTimeFormat(context).format(calendar.time)
 }

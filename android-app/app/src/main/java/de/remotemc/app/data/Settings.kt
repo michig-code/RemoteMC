@@ -50,6 +50,9 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 putString("alerts.players", it.players)
                 putBoolean("alerts.mentions", it.mentions)
                 putString("alerts.words", it.words)
+                putBoolean("alerts.quiet", it.quiet)
+                putInt("alerts.quietFrom", it.quietFrom)
+                putInt("alerts.quietTo", it.quietTo)
             }
         }
     }
@@ -72,6 +75,9 @@ class SettingsStore(private val prefs: SharedPreferences) {
             players = prefs.getString("alerts.players", "").orEmpty(),
             mentions = prefs.getBoolean("alerts.mentions", true),
             words = prefs.getString("alerts.words", "").orEmpty(),
+            quiet = prefs.getBoolean("alerts.quiet", false),
+            quietFrom = prefs.getInt("alerts.quietFrom", 22 * 60).coerceIn(0, 1439),
+            quietTo = prefs.getInt("alerts.quietTo", 7 * 60).coerceIn(0, 1439),
         ),
     )
 }

@@ -91,7 +91,11 @@ class WatchService : Service() {
             server = { watchers[id]?.first ?: app.servers.get(id) },
             rules = AlertRules { app.settings.settings.value.alerts },
             phoneOnline = ::phoneOnline,
-            post = { server, alert -> Notifier.post(this, server, alert) },
+            post = { server, alert ->
+                val now = java.util.Calendar.getInstance()
+                val minute = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
+                Notifier.post(this, server, alert, quiet = app.settings.settings.value.alerts.isQuiet(minute))
+            },
             clock = SystemClock::elapsedRealtime, // keeps counting while the phone sleeps
             log = { Log.w(TAG, it) },
         ).run()

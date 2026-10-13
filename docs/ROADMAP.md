@@ -104,7 +104,7 @@ Mehrere Spieler auf einmal kicken, eine Nachricht senden oder whitelisten.
 - Position und Teleport
 - Inventar und Endertruhe ansehen (nur lesen)
 
-### B5 – Benachrichtigungen
+### B5 – Benachrichtigungen ✅
 - Ruhezeiten
 - pro Server ein- und ausschaltbar
 - gebündelt („3 Spieler sind beigetreten“)
