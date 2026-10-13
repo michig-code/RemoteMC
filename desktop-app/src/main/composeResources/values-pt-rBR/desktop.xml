@@ -6,4 +6,7 @@
     <string name="tray_quit">Sair</string>
     <string name="tray_running">O RemoteMC continua na bandeja do sistema e vai te avisar.</string>
     <string name="desktop_dashboard_edit_hint">Arraste um cartão para movê-lo. Use os botões para mudar a largura ou ocultá-lo.</string>
+    <string name="window_minimize">Minimizar</string>
+    <string name="window_maximize">Maximizar</string>
+    <string name="window_restore">Restaurar</string>
 </resources>

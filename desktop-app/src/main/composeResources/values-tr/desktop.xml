@@ -6,4 +6,7 @@
     <string name="tray_quit">Çık</string>
     <string name="tray_running">RemoteMC sistem tepsisinde çalışmaya devam ediyor ve seni bilgilendirecek.</string>
     <string name="desktop_dashboard_edit_hint">Bir kartı sürükleyerek taşı. Düğmelerle genişliğini değiştir veya gizle.</string>
+    <string name="window_minimize">Simge durumuna küçült</string>
+    <string name="window_maximize">Ekranı kapla</string>
+    <string name="window_restore">Önceki boyut</string>
 </resources>

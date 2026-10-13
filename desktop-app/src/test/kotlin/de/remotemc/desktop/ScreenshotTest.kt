@@ -108,6 +108,28 @@ class ScreenshotTest {
             OverviewPane(s, loadHistory = null, startEditing = true)
         }
     }
+    private val fakeWindow = object : WindowControls {
+        override val maximized = false
+        override fun minimize() {}
+        override fun toggleMaximize() {}
+        override fun close() {}
+        @androidx.compose.runtime.Composable
+        override fun DragArea(modifier: androidx.compose.ui.Modifier, content: @androidx.compose.runtime.Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) =
+            androidx.compose.foundation.layout.Box(modifier, content = content)
+    }
+
+    @Test fun tabs() = shot("18_tabs") {
+        val tabs = androidx.compose.runtime.remember {
+            Tabs(model, CoroutineScope(Dispatchers.Unconfined), persist = false, connect = false).apply {
+                model.servers.servers.value.forEach { open(it.id) }
+                open(model.servers.servers.value.first().id)
+            }
+        }
+        androidx.compose.foundation.layout.Column {
+            TitleBar(model, tabs, fakeWindow, onAdd = {})
+            ServerContent(session(), {}, Pane.OVERVIEW)
+        }
+    }
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
 }

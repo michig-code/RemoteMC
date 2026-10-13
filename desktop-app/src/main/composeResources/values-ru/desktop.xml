@@ -6,4 +6,7 @@
     <string name="tray_quit">Выход</string>
     <string name="tray_running">RemoteMC продолжает работать в области уведомлений и сообщит вам.</string>
     <string name="desktop_dashboard_edit_hint">Перетащите карточку, чтобы переместить её. Кнопками можно изменить ширину или скрыть её.</string>
+    <string name="window_minimize">Свернуть</string>
+    <string name="window_maximize">Развернуть</string>
+    <string name="window_restore">Восстановить</string>
 </resources>

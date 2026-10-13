@@ -6,4 +6,7 @@
     <string name="tray_quit">Salir</string>
     <string name="tray_running">RemoteMC sigue en la bandeja del sistema y te avisará.</string>
     <string name="desktop_dashboard_edit_hint">Arrastra una tarjeta para moverla. Con los botones cambias su ancho o la ocultas.</string>
+    <string name="window_minimize">Minimizar</string>
+    <string name="window_maximize">Maximizar</string>
+    <string name="window_restore">Restaurar</string>
 </resources>

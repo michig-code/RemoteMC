@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +80,7 @@ fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit) {
 /** Separate from the connection so screenshot tests can show it with fixed data. */
 @Composable
 fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0) {
-    var pane by remember { mutableStateOf(initialPane) }
+    var pane by rememberSaveable { mutableStateOf(initialPane) }
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(session) { for (m in session.messages) snackbar.showSnackbar(m) }
     val panes = Pane.entries.filter { session.role.atLeast(it.minRole) && (it.feature == null || session.supports(it.feature)) }

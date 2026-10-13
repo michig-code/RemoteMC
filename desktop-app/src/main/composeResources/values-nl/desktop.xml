@@ -6,4 +6,7 @@
     <string name="tray_quit">Afsluiten</string>
     <string name="tray_running">RemoteMC blijft actief in het systeemvak en laat het je weten.</string>
     <string name="desktop_dashboard_edit_hint">Sleep een kaart om haar te verplaatsen. Met de knoppen wijzig je de breedte of verberg je haar.</string>
+    <string name="window_minimize">Minimaliseren</string>
+    <string name="window_maximize">Maximaliseren</string>
+    <string name="window_restore">Vorig formaat</string>
 </resources>

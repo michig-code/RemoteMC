@@ -6,4 +6,7 @@
     <string name="tray_quit">Esci</string>
     <string name="tray_running">RemoteMC resta attivo nell’area di notifica e ti avviserà.</string>
     <string name="desktop_dashboard_edit_hint">Trascina una scheda per spostarla. Con i pulsanti ne cambi la larghezza o la nascondi.</string>
+    <string name="window_minimize">Riduci a icona</string>
+    <string name="window_maximize">Ingrandisci</string>
+    <string name="window_restore">Ripristina</string>
 </resources>

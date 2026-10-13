@@ -1,5 +1,11 @@
 package de.remotemc.desktop
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,9 +13,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Notification
@@ -68,48 +80,88 @@ fun main() = application {
         }
     }
     val runningHint = stringResource(Res.string.tray_running)
-    Window(
-        onCloseRequest = {
-            if (inTray) {
-                visible = false
-                if (!trayHintShown) {
-                    trayHintShown = true
-                    tray.sendNotification(Notification("RemoteMC", runningHint, Notification.Type.None))
-                }
-            } else {
-                exitApplication()
+    val windowState = rememberWindowState(size = DpSize(1180.dp, 780.dp))
+    val close = {
+        if (inTray) {
+            visible = false
+            if (!trayHintShown) {
+                trayHintShown = true
+                tray.sendNotification(Notification("RemoteMC", runningHint, Notification.Type.None))
             }
-        },
+        } else {
+            exitApplication()
+        }
+    }
+    val tabs = remember { Tabs(model, scope) }
+    Window(
+        onCloseRequest = close,
         visible = visible,
         title = "RemoteMC",
         icon = icon,
-        state = rememberWindowState(size = DpSize(1180.dp, 780.dp)),
+        state = windowState,
+        // RemoteMC draws its own title bar with the server tabs.
+        undecorated = true,
+        onPreviewKeyEvent = { e -> tabShortcut(e, tabs) },
     ) {
         window.minimumSize = java.awt.Dimension(820, 560)
         LaunchedEffect(visible) { if (visible) window.toFront() }
-        App(model)
+        val controls = remember { AwtWindowControls(this, close) }
+        App(model, tabs = tabs, controls = controls)
+        ResizeEdges(window)
+    }
+}
+
+/** Ctrl+W closes the current server tab, Ctrl+Tab / Ctrl+Shift+Tab switch tabs. */
+private fun tabShortcut(e: androidx.compose.ui.input.key.KeyEvent, tabs: Tabs): Boolean {
+    if (e.type != androidx.compose.ui.input.key.KeyEventType.KeyDown || !e.isCtrlPressed) return false
+    return when (e.key) {
+        androidx.compose.ui.input.key.Key.W -> tabs.active?.let { tabs.close(it); true } ?: false
+        androidx.compose.ui.input.key.Key.Tab -> { tabs.next(if (e.isShiftPressed) -1 else 1); true }
+        else -> false
     }
 }
 
 @Composable
-fun App(model: AppModel, start: Screen = Screen.Servers) {
+fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, controls: WindowControls? = null) {
     val settings by model.settings.settings.collectAsState()
     var screen by remember { mutableStateOf(start) }
+    val servers by model.servers.servers.collectAsState()
+    LaunchedEffect(servers) { tabs?.prune() }
+    val saveable = rememberSaveableStateHolder()
     RemoteMCTheme(settings) {
-        when (val s = screen) {
-            Screen.Servers -> ServerListScreen(
-                model,
-                onOpen = { screen = Screen.Server(it) },
-                onAdd = { screen = Screen.Pair(it) },
-                onSettings = { screen = Screen.Settings },
-            )
-            is Screen.Pair -> PairScreen(model, s.link, onDone = { id -> screen = if (id != null) Screen.Server(id) else Screen.Servers })
-            is Screen.Server -> {
-                val profile = model.servers.get(s.id)
-                if (profile == null) screen = Screen.Servers
-                else ServerScreen(model, profile, onBack = { screen = Screen.Servers })
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            if (tabs != null && controls != null) {
+                TitleBar(model, tabs, controls, onAdd = { tabs.showHome(); screen = Screen.Pair(null) })
             }
-            Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                val activeTab = tabs?.active
+                if (tabs != null && activeTab != null) {
+                    // Each tab keeps its own state (pane, scroll position) while others are shown.
+                    saveable.SaveableStateProvider(activeTab) {
+                        val session = tabs.session(activeTab)
+                        if (session != null) ServerContent(session, onBack = tabs::showHome)
+                    }
+                    return@Box
+                }
+                when (val s = screen) {
+                    Screen.Servers -> ServerListScreen(
+                        model,
+                        onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
+                        onAdd = { screen = Screen.Pair(it) },
+                        onSettings = { screen = Screen.Settings },
+                    )
+                    is Screen.Pair -> PairScreen(model, s.link, onDone = { id ->
+                        screen = Screen.Servers
+                        if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
+                    })
+                    is Screen.Server -> {
+                        val profile = model.servers.get(s.id)
+                        if (profile == null) screen = Screen.Servers
+                        else ServerScreen(model, profile, onBack = { screen = Screen.Servers })
+                    }
+                    Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
+                }
+            }
         }
     }
 }

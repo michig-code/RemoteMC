@@ -6,4 +6,7 @@
     <string name="tray_quit">Zakończ</string>
     <string name="tray_running">RemoteMC działa dalej w zasobniku i powiadomi cię.</string>
     <string name="desktop_dashboard_edit_hint">Przeciągnij kartę, aby ją przesunąć. Przyciskami zmienisz jej szerokość lub ją ukryjesz.</string>
+    <string name="window_minimize">Minimalizuj</string>
+    <string name="window_maximize">Maksymalizuj</string>
+    <string name="window_restore">Przywróć</string>
 </resources>
