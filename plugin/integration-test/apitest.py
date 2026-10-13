@@ -111,6 +111,28 @@ check("unversioned path still works", st == 200, d)
 st, d = req("GET", "/api/v1/whitelist", admin)
 check("whitelist", st == 200 and "enabled" in d and isinstance(d.get("players"), list), d)
 was_on = d.get("enabled")
+# unchanged answers: ETag + empty 304; big answers gzip-compressed
+def raw_get(path, token, headers):
+    c = conn()
+    c.request("GET", path, headers={"Authorization": "Bearer " + token, **headers})
+    r = c.getresponse()
+    return r.status, {k.lower(): v for k, v in r.getheaders()}, r.read()
+
+st, h, _ = raw_get("/api/v1/whitelist", admin, {})
+etag = h.get("etag", "")
+check("etag on reads", st == 200 and etag.startswith('W/"'), h)
+st, h, body = raw_get("/api/v1/whitelist", admin, {"If-None-Match": etag})
+check("304 when unchanged", st == 304 and body == b"", (st, body[:80]))
+st, h, body = raw_get("/api/v1/whitelist", admin, {"If-None-Match": 'W/"stale"'})
+check("200 when changed", st == 200 and json.loads(body).get("players") is not None, st)
+st, h, body = raw_get("/api/v1/commands", admin, {"Accept-Encoding": "gzip"})
+import gzip as _gzip
+plain = raw_get("/api/v1/commands", admin, {})[2]
+check("gzip for big answers", st == 200 and h.get("content-encoding") == "gzip"
+      and _gzip.decompress(body) == plain and len(body) < len(plain) / 3, (h.get("content-encoding"), len(body), len(plain)))
+st, h, body = raw_get("/api/v1/ping", admin, {"Accept-Encoding": "gzip"})
+check("no gzip for small answers", st == 200 and "content-encoding" not in h and json.loads(body).get("apiVersion"), h)
+
 st, d = req("POST", "/api/v1/whitelist/add", admin, {"name": "Notch"})
 check("whitelist add", st == 200 and any(n.lower() == "notch" for n in d.get("players", [])), d)
 st, d = req("POST", "/api/v1/whitelist/remove", admin, {"name": "Notch"})

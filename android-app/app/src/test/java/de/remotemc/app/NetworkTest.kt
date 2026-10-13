@@ -6,6 +6,7 @@ import de.remotemc.app.net.ApiClient
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.net.EventStream
 import de.remotemc.app.net.Http
+import de.remotemc.app.net.ResponseCache
 import de.remotemc.app.net.StreamEvent
 import de.remotemc.app.net.Tls
 import kotlinx.coroutines.flow.take
@@ -37,6 +38,7 @@ class NetworkTest {
         server.useHttps(HandshakeCertificates.Builder().heldCertificate(cert).build().sslSocketFactory(), false)
         server.start()
         fingerprint = Tls.fingerprint(cert.certificate)
+        ResponseCache.clear()
     }
 
     @After
@@ -73,6 +75,36 @@ class NetworkTest {
         server.enqueue(json("""{"bans":[]}"""))
         api.pardon("Griefer42")
         assertEquals("/api/v1/bans/Griefer42/pardon", server.takeRequest().path)
+    }
+
+    @Test
+    fun unchangedAnswersComeFromTheCache() = runBlocking {
+        val api = ApiClient(profile())
+        val body = """{"enabled":true,"enforced":false,"players":["Steve"]}"""
+        server.enqueue(json(body).setHeader("ETag", "W/\"abc\""))
+        assertEquals(listOf("Steve"), api.whitelist().players)
+        server.takeRequest().let {
+            assertEquals(null, it.getHeader("If-None-Match"))
+            assertEquals("gzip", it.getHeader("Accept-Encoding"))
+        }
+        // Unchanged: the server sends an empty 304 and the app shows the remembered list.
+        server.enqueue(MockResponse().setResponseCode(304).setHeader("ETag", "W/\"abc\""))
+        assertEquals(listOf("Steve"), api.whitelist().players)
+        assertEquals("W/\"abc\"", server.takeRequest().getHeader("If-None-Match"))
+        // Actions are never cached or conditional.
+        server.enqueue(json(body))
+        api.whitelistAdd("Alex")
+        assertEquals(null, server.takeRequest().getHeader("If-None-Match"))
+    }
+
+    @Test
+    fun gzipAnswersAreUnpacked() = runBlocking {
+        val buffer = okio.Buffer()
+        okio.GzipSink(buffer).use { sink ->
+            okio.Buffer().writeUtf8("""{"bans":[{"name":"Griefer42","reason":"x","source":"Console","created":1,"expires":0}]}""").let { sink.write(it, it.size) }
+        }
+        server.enqueue(MockResponse().setHeader("Content-Type", "application/json").setHeader("Content-Encoding", "gzip").setBody(buffer))
+        assertEquals("Griefer42", ApiClient(profile()).bans().single().name)
     }
 
     @Test

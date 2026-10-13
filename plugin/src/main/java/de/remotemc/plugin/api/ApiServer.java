@@ -123,7 +123,8 @@ public final class ApiServer {
             }
             String method = ex.getRequestMethod().toUpperCase(Locale.ROOT);
             String ip = ex.getRemoteAddress().getAddress().getHostAddress();
-            ex.getResponseHeaders().set("Cache-Control", "no-store");
+            // Clients may keep answers only to ask "changed?" (ETag), never reuse them unasked.
+            ex.getResponseHeaders().set("Cache-Control", "private, no-cache");
 
             if (path.equals("/api/v1/ping")) {
                 send(ex, 200, ping());
@@ -901,7 +902,23 @@ public final class ApiServer {
 
     private static void send(HttpExchange ex, int status, JsonObject body) throws IOException {
         byte[] bytes = GSON.toJson(body).getBytes(StandardCharsets.UTF_8);
-        ex.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+        var headers = ex.getResponseHeaders();
+        headers.set("Content-Type", "application/json; charset=utf-8");
+        // Successful reads get an ETag: a client that already has this exact answer gets an
+        // empty 304 instead of the whole list again.
+        if (status == 200 && ex.getRequestMethod().equalsIgnoreCase("GET")) {
+            String etag = ResponseBody.etag(bytes);
+            headers.set("ETag", etag);
+            if (ResponseBody.notModified(ex.getRequestHeaders().getFirst("If-None-Match"), etag)) {
+                ex.sendResponseHeaders(304, -1);
+                return;
+            }
+        }
+        headers.add("Vary", "Accept-Encoding");
+        if (ResponseBody.shouldGzip(ex.getRequestHeaders().getFirst("Accept-Encoding"), bytes.length)) {
+            bytes = ResponseBody.gzip(bytes);
+            headers.set("Content-Encoding", "gzip");
+        }
         ex.sendResponseHeaders(status, bytes.length);
         try (OutputStream out = ex.getResponseBody()) {
             out.write(bytes);

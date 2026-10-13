@@ -220,14 +220,20 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
             val url = (baseUrl + path).toHttpUrlOrNull() ?: throw ApiError.Unreachable("Invalid address")
             // POST needs a body even for actions without parameters (delete, run, unban).
             val payload = body ?: if (method == "POST" || method == "PUT" || method == "PATCH") JSONObject() else null
+            // Reads we already have an answer for ask "changed?"; an unchanged list then costs an
+            // empty 304 instead of the whole JSON. (gzip is added and unpacked by OkHttp itself.)
+            val cacheKey = if (method == "GET") ResponseCache.key(url.toString(), token) else null
+            val cached = cacheKey?.let(ResponseCache::get)
             val request = Request.Builder()
                 .url(url)
                 .method(method, raw ?: payload?.toString()?.toRequestBody(JSON))
                 .header("Accept", "application/json")
                 .apply { if (token != null) header("Authorization", "Bearer $token") }
+                .apply { if (cached != null) header("If-None-Match", cached.etag) }
                 .build()
             try {
                 client.newCall(request).execute().use { response ->
+                    if (response.code == 304 && cached != null) return@use JSONObject(cached.body)
                     val text = response.body?.string().orEmpty()
                     val json = try {
                         JSONObject(text)
@@ -242,6 +248,9 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
                         )
                     }
                     json ?: throw ApiError.InvalidResponse()
+                    val etag = response.header("ETag")
+                    if (cacheKey != null && etag != null) ResponseCache.put(cacheKey, etag, text)
+                    json
                 }
             } catch (e: ApiError) {
                 throw e
