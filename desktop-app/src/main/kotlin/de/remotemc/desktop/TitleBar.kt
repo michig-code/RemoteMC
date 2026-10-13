@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -82,6 +84,15 @@ interface WindowControls {
     /** Dragging ended (the window may snap to a screen edge). */
     fun dragEnd() {}
 
+    /** True when Windows draws the frame, its buttons and handles dragging (JetBrains Runtime). */
+    val native: Boolean get() = false
+
+    /** Room to leave on the right for Windows' own buttons. */
+    val rightInset: Dp get() = 0.dp
+
+    /** Tells Windows whether the mouse is over our content (true) or free title bar (false). */
+    fun hitTest(client: Boolean) {}
+
     /** The empty part of the bar (double-click maximizes; the whole bar drags the window). */
     @Composable
     fun DragArea(modifier: Modifier, content: @Composable BoxScope.() -> Unit)
@@ -95,7 +106,7 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
     val servers = model.servers.servers.value
     Row(
         Modifier.fillMaxWidth().height(TitleBarHeight).background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .windowDrag(controls),
+            .then(if (controls.native) Modifier.nativeCaption(controls) else Modifier.windowDrag(controls)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(Modifier.width(10.dp))
@@ -141,7 +152,10 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
         BarButton(Icons.Outlined.Add, stringResource(Res.string.servers_add), onClick = { tabs.openSpecial(Tabs.PAIR) })
         // Empty space: drag to move the window, double-click to maximize.
         controls.DragArea(Modifier.weight(1f).fillMaxHeight()) {
-            Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onDoubleTap = { controls.toggleMaximize() }) })
+            // With Windows' frame, a double-click on the free title bar is handled by Windows itself.
+            if (!controls.native) {
+                Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onDoubleTap = { controls.toggleMaximize() }) })
+            }
         }
         model.updates?.let { updates ->
             updates.available?.let { info ->
@@ -155,13 +169,17 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
             tabs.openSpecial(Tabs.SETTINGS)
         }
         Spacer(Modifier.width(6.dp))
-        BarButton(Icons.Outlined.Remove, stringResource(Res.string.window_minimize), wide = true, onClick = controls::minimize)
-        BarButton(
-            if (controls.maximized) Icons.Outlined.FilterNone else Icons.Outlined.CropSquare,
-            stringResource(if (controls.maximized) Res.string.window_restore else Res.string.window_maximize),
-            wide = true, onClick = controls::toggleMaximize,
-        )
-        BarButton(Icons.Outlined.Close, stringResource(Res.string.action_close), wide = true, danger = true, onClick = controls::close)
+        if (controls.native) {
+            Spacer(Modifier.width(controls.rightInset))
+        } else {
+            BarButton(Icons.Outlined.Remove, stringResource(Res.string.window_minimize), wide = true, onClick = controls::minimize)
+            BarButton(
+                if (controls.maximized) Icons.Outlined.FilterNone else Icons.Outlined.CropSquare,
+                stringResource(if (controls.maximized) Res.string.window_restore else Res.string.window_maximize),
+                wide = true, onClick = controls::toggleMaximize,
+            )
+            BarButton(Icons.Outlined.Close, stringResource(Res.string.action_close), wide = true, danger = true, onClick = controls::close)
+        }
     }
 }
 
@@ -193,6 +211,33 @@ private fun Modifier.windowDrag(controls: WindowControls): Modifier = pointerInp
     }
 }
 
+/**
+ * With Windows' own frame: everything on the bar that nobody handled (free space, the logo)
+ * counts as title bar, so Windows drags, snaps and maximizes the window natively.
+ */
+private fun Modifier.nativeCaption(controls: WindowControls): Modifier = pointerInput(controls) {
+    awaitPointerEventScope {
+        var inControl = false
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Main)
+            val handled = event.changes.any { it.isConsumed }
+            if (event.type == PointerEventType.Press && handled) inControl = true
+            controls.hitTest(handled || inControl)
+            if (event.type == PointerEventType.Release) inControl = false
+        }
+    }
+}
+
+/** Marks tabs and buttons as our content (they take the mouse instead of Windows' title bar). */
+private fun Modifier.titleBarControl(): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            // Runs after the tab's own click handling (outer modifier), then claims the event.
+            awaitPointerEvent(PointerEventPass.Main).changes.forEach { it.consume() }
+        }
+    }
+}
+
 @Composable
 private fun Tab(
     title: String,
@@ -209,7 +254,7 @@ private fun Tab(
         else -> Color.Transparent
     }
     Row(
-        Modifier.height(32.dp).widthIn(max = 220.dp).clip(RoundedCornerShape(10.dp)).background(background)
+        Modifier.titleBarControl().height(32.dp).widthIn(max = 220.dp).clip(RoundedCornerShape(10.dp)).background(background)
             .hoverable(interaction)
             // Middle click closes the tab, like in a browser.
             .pointerInput(onClose) {
@@ -252,7 +297,7 @@ private fun BarButton(icon: ImageVector, label: String, wide: Boolean = false, d
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     Box(
-        Modifier.fillMaxHeight().width(if (wide) 46.dp else 36.dp)
+        Modifier.titleBarControl().fillMaxHeight().width(if (wide) 46.dp else 36.dp)
             .background(
                 when {
                     hovered && danger -> Color(0xFFC42B1C)
@@ -276,7 +321,7 @@ private fun BarButton(icon: ImageVector, label: String, wide: Boolean = false, d
 @Composable
 private fun UpdatePill(version: String, onClick: () -> Unit) {
     Row(
-        Modifier.height(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)
+        Modifier.titleBarControl().height(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)
             .clickable(onClick = onClick).padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

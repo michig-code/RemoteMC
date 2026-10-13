@@ -117,15 +117,30 @@ fun main() = application {
         title = "RemoteMC",
         icon = icon,
         state = windowState,
-        // RemoteMC draws its own title bar with the server tabs.
-        undecorated = true,
+        // With the JetBrains Runtime the window keeps Windows' own frame (native dragging, snapping
+        // and animations) and RemoteMC draws the tabs into its title bar; otherwise RemoteMC draws
+        // the whole frame itself.
+        undecorated = !NativeTitleBar.supported,
         onPreviewKeyEvent = { e -> tabShortcut(e, tabs) },
     ) {
         window.minimumSize = java.awt.Dimension(820, 560)
         LaunchedEffect(visible) { if (visible) window.toFront() }
-        val controls = remember { AwtWindowControls(this, close, quit = ::exitApplication, animations = { model.settings.settings.value.animations }) }
+        val dark = when (settings.theme) {
+            ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+        }
+        val controls: WindowControls = remember {
+            if (NativeTitleBar.supported) {
+                NativeWindowControls(window, NativeTitleBar.install(window, TitleBarHeight, dark), close, quit = ::exitApplication)
+            } else {
+                AwtWindowControls(this, close, quit = ::exitApplication, animations = { model.settings.settings.value.animations })
+            }
+        }
+        // Windows' own buttons follow the colour theme.
+        LaunchedEffect(dark) { (controls as? NativeWindowControls)?.setDark(dark) }
         App(model, tabs = tabs, controls = controls)
-        ResizeEdges(window)
+        if (!controls.native) ResizeEdges(window)
     }
 }
 

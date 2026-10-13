@@ -49,6 +49,8 @@ dependencies {
     implementation("org.json:json:20240303") // same API as Android's built-in org.json
     implementation("net.java.dev.jna:jna-platform:5.15.0") // Windows DPAPI for the stored tokens
     implementation("sh.calvin.reorderable:reorderable:2.5.1") // drag cards on the overview (same as the phone)
+    // Native Windows title bar with our own content when running on the JetBrains Runtime.
+    implementation("org.jetbrains.runtime:jbr-api:1.10.1")
 
     testImplementation(kotlin("test"))
 }
