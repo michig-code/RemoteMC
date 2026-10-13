@@ -1,6 +1,7 @@
 package de.remotemc.desktop
 
 import com.sun.jna.platform.win32.Crypt32Util
+import de.remotemc.app.data.AlertSettings
 import de.remotemc.app.data.ServerProfile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,6 +80,8 @@ data class DesktopSettings(
     /** Hue of the colour theme; null = classic green. */
     val accentHue: Float? = null,
     val deviceName: String = defaultDeviceName(),
+    /** Windows notifications; while on, closing the window keeps RemoteMC in the tray. */
+    val alerts: AlertSettings = AlertSettings(),
 )
 
 fun defaultDeviceName(): String =
@@ -92,7 +95,12 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
     fun update(change: (DesktopSettings) -> DesktopSettings) {
         val next = change(_settings.value)
         _settings.value = next
+        val a = next.alerts
+        val alerts = JSONObject().put("enabled", a.enabled).put("offline", a.offline).put("lowTps", a.lowTps)
+            .put("tpsThreshold", a.tpsThreshold).put("joins", a.joins).put("players", a.players)
+            .put("mentions", a.mentions).put("words", a.words)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
+            .put("alerts", alerts)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -102,6 +110,18 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             theme = runCatching { ThemeMode.valueOf(o.getString("theme")) }.getOrDefault(ThemeMode.SYSTEM),
             accentHue = o.optDouble("accentHue", -1.0).takeIf { it >= 0 }?.toFloat(),
             deviceName = o.optString("deviceName").ifBlank { defaultDeviceName() },
+            alerts = o.optJSONObject("alerts")?.let { a ->
+                AlertSettings(
+                    enabled = a.optBoolean("enabled", false),
+                    offline = a.optBoolean("offline", true),
+                    lowTps = a.optBoolean("lowTps", true),
+                    tpsThreshold = a.optInt("tpsThreshold", 15).coerceIn(5, 19),
+                    joins = a.optBoolean("joins", false),
+                    players = a.optString("players"),
+                    mentions = a.optBoolean("mentions", true),
+                    words = a.optString("words"),
+                )
+            } ?: AlertSettings(),
         )
     }.getOrDefault(DesktopSettings())
 }

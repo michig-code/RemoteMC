@@ -71,7 +71,9 @@ The same server control on the PC: server list with live status, pairing with th
 `remotemc://` link (with the same certificate check), overview with TPS, memory and history chart,
 players with all actions, whitelist and ban list, world settings (time, weather, difficulty, game
 rules), plugin list, scheduled tasks, coloured console with suggestions (Tab) and history (↑/↓), chat.
-Colour themes and all 10 languages. Access tokens are stored with Windows DPAPI.
+Windows notifications (server offline, low TPS, player joins, mentions) with RemoteMC staying in the
+tray when you close the window. Colour themes and all 10 languages. Access tokens are stored with
+Windows DPAPI.
 
 Download `RemoteMC-Windows-x.y.z.msi` (or `-Setup.exe`) from the releases; Java is included.
 Build it yourself on Windows with `cd desktop-app && gradlew packageMsi`.

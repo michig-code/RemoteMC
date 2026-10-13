@@ -8,6 +8,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -91,6 +92,8 @@ class WatchService : Service() {
             rules = AlertRules { app.settings.settings.value.alerts },
             phoneOnline = ::phoneOnline,
             post = { server, alert -> Notifier.post(this, server, alert) },
+            clock = SystemClock::elapsedRealtime, // keeps counting while the phone sleeps
+            log = { Log.w(TAG, it) },
         ).run()
     }
 

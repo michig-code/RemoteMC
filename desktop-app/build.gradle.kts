@@ -28,6 +28,9 @@ kotlin {
             "de/remotemc/app/data/Models.kt",
             "de/remotemc/app/data/ServerProfile.kt",
             "de/remotemc/app/data/ConnectLink.kt",
+            "de/remotemc/app/data/AlertSettings.kt",
+            "de/remotemc/app/notify/AlertRules.kt",
+            "de/remotemc/app/notify/ServerWatcher.kt",
             "de/remotemc/app/ui/util/MinecraftText.kt",
         )
     }

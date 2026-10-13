@@ -1,7 +1,5 @@
 package de.remotemc.app.notify
 
-import android.os.SystemClock
-import android.util.Log
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.net.EventStream
@@ -20,10 +18,11 @@ class ServerWatcher(
     private val phoneOnline: () -> Boolean,
     private val post: (ServerProfile, Alert) -> Unit,
     private val base: OkHttpClient = Http.base,
-    private val clock: () -> Long = SystemClock::elapsedRealtime,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
     private val minBackoff: Long = 2_000,
     private val maxBackoff: Long = 30_000,
     private val errorBackoff: Long = 5 * 60_000,
+    private val log: (String) -> Unit = {},
 ) {
     suspend fun run() {
         var backoff = minBackoff
@@ -55,7 +54,7 @@ class ServerWatcher(
                 delay(backoff)
                 backoff = (backoff * 2).coerceAtMost(maxBackoff)
             } else {
-                Log.w("ServerWatcher", "Not watching ${profile.name} for now: $failure")
+                log("Not watching ${profile.name} for now: $failure")
                 delay(errorBackoff)
             }
         }

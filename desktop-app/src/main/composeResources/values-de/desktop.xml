@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Zeigt Windows-Benachrichtigungen. Wenn du das Fenster schließt, läuft RemoteMC im Infobereich weiter.</string>
+    <string name="tray_open">RemoteMC öffnen</string>
+    <string name="tray_quit">Beenden</string>
+    <string name="tray_running">RemoteMC läuft im Infobereich weiter und benachrichtigt dich.</string>
+</resources>

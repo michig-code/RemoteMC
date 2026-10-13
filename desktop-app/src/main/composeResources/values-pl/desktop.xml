@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Pokazuje powiadomienia Windows. Po zamknięciu okna RemoteMC działa dalej w zasobniku systemowym.</string>
+    <string name="tray_open">Otwórz RemoteMC</string>
+    <string name="tray_quit">Zakończ</string>
+    <string name="tray_running">RemoteMC działa dalej w zasobniku i powiadomi cię.</string>
+</resources>

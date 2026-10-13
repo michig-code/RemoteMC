@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Affiche des notifications Windows. Quand vous fermez la fenêtre, RemoteMC reste dans la zone de notification.</string>
+    <string name="tray_open">Ouvrir RemoteMC</string>
+    <string name="tray_quit">Quitter</string>
+    <string name="tray_running">RemoteMC reste dans la zone de notification et vous préviendra.</string>
+</resources>

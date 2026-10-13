@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import de.remotemc.app.data.AlertSettings
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import java.io.File
@@ -30,6 +31,10 @@ class StorageTest {
         val settings = SettingsStore(File(dir, "settings.json"))
         settings.update { it.copy(theme = ThemeMode.DARK, accentHue = 212f, deviceName = "Gaming-PC") }
         assertEquals(DesktopSettings(ThemeMode.DARK, 212f, "Gaming-PC"), SettingsStore(File(dir, "settings.json")).settings.value)
+
+        val alerts = AlertSettings(enabled = true, lowTps = false, tpsThreshold = 12, joins = true, players = "Steve, Alex", words = "Michi")
+        settings.update { it.copy(alerts = alerts) }
+        assertEquals(alerts, SettingsStore(File(dir, "settings.json")).settings.value.alerts)
 
         val history = CommandHistory(File(dir, "h.json"))
         history.add("s", "time set day")

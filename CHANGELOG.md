@@ -33,6 +33,8 @@ First public release of **RemoteMC**.
   history chart, players with all actions, coloured console with suggestions and history, chat
 - Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
   server's plugin supports them
+- Windows notifications with the same rules as on the phone; RemoteMC stays in the tray while
+  they are on, and each server can be muted
 - Colour themes, light/dark, 10 languages; tokens protected with Windows DPAPI
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Windows bildirimleri gösterir. Pencereyi kapattığında RemoteMC sistem tepsisinde çalışmaya devam eder.</string>
+    <string name="tray_open">RemoteMC’yi aç</string>
+    <string name="tray_quit">Çık</string>
+    <string name="tray_running">RemoteMC sistem tepsisinde çalışmaya devam ediyor ve seni bilgilendirecek.</string>
+</resources>

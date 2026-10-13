@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,8 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import de.remotemc.app.data.AlertSettings
 import de.remotemc.desktop.res.*
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -95,6 +100,10 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                         )
                     }
                 }
+                SectionTitle(stringResource(Res.string.settings_notifications))
+                McCard(Modifier.fillMaxWidth()) {
+                    AlertSettingsCard(settings.alerts) { change -> model.settings.update { it.copy(alerts = change(it.alerts)) } }
+                }
                 SectionTitle(stringResource(Res.string.settings_about))
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -112,6 +121,72 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AlertSettingsCard(alerts: AlertSettings, onChange: ((AlertSettings) -> AlertSettings) -> Unit) {
+    Column(Modifier.padding(vertical = 8.dp)) {
+        SwitchRow(stringResource(Res.string.settings_notifications), stringResource(Res.string.desktop_notify_text), alerts.enabled) { on ->
+            onChange { it.copy(enabled = on) }
+        }
+        AnimatedVisibility(alerts.enabled) {
+            Column {
+                HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                SwitchRow(stringResource(Res.string.settings_notify_offline), stringResource(Res.string.settings_notify_offline_text), alerts.offline) { v ->
+                    onChange { it.copy(offline = v) }
+                }
+                SwitchRow(stringResource(Res.string.settings_notify_tps), stringResource(Res.string.settings_notify_tps_text, alerts.tpsThreshold), alerts.lowTps) { v ->
+                    onChange { it.copy(lowTps = v) }
+                }
+                if (alerts.lowTps) {
+                    Slider(
+                        value = alerts.tpsThreshold.toFloat(),
+                        onValueChange = { v -> onChange { it.copy(tpsThreshold = v.roundToInt()) } },
+                        valueRange = 5f..19f,
+                        steps = 13,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+                SwitchRow(stringResource(Res.string.settings_notify_joins), stringResource(Res.string.settings_notify_players_hint), alerts.joins) { v ->
+                    onChange { it.copy(joins = v) }
+                }
+                if (alerts.joins) {
+                    OutlinedTextField(
+                        alerts.players, { v -> onChange { it.copy(players = v.take(300)) } },
+                        label = { Text(stringResource(Res.string.settings_notify_players)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    )
+                }
+                SwitchRow(stringResource(Res.string.settings_notify_mentions), stringResource(Res.string.settings_notify_words_hint), alerts.mentions) { v ->
+                    onChange { it.copy(mentions = v) }
+                }
+                if (alerts.mentions) {
+                    OutlinedTextField(
+                        alerts.words, { v -> onChange { it.copy(words = v.take(300)) } },
+                        label = { Text(stringResource(Res.string.settings_notify_words)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwitchRow(title: String, text: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.width(12.dp))
+        Switch(checked, onCheckedChange = null)
     }
 }
 

@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -88,6 +90,7 @@ fun ServerListScreen(
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
 ) {
     val servers by model.servers.servers.collectAsState()
+    val alertsOn = model.settings.settings.collectAsState().value.alerts.enabled
     var query by remember { mutableStateOf("") }
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
@@ -163,7 +166,10 @@ fun ServerListScreen(
                     }
                 }
                 items(shown, key = { it.id }) { server ->
-                    ServerCard(server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server })
+                    ServerCard(
+                        server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
+                        alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
+                    )
                 }
             }
         }
@@ -201,6 +207,8 @@ private fun ServerCard(
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    alertsOn: Boolean = false,
+    onToggleNotify: () -> Unit = {},
 ) {
     var menu by remember { mutableStateOf(false) }
     var refresh by remember { mutableIntStateOf(0) }
@@ -229,6 +237,11 @@ private fun ServerCard(
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        if (alertsOn && !server.notify) {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(Icons.Outlined.NotificationsOff, stringResource(Res.string.servers_notify_muted), Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                         if (server.role != Role.ADMIN) {
                             Spacer(Modifier.width(6.dp))
                             Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
@@ -244,6 +257,13 @@ private fun ServerCard(
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(Res.string.action_more)) }
                     DropdownMenu(menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem({ Text(stringResource(Res.string.servers_rename)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
+                        if (alertsOn) {
+                            DropdownMenuItem(
+                                { Text(stringResource(if (server.notify) Res.string.servers_notify_off else Res.string.servers_notify_on)) },
+                                { menu = false; onToggleNotify() },
+                                leadingIcon = { Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null) },
+                            )
+                        }
                         DropdownMenuItem({ Text(stringResource(Res.string.action_remove)) }, { menu = false; onDelete() }, leadingIcon = { Icon(Icons.Outlined.Delete, null) })
                     }
                 }

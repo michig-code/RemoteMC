@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Toont Windows-meldingen. Als je het venster sluit, blijft RemoteMC actief in het systeemvak.</string>
+    <string name="tray_open">RemoteMC openen</string>
+    <string name="tray_quit">Afsluiten</string>
+    <string name="tray_running">RemoteMC blijft actief in het systeemvak en laat het je weten.</string>
+</resources>

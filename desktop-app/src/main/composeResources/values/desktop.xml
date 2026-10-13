@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts only the Windows app uses (the rest comes from the Android app). -->
+<resources>
+    <string name="desktop_notify_text">Shows Windows notifications. When you close the window, RemoteMC keeps running in the system tray.</string>
+    <string name="tray_open">Open RemoteMC</string>
+    <string name="tray_quit">Quit</string>
+    <string name="tray_running">RemoteMC keeps running in the tray and will notify you.</string>
+</resources>
