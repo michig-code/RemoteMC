@@ -124,6 +124,7 @@ data class ServerUiState(
     val history: List<String> = emptyList(),
     val suggestions: List<Suggestion> = emptyList(),
     val usageHint: String? = null,
+    val suggestionsOffline: Boolean = false,
     /** Saved overview layout ([de.remotemc.app.data.DashboardLayout.encode]). */
     val dashboardLayout: String = "",
     /** When the shown data was saved, while it still comes from the last visit. */
@@ -220,6 +221,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             history = vm.history,
             suggestions = vm.suggestions,
             usageHint = vm.usageHint,
+            suggestionsOffline = vm.suggestionsOffline,
             dashboardLayout = settings.dashboard,
             cachedAt = vm.cachedAt,
         ),
@@ -389,6 +391,7 @@ fun ServerScreenContent(
                                 history = state.history,
                                 suggestions = state.suggestions,
                                 usageHint = state.usageHint,
+                                suggestionsOffline = state.suggestionsOffline,
                                 onInput = actions.onCommandInput,
                                 onCommand = actions.onCommand,
                                 onForget = actions.onForgetCommand,

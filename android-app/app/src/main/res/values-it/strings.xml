@@ -145,6 +145,7 @@
     <string name="console_waiting">In attesa dell\'output della console…</string>
     <string name="console_scroll_down">Vai ai più recenti</string>
     <string name="console_input_hint">Inserisci un comando…</string>
+    <string name="console_suggestions_offline">Nessuna connessione – solo suggerimenti salvati</string>
     <string name="console_read_only">Il tuo ruolo può leggere la console ma non eseguire comandi.</string>
     <string name="console_recent">Comandi recenti</string>
     <string name="console_recent_forget">Rimuovi dai comandi recenti</string>

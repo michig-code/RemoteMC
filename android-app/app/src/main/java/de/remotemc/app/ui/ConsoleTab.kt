@@ -104,6 +104,9 @@ fun ConsoleTab(
     history: List<String> = emptyList(),
     suggestions: List<Suggestion> = emptyList(),
     usageHint: String? = null,
+    /** Only saved and local suggestions: the server could not be asked. */
+    suggestionsOffline: Boolean = false,
+    /** The text before the cursor, whenever it changes (suggestions are for the word there). */
     onInput: (String) -> Unit = {},
     onCommand: (String) -> Unit,
     onForget: (String) -> Unit = {},
@@ -143,13 +146,11 @@ fun ConsoleTab(
         setInput("")
     }
 
-    /** Replaces the word being typed with [suggestion], like pressing Tab in Minecraft. */
+    /** Replaces the word at the cursor with [suggestion], like pressing Tab in Minecraft. */
     fun apply(suggestion: String) {
         haptics.tap()
-        val text = input.text
-        val cut = text.lastIndexOf(' ')
-        val prefix = if (cut < 0) (if (text.startsWith("/")) "/" else "") else text.substring(0, cut + 1)
-        setInput("$prefix$suggestion ")
+        input = completeAt(input, suggestion)
+        onInput(input.text.take(input.selection.end))
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -212,12 +213,12 @@ fun ConsoleTab(
             }
             // Suggestions float over the bottom of the terminal, like Minecraft's chat completion.
             androidx.compose.animation.AnimatedVisibility(
-                visible = canRunCommands && (suggestions.isNotEmpty() || usageHint != null) && input.text.isNotBlank(),
+                visible = canRunCommands && (suggestions.isNotEmpty() || usageHint != null || suggestionsOffline) && input.text.isNotBlank(),
                 enter = if (animate) expandVertically(expandFrom = Alignment.Bottom) + fadeIn() else EnterTransition.None,
                 exit = if (animate) shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut() else ExitTransition.None,
                 modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
             ) {
-                SuggestionPanel(input.text, suggestions, usageHint, ::apply)
+                SuggestionPanel(input.text.take(input.selection.end), suggestions, usageHint, suggestionsOffline, ::apply)
             }
         }
 
@@ -232,9 +233,10 @@ fun ConsoleTab(
             CommandInput(
                 value = input,
                 onValueChange = {
-                    val changed = it.text != input.text
+                    // Moving the cursor to another word changes the suggestions too.
+                    val changed = it.text != input.text || it.selection.end != input.selection.end
                     input = it
-                    if (changed) onInput(it.text)
+                    if (changed) onInput(it.text.take(it.selection.end))
                 },
                 placeholder = stringResource(R.string.console_input_hint),
                 prefix = "/",
@@ -253,7 +255,7 @@ fun ConsoleTab(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SuggestionPanel(input: String, suggestions: List<Suggestion>, usageHint: String?, onPick: (String) -> Unit) {
+private fun SuggestionPanel(input: String, suggestions: List<Suggestion>, usageHint: String?, offline: Boolean, onPick: (String) -> Unit) {
     val typed = input.substringAfterLast(' ').removePrefix("/")
     Surface(
         color = Color(0xF0161D19),
@@ -272,7 +274,15 @@ private fun SuggestionPanel(input: String, suggestions: List<Suggestion>, usageH
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
-                if (suggestions.isNotEmpty()) HorizontalDivider(color = Color(0x22FFFFFF))
+                if (suggestions.isNotEmpty() || offline) HorizontalDivider(color = Color(0x22FFFFFF))
+            }
+            if (offline) {
+                Text(
+                    stringResource(R.string.console_suggestions_offline),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TerminalDim,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
             }
             LazyColumn(Modifier.heightIn(max = 220.dp)) {
                 items(suggestions, key = { it.text }) { s ->
@@ -432,4 +442,21 @@ fun CommandInput(
             Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.action_send))
         }
     }
+}
+
+/**
+ * Puts [suggestion] in place of the word at the cursor of [value]. At the end a space follows,
+ * ready for the next argument; inside the text the cursor jumps to the next word.
+ */
+internal fun completeAt(value: TextFieldValue, suggestion: String): TextFieldValue {
+    val text = value.text
+    val cursor = value.selection.end.coerceIn(0, text.length)
+    val start = if (cursor == 0) 0 else text.lastIndexOf(' ', cursor - 1) + 1
+    val end = text.indexOf(' ', cursor).let { if (it < 0) text.length else it }
+    val slash = if (start == 0 && text.startsWith("/")) "/" else ""
+    val before = text.substring(0, start) + slash + suggestion
+    val after = text.substring(end)
+    val next = if (after.isEmpty()) "$before " else before + after
+    val caret = if (after.isEmpty()) next.length else before.length + 1
+    return TextFieldValue(next, TextRange(caret.coerceAtMost(next.length)))
 }

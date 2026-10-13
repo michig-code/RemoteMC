@@ -152,6 +152,7 @@
     <string name="console_waiting">Czekam na dane z konsoli…</string>
     <string name="console_scroll_down">Przejdź do najnowszych</string>
     <string name="console_input_hint">Wpisz komendę…</string>
+    <string name="console_suggestions_offline">Brak połączenia – tylko zapisane podpowiedzi</string>
     <string name="console_read_only">Twoja rola pozwala czytać konsolę, ale nie wykonywać komend.</string>
     <string name="console_recent">Ostatnie komendy</string>
     <string name="console_recent_forget">Usuń z ostatnich komend</string>

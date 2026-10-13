@@ -138,6 +138,7 @@
     <string name="console_waiting">Wachten op console-uitvoer…</string>
     <string name="console_scroll_down">Naar nieuwste</string>
     <string name="console_input_hint">Voer een commando in…</string>
+    <string name="console_suggestions_offline">Geen verbinding – alleen opgeslagen suggesties</string>
     <string name="console_read_only">Met je rol kun je de console lezen, maar geen commando\'s uitvoeren.</string>
     <string name="console_recent">Recente commando\'s</string>
     <string name="console_recent_forget">Verwijderen uit recente commando\'s</string>

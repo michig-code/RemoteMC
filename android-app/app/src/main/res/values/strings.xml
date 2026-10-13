@@ -159,6 +159,7 @@
     <string name="console_waiting">Waiting for console output…</string>
     <string name="console_scroll_down">Jump to latest</string>
     <string name="console_input_hint">Enter a command…</string>
+    <string name="console_suggestions_offline">No connection – only saved suggestions</string>
     <string name="console_read_only">Your role can read the console but not run commands.</string>
     <string name="console_recent">Recent commands</string>
     <string name="console_recent_forget">Remove from recent commands</string>

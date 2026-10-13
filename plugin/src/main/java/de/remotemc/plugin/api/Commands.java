@@ -53,6 +53,16 @@ final class Commands {
         return o;
     }
 
+    /** Online player names starting with the last word of {@code buffer}. */
+    static List<String> players(String buffer) {
+        String word = buffer.substring(buffer.lastIndexOf(' ') + 1).toLowerCase(Locale.ROOT);
+        return Bukkit.getOnlinePlayers().stream()
+                .map(org.bukkit.entity.Player::getName)
+                .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(word))
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+    }
+
     /** Suggestions for the last word of {@code buffer} (e.g. "gamemode cr" → ["creative"]). */
     static JsonObject complete(String buffer, Collection<String> blocked) {
         String label = buffer.split(" ", 2)[0].toLowerCase(Locale.ROOT);
@@ -60,7 +70,14 @@ final class Commands {
         if (isBlocked(label.substring(label.indexOf(':') + 1), blocked) && buffer.contains(" ")) {
             suggestions = List.of();
         } else {
-            List<String> raw = Platform.commandMap().tabComplete(Bukkit.getConsoleSender(), buffer);
+            List<String> raw;
+            try {
+                raw = Platform.commandMap().tabComplete(Bukkit.getConsoleSender(), buffer);
+            } catch (RuntimeException | LinkageError e) {
+                // Another plugin's tab completer failed: still help with player names, like the
+                // game does for commands without their own completion.
+                raw = players(buffer);
+            }
             suggestions = raw == null ? List.of() : raw.stream()
                     .filter(s -> buffer.contains(" ") || (!s.contains(":") && !isBlocked(s.replace("/", ""), blocked)))
                     .distinct()

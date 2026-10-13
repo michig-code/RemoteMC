@@ -55,6 +55,7 @@ public final class ApiServer {
     private static final Gson GSON = new Gson();
     private static final int MAX_BODY = 16 * 1024;
     private static final int MAX_STREAMS = 32;
+    private static final int COMPLETE_TIMEOUT_SECONDS = 3;
     private static final long HEARTBEAT_MILLIS = 15_000;
     private static final Pattern PLAYER_NAME = Pattern.compile("[A-Za-z0-9_.]{1,16}");
 
@@ -204,7 +205,19 @@ public final class ApiServer {
                 }
                 String finalBuffer = buffer;
                 List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
-                return global(() -> Commands.complete(finalBuffer, blocked));
+                // Suggestions are only useful while typing: a hanging tab completer of another
+                // plugin must not keep the app waiting, so give up early with an empty list.
+                try {
+                    return await(plugin.scheduler().global(() -> Commands.complete(finalBuffer, blocked)), COMPLETE_TIMEOUT_SECONDS);
+                } catch (ApiException e) {
+                    if (!"timeout".equals(e.code)) {
+                        throw e;
+                    }
+                    JsonObject empty = new JsonObject();
+                    empty.add("suggestions", new JsonArray());
+                    empty.addProperty("timeout", true);
+                    return empty;
+                }
             }
             case "GET /api/v1/whitelist" -> {
                 require(caller, Role.MODERATOR);
@@ -752,8 +765,12 @@ public final class ApiServer {
     }
 
     private static <T> T await(CompletableFuture<T> future) throws Exception {
+        return await(future, 10);
+    }
+
+    private static <T> T await(CompletableFuture<T> future, int timeoutSeconds) throws Exception {
         try {
-            return future.get(10, TimeUnit.SECONDS);
+            return future.get(timeoutSeconds, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             // Tasks wrap checked API errors in CompletionException to pass them out.

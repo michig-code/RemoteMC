@@ -145,6 +145,7 @@
     <string name="console_waiting">Aguardando saída do console…</string>
     <string name="console_scroll_down">Ir para o mais recente</string>
     <string name="console_input_hint">Digite um comando…</string>
+    <string name="console_suggestions_offline">Sem conexão – apenas sugestões salvas</string>
     <string name="console_read_only">Sua função pode ler o console, mas não executar comandos.</string>
     <string name="console_recent">Comandos recentes</string>
     <string name="console_recent_forget">Remover dos comandos recentes</string>

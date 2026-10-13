@@ -138,6 +138,7 @@
     <string name="console_waiting">Konsol çıktısı bekleniyor…</string>
     <string name="console_scroll_down">En yeniye git</string>
     <string name="console_input_hint">Bir komut gir…</string>
+    <string name="console_suggestions_offline">Bağlantı yok – yalnızca kayıtlı öneriler</string>
     <string name="console_read_only">Rolün konsolu okuyabilir ama komut çalıştıramaz.</string>
     <string name="console_recent">Son komutlar</string>
     <string name="console_recent_forget">Son komutlardan kaldır</string>

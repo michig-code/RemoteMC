@@ -152,6 +152,7 @@
     <string name="console_waiting">Ожидание вывода консоли…</string>
     <string name="console_scroll_down">К последним</string>
     <string name="console_input_hint">Введите команду…</string>
+    <string name="console_suggestions_offline">Нет соединения – только сохранённые подсказки</string>
     <string name="console_read_only">Ваша роль позволяет читать консоль, но не выполнять команды.</string>
     <string name="console_recent">Недавние команды</string>
     <string name="console_recent_forget">Удалить из недавних команд</string>

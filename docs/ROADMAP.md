@@ -34,7 +34,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 
 ## B. Komfort
 
-### B0 – Befehlsvorschläge funktionieren immer
+### B0 – Befehlsvorschläge funktionieren immer ✅
 
 **Warum heute manchmal nichts kommt**
 1. Die Befehlsliste wird nur einmal geladen (`ServerViewModel.loadCommands`). Schlägt das fehl, bleibt sie bis zum Neuöffnen leer.
@@ -55,7 +55,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 - **Robust beim Tippen:**
   - Verspätete Server-Antworten werden noch angezeigt, solange sie zur aktuellen Eingabe passen.
   - Ohne Verbindung zeigt die Leiste: „Keine Verbindung – nur gespeicherte Vorschläge“.
-- **Alle Rollen:** Moderatoren und Zuschauer sehen Vorschläge für die Befehle, die sie ausführen dürfen. Das Plugin filtert nach Rolle und `security.blocked-commands`.
+- ~~**Alle Rollen:**~~ entfällt: Moderatoren und Zuschauer dürfen keine Konsolenbefehle ausführen. Ihr Eingabefeld ist gesperrt, Vorschläge würden ihnen nichts nützen. Gesperrte Befehle (`security.blocked-commands`) filtert das Plugin bereits.
 - **Am Cursor ergänzen:** Vorgeschlagen und ersetzt wird das Wort an der Cursor-Position.
 - **Plugin:**
   - Wirft das Tab-Complete eines fremden Plugins einen Fehler, kommen die übrigen Vorschläge trotzdem, statt dass ein Fehler zurückkommt.

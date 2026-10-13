@@ -15,7 +15,9 @@ import androidx.lifecycle.viewModelScope
 import de.remotemc.app.R
 import de.remotemc.app.app
 import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.CommandCompletion
 import de.remotemc.app.data.CommandInfo
+import de.remotemc.app.data.CompletionCache
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.HistoryRange
 import de.remotemc.app.data.PerformanceHistory
@@ -96,6 +98,13 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         private set
     private var commands: List<CommandInfo> = emptyList()
     private var commandsLoaded = false
+    private var commandsJob: Job? = null
+    private val completionCache = CompletionCache()
+    /** What is typed now (before the cursor), to place late server answers. */
+    private var typed = ""
+    /** True when the server could not be asked: only saved and local suggestions are shown. */
+    var suggestionsOffline by mutableStateOf(false)
+        private set
     private var suggestJob: Job? = null
 
     val role: Role get() = session?.role ?: profile.role
@@ -422,20 +431,31 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         history = getApplication<Application>().app.history.remove(profile.id, command)
     }
 
-    /** Loads the server's command list once (admins only) for offline-fast suggestions. */
+    /**
+     * Loads the server's command list (admins only) for instant suggestions. Restored commands
+     * are shown at once but still refreshed once (cheap: ETag); a failed load is retried.
+     */
     fun loadCommands() {
-        // Restored commands are shown at once but still refreshed once (cheap: ETag).
-        if (commandsLoaded || !role.atLeast(Role.ADMIN)) return
-        viewModelScope.launch { runCatching { commands = api.commands() }.onSuccess { commandsLoaded = true } }
+        if (commandsLoaded || commandsJob?.isActive == true || !role.atLeast(Role.ADMIN)) return
+        commandsJob = viewModelScope.launch {
+            for (wait in COMMAND_RETRY_MS) {
+                if (runCatching { commands = api.commands() }.isSuccess) {
+                    commandsLoaded = true
+                    return@launch
+                }
+                delay(wait)
+            }
+        }
     }
 
     /**
-     * Suggestions like Minecraft's chat: command names from the cached list while typing the
-     * first word, then the server's own tab completion for arguments.
+     * Suggestions like Minecraft's chat for [input] (the text before the cursor): command names
+     * from the saved list while typing the first word; for arguments, local ones (players, game
+     * modes, …) and remembered server answers at once, then the server's own tab completion.
      */
     fun onCommandInput(input: String) {
-        suggestJob?.cancel()
         val text = input.removePrefix("/")
+        typed = text
         if (text.isBlank()) {
             clearSuggestions()
             return
@@ -450,15 +470,32 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
                 .take(8)
                 .map { Suggestion(it.name, it.description) }
             suggestions = local
+            suggestionsOffline = false
             if (local.isNotEmpty() || commands.isNotEmpty()) return
         }
+        showArguments(text, completionCache.lookup(text))
+        suggestJob?.cancel() // only the debounce: requests already sent are not cancelled
         suggestJob = viewModelScope.launch {
-            delay(150) // debounce while typing
-            val current = text.substringAfterLast(' ')
-            suggestions = runCatching { api.complete(text) }.getOrDefault(emptyList())
-                .filter { it != current }
-                .take(30)
-                .map { Suggestion(it) }
+            delay(120) // wait until typing pauses
+            if (typed != text) return@launch
+            launch { requestCompletion(text) }
+        }
+    }
+
+    private fun showArguments(text: String, server: List<String>?) {
+        val local = CommandCompletion.suggest(text, players.map { it.name }, status?.worlds?.map { it.name }.orEmpty())
+        suggestions = CommandCompletion.merge(server.orEmpty(), local).take(30).map { Suggestion(it) }
+    }
+
+    /** Asks the server; a late answer is still shown if it fits what is typed now. */
+    private suspend fun requestCompletion(text: String) {
+        val result = runCatching { api.complete(text) }
+        result.onSuccess { completionCache.put(text, it) }
+        val now = typed
+        // Same argument as now (the user may have typed on): show the answer, filtered.
+        if (now.startsWith(text) && ' ' !in now.substring(text.lastIndexOf(' ') + 1)) {
+            suggestionsOffline = result.isFailure
+            if (result.isSuccess) showArguments(now, completionCache.lookup(now))
         }
     }
 
@@ -466,6 +503,7 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         suggestJob?.cancel()
         suggestions = emptyList()
         usageHint = null
+        suggestionsOffline = false
     }
 
     /** Sends right away; the message shows up in the chat via the live stream. */
@@ -494,5 +532,6 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     private companion object {
         const val SAVE_EVERY_MS = 60_000L
+        val COMMAND_RETRY_MS = listOf(2_000L, 5_000L, 15_000L, 30_000L, 60_000L)
     }
 }
