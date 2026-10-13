@@ -256,6 +256,9 @@ check("console hides tokens, pairing codes and QR codes",
 st, d = req("GET", "/api/v1/commands", admin)
 names = [c["name"] for c in d.get("commands", [])]
 check("command list without blocked commands", st == 200 and "gamemode" in names and "stop" not in names, names[:10])
+origins = {c["name"]: c.get("plugin") for c in d.get("commands", [])}
+check("commands name their plugin", origins.get("gamemode") == "Minecraft" and origins.get("remotemc") == "RemoteMC"
+      and all(origins.values()), {k: origins.get(k) for k in ("gamemode", "remotemc", "version", "paper")})
 st, d = req("GET", "/api/v1/complete?buffer=gamemode%20cr", admin)
 check("tab completion", st == 200 and d.get("suggestions") == ["creative"], d)
 st, d = req("GET", "/api/v1/complete?buffer=gam", mod)

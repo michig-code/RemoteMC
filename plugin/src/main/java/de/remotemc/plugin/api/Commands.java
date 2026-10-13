@@ -6,6 +6,7 @@ import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.command.SimpleCommandMap;
 
 import java.util.Collection;
@@ -43,6 +44,7 @@ final class Commands {
             if (c.getUsage() != null && !c.getUsage().isBlank() && !c.getUsage().equals("/" + name)) {
                 o.addProperty("usage", c.getUsage().replace("<command>", name));
             }
+            o.addProperty("plugin", origin(c));
             JsonArray aliases = new JsonArray();
             c.getAliases().forEach(aliases::add);
             o.add("aliases", aliases);
@@ -51,6 +53,30 @@ final class Commands {
         JsonObject o = new JsonObject();
         o.add("commands", arr);
         return o;
+    }
+
+    /** Who brings the command: a plugin's name, or Minecraft / Bukkit / Paper / Spigot / Server. */
+    static String origin(Command c) {
+        if (c instanceof PluginIdentifiableCommand pc && pc.getPlugin() != null) {
+            return pc.getPlugin().getName();
+        }
+        return origin(c.getClass().getName());
+    }
+
+    static String origin(String className) {
+        if (className.endsWith("VanillaCommandWrapper")) {
+            return "Minecraft";
+        }
+        if (className.startsWith("io.papermc.") || className.startsWith("com.destroystokyo.paper.")) {
+            return "Paper";
+        }
+        if (className.startsWith("org.spigotmc.")) {
+            return "Spigot";
+        }
+        if (className.startsWith("org.bukkit.")) {
+            return "Bukkit";
+        }
+        return "Server";
     }
 
     /** Online player names starting with the last word of {@code buffer}. */

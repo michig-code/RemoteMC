@@ -6,6 +6,7 @@ import de.remotemc.app.data.CommandHistory
 import de.remotemc.app.data.KeystoreBox
 import de.remotemc.app.data.ServerRepository
 import de.remotemc.app.data.SettingsStore
+import de.remotemc.app.data.ShortcutStore
 import de.remotemc.app.data.SnapshotStore
 import java.io.File
 
@@ -16,6 +17,9 @@ class RemoteMCApp : Application() {
         private set
     lateinit var history: CommandHistory
         private set
+    /** Favorites and macros per server. */
+    lateinit var shortcuts: ShortcutStore
+        private set
     /** Last shown data per server, for an instant start (see [de.remotemc.app.data.ServerSnapshot]). */
     lateinit var snapshots: SnapshotStore
         private set
@@ -25,6 +29,7 @@ class RemoteMCApp : Application() {
         servers = ServerRepository(getSharedPreferences("servers", MODE_PRIVATE), KeystoreBox())
         settings = SettingsStore(getSharedPreferences("settings", MODE_PRIVATE))
         history = CommandHistory(getSharedPreferences("history", MODE_PRIVATE))
+        shortcuts = ShortcutStore(getSharedPreferences("shortcuts", MODE_PRIVATE))
         snapshots = SnapshotStore(File(noBackupFilesDir, "snapshots"), KeystoreBox("remotemc.snapshots"))
     }
 }

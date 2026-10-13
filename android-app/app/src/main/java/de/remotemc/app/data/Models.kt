@@ -153,10 +153,17 @@ data class ConsoleLine(val id: Long, val time: Long, val level: String, val mess
 }
 
 /** A console command known to the server, for suggestions. */
-data class CommandInfo(val name: String, val description: String?, val usage: String?, val aliases: List<String>) {
+data class CommandInfo(
+    val name: String,
+    val description: String?,
+    val usage: String?,
+    val aliases: List<String>,
+    /** Plugin that brings the command, or Minecraft / Bukkit / Paper / Spigot / Server (plugin 1.0+). */
+    val plugin: String? = null,
+) {
     fun toJson(): JSONObject = JSONObject()
         .put("name", name).put("description", description.orEmpty()).put("usage", usage.orEmpty())
-        .put("aliases", JSONArray(aliases))
+        .put("aliases", JSONArray(aliases)).put("plugin", plugin.orEmpty())
 
     companion object {
         fun fromJson(c: JSONObject): CommandInfo {
@@ -166,6 +173,7 @@ data class CommandInfo(val name: String, val description: String?, val usage: St
                 description = c.optString("description").takeIf { it.isNotBlank() },
                 usage = c.optString("usage").takeIf { it.isNotBlank() },
                 aliases = if (aliases == null) emptyList() else List(aliases.length()) { aliases.getString(it) },
+                plugin = c.optString("plugin").takeIf { it.isNotBlank() },
             )
         }
     }

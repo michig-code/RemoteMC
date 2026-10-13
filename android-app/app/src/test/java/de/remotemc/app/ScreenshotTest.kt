@@ -165,6 +165,46 @@ class ScreenshotTest {
         }
     }
 
+    private val menuCommands = listOf(
+        de.remotemc.app.data.CommandInfo("gamemode", "Sets a player's game mode", null, emptyList(), "Minecraft"),
+        de.remotemc.app.data.CommandInfo("save-all", "Saves the server to disk", null, emptyList(), "Minecraft"),
+        de.remotemc.app.data.CommandInfo("seed", "Displays the world seed", null, emptyList(), "Minecraft"),
+        de.remotemc.app.data.CommandInfo("tps", "Gets the current ticks per second", null, emptyList(), "Paper"),
+        de.remotemc.app.data.CommandInfo("lp", "Manage permissions", "/lp user <name> permission set <node>", listOf("perms"), "LuckPerms"),
+        de.remotemc.app.data.CommandInfo("remotemc", "RemoteMC admin command", "/remotemc pair|info|token|reload", listOf("rmc"), "RemoteMC"),
+    )
+    private val menuShortcuts = de.remotemc.app.data.Shortcuts(
+        favorites = listOf(
+            de.remotemc.app.data.Favorite("f1", "tp {player} 0 100 0"),
+            de.remotemc.app.data.Favorite("f2", "lp user {player} parent set vip"),
+            de.remotemc.app.data.Favorite("f3", "stop", confirm = true),
+        ),
+        macros = listOf(
+            de.remotemc.app.data.Macro("m1", "Restart", listOf(
+                de.remotemc.app.data.MacroStep("say Restart in 10 seconds"),
+                de.remotemc.app.data.MacroStep("save-all", 10),
+                de.remotemc.app.data.MacroStep("restart", 2),
+            ), confirm = true),
+            de.remotemc.app.data.Macro("m2", "Morning", listOf(de.remotemc.app.data.MacroStep("time set day"), de.remotemc.app.data.MacroStep("weather clear"))),
+        ),
+    )
+
+    private fun menu(running: String? = null) = de.remotemc.app.ui.CommandMenuActions(
+        menuCommands, menuShortcuts, players.map { it.name }, running, {}, { _, _ -> }, {},
+    )
+
+    @Test fun commandMenu() = shot("06d_command_menu") {
+        de.remotemc.app.ui.CommandMenuSheet(menu(), "", {}, {}, {}, inSheet = false)
+    }
+
+    @Test fun commandFavorites() = shot("06e_command_favorites") {
+        de.remotemc.app.ui.CommandMenuSheet(menu(), "", {}, {}, {}, inSheet = false, initialTab = 1)
+    }
+
+    @Test fun commandMacros() = shot("06f_command_macros", dark = false) {
+        de.remotemc.app.ui.CommandMenuSheet(menu(running = "Restart"), "", {}, {}, {}, inSheet = false, initialTab = 2)
+    }
+
     @Composable
     @Suppress("FunctionName")
     private fun Scaffoldless(content: @Composable () -> Unit) =

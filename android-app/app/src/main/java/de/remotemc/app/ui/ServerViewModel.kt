@@ -20,19 +20,23 @@ import de.remotemc.app.data.CommandInfo
 import de.remotemc.app.data.CompletionCache
 import de.remotemc.app.data.ConsoleLine
 import de.remotemc.app.data.HistoryRange
+import de.remotemc.app.data.Macro
 import de.remotemc.app.data.PerformanceHistory
+import de.remotemc.app.data.Placeholders
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerSnapshot
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.data.Session
+import de.remotemc.app.data.Shortcuts
 import de.remotemc.app.net.ApiClient
 import de.remotemc.app.net.ApiError
 import de.remotemc.app.net.EventStream
 import de.remotemc.app.net.StreamEvent
 import de.remotemc.app.ui.util.UiText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
@@ -96,7 +100,16 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     /** Usage of the command being typed, e.g. "/gamemode <mode> [player]". */
     var usageHint by mutableStateOf<String?>(null)
         private set
-    private var commands: List<CommandInfo> = emptyList()
+    /** The server's commands (saved from the last visit, refreshed once connected). */
+    var commands by mutableStateOf<List<CommandInfo>>(emptyList())
+        private set
+    /** Favorites and macros of this server. */
+    var shortcuts by mutableStateOf(application.app.shortcuts.load(profile.id))
+        private set
+    /** Name of the macro that is running, if any. */
+    var runningMacro by mutableStateOf<String?>(null)
+        private set
+    private var macroJob: Job? = null
     private var commandsLoaded = false
     private var commandsJob: Job? = null
     private val completionCache = CompletionCache()
@@ -409,22 +422,67 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
     fun runCommand(command: String) {
         val cmd = command.trim().removePrefix("/")
         if (cmd.isEmpty()) return
-        local("> /$cmd", "COMMAND")
         history = getApplication<Application>().app.history.add(profile.id, cmd)
         clearSuggestions()
-        viewModelScope.launch {
+        viewModelScope.launch { execute(cmd) }
+    }
+
+    /** Runs one command and shows it with its output in the console; false if it failed. */
+    private suspend fun execute(cmd: String): Boolean {
+        local("> /$cmd", "COMMAND")
+        return try {
+            val result = api.command(cmd)
+            result.output.forEachIndexed { i, line -> local(line, "OUTPUT", result.formatted.getOrNull(i)) }
+            if (!result.success) {
+                local(getApplication<Application>().getString(R.string.console_command_failed), "ERROR")
+            } else if (!result.captured && result.output.isEmpty()) {
+                local(getApplication<Application>().getString(R.string.console_output_in_log), "OUTPUT")
+            }
+            result.success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            local(UiText.Error(e).resolve(getApplication()), "ERROR")
+            false
+        }
+    }
+
+    fun updateShortcuts(change: (Shortcuts) -> Shortcuts) {
+        shortcuts = change(shortcuts)
+        getApplication<Application>().app.shortcuts.save(profile.id, shortcuts)
+    }
+
+    /**
+     * Runs the steps of [macro] one after another with their waits, placeholders filled from
+     * [values]. Stops at the first failing step; [stopMacro] cancels it.
+     */
+    fun runMacro(macro: Macro, values: Map<String, String>) {
+        if (macroJob?.isActive == true) return
+        clearSuggestions()
+        macroJob = viewModelScope.launch {
+            runningMacro = macro.name
+            val app = getApplication<Application>()
+            local(app.getString(R.string.macro_started, macro.name), "INFO")
             try {
-                val result = api.command(cmd)
-                result.output.forEachIndexed { i, line -> local(line, "OUTPUT", result.formatted.getOrNull(i)) }
-                if (!result.success) {
-                    local(getApplication<Application>().getString(R.string.console_command_failed), "ERROR")
-                } else if (!result.captured && result.output.isEmpty()) {
-                    local(getApplication<Application>().getString(R.string.console_output_in_log), "OUTPUT")
+                for (step in macro.steps) {
+                    if (step.waitSeconds > 0) delay(step.waitSeconds * 1000L)
+                    if (!execute(Placeholders.fill(step.command, values).trim().removePrefix("/"))) {
+                        local(app.getString(R.string.macro_failed, macro.name), "ERROR")
+                        return@launch
+                    }
                 }
-            } catch (e: Exception) {
-                local(UiText.Error(e).resolve(getApplication()), "ERROR")
+                local(app.getString(R.string.macro_done, macro.name), "INFO")
+            } catch (e: CancellationException) {
+                local(app.getString(R.string.macro_stopped, macro.name), "WARN")
+                throw e
+            } finally {
+                runningMacro = null
             }
         }
+    }
+
+    fun stopMacro() {
+        macroJob?.cancel()
     }
 
     fun forgetCommand(command: String) {

@@ -66,7 +66,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
   - API-Checks für `/complete` mit Admin-, Moderator- und Zuschauer-Token
   - Fehlerfall „Plugin wirft beim Tab-Complete einen Fehler“
 
-### B1 – Zahnrad-Menü: Befehle, Favoriten, Makros
+### B1 – Zahnrad-Menü: Befehle, Favoriten, Makros ✅
 
 - **Zahnrad-Knopf** in der Konsole links neben „Senden“. Er öffnet ein Menü von unten mit den Bereichen **Befehle**, **Favoriten** und **Makros**.
 - **Befehle:**

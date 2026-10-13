@@ -125,6 +125,10 @@ data class ServerUiState(
     val suggestions: List<Suggestion> = emptyList(),
     val usageHint: String? = null,
     val suggestionsOffline: Boolean = false,
+    /** Commands, favorites and macros for the console's command menu. */
+    val commands: List<de.remotemc.app.data.CommandInfo> = emptyList(),
+    val shortcuts: de.remotemc.app.data.Shortcuts = de.remotemc.app.data.Shortcuts(),
+    val runningMacro: String? = null,
     /** Saved overview layout ([de.remotemc.app.data.DashboardLayout.encode]). */
     val dashboardLayout: String = "",
     /** When the shown data was saved, while it still comes from the last visit. */
@@ -154,6 +158,10 @@ class ServerActions(
     val files: FileActions? = null,
     /** Saves the overview layout after the user changed it. */
     val onDashboardLayout: (String) -> Unit = {},
+    /** Changes favorites / macros of this server. */
+    val onShortcuts: ((de.remotemc.app.data.Shortcuts) -> de.remotemc.app.data.Shortcuts) -> Unit = {},
+    val onRunMacro: (de.remotemc.app.data.Macro, Map<String, String>) -> Unit = { _, _ -> },
+    val onStopMacro: () -> Unit = {},
 )
 
 /** Files in the server folder; paths are relative to it ("" = the folder itself). */
@@ -222,6 +230,9 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             suggestions = vm.suggestions,
             usageHint = vm.usageHint,
             suggestionsOffline = vm.suggestionsOffline,
+            commands = vm.commands,
+            shortcuts = vm.shortcuts,
+            runningMacro = vm.runningMacro,
             dashboardLayout = settings.dashboard,
             cachedAt = vm.cachedAt,
         ),
@@ -241,6 +252,9 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             schedules = vm.scheduleActions,
             files = vm.fileActions,
             onDashboardLayout = { text -> context.app.settings.update { it.copy(dashboard = text) } },
+            onShortcuts = vm::updateShortcuts,
+            onRunMacro = vm::runMacro,
+            onStopMacro = vm::stopMacro,
         ),
         snackbar = snackbar,
     )
@@ -392,6 +406,15 @@ fun ServerScreenContent(
                                 suggestions = state.suggestions,
                                 usageHint = state.usageHint,
                                 suggestionsOffline = state.suggestionsOffline,
+                                menu = CommandMenuActions(
+                                    commands = state.commands,
+                                    shortcuts = state.shortcuts,
+                                    players = state.players.map { it.name },
+                                    runningMacro = state.runningMacro,
+                                    onShortcuts = actions.onShortcuts,
+                                    onRunMacro = actions.onRunMacro,
+                                    onStopMacro = actions.onStopMacro,
+                                ),
                                 onInput = actions.onCommandInput,
                                 onCommand = actions.onCommand,
                                 onForget = actions.onForgetCommand,

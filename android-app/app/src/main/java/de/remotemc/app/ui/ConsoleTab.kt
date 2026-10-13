@@ -40,10 +40,12 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
@@ -111,8 +113,11 @@ fun ConsoleTab(
     onCommand: (String) -> Unit,
     onForget: (String) -> Unit = {},
     initialInput: String = "",
+    /** Gear next to "send": all commands, favorites and macros (null = no gear). */
+    menu: CommandMenuActions? = null,
 ) {
     var input by remember { mutableStateOf(TextFieldValue(initialInput, TextRange(initialInput.length))) }
+    var menuOpen by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val haptics = rememberHaptics()
@@ -230,6 +235,22 @@ fun ConsoleTab(
             ) {
                 RecentCommands(history, onPick = { setInput(it) }, onForget = { haptics.heavy(); onForget(it) })
             }
+            menu?.runningMacro?.let { name ->
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.macro_running, name),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = { haptics.heavy(); menu.onStopMacro() }) { Text(stringResource(R.string.macro_stop)) }
+                }
+            }
             CommandInput(
                 value = input,
                 onValueChange = {
@@ -241,7 +262,23 @@ fun ConsoleTab(
                 placeholder = stringResource(R.string.console_input_hint),
                 prefix = "/",
                 onSend = ::send,
+                extra = if (menu == null) null else {
+                    {
+                        IconButton(onClick = { haptics.tap(); menuOpen = true }) {
+                            Icon(Icons.Outlined.Settings, stringResource(R.string.menu_open), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                },
             )
+            if (menuOpen && menu != null) {
+                CommandMenuSheet(
+                    menu = menu,
+                    currentInput = input.text,
+                    onInsert = { setInput(it) },
+                    onRun = { onCommand(it) },
+                    onDismiss = { menuOpen = false },
+                )
+            }
         } else {
             Text(
                 stringResource(R.string.console_read_only),
@@ -411,6 +448,8 @@ fun CommandInput(
     placeholder: String,
     onSend: () -> Unit,
     prefix: String? = null,
+    /** Shown between the text field and the send button (the console's command menu). */
+    extra: (@Composable () -> Unit)? = null,
 ) {
     Row(
         Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp, top = 4.dp),
@@ -438,7 +477,8 @@ fun CommandInput(
             ),
             keyboardActions = KeyboardActions(onSend = { onSend() }),
         )
-        FilledIconButton(onClick = onSend, enabled = value.text.isNotBlank(), modifier = Modifier.padding(start = 8.dp)) {
+        if (extra != null) Box(Modifier.padding(start = 4.dp)) { extra() }
+        FilledIconButton(onClick = onSend, enabled = value.text.isNotBlank(), modifier = Modifier.padding(start = if (extra != null) 0.dp else 8.dp)) {
             Icon(Icons.AutoMirrored.Filled.Send, stringResource(R.string.action_send))
         }
     }
