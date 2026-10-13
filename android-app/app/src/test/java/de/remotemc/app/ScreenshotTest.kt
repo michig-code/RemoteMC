@@ -128,6 +128,16 @@ class ScreenshotTest {
     @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
     @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }
     @Test fun players() = shot("05_players") { server(Tab.Players) }
+    @Test fun playersSelected() = shot("05b_players_selected") {
+        Scaffoldless {
+            de.remotemc.app.ui.PlayersTab(
+                players, Role.ADMIN, { _, _, _, _ -> },
+                onBatch = { _, _, _ -> }, canWhitelist = true,
+                initialSelection = setOf(players[0].name, players[2].name),
+            )
+        }
+    }
+
     @Test fun consoleTab() = shot("06_console") {
         ServerScreenContent(
             ServerUiState("Survival", status, players, console, chat, Connection.LIVE, null, false, Role.ADMIN,

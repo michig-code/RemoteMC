@@ -477,4 +477,29 @@
     <string name="console_filter_warnings">Waarschuwingen</string>
     <string name="console_filter_errors">Fouten</string>
     <string name="console_share">Regels delen</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d geselecteerd</item>
+        <item quantity="other">%d geselecteerd</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">%d speler kicken?</item>
+        <item quantity="other">%d spelers kicken?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">%d speler verbannen?</item>
+        <item quantity="other">%d spelers verbannen?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Bericht aan %d speler</item>
+        <item quantity="other">Bericht aan %d spelers</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Klaar voor %d speler</item>
+        <item quantity="other">Klaar voor %d spelers</item>
+    </plurals>
+    <string name="players_select_all">Alles selecteren</string>
+    <string name="players_batch_failed">Mislukt voor: %s</string>
+    <string name="players_whitelist_add">Whitelist</string>
+    <string name="players_message">Bericht</string>
+    <string name="players_select_hint">Druk lang op een speler om er meerdere te selecteren</string>
 </resources>

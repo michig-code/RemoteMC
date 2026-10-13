@@ -1,7 +1,11 @@
 package de.remotemc.app.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Favorite
@@ -37,6 +43,8 @@ import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.RemoveModerator
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.SportsEsports
+import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -48,6 +56,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -64,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -90,10 +100,31 @@ typealias PlayerAction = (player: String, action: String, body: JSONObject, succ
 private enum class SortBy(val label: Int) { NAME(R.string.players_sort_name), PING(R.string.players_sort_ping), WORLD(R.string.players_sort_world) }
 
 @Composable
-fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction, canTeleport: Boolean = true) {
+fun PlayersTab(
+    players: List<PlayerInfo>,
+    role: Role,
+    onAction: PlayerAction,
+    canTeleport: Boolean = true,
+    /** The same action for several players; null turns multi-select off. */
+    onBatch: ((players: List<String>, action: String, body: JSONObject) -> Unit)? = null,
+    canWhitelist: Boolean = false,
+    initialSelection: Set<String> = emptySet(),
+) {
     var selected by remember { mutableStateOf<String?>(null) }
     var query by rememberSaveable { mutableStateOf("") }
     var sort by rememberSaveable { mutableStateOf(SortBy.NAME) }
+    val haptics = rememberHaptics()
+    // Multi-select (long press): players that leave drop out of the selection.
+    val canSelect = onBatch != null && role.atLeast(Role.MODERATOR)
+    var picked by remember { mutableStateOf(initialSelection) }
+    val names = players.map { it.name }.toSet()
+    if (!names.containsAll(picked)) picked = picked intersect names
+    val selecting = canSelect && picked.isNotEmpty()
+
+    fun toggle(name: String) {
+        haptics.tick()
+        picked = if (name in picked) picked - name else picked + name
+    }
 
     if (players.isEmpty()) {
         // Scrollable so pull-to-refresh still works on the empty state.
@@ -110,16 +141,32 @@ fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction, ca
                     SortBy.WORLD -> compareBy<PlayerInfo> { it.world }.thenBy { it.name.lowercase() }
                 },
             )
+        Column(Modifier.fillMaxSize()) {
         LazyColumn(
-            Modifier.fillMaxSize(),
+            Modifier.weight(1f).fillMaxWidth(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (players.size > 3) {
+            if (selecting) {
+                item(key = "selection") {
+                    SelectionBar(picked.size, onAll = { haptics.tap(); picked = shown.map { it.name }.toSet() }, onClose = { picked = emptySet() })
+                }
+            } else if (players.size > 3) {
                 item(key = "search") { SearchBar(query, { query = it }, sort, { sort = it }) }
             }
+            if (canSelect && !selecting && players.size > 1) {
+                item(key = "hint") {
+                    Text(stringResource(R.string.players_select_hint), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 4.dp))
+                }
+            }
             itemsIndexed(shown, key = { _, p -> p.uuid }) { i, p ->
-                PlayerCard(p, Modifier.then(if (LocalAnimations.current) Modifier.animateItem() else Modifier).staggeredAppear(i)) { selected = p.name }
+                PlayerCard(
+                    p,
+                    Modifier.then(if (LocalAnimations.current) Modifier.animateItem() else Modifier).staggeredAppear(i),
+                    picked = selecting && p.name in picked,
+                    onLongClick = if (canSelect) { { haptics.heavy(); toggle(p.name) } } else null,
+                ) { if (selecting) toggle(p.name) else selected = p.name }
             }
             if (shown.isEmpty()) {
                 item(key = "nomatch") {
@@ -130,6 +177,14 @@ fun PlayersTab(players: List<PlayerInfo>, role: Role, onAction: PlayerAction, ca
                     )
                 }
             }
+        }
+        AnimatedVisibility(selecting && onBatch != null) {
+            BatchActions(picked.sortedBy { it.lowercase() }, role, canWhitelist) { action, body ->
+                onBatch?.invoke(picked.toList(), action, body)
+                haptics.success()
+                picked = emptySet()
+            }
+        }
         }
     }
 
@@ -181,17 +236,39 @@ private fun SearchBar(query: String, onQuery: (String) -> Unit, sort: SortBy, on
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PlayerCard(p: PlayerInfo, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun PlayerCard(
+    p: PlayerInfo,
+    modifier: Modifier = Modifier,
+    picked: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
+    onClick: () -> Unit,
+) {
     val description = stringResource(
         R.string.players_card_description, p.name, gameModeLabel(p.gameMode), p.world, p.health.toInt(), p.ping,
     )
-    McCard(modifier.fillMaxWidth(), onClick = onClick) {
+    val shape = MaterialTheme.shapes.large
+    McCard(
+        modifier.fillMaxWidth().clip(shape)
+            .then(if (picked) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+    ) {
         Row(
             Modifier.padding(14.dp).clearAndSetSemantics { contentDescription = description },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PlayerHead(p.name, 48.dp, skinUrl = p.skin)
+            Box {
+                PlayerHead(p.name, 48.dp, skinUrl = p.skin)
+                if (picked) {
+                    Icon(
+                        Icons.Filled.CheckCircle, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.BottomEnd).offset(6.dp, 6.dp).size(22.dp)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    )
+                }
+            }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -459,5 +536,100 @@ internal fun formatPlaytime(seconds: Long): String {
         minutes < 60 -> "$minutes min"
         minutes < 24 * 60 -> "${minutes / 60} h ${minutes % 60} min"
         else -> "${minutes / (24 * 60)} d ${minutes / 60 % 24} h"
+    }
+}
+
+@Composable
+private fun SelectionBar(count: Int, onAll: () -> Unit, onClose: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, stringResource(R.string.action_close)) }
+        Text(
+            pluralStringResource(R.plurals.players_selected, count, count),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = onAll) { Text(stringResource(R.string.players_select_all)) }
+    }
+}
+
+/** Actions for all selected players, shown at the bottom while selecting. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun BatchActions(names: List<String>, role: Role, canWhitelist: Boolean, onRun: (action: String, body: JSONObject) -> Unit) {
+    val haptics = rememberHaptics()
+    var dialog by remember { mutableStateOf<String?>(null) }
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+        FlowRow(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ActionButton(Icons.AutoMirrored.Outlined.Send, stringResource(R.string.players_message), MaterialTheme.colorScheme.primary) { dialog = "message" }
+            ActionButton(Icons.Outlined.Favorite, stringResource(R.string.players_heal), McColors.Heart) { onRun("heal", JSONObject()) }
+            ActionButton(Icons.Outlined.SportsEsports, stringResource(R.string.players_game_mode), McColors.Grass) { dialog = "gamemode" }
+            if (canWhitelist) {
+                ActionButton(Icons.Outlined.VerifiedUser, stringResource(R.string.players_whitelist_add), McColors.Gold) { onRun("whitelist", JSONObject()) }
+            }
+            ActionButton(Icons.AutoMirrored.Outlined.Logout, stringResource(R.string.players_kick), McColors.Warning) { haptics.heavy(); dialog = "kick" }
+            ActionButton(Icons.Outlined.Block, stringResource(R.string.players_ban), McColors.Offline) { haptics.heavy(); dialog = "ban" }
+        }
+    }
+
+    when (val d = dialog) {
+        "message", "kick", "ban" -> {
+            var text by remember(d) { mutableStateOf("") }
+            val title = when (d) {
+                "message" -> pluralStringResource(R.plurals.players_message_many, names.size, names.size)
+                "kick" -> pluralStringResource(R.plurals.players_kick_many, names.size, names.size)
+                else -> pluralStringResource(R.plurals.players_ban_many, names.size, names.size)
+            }
+            AlertDialog(
+                onDismissRequest = { dialog = null },
+                title = { Text(title) },
+                text = {
+                    Column {
+                        Text(names.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.height(12.dp))
+                        OutlinedTextField(
+                            text, { if (it.length <= 200) text = it },
+                            label = { Text(stringResource(if (d == "message") R.string.players_message else R.string.players_message_or_reason)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = d != "message" || text.isNotBlank(),
+                        onClick = {
+                            dialog = null
+                            if (d == "message") onRun("message", JSONObject().put("message", text)) else onRun(d, JSONObject().put("reason", text))
+                        },
+                    ) {
+                        Text(stringResource(when (d) { "message" -> R.string.action_send; "kick" -> R.string.players_kick; else -> R.string.players_ban }))
+                    }
+                },
+                dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
+            )
+        }
+        "gamemode" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.players_game_mode)) },
+            text = {
+                Column {
+                    listOf("SURVIVAL", "CREATIVE", "ADVENTURE", "SPECTATOR").forEach { mode ->
+                        Text(
+                            gameModeLabel(mode),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                                .clickable { dialog = null; onRun("gamemode", JSONObject().put("mode", mode)) }
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }

@@ -103,7 +103,12 @@ fun PlayersSection(state: ServerUiState, actions: ServerActions, initialView: In
         }
         when (if (moderation == null) PlayersView.ONLINE else view) {
             PlayersView.ONLINE -> PullToRefreshBox(state.refreshing, actions.onRefresh) {
-                PlayersTab(state.players, state.role, actions.onPlayerAction, canTeleport = state.status?.supports("teleport") == true)
+                PlayersTab(
+                    state.players, state.role, actions.onPlayerAction,
+                    canTeleport = state.status?.supports("teleport") == true,
+                    onBatch = actions.onPlayerBatch,
+                    canWhitelist = actions.moderation != null,
+                )
             }
             PlayersView.WHITELIST -> WhitelistView(moderation!!, canToggle = state.role.atLeast(Role.ADMIN))
             PlayersView.BANS -> BansView(moderation!!)

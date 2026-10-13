@@ -477,4 +477,29 @@
     <string name="console_filter_warnings">Uyarılar</string>
     <string name="console_filter_errors">Hatalar</string>
     <string name="console_share">Satırları paylaş</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d seçili</item>
+        <item quantity="other">%d seçili</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">%d oyuncu atılsın mı?</item>
+        <item quantity="other">%d oyuncu atılsın mı?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">%d oyuncu yasaklansın mı?</item>
+        <item quantity="other">%d oyuncu yasaklansın mı?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">%d oyuncuya mesaj</item>
+        <item quantity="other">%d oyuncuya mesaj</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">%d oyuncu için tamam</item>
+        <item quantity="other">%d oyuncu için tamam</item>
+    </plurals>
+    <string name="players_select_all">Tümünü seç</string>
+    <string name="players_batch_failed">Başarısız: %s</string>
+    <string name="players_whitelist_add">Beyaz liste</string>
+    <string name="players_message">Mesaj</string>
+    <string name="players_select_hint">Birden fazla seçmek için bir oyuncuya basılı tut</string>
 </resources>

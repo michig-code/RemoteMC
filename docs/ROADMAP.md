@@ -14,7 +14,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 2. **B0:** Befehlsvorschläge funktionieren immer
 3. **B1:** Zahnrad-Menü mit Befehlen, Favoriten und Makros
 4. **B2:** Konsolensuche
-5. danach der Rest von A, B und C
+5. danach der Rest von A, B (inkl. B9 App-Updates) und C
 
 ---
 
@@ -95,7 +95,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 - an eine Zeile springen
 - Ausschnitte teilen
 
-### B3 – Mehrfachauswahl bei Spielern
+### B3 – Mehrfachauswahl bei Spielern ✅
 Mehrere Spieler auf einmal kicken, eine Nachricht senden oder whitelisten.
 
 ### B4 – Spieler-Details
@@ -122,6 +122,15 @@ Die letzten Daten werden mit Zeitstempel angezeigt statt nur einer Fehlermeldung
 - Entbannen nach Bann
 - Whitelist-Entfernung
 - Papierkorb für gelöschte Dateien (24 h, im Plugin)
+
+### B9 – App-Updates direkt in der App (APK)
+Für alle, die die App als APK installieren (nicht über einen Store):
+- Die App prüft beim Start und alle 6 Stunden GitHub Releases auf eine neuere Version. Das ist abschaltbar.
+- Gibt es eine, erscheint ein Hinweis mit den Änderungen und „Jetzt aktualisieren“.
+- Die APK wird heruntergeladen und ihre Prüfsumme (SHA-256) kontrolliert. Danach öffnet sich der Android-Installer, die Einstellungen bleiben erhalten.
+- Download nur von GitHub über HTTPS. Android prüft zusätzlich, dass die neue APK mit demselben Schlüssel signiert ist.
+- In den Einstellungen gibt es „Nach Updates suchen“ und die aktuelle Version.
+- Technik: wie der Updater der Windows-App. Nötig sind die Berechtigung `REQUEST_INSTALL_PACKAGES` und ein `FileProvider` für die heruntergeladene Datei.
 
 ---
 

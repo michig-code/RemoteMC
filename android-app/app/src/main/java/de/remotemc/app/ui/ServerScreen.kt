@@ -162,6 +162,8 @@ class ServerActions(
     val onShortcuts: ((de.remotemc.app.data.Shortcuts) -> de.remotemc.app.data.Shortcuts) -> Unit = {},
     val onRunMacro: (de.remotemc.app.data.Macro, Map<String, String>) -> Unit = { _, _ -> },
     val onStopMacro: () -> Unit = {},
+    /** The same action for several selected players (null: no multi-select). */
+    val onPlayerBatch: ((players: List<String>, action: String, body: JSONObject) -> Unit)? = null,
 )
 
 /** Files in the server folder; paths are relative to it ("" = the folder itself). */
@@ -255,6 +257,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onShortcuts = vm::updateShortcuts,
             onRunMacro = vm::runMacro,
             onStopMacro = vm::stopMacro,
+            onPlayerBatch = vm::playerBatch,
         ),
         snackbar = snackbar,
     )

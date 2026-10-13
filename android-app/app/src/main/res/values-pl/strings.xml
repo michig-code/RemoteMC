@@ -495,4 +495,39 @@
     <string name="console_filter_warnings">Ostrzeżenia</string>
     <string name="console_filter_errors">Błędy</string>
     <string name="console_share">Udostępnij wiersze</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d zaznaczony</item>
+        <item quantity="few">%d zaznaczone</item>
+        <item quantity="many">%d zaznaczonych</item>
+        <item quantity="other">%d zaznaczonego</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">Wyrzucić %d gracza?</item>
+        <item quantity="few">Wyrzucić %d graczy?</item>
+        <item quantity="many">Wyrzucić %d graczy?</item>
+        <item quantity="other">Wyrzucić %d gracza?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">Zbanować %d gracza?</item>
+        <item quantity="few">Zbanować %d graczy?</item>
+        <item quantity="many">Zbanować %d graczy?</item>
+        <item quantity="other">Zbanować %d gracza?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Wiadomość do %d gracza</item>
+        <item quantity="few">Wiadomość do %d graczy</item>
+        <item quantity="many">Wiadomość do %d graczy</item>
+        <item quantity="other">Wiadomość do %d gracza</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Gotowe dla %d gracza</item>
+        <item quantity="few">Gotowe dla %d graczy</item>
+        <item quantity="many">Gotowe dla %d graczy</item>
+        <item quantity="other">Gotowe dla %d gracza</item>
+    </plurals>
+    <string name="players_select_all">Zaznacz wszystko</string>
+    <string name="players_batch_failed">Nie udało się dla: %s</string>
+    <string name="players_whitelist_add">Biała lista</string>
+    <string name="players_message">Wiadomość</string>
+    <string name="players_select_hint">Przytrzymaj gracza, aby zaznaczyć kilku</string>
 </resources>

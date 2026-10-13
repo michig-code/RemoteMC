@@ -486,4 +486,34 @@
     <string name="console_filter_warnings">Avertissements</string>
     <string name="console_filter_errors">Erreurs</string>
     <string name="console_share">Partager les lignes</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d sélectionné</item>
+        <item quantity="many">%d sélectionnés</item>
+        <item quantity="other">%d sélectionnés</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">Expulser %d joueur ?</item>
+        <item quantity="many">Expulser %d joueurs ?</item>
+        <item quantity="other">Expulser %d joueurs ?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">Bannir %d joueur ?</item>
+        <item quantity="many">Bannir %d joueurs ?</item>
+        <item quantity="other">Bannir %d joueurs ?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Message à %d joueur</item>
+        <item quantity="many">Message à %d joueurs</item>
+        <item quantity="other">Message à %d joueurs</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Fait pour %d joueur</item>
+        <item quantity="many">Fait pour %d joueurs</item>
+        <item quantity="other">Fait pour %d joueurs</item>
+    </plurals>
+    <string name="players_select_all">Tout sélectionner</string>
+    <string name="players_batch_failed">Échec pour : %s</string>
+    <string name="players_whitelist_add">Liste blanche</string>
+    <string name="players_message">Message</string>
+    <string name="players_select_hint">Appui long sur un joueur pour en sélectionner plusieurs</string>
 </resources>

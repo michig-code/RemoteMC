@@ -508,4 +508,29 @@
     <string name="console_filter_warnings">Warnings</string>
     <string name="console_filter_errors">Errors</string>
     <string name="console_share">Share lines</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">Kick %d player?</item>
+        <item quantity="other">Kick %d players?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">Ban %d player?</item>
+        <item quantity="other">Ban %d players?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Message to %d player</item>
+        <item quantity="other">Message to %d players</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Done for %d player</item>
+        <item quantity="other">Done for %d players</item>
+    </plurals>
+    <string name="players_select_all">Select all</string>
+    <string name="players_batch_failed">Did not work for: %s</string>
+    <string name="players_whitelist_add">Whitelist</string>
+    <string name="players_message">Message</string>
+    <string name="players_select_hint">Long-press a player to select several</string>
 </resources>

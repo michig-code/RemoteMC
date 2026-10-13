@@ -491,4 +491,29 @@
     <string name="console_filter_warnings">Warnungen</string>
     <string name="console_filter_errors">Fehler</string>
     <string name="console_share">Zeilen teilen</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d ausgewählt</item>
+        <item quantity="other">%d ausgewählt</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">%d Spieler kicken?</item>
+        <item quantity="other">%d Spieler kicken?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">%d Spieler bannen?</item>
+        <item quantity="other">%d Spieler bannen?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Nachricht an %d Spieler</item>
+        <item quantity="other">Nachricht an %d Spieler</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Erledigt für %d Spieler</item>
+        <item quantity="other">Erledigt für %d Spieler</item>
+    </plurals>
+    <string name="players_select_all">Alle auswählen</string>
+    <string name="players_batch_failed">Nicht geklappt bei: %s</string>
+    <string name="players_whitelist_add">Whitelist</string>
+    <string name="players_message">Nachricht</string>
+    <string name="players_select_hint">Lange auf einen Spieler drücken, um mehrere auszuwählen</string>
 </resources>

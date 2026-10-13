@@ -495,4 +495,39 @@
     <string name="console_filter_warnings">Предупреждения</string>
     <string name="console_filter_errors">Ошибки</string>
     <string name="console_share">Поделиться строками</string>
+    <plurals name="players_selected">
+        <item quantity="one">%d выбран</item>
+        <item quantity="few">%d выбрано</item>
+        <item quantity="many">%d выбрано</item>
+        <item quantity="other">%d выбрано</item>
+    </plurals>
+    <plurals name="players_kick_many">
+        <item quantity="one">Кикнуть %d игрока?</item>
+        <item quantity="few">Кикнуть %d игроков?</item>
+        <item quantity="many">Кикнуть %d игроков?</item>
+        <item quantity="other">Кикнуть %d игрока?</item>
+    </plurals>
+    <plurals name="players_ban_many">
+        <item quantity="one">Забанить %d игрока?</item>
+        <item quantity="few">Забанить %d игроков?</item>
+        <item quantity="many">Забанить %d игроков?</item>
+        <item quantity="other">Забанить %d игрока?</item>
+    </plurals>
+    <plurals name="players_message_many">
+        <item quantity="one">Сообщение %d игроку</item>
+        <item quantity="few">Сообщение %d игрокам</item>
+        <item quantity="many">Сообщение %d игрокам</item>
+        <item quantity="other">Сообщение %d игрокам</item>
+    </plurals>
+    <plurals name="players_batch_done">
+        <item quantity="one">Готово для %d игрока</item>
+        <item quantity="few">Готово для %d игроков</item>
+        <item quantity="many">Готово для %d игроков</item>
+        <item quantity="other">Готово для %d игрока</item>
+    </plurals>
+    <string name="players_select_all">Выбрать всех</string>
+    <string name="players_batch_failed">Не удалось для: %s</string>
+    <string name="players_whitelist_add">Белый список</string>
+    <string name="players_message">Сообщение</string>
+    <string name="players_select_hint">Удерживайте игрока, чтобы выбрать нескольких</string>
 </resources>

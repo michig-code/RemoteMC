@@ -588,6 +588,31 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
         }
     }
 
+    /**
+     * Runs [action] for several players one after another ("whitelist" adds them to the
+     * whitelist); one message at the end says for whom it did not work.
+     */
+    fun playerBatch(players: List<String>, action: String, body: JSONObject = JSONObject()) {
+        if (players.isEmpty()) return
+        viewModelScope.launch {
+            val failed = mutableListOf<String>()
+            for (name in players) {
+                try {
+                    if (action == "whitelist") api.whitelistAdd(name) else api.playerAction(name, action, body)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    failed += name
+                }
+            }
+            messageChannel.send(
+                if (failed.isEmpty()) UiText.Plural(R.plurals.players_batch_done, players.size)
+                else UiText.Res(R.string.players_batch_failed, listOf(failed.joinToString(", "))),
+            )
+            pollOnce()
+        }
+    }
+
     private companion object {
         const val SAVE_EVERY_MS = 60_000L
         val COMMAND_RETRY_MS = listOf(2_000L, 5_000L, 15_000L, 30_000L, 60_000L)
