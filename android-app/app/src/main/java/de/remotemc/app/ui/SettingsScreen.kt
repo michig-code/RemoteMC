@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -91,6 +92,7 @@ import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.components.SectionTitle
 import de.remotemc.app.ui.theme.AccentPresets
 import de.remotemc.app.ui.theme.accentSwatch
+import de.remotemc.app.ui.util.Haptics
 import kotlin.math.roundToInt
 
 const val SOURCE_URL = "https://github.com/michig-code/RemoteMC"
@@ -119,6 +121,7 @@ fun SettingsScreen(
     onShowGuide: () -> Unit = {},
 ) {
     val uri = LocalUriHandler.current
+    val view = LocalView.current
     var licenses by remember { mutableStateOf(false) }
     val currentLanguage = AppCompatDelegate.getApplicationLocales().get(0)?.let { locale ->
         APP_LANGUAGES.firstOrNull { it.first == locale.toLanguageTag() }?.first
@@ -212,6 +215,8 @@ fun SettingsScreen(
                             onChange { it.copy(animations = v) }
                         }
                         SwitchRow(stringResource(R.string.settings_haptics), stringResource(R.string.settings_haptics_text), settings.haptics) { v ->
+                            // Switching it on gives a short sample, so you feel what it is.
+                            if (v) Haptics(view, enabled = true).success()
                             onChange { it.copy(haptics = v) }
                         }
                     }
