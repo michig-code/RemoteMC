@@ -81,6 +81,7 @@ tray when you close the window. Colour themes and all 10 languages. Access token
 Windows DPAPI.
 
 Download `RemoteMC-Windows-x.y.z.msi` (or `-Setup.exe`) from the releases; Java is included.
+Installed this way, the app finds new releases by itself and updates with one click.
 Build it yourself on Windows with `cd desktop-app && gradlew packageMsi`.
 
 <p>

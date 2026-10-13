@@ -9,4 +9,18 @@
     <string name="window_minimize">Свернуть</string>
     <string name="window_maximize">Развернуть</string>
     <string name="window_restore">Восстановить</string>
+    <string name="update_button">Обновить</string>
+    <string name="update_title">Доступна версия RemoteMC %1$s</string>
+    <string name="update_install">Установить и перезапустить</string>
+    <string name="update_page">Открыть страницу загрузки</string>
+    <string name="update_later">Позже</string>
+    <string name="update_downloading">Загрузка обновления …</string>
+    <string name="update_failed">Не удалось обновить: %1$s</string>
+    <string name="settings_updates">Обновления</string>
+    <string name="settings_auto_update">Автоматически искать обновления</string>
+    <string name="settings_auto_update_text">При запуске и каждые 6 часов (GitHub Releases)</string>
+    <string name="update_check_now">Проверить сейчас</string>
+    <string name="update_up_to_date">RemoteMC обновлён (%1$s).</string>
+    <string name="update_checking">Проверка …</string>
+    <string name="update_portable_hint">Эта копия не может обновиться сама (портативная версия). Скачайте новую версию со страницы загрузки.</string>
 </resources>

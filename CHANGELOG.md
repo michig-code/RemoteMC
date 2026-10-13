@@ -44,6 +44,9 @@ First public release of **RemoteMC**.
   they are on, and each server can be muted
 - Colour themes, light/dark, 10 languages; tokens protected with Windows DPAPI
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
+- Updates itself: looks for new releases on GitHub (at start and every 6 hours, can be turned off),
+  shows an "Update" button in the title bar, downloads the installer, checks its checksum, installs
+  it and restarts; the portable version opens the download page instead
 
 ### App
 - Animations can be turned off in the settings (on by default)

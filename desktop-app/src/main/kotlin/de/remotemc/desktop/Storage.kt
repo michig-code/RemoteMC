@@ -84,6 +84,8 @@ data class DesktopSettings(
     val alerts: AlertSettings = AlertSettings(),
     /** Transitions, moving numbers and the like; off = everything changes instantly. */
     val animations: Boolean = true,
+    /** Look for new RemoteMC versions on GitHub at start and every 6 hours. */
+    val autoUpdate: Boolean = true,
 )
 
 fun defaultDeviceName(): String =
@@ -102,7 +104,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             .put("tpsThreshold", a.tpsThreshold).put("joins", a.joins).put("players", a.players)
             .put("mentions", a.mentions).put("words", a.words)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
-            .put("alerts", alerts).put("animations", next.animations)
+            .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -113,6 +115,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             accentHue = o.optDouble("accentHue", -1.0).takeIf { it >= 0 }?.toFloat(),
             deviceName = o.optString("deviceName").ifBlank { defaultDeviceName() },
             animations = o.optBoolean("animations", true),
+            autoUpdate = o.optBoolean("autoUpdate", true),
             alerts = o.optJSONObject("alerts")?.let { a ->
                 AlertSettings(
                     enabled = a.optBoolean("enabled", false),

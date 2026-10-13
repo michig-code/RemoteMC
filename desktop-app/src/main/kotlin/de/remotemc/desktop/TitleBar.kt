@@ -10,18 +10,22 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
@@ -29,12 +33,19 @@ import androidx.compose.material.icons.outlined.CropSquare
 import androidx.compose.material.icons.outlined.FilterNone
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +56,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.remotemc.desktop.res.*
@@ -56,6 +68,9 @@ interface WindowControls {
     fun minimize()
     fun toggleMaximize()
     fun close()
+
+    /** Ends RemoteMC completely (also from the tray), e.g. before an update is installed. */
+    fun quit() = close()
 
     /** The part of the bar that moves the window when dragged. */
     @Composable
@@ -98,6 +113,14 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls, onAdd: () ->
         // Empty space: drag to move the window, double-click to maximize.
         controls.DragArea(Modifier.weight(1f).fillMaxHeight()) {
             Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onDoubleTap = { controls.toggleMaximize() }) })
+        }
+        model.updates?.let { updates ->
+            updates.available?.let { info ->
+                var open by remember { mutableStateOf(false) }
+                UpdatePill(info.version) { open = true }
+                if (open) UpdateDialog(updates, info, onQuit = controls::quit) { open = false }
+                Spacer(Modifier.width(8.dp))
+            }
         }
         BarButton(Icons.Outlined.Remove, stringResource(Res.string.window_minimize), wide = true, onClick = controls::minimize)
         BarButton(
@@ -177,4 +200,64 @@ private fun BarButton(icon: ImageVector, label: String, wide: Boolean = false, d
     ) {
         Icon(icon, label, Modifier.size(if (wide) 16.dp else 18.dp), tint = if (hovered && danger) Color.White else MaterialTheme.colorScheme.onSurfaceVariant)
     }
+}
+
+@Composable
+private fun UpdatePill(version: String, onClick: () -> Unit) {
+    Row(
+        Modifier.height(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)
+            .clickable(onClick = onClick).padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Outlined.SystemUpdate, null, Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
+        Spacer(Modifier.width(6.dp))
+        Text("${stringResource(Res.string.update_button)} $version", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary)
+    }
+}
+
+/** Release notes and "Install and restart" (or the download page for the portable version). */
+@Composable
+fun UpdateDialog(updates: UpdateState, info: UpdateInfo, onQuit: () -> Unit, onDismiss: () -> Unit) {
+    val uri = LocalUriHandler.current
+    val installable = Updater.canInstall && info.msiUrl != null
+    AlertDialog(
+        onDismissRequest = { if (updates.progress == null) onDismiss() },
+        icon = { Icon(Icons.Outlined.SystemUpdate, null) },
+        title = { Text(stringResource(Res.string.update_title, info.version)) },
+        text = {
+            Column(Modifier.widthIn(min = 420.dp, max = 560.dp)) {
+                if (info.notes.isNotBlank()) {
+                    Text(
+                        info.notes, style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState()),
+                    )
+                }
+                if (!installable) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(stringResource(Res.string.update_portable_hint), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                updates.progress?.let { p ->
+                    Spacer(Modifier.height(12.dp))
+                    Text(stringResource(Res.string.update_downloading), style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.height(6.dp))
+                    LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
+                }
+                updates.error?.let {
+                    Spacer(Modifier.height(10.dp))
+                    Text(stringResource(Res.string.update_failed, it), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        },
+        confirmButton = {
+            if (installable) {
+                Button(onClick = { updates.install(onQuit) }, enabled = updates.progress == null) { Text(stringResource(Res.string.update_install)) }
+            } else {
+                Button(onClick = { uri.openUri(info.page); onDismiss() }) { Text(stringResource(Res.string.update_page)) }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = updates.progress == null) { Text(stringResource(Res.string.update_later)) }
+        },
+    )
 }

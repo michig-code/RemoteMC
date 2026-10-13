@@ -29,10 +29,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
@@ -43,6 +45,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,6 +122,15 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                 SectionTitle(stringResource(Res.string.settings_notifications))
                 McCard(Modifier.fillMaxWidth()) {
                     AlertSettingsCard(settings.alerts) { change -> model.settings.update { it.copy(alerts = change(it.alerts)) } }
+                }
+                SectionTitle(stringResource(Res.string.settings_updates))
+                McCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(vertical = 8.dp)) {
+                        SwitchRow(stringResource(Res.string.settings_auto_update), stringResource(Res.string.settings_auto_update_text), settings.autoUpdate) { v ->
+                            model.settings.update { it.copy(autoUpdate = v) }
+                        }
+                        model.updates?.let { updates -> UpdateRow(updates, version, model.quit) }
+                    }
                 }
                 SectionTitle(stringResource(Res.string.settings_about))
                 McCard(Modifier.fillMaxWidth()) {
@@ -209,6 +223,33 @@ private fun SwitchRow(title: String, text: String, checked: Boolean, onChange: (
 }
 
 @Composable
+private fun UpdateRow(updates: UpdateState, version: String, quit: () -> Unit) {
+    var dialog by remember { mutableStateOf(false) }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        val info = updates.available
+        Text(
+            when {
+                updates.checking -> stringResource(Res.string.update_checking)
+                info != null -> stringResource(Res.string.update_title, info.version)
+                updates.error != null -> stringResource(Res.string.update_failed, updates.error.orEmpty())
+                updates.upToDate -> stringResource(Res.string.update_up_to_date, version)
+                else -> stringResource(Res.string.settings_version, version)
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (updates.error != null && info == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        if (info != null) {
+            Button(onClick = { dialog = true }) { Text(stringResource(Res.string.update_button)) }
+        } else {
+            OutlinedButton(onClick = updates::checkNow, enabled = !updates.checking) { Text(stringResource(Res.string.update_check_now)) }
+        }
+    }
+    val info = updates.available
+    if (dialog && info != null) UpdateDialog(updates, info, onQuit = quit) { dialog = false }
+}
+
+@Composable
 private fun Swatch(color: Color, selected: Boolean, onClick: () -> Unit) {
     Box(
         Modifier.size(36.dp).clip(CircleShape).background(color)
@@ -217,5 +258,6 @@ private fun Swatch(color: Color, selected: Boolean, onClick: () -> Unit) {
     ) { if (selected) Icon(Icons.Default.Check, null, tint = Color.White) }
 }
 
-/** Version from the jar manifest (set by the build), or the dev default. */
-val AppVersion: String = AppModel::class.java.`package`?.implementationVersion ?: "1.0.0"
+/** Version written by the build (-Prmc.version), or the dev default. */
+val AppVersion: String = AppModel::class.java.getResource("/remotemc-version.txt")?.readText()?.trim()?.ifBlank { null }
+    ?: AppModel::class.java.`package`?.implementationVersion ?: "1.0.0"

@@ -9,4 +9,18 @@
     <string name="window_minimize">Minimizar</string>
     <string name="window_maximize">Maximizar</string>
     <string name="window_restore">Restaurar</string>
+    <string name="update_button">Atualizar</string>
+    <string name="update_title">RemoteMC %1$s está disponível</string>
+    <string name="update_install">Instalar e reiniciar</string>
+    <string name="update_page">Abrir página de download</string>
+    <string name="update_later">Depois</string>
+    <string name="update_downloading">Baixando a atualização …</string>
+    <string name="update_failed">A atualização falhou: %1$s</string>
+    <string name="settings_updates">Atualizações</string>
+    <string name="settings_auto_update">Procurar atualizações automaticamente</string>
+    <string name="settings_auto_update_text">Ao iniciar e a cada 6 horas (GitHub Releases)</string>
+    <string name="update_check_now">Verificar agora</string>
+    <string name="update_up_to_date">O RemoteMC está atualizado (%1$s).</string>
+    <string name="update_checking">Verificando …</string>
+    <string name="update_portable_hint">Esta cópia não consegue se atualizar sozinha (versão portátil). Baixe a nova versão na página de download.</string>
 </resources>

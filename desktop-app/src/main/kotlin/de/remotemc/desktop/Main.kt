@@ -59,7 +59,13 @@ class AppModel(
     val servers: ServerStore = ServerStore(),
     val settings: SettingsStore = SettingsStore(),
     val history: CommandHistory = CommandHistory(),
-)
+) {
+    /** Update check and installer (only in the running app, not in tests). */
+    var updates: UpdateState? = null
+
+    /** Ends RemoteMC completely (also when it sits in the tray), e.g. for an update. */
+    var quit: () -> Unit = {}
+}
 
 fun main() = application {
     val model = remember { AppModel() }
@@ -101,6 +107,10 @@ fun main() = application {
         }
     }
     val tabs = remember { Tabs(model, scope) }
+    LaunchedEffect(Unit) {
+        model.quit = ::exitApplication
+        model.updates = UpdateState(scope) { model.settings.settings.value.autoUpdate }.also { it.start() }
+    }
     Window(
         onCloseRequest = close,
         visible = visible,
@@ -113,7 +123,7 @@ fun main() = application {
     ) {
         window.minimumSize = java.awt.Dimension(820, 560)
         LaunchedEffect(visible) { if (visible) window.toFront() }
-        val controls = remember { AwtWindowControls(this, close) }
+        val controls = remember { AwtWindowControls(this, close, quit = ::exitApplication) }
         App(model, tabs = tabs, controls = controls)
         ResizeEdges(window)
     }

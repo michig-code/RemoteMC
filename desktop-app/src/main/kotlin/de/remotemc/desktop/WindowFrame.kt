@@ -33,7 +33,11 @@ import java.awt.Window
  * Window buttons for the undecorated window. Maximizing fills the screen without covering the
  * taskbar (a plain maximized undecorated window would hide it).
  */
-class AwtWindowControls(private val scope: FrameWindowScope, private val onClose: () -> Unit) : WindowControls {
+class AwtWindowControls(
+    private val scope: FrameWindowScope,
+    private val onClose: () -> Unit,
+    private val quit: () -> Unit,
+) : WindowControls {
     override var maximized by mutableStateOf(false)
         private set
     private var restore: Rectangle? = null
@@ -61,6 +65,8 @@ class AwtWindowControls(private val scope: FrameWindowScope, private val onClose
     }
 
     override fun close() = onClose()
+
+    override fun quit() = quit.invoke()
 
     @Composable
     override fun DragArea(modifier: Modifier, content: @Composable BoxScope.() -> Unit) {

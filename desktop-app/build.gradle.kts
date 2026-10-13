@@ -53,6 +53,16 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+// The app's own version (for the update check), from the same -Prmc.version as the installers.
+val writeVersion by tasks.registering {
+    val out = layout.buildDirectory.dir("generated/version")
+    val v = project.version.toString()
+    inputs.property("version", v)
+    outputs.dir(out)
+    doLast { out.get().file("remotemc-version.txt").asFile.apply { parentFile.mkdirs() }.writeText(v) }
+}
+sourceSets.main { resources.srcDir(writeVersion) }
+
 compose.desktop {
     application {
         mainClass = "de.remotemc.desktop.MainKt"

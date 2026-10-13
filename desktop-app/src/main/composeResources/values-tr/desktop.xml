@@ -9,4 +9,18 @@
     <string name="window_minimize">Simge durumuna küçült</string>
     <string name="window_maximize">Ekranı kapla</string>
     <string name="window_restore">Önceki boyut</string>
+    <string name="update_button">Güncelle</string>
+    <string name="update_title">RemoteMC %1$s kullanılabilir</string>
+    <string name="update_install">Yükle ve yeniden başlat</string>
+    <string name="update_page">İndirme sayfasını aç</string>
+    <string name="update_later">Sonra</string>
+    <string name="update_downloading">Güncelleme indiriliyor …</string>
+    <string name="update_failed">Güncelleme başarısız: %1$s</string>
+    <string name="settings_updates">Güncellemeler</string>
+    <string name="settings_auto_update">Güncellemeleri otomatik ara</string>
+    <string name="settings_auto_update_text">Başlangıçta ve her 6 saatte bir (GitHub Releases)</string>
+    <string name="update_check_now">Şimdi kontrol et</string>
+    <string name="update_up_to_date">RemoteMC güncel (%1$s).</string>
+    <string name="update_checking">Kontrol ediliyor …</string>
+    <string name="update_portable_hint">Bu kopya kendini güncelleyemez (taşınabilir sürüm). Yeni sürümü indirme sayfasından al.</string>
 </resources>
