@@ -449,8 +449,12 @@ public final class ApiServer {
         return ok();
     }
 
-    /** Strips the slash and refuses empty and blocked commands. */
     private String checkCommand(String command) throws ApiException {
+        return checkCommand(command, plugin.getConfig().getStringList("security.blocked-commands"));
+    }
+
+    /** Strips the slash and refuses empty and blocked commands. */
+    public static String checkCommand(String command, List<String> blockedCommands) throws ApiException {
         String cmd = command.strip();
         if (cmd.startsWith("/")) {
             cmd = cmd.substring(1);
@@ -460,7 +464,7 @@ public final class ApiServer {
         }
         String label = cmd.split(" ", 2)[0].toLowerCase(Locale.ROOT);
         label = label.substring(label.indexOf(':') + 1);
-        for (String blocked : plugin.getConfig().getStringList("security.blocked-commands")) {
+        for (String blocked : blockedCommands) {
             if (blocked.equalsIgnoreCase(label)) {
                 throw new ApiException(403, "command_blocked", "The command '" + label + "' is blocked in config.yml");
             }
@@ -543,6 +547,9 @@ public final class ApiServer {
                 throw ApiException.notFound("player_offline", "Player " + name + " is not online");
             }
             String to = body.has("to") ? body.get("to").getAsString() : "";
+            if (!to.equals("spawn") && !PLAYER_NAME.matcher(to).matches()) {
+                throw ApiException.badRequest("bad_request", "Invalid teleport target");
+            }
             org.bukkit.Location target;
             if (to.equals("spawn")) {
                 target = global(() -> Bukkit.getWorlds().get(0).getSpawnLocation());

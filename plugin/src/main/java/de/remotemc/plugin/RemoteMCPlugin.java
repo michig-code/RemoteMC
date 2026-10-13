@@ -132,6 +132,13 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
                             if (!getConfig().getBoolean("security.allow-commands", true)) {
                                 return;
                             }
+                            // The block list may have changed since the task was saved.
+                            try {
+                                ApiServer.checkCommand(task.command, getConfig().getStringList("security.blocked-commands"));
+                            } catch (Exception e) {
+                                getLogger().warning("Scheduled task '" + task.name + "' skipped: " + e.getMessage());
+                                return;
+                            }
                             audit.log("schedule " + task.name, "-", "command: /" + task.command);
                             scheduler.global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), task.command));
                         });

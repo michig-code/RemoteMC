@@ -39,7 +39,7 @@ public final class AuditLog {
             return;
         }
         String line = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                + " [" + who + "] " + ip + " " + action.replace('\n', ' ') + System.lineSeparator();
+                + " [" + clean(who) + "] " + ip + " " + clean(action) + System.lineSeparator();
         writer.execute(() -> {
             try (Writer w = new FileWriter(file, StandardCharsets.UTF_8, true)) {
                 w.write(line);
@@ -51,5 +51,10 @@ public final class AuditLog {
 
     public void close() {
         writer.shutdown();
+    }
+
+    /** One line per entry: control characters (line breaks, escapes) would allow fake entries. */
+    static String clean(String text) {
+        return text == null ? "" : text.replaceAll("\\p{Cntrl}", " ");
     }
 }
