@@ -11,6 +11,8 @@
 Verwalte deinen Minecraft-Server vom Handy aus – live, verschlüsselt und kostenlos.
 **[English version](README.md)** (dort auch API-Referenz und Entwickler-Infos)
 
+> 🤖 RemoteMC wird mit Hilfe der KI **Claude** (Anthropic) entwickelt – siehe [Wie RemoteMC entsteht](#wie-remotemc-entsteht).
+
 <p>
   <img src="docs/screenshots/01_servers.png" width="190" alt="Serverliste">
   <img src="docs/screenshots/03_dashboard.png" width="190" alt="Übersicht">
@@ -51,6 +53,16 @@ kicken/bannen/heilen · *admin* zusätzlich Konsolenbefehle und OP.
 ## Sicherheit
 Die Verbindung ist per HTTPS verschlüsselt; die App vertraut genau dem Zertifikat aus dem QR-Code. Jedes Handy
 bekommt einen eigenen Zugang, der Server speichert nur Hashes. Alle Aktionen landen in `plugins/RemoteMC/audit.log`.
+
+## Wie RemoteMC entsteht
+RemoteMC wird mit Hilfe von **Claude** entwickelt, einer KI von Anthropic (über Claude Code). Der Großteil von
+Code, Tests und Dokumentation wurde von Claude geschrieben; das ist auch in der Commit-Historie sichtbar, in der
+Claude als Autor steht. [@michig-code](https://github.com/michig-code) entscheidet, was gebaut wird, testet jede
+Version auf echten Servern und Geräten, meldet Fehler und betreut das Projekt.
+
+Jede Änderung durchläuft dieselben Prüfungen: Unit-Tests für Plugin und Apps, Screenshot-Vergleiche aller
+Bildschirme und einen End-to-End-Test gegen einen echten Paper-Server im CI. Fehler oder Sicherheitslücke
+gefunden? Bitte [ein Issue eröffnen](https://github.com/michig-code/RemoteMC/issues).
 
 ## Lizenz
 [MIT](LICENSE). Verwendete Bibliotheken behalten ihre eigenen Lizenzen (in der App unter Einstellungen → Open-Source-Lizenzen).

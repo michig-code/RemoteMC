@@ -30,3 +30,5 @@ watch performance, read the live console, chat with players and run commands –
 | `/remotemc reload` | Reload the config |
 
 Alias: `/rmc`. Source code and app download: https://github.com/michig-code/RemoteMC
+
+Developed with the help of the AI Claude (Anthropic); tested and maintained by michig-code.

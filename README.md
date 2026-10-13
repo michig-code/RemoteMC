@@ -11,6 +11,8 @@
 Manage your Minecraft server from your phone – live, encrypted and free.
 **[Deutsche Version](README.de.md)**
 
+> 🤖 RemoteMC is developed with the help of the AI **Claude** (Anthropic) – see [How RemoteMC is made](#how-remotemc-is-made).
+
 | Folder | What it is |
 |---|---|
 | [`plugin/`](plugin) | Server plugin for Paper, Purpur, Folia and Spigot (Minecraft 1.20.6 – 26.x) |
@@ -211,6 +213,16 @@ SpigotMC has no upload API; upload the jar there by hand. Store texts are in [`d
 the privacy policy in [`docs/PRIVACY.md`](docs/PRIVACY.md).
 
 RemoteMC is not affiliated with Mojang or Microsoft.
+
+## How RemoteMC is made
+RemoteMC is developed with the help of **Claude**, an AI by Anthropic, using Claude Code. Most of the code,
+tests and documentation were written by Claude; this is also visible in the commit history, where Claude is
+the author. [@michig-code](https://github.com/michig-code) decides what gets built, tests every version on real
+servers and devices, reports bugs and maintains the project.
+
+Every change goes through the same checks: unit tests for plugin and apps, screenshot comparisons of every
+screen, and an end-to-end test against a real Paper server in CI. Found a bug or a security issue? Please
+[open an issue](https://github.com/michig-code/RemoteMC/issues).
 
 ## License
 [MIT](LICENSE). Third-party libraries keep their own licences (listed in the app under Settings → Open-source licences).

@@ -21,4 +21,6 @@ Paper, Purpur, Folia or Spigot server, run /remotemc pair and scan the QR code.
 • English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
 • No account, no ads, no tracking
 
+Developed with the help of the AI Claude (Anthropic); tested and maintained by michig-code.
+
 RemoteMC is not affiliated with Mojang or Microsoft.

@@ -19,3 +19,5 @@ online ist, behalte die Leistung im Blick, lies die Live-Konsole, chatte und fü
 2. Port **8765** (TCP) in Firewall/Router freigeben oder einen Zusatzport deines Hosters nutzen
    (`api.port` in `plugins/RemoteMC/config.yml`).
 3. RemoteMC-App installieren, `/remotemc pair` eingeben, QR-Code scannen – fertig.
+
+Entwickelt mit Hilfe der KI Claude (Anthropic); getestet und betreut von michig-code.
