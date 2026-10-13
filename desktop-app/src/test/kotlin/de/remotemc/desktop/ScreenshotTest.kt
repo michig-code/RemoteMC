@@ -3,7 +3,14 @@ package de.remotemc.desktop
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
+import de.remotemc.app.data.BanInfo
 import de.remotemc.app.data.ChatEntry
+import de.remotemc.app.data.GameRuleInfo
+import de.remotemc.app.data.PluginInfo
+import de.remotemc.app.data.ScheduleInfo
+import de.remotemc.app.data.ScheduleList
+import de.remotemc.app.data.Whitelist
+import de.remotemc.app.data.WorldDetails
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
@@ -13,6 +20,7 @@ import de.remotemc.app.data.WorldInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.skia.EncodedImageFormat
+import org.json.JSONObject
 import java.io.File
 import java.nio.file.Files
 import java.util.Locale
@@ -59,6 +67,7 @@ class ScreenshotTest {
 
     private fun session() = ServerSession(survival, CoroutineScope(Dispatchers.Unconfined), model.servers, model.history).apply {
         showPreview(sample, samplePlayers, sampleConsole, sampleChat, Session("PC", Role.ADMIN, true, true), listOf("time set day", "weather clear", "save-all"))
+        manage = SampleManagement(now)
     }
 
     private fun shot(name: String, dark: Boolean = true, content: @Composable () -> Unit) {
@@ -76,6 +85,52 @@ class ScreenshotTest {
     @Test fun playersPane() = shot("04_players") { ServerContent(session(), {}, Pane.PLAYERS) }
     @Test fun consolePane() = shot("05_console") { ServerContent(session(), {}, Pane.CONSOLE) }
     @Test fun chatPane() = shot("06_chat") { ServerContent(session(), {}, Pane.CHAT) }
+    @Test fun whitelist() = shot("09_whitelist") { ServerContent(session(), {}, Pane.PLAYERS, playersView = 1) }
+    @Test fun bans() = shot("10_bans", dark = false) { ServerContent(session(), {}, Pane.PLAYERS, playersView = 2) }
+    @Test fun worlds() = shot("11_worlds") { ServerContent(session(), {}, Pane.WORLDS) }
+    @Test fun plugins() = shot("12_plugins") { ServerContent(session(), {}, Pane.PLUGINS) }
+    @Test fun schedules() = shot("13_schedules") { ServerContent(session(), {}, Pane.SCHEDULES) }
     @Test fun pair() = shot("07_pair") { PairScreen(model, "remotemc://mc.example.com:8765?code=123456&fp=abc", {}) }
     @Test fun settings() = shot("08_settings") { SettingsScreen(model, {}, "1.0.0") }
+}
+
+/** Fixed management data for the screenshots. */
+private class SampleManagement(private val now: Long) : Management {
+    private val list = Whitelist(true, listOf("Alex_Builds", "Notch", "Steve", "jeb_"))
+    override suspend fun whitelist() = list
+    override suspend fun setWhitelist(enabled: Boolean) = list.copy(enabled = enabled)
+    override suspend fun whitelistAdd(name: String) = list.copy(players = list.players + name)
+    override suspend fun whitelistRemove(name: String) = list.copy(players = list.players - name)
+    override suspend fun bans() = listOf(
+        BanInfo("Griefer42", "Destroyed the spawn", "Steve", now - 3 * 86_400_000L, null),
+        BanInfo("xX_Hacker_Xx", "Fly hacks", "Server", now - 86_400_000L, now + 6 * 86_400_000L),
+    )
+    override suspend fun pardon(name: String) = bans().filter { it.name != name }
+    override suspend fun world(name: String) = WorldDetails(
+        name, "NORMAL", 13_000, storm = true, thunder = false, difficulty = "NORMAL",
+        gameRules = listOf(
+            GameRuleInfo("doDaylightCycle", true, "true"), GameRuleInfo("doFireTick", true, "false"),
+            GameRuleInfo("doMobSpawning", true, "true"), GameRuleInfo("keepInventory", true, "true"),
+            GameRuleInfo("mobGriefing", true, "false"), GameRuleInfo("playersSleepingPercentage", false, "50"),
+            GameRuleInfo("randomTickSpeed", false, "3"), GameRuleInfo("spawnRadius", false, "10"),
+        ),
+    )
+    override suspend fun worldAction(name: String, action: String, body: JSONObject) = world(name)
+    override suspend fun plugins() = listOf(
+        PluginInfo("RemoteMC", "1.0.0", true, "Manage your server from your phone and PC", listOf("michig-code")),
+        PluginInfo("EssentialsX", "2.21.0", true, "Provides an essential, core set of commands for Bukkit.", listOf("zenexer", "md_5")),
+        PluginInfo("LuckPerms", "5.4.145", true, "A permissions plugin", listOf("Luck")),
+        PluginInfo("WorldEdit", "7.3.9", true, "In-game Minecraft map editor", listOf("EngineHub")),
+        PluginInfo("OldPlugin", "0.3", false, null, emptyList()),
+    )
+    override suspend fun schedules() = ScheduleList(
+        listOf(
+            ScheduleInfo("a", "Nightly restart", "restart", daily = true, minutes = 0, time = "04:00", warn = 5, enabled = true, nextRun = now + 5 * 3_600_000L),
+            ScheduleInfo("b", "Save worlds", "save-all", daily = false, minutes = 30, time = "", warn = 0, enabled = true, nextRun = now + 12 * 60_000L),
+            ScheduleInfo("c", "Discord reminder", "say Join our Discord!", daily = false, minutes = 60, time = "", warn = 0, enabled = false),
+        ),
+        "Europe/Berlin", now,
+    )
+    override suspend fun saveSchedule(task: ScheduleInfo) = schedules()
+    override suspend fun scheduleAction(id: String, action: String) = schedules()
 }

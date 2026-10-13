@@ -69,8 +69,9 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 ## Windows app
 The same server control on the PC: server list with live status, pairing with the code or a pasted
 `remotemc://` link (with the same certificate check), overview with TPS, memory and history chart,
-players with all actions, coloured console with suggestions (Tab) and history (↑/↓), chat. Colour
-themes and all 10 languages. Access tokens are stored with Windows DPAPI.
+players with all actions, whitelist and ban list, world settings (time, weather, difficulty, game
+rules), plugin list, scheduled tasks, coloured console with suggestions (Tab) and history (↑/↓), chat.
+Colour themes and all 10 languages. Access tokens are stored with Windows DPAPI.
 
 Download `RemoteMC-Windows-x.y.z.msi` (or `-Setup.exe`) from the releases; Java is included.
 Build it yourself on Windows with `cd desktop-app && gradlew packageMsi`.
@@ -78,6 +79,8 @@ Build it yourself on Windows with `cd desktop-app && gradlew packageMsi`.
 <p>
   <img src="docs/screenshots/desktop/03_overview.png" width="560" alt="Windows app: overview">
   <img src="docs/screenshots/desktop/05_console.png" width="560" alt="Windows app: console">
+  <img src="docs/screenshots/desktop/11_worlds.png" width="560" alt="Windows app: world settings">
+  <img src="docs/screenshots/desktop/13_schedules.png" width="560" alt="Windows app: scheduled tasks">
 </p>
 
 ## Commands

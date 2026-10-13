@@ -31,6 +31,8 @@ First public release of **RemoteMC**.
 ### Windows app (new)
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
+- Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
+  server's plugin supports them
 - Colour themes, light/dark, 10 languages; tokens protected with Windows DPAPI
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 

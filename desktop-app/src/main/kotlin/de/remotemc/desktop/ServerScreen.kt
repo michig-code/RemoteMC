@@ -15,6 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Terminal
@@ -40,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
@@ -48,11 +52,15 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-enum class Pane(val label: StringResource, val icon: ImageVector, val minRole: Role) {
+/** [feature]: only shown when the server's plugin has it (older plugins lack the newer endpoints). */
+enum class Pane(val label: StringResource, val icon: ImageVector, val minRole: Role, val feature: String? = null) {
     OVERVIEW(Res.string.tab_overview, Icons.Outlined.Dashboard, Role.VIEWER),
     PLAYERS(Res.string.tab_players, Icons.Outlined.Group, Role.VIEWER),
     CONSOLE(Res.string.tab_console, Icons.Outlined.Terminal, Role.MODERATOR),
     CHAT(Res.string.tab_chat, Icons.AutoMirrored.Outlined.Chat, Role.VIEWER),
+    WORLDS(Res.string.dashboard_worlds, Icons.Outlined.Public, Role.ADMIN, "worlds"),
+    PLUGINS(Res.string.dashboard_plugins, Icons.Outlined.Extension, Role.MODERATOR, "plugins"),
+    SCHEDULES(Res.string.schedules_title, Icons.Outlined.Schedule, Role.ADMIN, "schedules"),
 }
 
 @Composable
@@ -68,11 +76,11 @@ fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit) {
 
 /** Separate from the connection so screenshot tests can show it with fixed data. */
 @Composable
-fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW) {
+fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0) {
     var pane by remember { mutableStateOf(initialPane) }
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(session) { for (m in session.messages) snackbar.showSnackbar(m) }
-    val panes = Pane.entries.filter { session.role.atLeast(it.minRole) }
+    val panes = Pane.entries.filter { session.role.atLeast(it.minRole) && (it.feature == null || session.supports(it.feature)) }
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Row(Modifier.fillMaxSize().padding(padding)) {
@@ -89,7 +97,7 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                         selected = pane == p,
                         onClick = { pane = p },
                         icon = { Icon(p.icon, null) },
-                        label = { Text(stringResource(p.label)) },
+                        label = { Text(stringResource(p.label), textAlign = TextAlign.Center, maxLines = 2) },
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -99,9 +107,12 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     when (if (pane in panes) pane else Pane.OVERVIEW) {
                         Pane.OVERVIEW -> OverviewPane(session)
-                        Pane.PLAYERS -> PlayersPane(session)
+                        Pane.PLAYERS -> PlayersPane(session, playersView)
                         Pane.CONSOLE -> ConsolePane(session)
                         Pane.CHAT -> ChatPane(session)
+                        Pane.WORLDS -> WorldsPane(session)
+                        Pane.PLUGINS -> PluginsPane(session)
+                        Pane.SCHEDULES -> SchedulesPane(session)
                     }
                 }
             }

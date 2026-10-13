@@ -30,6 +30,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,11 +48,50 @@ import androidx.compose.ui.unit.dp
 import de.remotemc.app.data.PlayerInfo
 import de.remotemc.app.data.Role
 import de.remotemc.desktop.res.*
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
 
+private enum class PlayersView(val label: StringResource) {
+    ONLINE(Res.string.players_tab_online),
+    WHITELIST(Res.string.players_tab_whitelist),
+    BANS(Res.string.players_tab_bans),
+}
+
+/** Online players, and for moderators also the whitelist and the ban list. */
 @Composable
-fun PlayersPane(session: ServerSession) {
+fun PlayersPane(session: ServerSession, initialView: Int = 0) {
+    val moderation = session.role.atLeast(Role.MODERATOR) && session.supports("moderation")
+    var view by remember { mutableStateOf(PlayersView.entries[initialView]) }
+    Column(Modifier.fillMaxSize()) {
+        if (moderation) {
+            SingleChoiceSegmentedButtonRow(Modifier.padding(start = 24.dp, top = 8.dp).widthIn(max = 520.dp).fillMaxWidth()) {
+                PlayersView.entries.forEachIndexed { i, v ->
+                    SegmentedButton(
+                        selected = view == v,
+                        onClick = { view = v },
+                        shape = SegmentedButtonDefaults.itemShape(i, PlayersView.entries.size),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
+                        icon = {},
+                    ) {
+                        Text(if (v == PlayersView.ONLINE) "${stringResource(v.label)} · ${session.players.size}" else stringResource(v.label), maxLines = 1)
+                    }
+                }
+            }
+        }
+        when (if (moderation) view else PlayersView.ONLINE) {
+            PlayersView.ONLINE -> OnlinePlayers(session)
+            PlayersView.WHITELIST -> WhitelistView(session)
+            PlayersView.BANS -> BansView(session)
+        }
+    }
+}
+
+@Composable
+private fun OnlinePlayers(session: ServerSession) {
     val players = session.players.sortedBy { it.name.lowercase() }
     var selected by remember { mutableStateOf<String?>(null) }
     if (players.isEmpty()) {

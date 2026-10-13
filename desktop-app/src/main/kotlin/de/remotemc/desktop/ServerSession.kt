@@ -64,6 +64,16 @@ class ServerSession(initial: ServerProfile, private val scope: CoroutineScope, p
 
     val role get() = session?.role ?: profile.role
     val client get() = api
+    /** Whitelist, bans, worlds, plugins and scheduled tasks (replaced in screenshot tests). */
+    var manage: Management = ApiManagement { api }
+        internal set
+
+    fun supports(feature: String) = status?.supports(feature) == true
+
+    /** Shows [text] in the snackbar. */
+    fun notify(text: String) {
+        messages.trySend(text)
+    }
 
     private var lastConsoleId = 0L
     private var lastChatId = 0L

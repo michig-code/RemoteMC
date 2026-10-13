@@ -80,7 +80,7 @@ val syncStrings by tasks.registering(Sync::class) {
     }
     from("src/main/composeResources")
     includeEmptyDirs = false
-    inputs.property("placeholderFormat", 2) // bump when composePlaceholders changes
+    inputs.property("placeholderFormat", 3) // bump when composePlaceholders changes
     // The strings are UTF-8; without this, Windows reads and writes them as cp1252.
     filteringCharset = "UTF-8"
     // Compose resources only fill in numbered string placeholders (%1$s). Android's %d, %s,
@@ -98,6 +98,8 @@ compose.resources {
 }
 
 fun composePlaceholders(line: String): String {
+    // Android escapes apostrophes and quotes; Compose resources shows the backslash.
+    @Suppress("NAME_SHADOWING") val line = line.replace("\\'", "'").replace("\\\"", "\"")
     var next = 1
     return Regex("""%(?:(\d+)\$)?[-+ 0#]*\d*(?:\.\d+)?([sdf])""").replace(line) { m ->
         val index = m.groupValues[1].ifEmpty { (next++).toString() }
