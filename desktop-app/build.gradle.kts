@@ -1,0 +1,104 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
+plugins {
+    kotlin("jvm") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    id("org.jetbrains.compose") version "1.7.3"
+}
+
+group = "de.remotemc"
+// Release builds get the version from the git tag (-Prmc.version=1.0.0).
+version = (findProperty("rmc.version") as String?) ?: "1.0.0"
+
+val androidSources = "../android-app/app/src/main/java"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    sourceSets.main {
+        // Network, TLS pinning, models and Minecraft colour codes are shared with the Android app.
+        kotlin.srcDir(androidSources)
+        kotlin.include(
+            "de/remotemc/desktop/**",
+            "de/remotemc/app/net/**",
+            "de/remotemc/app/data/Models.kt",
+            "de/remotemc/app/data/ServerProfile.kt",
+            "de/remotemc/app/data/ConnectLink.kt",
+            "de/remotemc/app/ui/util/MinecraftText.kt",
+        )
+    }
+}
+
+dependencies {
+    // -Pwindows builds a jar with the Windows graphics libraries (e.g. from Linux).
+    implementation(if (project.hasProperty("windows")) compose.desktop.windows_x64 else compose.desktop.currentOs)
+    implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
+    implementation(compose.components.resources)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
+    implementation("org.json:json:20240303") // same API as Android's built-in org.json
+    implementation("net.java.dev.jna:jna-platform:5.15.0") // Windows DPAPI for the stored tokens
+
+    testImplementation(kotlin("test"))
+}
+
+compose.desktop {
+    application {
+        mainClass = "de.remotemc.desktop.MainKt"
+        nativeDistributions {
+            targetFormats(TargetFormat.Msi, TargetFormat.Exe)
+            packageName = "RemoteMC"
+            packageVersion = project.version.toString()
+            description = "Manage your Minecraft server"
+            vendor = "RemoteMC"
+            copyright = "MIT License"
+            // From suggestRuntimeModules, plus EC crypto for the plugin's TLS certificate.
+            modules("java.instrument", "jdk.unsupported", "jdk.crypto.ec", "java.naming")
+            windows {
+                iconFile.set(project.file("src/main/resources/icon.ico"))
+                menuGroup = "RemoteMC"
+                shortcut = true
+                dirChooser = true
+                perUserInstall = true
+                // Same id for every version, so new installers upgrade the old one.
+                upgradeUuid = "5b4d2f8e-6c1a-4f0e-9d3b-7a2e8c5f1d64"
+            }
+        }
+    }
+}
+
+// Copies the Android strings (and our own images) into the layout Compose resources expect.
+val syncStrings by tasks.registering(Sync::class) {
+    from("../android-app/app/src/main/res") {
+        include("values*/strings.xml")
+    }
+    from("src/main/composeResources")
+    includeEmptyDirs = false
+    inputs.property("placeholderFormat", 1) // bump when composePlaceholders changes
+    // Compose resources only fill in numbered string placeholders (%1$s). Android's %d, %s,
+    // %.1f and %2$.0f become %1$s, %2$s, …; the app formats numbers itself before passing them.
+    filesMatching("**/strings.xml") {
+        filter { line -> composePlaceholders(line) }
+    }
+    into(layout.projectDirectory.dir("build/sharedResources"))
+}
+compose.resources {
+    packageOfResClass = "de.remotemc.desktop.res"
+    // The app texts (10 languages) come straight from the Android app; mapping the task output
+    // makes every resource task depend on the copy.
+    customDirectory("main", syncStrings.map { layout.projectDirectory.dir("build/sharedResources") })
+}
+
+fun composePlaceholders(line: String): String {
+    var next = 1
+    return Regex("""%(?:(\d+)\$)?[-+ 0#]*\d*(?:\.\d+)?([sdf])""").replace(line) { m ->
+        val index = m.groupValues[1].ifEmpty { (next++).toString() }
+        "%$index\$s"
+    }
+}

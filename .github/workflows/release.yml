@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like v1.0.0 to publish the plugin and the app.
+# Push a tag like v1.0.0 to publish the plugin, the Android app and the Windows app.
 on:
   push:
     tags: ["v*"]
@@ -83,3 +83,30 @@ jobs:
             -H "Authorization: $JWT" \
             -F "versionUpload=@meta.json;type=application/json" \
             -F "files=@$JAR"
+
+  desktop-windows:
+    # Windows installers for the same release (jpackage only builds them on Windows).
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: desktop-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Installers
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          ./gradlew packageMsi packageExe packageUberJarForCurrentOS -Prmc.version="$V"
+          mkdir -p out
+          cp build/compose/binaries/main/msi/*.msi "out/RemoteMC-Windows-$V.msi"
+          cp build/compose/binaries/main/exe/*.exe "out/RemoteMC-Windows-$V-Setup.exe"
+          cp build/compose/jars/*.jar "out/RemoteMC-Windows-$V-portable.jar"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: desktop-app/out/*
+

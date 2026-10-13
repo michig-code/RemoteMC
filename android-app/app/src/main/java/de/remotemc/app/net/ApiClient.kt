@@ -120,7 +120,7 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
 
     /** Server-side tab completion for the last word of [buffer] (plugin 2.1+). */
     suspend fun complete(buffer: String): List<String> = try {
-        val arr = call("GET", "/api/v1/complete?buffer=" + android.net.Uri.encode(buffer)).getJSONArray("suggestions")
+        val arr = call("GET", "/api/v1/complete?buffer=" + enc(buffer)).getJSONArray("suggestions")
         List(arr.length()) { arr.getString(it) }
     } catch (e: ApiError.Http) {
         if (e.status == 404) emptyList() else throw e
@@ -131,7 +131,7 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
     }
 
     suspend fun playerAction(player: String, action: String, body: JSONObject = JSONObject()) {
-        call("POST", "/api/v1/players/${android.net.Uri.encode(player)}/$action", body)
+        call("POST", "/api/v1/players/${enc(player)}/$action", body)
     }
 
     private suspend fun call(method: String, path: String, body: JSONObject? = null): JSONObject =

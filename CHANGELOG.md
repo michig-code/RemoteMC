@@ -28,6 +28,12 @@ First public release of **RemoteMC**.
   Turkish and Russian; update check
 - Imports settings and the access token from the McRemote prototype
 
+### Windows app (new)
+- Server list, pairing (code, pasted link or token, with certificate check), overview with
+  history chart, players with all actions, coloured console with suggestions and history, chat
+- Colour themes, light/dark, 10 languages; tokens protected with Windows DPAPI
+- MSI and EXE installers with their own Java runtime, built by CI on Windows
+
 ### App
 - Pairing by QR code or 6-digit code, with a security check; the phone's name is asked once
   and used for every pairing

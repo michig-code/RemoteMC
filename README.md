@@ -15,6 +15,7 @@ Manage your Minecraft server from your phone – live, encrypted and free.
 |---|---|
 | [`plugin/`](plugin) | Server plugin for Paper, Purpur, Folia and Spigot (Minecraft 1.20.6 – 26.x) |
 | [`android-app/`](android-app) | Android app (Android 8+, Kotlin / Jetpack Compose) |
+| [`desktop-app/`](desktop-app) | Windows app (Compose Multiplatform; shares the network code with the Android app) |
 
 <p>
   <img src="docs/screenshots/01_servers.png" width="190" alt="Server list">
@@ -64,6 +65,20 @@ Manage your Minecraft server from your phone – live, encrypted and free.
    Without a camera: tap “Enter code” and type the address, port and 6-digit code.
 
 > Upgrading from the McRemote prototype? Remove `McRemote-1.0.0.jar`. RemoteMC takes over its config and token on first start.
+
+## Windows app
+The same server control on the PC: server list with live status, pairing with the code or a pasted
+`remotemc://` link (with the same certificate check), overview with TPS, memory and history chart,
+players with all actions, coloured console with suggestions (Tab) and history (↑/↓), chat. Colour
+themes and all 10 languages. Access tokens are stored with Windows DPAPI.
+
+Download `RemoteMC-Windows-x.y.z.msi` (or `-Setup.exe`) from the releases; Java is included.
+Build it yourself on Windows with `cd desktop-app && gradlew packageMsi`.
+
+<p>
+  <img src="docs/screenshots/desktop/03_overview.png" width="560" alt="Windows app: overview">
+  <img src="docs/screenshots/desktop/05_console.png" width="560" alt="Windows app: console">
+</p>
 
 ## Commands
 Permission `remotemc.admin` (default: OP), alias `/rmc`.

@@ -1,7 +1,5 @@
 package de.remotemc.app.net
 
-import android.annotation.SuppressLint
-import android.util.Base64
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.cert.CertificateException
@@ -19,11 +17,11 @@ class CertificateChangedException(val actualFingerprint: String) :
 object Tls {
 
     fun fingerprint(cert: X509Certificate): String =
-        Base64.encodeToString(MessageDigest.getInstance("SHA-256").digest(cert.encoded), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+        java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(cert.encoded))
 
     /** Short form users compare with the server console, e.g. "AB12-CD34". */
     fun shortFingerprint(fingerprint: String): String {
-        val bytes = Base64.decode(fingerprint, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+        val bytes = java.util.Base64.getUrlDecoder().decode(fingerprint)
         val hex = bytes.take(4).joinToString("") { "%02X".format(it) }
         return hex.substring(0, 4) + "-" + hex.substring(4)
     }
@@ -38,7 +36,7 @@ object Tls {
      * Trusts exactly the pinned certificate (the plugin's self-signed one), or uses normal CA
      * validation when no fingerprint is stored (e.g. behind a reverse proxy with a real certificate).
      */
-    @SuppressLint("CustomX509TrustManager") // deliberate: certificate pinning, falls back to the system trust manager
+    @Suppress("CustomX509TrustManager") // deliberate: certificate pinning, falls back to the system trust manager
     class PinningTrustManager(private val pinned: String?) : X509TrustManager {
         override fun checkServerTrusted(chain: Array<out X509Certificate>, authType: String) {
             if (pinned == null) {
@@ -58,7 +56,7 @@ object Tls {
     }
 
     /** Accepts any certificate but remembers it; only used to show its fingerprint before pairing. */
-    @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager") // only for reading the fingerprint; no secrets are sent
+    @Suppress("CustomX509TrustManager", "TrustAllX509TrustManager") // only for reading the fingerprint; no secrets are sent
     class CapturingTrustManager : X509TrustManager {
         @Volatile
         var captured: X509Certificate? = null
