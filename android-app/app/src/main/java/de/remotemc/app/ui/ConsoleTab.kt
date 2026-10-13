@@ -45,7 +45,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -100,6 +100,9 @@ import java.util.Date
 import java.util.Locale
 
 private val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
+
+/** Coloured console lines by key; a bit more than the console keeps (1500 lines). */
+private val parsedLines = android.util.LruCache<String, AnnotatedString>(2000)
 private val TerminalText = Color(0xFFD5DDD8)
 private val TerminalDim = Color(0xFF56635A)
 private val TerminalAccent = Color(0xFF7CC4FF)
@@ -118,7 +121,7 @@ fun ConsoleTab(
     onCommand: (String) -> Unit,
     onForget: (String) -> Unit = {},
     initialInput: String = "",
-    /** Gear next to "send": all commands, favorites and macros (null = no gear). */
+    /** Book next to "send": all commands, favorites and macros (null = no button). */
     menu: CommandMenuActions? = null,
     initialSearch: String? = null,
     initialLevel: LevelFilter = LevelFilter.ALL,
@@ -332,7 +335,7 @@ fun ConsoleTab(
                 extra = if (menu == null) null else {
                     {
                         IconButton(onClick = { haptics.tap(); menuOpen = true }) {
-                            Icon(Icons.Outlined.Settings, stringResource(R.string.menu_open), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(Icons.AutoMirrored.Outlined.MenuBook, stringResource(R.string.menu_open), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 },
@@ -478,9 +481,12 @@ private fun ConsoleLineView(line: ConsoleEntry, highlight: String = "", current:
         "OUTPUT" -> Color(0xFF8BE9A8)
         else -> TerminalText
     }
+    // Parsed once per line and kept while it is in the log, not again on every scroll.
     val plain = remember(line.key, line.formatted) {
-        if (line.formatted != null) MinecraftText.parse(line.formatted, base)
-        else MinecraftText.highlightPlain(line.text, base, TerminalAccent)
+        parsedLines.get(line.key) ?: (
+            if (line.formatted != null) MinecraftText.parse(line.formatted, base)
+            else MinecraftText.highlightPlain(line.text, base, TerminalAccent)
+            ).also { parsedLines.put(line.key, it) }
     }
     val text = remember(plain, highlight, current) {
         val ranges = ConsoleSearch.ranges(plain.text, highlight)

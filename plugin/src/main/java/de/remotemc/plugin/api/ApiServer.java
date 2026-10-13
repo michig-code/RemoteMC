@@ -482,8 +482,14 @@ public final class ApiServer {
 
             ex.getResponseHeaders().set("Content-Type", "text/event-stream; charset=utf-8");
             ex.getResponseHeaders().set("X-Accel-Buffering", "no"); // nginx: don't buffer
+            // One gzip stream for the whole connection: each event is flushed at once
+            // (sync flush), and the repeating JSON of the status events packs to a fraction.
+            boolean gzip = ResponseBody.shouldGzip(ex.getRequestHeaders().getFirst("Accept-Encoding"), Integer.MAX_VALUE);
+            if (gzip) {
+                ex.getResponseHeaders().set("Content-Encoding", "gzip");
+            }
             ex.sendResponseHeaders(200, 0);
-            OutputStream out = ex.getResponseBody();
+            OutputStream out = gzip ? new java.util.zip.GZIPOutputStream(ex.getResponseBody(), true) : ex.getResponseBody();
             write(out, "retry: 3000\n\n" + EventHub.frame("hello", hello));
 
             while (!sub.overflowed()) {

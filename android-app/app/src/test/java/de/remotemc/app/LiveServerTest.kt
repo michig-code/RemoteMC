@@ -5,7 +5,8 @@ import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.net.ApiClient
 import de.remotemc.app.net.EventStream
 import de.remotemc.app.net.StreamEvent
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
@@ -42,7 +43,9 @@ class LiveServerTest {
         assert(api.commands().any { it.name == "gamemode" })
         assertEquals(listOf("creative"), api.complete("gamemode cr"))
 
-        val hello = withTimeout(10_000) { EventStream(profile).events().first() }
-        assert(hello is StreamEvent.Hello)
+        // The stream is gzip-compressed (OkHttp asks for it): events must still arrive one by one.
+        val events = withTimeout(10_000) { EventStream(profile).events().take(2).toList() }
+        assert(events[0] is StreamEvent.Hello)
+        assert(events[1] is StreamEvent.Status) { events[1].toString() }
     }
 }

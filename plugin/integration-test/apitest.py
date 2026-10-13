@@ -289,6 +289,26 @@ except (socket.timeout, TimeoutError):
 check("stream delivers hello/status/console/chat", {"hello", "status", "console", "chat"} <= seen, seen)
 c.close()
 
+# compressed live stream: events arrive one by one, a fraction of the size
+import zlib
+c = conn()
+c.request("GET", "/api/v1/events", headers={"Authorization": "Bearer " + admin, "Accept-Encoding": "gzip"})
+r = c.getresponse()
+gz = r.getheader("Content-Encoding") == "gzip"
+inflate, packed, text, deadline = zlib.decompressobj(16 + zlib.MAX_WBITS), 0, "", time.time() + 7
+try:
+    while time.time() < deadline and text.count("event: status") < 3:
+        chunk = r.read1(4096)
+        if not chunk:
+            break
+        packed += len(chunk)
+        text += inflate.decompress(chunk).decode()
+except (socket.timeout, TimeoutError):
+    pass
+c.close()
+check("live stream gzip, event by event", gz and "event: hello" in text and text.count("event: status") >= 3 and packed * 3 < len(text.encode()),
+      (gz, packed, len(text.encode()), text[:120]))
+
 # 7. revoke
 console(f"remotemc token revoke viewer{RUN}", r"revoked|entzogen")
 st, d = req("GET", "/api/v1/status", viewer)

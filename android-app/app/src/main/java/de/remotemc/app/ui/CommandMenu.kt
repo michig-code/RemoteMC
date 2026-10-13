@@ -83,7 +83,7 @@ import de.remotemc.app.ui.util.rememberHaptics
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-/** What the command menu (gear next to "send" in the console) shows and does. */
+/** What the command menu (book next to "send" in the console) shows and does. */
 class CommandMenuActions(
     val commands: List<CommandInfo>,
     val shortcuts: Shortcuts,

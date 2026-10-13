@@ -308,17 +308,27 @@ object Http {
 
     private val pinned = ConcurrentHashMap<Pair<OkHttpClient, String?>, OkHttpClient>()
 
+    /** TLS setup per certificate, the same for every client of that server (see [forProfile]). */
+    private class TlsSetup(val factory: javax.net.ssl.SSLSocketFactory, val trust: javax.net.ssl.X509TrustManager, val hostnames: javax.net.ssl.HostnameVerifier)
+
+    private val tls = ConcurrentHashMap<String, TlsSetup>()
+
     /**
      * Client for one certificate. Reused, so repeated requests (e.g. the status on the server list)
-     * keep their connection open instead of doing a new TCP and TLS handshake each time.
+     * keep their connection open instead of doing a new TCP and TLS handshake each time. All
+     * clients of a server share one TLS setup: OkHttp then sees the same address and hands the
+     * connection the server list opened (quick client) to the server screen and the live stream.
      */
     fun forProfile(base: OkHttpClient, tls: Boolean, fingerprint: String?): OkHttpClient {
         if (!tls) return base
         return pinned.getOrPut(base to fingerprint) {
-            val tm = Tls.PinningTrustManager(fingerprint)
+            val setup = this.tls.getOrPut(fingerprint ?: "") {
+                val tm = Tls.PinningTrustManager(fingerprint)
+                TlsSetup(Tls.sslContext(tm).socketFactory, tm, Tls.hostnameVerifier(fingerprint != null))
+            }
             base.newBuilder()
-                .sslSocketFactory(Tls.sslContext(tm).socketFactory, tm)
-                .hostnameVerifier(Tls.hostnameVerifier(fingerprint != null))
+                .sslSocketFactory(setup.factory, setup.trust)
+                .hostnameVerifier(setup.hostnames)
                 .build()
         }
     }

@@ -200,6 +200,18 @@ class NetworkTest {
     }
 
     @Test
+    fun serverListConnectionIsReusedWhenTheServerIsOpened() = runBlocking {
+        val status = """{"motd":"x","version":"v","minecraftVersion":"1.21.4","platform":"Paper","onlinePlayers":0,"maxPlayers":20,"tps":[20.0]}"""
+        server.enqueue(json(status))
+        server.enqueue(json("""{"name":"Pixel","role":"admin"}"""))
+        ApiClient(profile(), Http.quick).status() // the check on the server list
+        ApiClient(profile()).me() // opening the server
+        assertEquals(0, server.takeRequest().sequenceNumber)
+        // Same connection: no second TCP and TLS handshake.
+        assertEquals(1, server.takeRequest().sequenceNumber)
+    }
+
+    @Test
     fun quickClientGivesUpFastOnUnreachableServer() = runBlocking {
         // 10.255.255.1 is not routed: the connection attempt hangs until the timeout.
         val offline = ServerProfile(name = "Down", host = "10.255.255.1", token = "t", tls = false)
