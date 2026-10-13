@@ -502,4 +502,13 @@
     <string name="players_whitelist_add">Beyaz liste</string>
     <string name="players_message">Mesaj</string>
     <string name="players_select_hint">Birden fazla seçmek için bir oyuncuya basılı tut</string>
+    <string name="players_first_played">İlk giriş: %s</string>
+    <string name="players_online_since">%1$s itibarıyla çevrimiçi (%2$s)</string>
+    <string name="players_note">Not (yalnızca bu telefonda)</string>
+    <string name="players_inventory">Envanter</string>
+    <string name="players_ender_chest">Ender sandığı</string>
+    <string name="inventory_armor">Zırh ve ikinci el</string>
+    <string name="inventory_hotbar">Hızlı erişim çubuğu</string>
+    <string name="inventory_tap_hint">Ayrıntılar için bir eşyaya dokun</string>
+    <string name="inventory_durability">Dayanıklılık %1$d / %2$d</string>
 </resources>

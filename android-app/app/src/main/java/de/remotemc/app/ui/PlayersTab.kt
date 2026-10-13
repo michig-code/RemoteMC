@@ -1,5 +1,7 @@
 package de.remotemc.app.ui
 
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -97,6 +99,13 @@ import org.json.JSONObject
 
 typealias PlayerAction = (player: String, action: String, body: JSONObject, success: UiText) -> Unit
 
+/** Extras in the player sheet: inventory (null = not offered) and private notes on this device. */
+class PlayerDetails(
+    val loadInventory: (suspend (String) -> de.remotemc.app.data.PlayerInventory)? = null,
+    val note: (uuid: String) -> String = { "" },
+    val setNote: (uuid: String, text: String) -> Unit = { _, _ -> },
+)
+
 private enum class SortBy(val label: Int) { NAME(R.string.players_sort_name), PING(R.string.players_sort_ping), WORLD(R.string.players_sort_world) }
 
 @Composable
@@ -109,6 +118,7 @@ fun PlayersTab(
     onBatch: ((players: List<String>, action: String, body: JSONObject) -> Unit)? = null,
     canWhitelist: Boolean = false,
     initialSelection: Set<String> = emptySet(),
+    details: PlayerDetails = PlayerDetails(),
 ) {
     var selected by remember { mutableStateOf<String?>(null) }
     var query by rememberSaveable { mutableStateOf("") }
@@ -191,7 +201,7 @@ fun PlayersTab(
     // Look the player up again so the sheet shows fresh data and closes if they leave.
     selected?.let { name ->
         val player = players.firstOrNull { it.name == name }
-        if (player == null) selected = null else PlayerSheet(player, role, players.map { it.name } - name, canTeleport, onAction) { selected = null }
+        if (player == null) selected = null else PlayerSheet(player, role, players.map { it.name } - name, canTeleport, onAction, details) { selected = null }
     }
 }
 
@@ -324,8 +334,18 @@ private fun PingIndicator(ping: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTeleport: Boolean, onAction: PlayerAction, onDismiss: () -> Unit) {
+private fun PlayerSheet(
+    p: PlayerInfo,
+    role: Role,
+    others: List<String>,
+    canTeleport: Boolean,
+    onAction: PlayerAction,
+    details: PlayerDetails,
+    onDismiss: () -> Unit,
+) {
     var text by remember { mutableStateOf("") }
+    var inventory by remember { mutableStateOf(false) }
+    var note by remember(p.uuid) { mutableStateOf(details.note(p.uuid)) }
     var confirm by remember { mutableStateOf<String?>(null) }
     var teleport by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -366,6 +386,25 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTele
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    if (p.firstPlayed > 0) {
+                        Text(
+                            stringResource(R.string.players_first_played, dateFormat().format(java.util.Date(p.firstPlayed))),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (p.onlineSince > 0) {
+                        val minutes = ((System.currentTimeMillis() - p.onlineSince) / 1000).coerceAtLeast(0)
+                        Text(
+                            stringResource(
+                                R.string.players_online_since,
+                                java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(java.util.Date(p.onlineSince)),
+                                formatPlaytime(minutes),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
@@ -381,6 +420,15 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTele
                     AnimatedBar(p.food / 20f, McColors.Food, height = 8.dp)
                 }
             }
+
+            OutlinedTextField(
+                note,
+                { v -> note = v.take(de.remotemc.app.data.PlayerNotes.MAX_LENGTH); details.setNote(p.uuid, note) },
+                label = { Text(stringResource(R.string.players_note)) },
+                leadingIcon = { Icon(Icons.Outlined.EditNote, null) },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 4,
+            )
 
             if (!canModerate) {
                 Text(
@@ -441,6 +489,11 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTele
                         teleport = true
                     }
                 }
+                if (details.loadInventory != null) {
+                    ActionButton(Icons.Outlined.Inventory2, stringResource(R.string.players_inventory), McColors.Grass) {
+                        inventory = true
+                    }
+                }
                 ActionButton(Icons.AutoMirrored.Outlined.Logout, stringResource(R.string.players_kick), McColors.Warning) {
                     haptics.heavy(); confirm = "kick"
                 }
@@ -449,6 +502,10 @@ private fun PlayerSheet(p: PlayerInfo, role: Role, others: List<String>, canTele
                 }
             }
         }
+    }
+
+    if (inventory && details.loadInventory != null) {
+        InventorySheet(p.name, details.loadInventory) { inventory = false }
     }
 
     if (teleport) {
@@ -633,3 +690,6 @@ private fun BatchActions(names: List<String>, role: Role, canWhitelist: Boolean,
         )
     }
 }
+
+/** Date in the phone's style, e.g. "12.03.2025". */
+private fun dateFormat(): java.text.DateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)

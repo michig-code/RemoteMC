@@ -533,4 +533,13 @@
     <string name="players_whitelist_add">Whitelist</string>
     <string name="players_message">Message</string>
     <string name="players_select_hint">Long-press a player to select several</string>
+    <string name="players_first_played">First joined %s</string>
+    <string name="players_online_since">Online since %1$s (%2$s)</string>
+    <string name="players_note">Note (only on this phone)</string>
+    <string name="players_inventory">Inventory</string>
+    <string name="players_ender_chest">Ender chest</string>
+    <string name="inventory_armor">Armor &amp; off hand</string>
+    <string name="inventory_hotbar">Hotbar</string>
+    <string name="inventory_tap_hint">Tap an item for details</string>
+    <string name="inventory_durability">Durability %1$d / %2$d</string>
 </resources>

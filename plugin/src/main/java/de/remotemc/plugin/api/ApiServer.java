@@ -366,6 +366,18 @@ public final class ApiServer {
                     plugin.audit().log(caller.who(), caller.ip(), "pardon " + name);
                     return global(Moderation::bans);
                 }
+                if (method.equals("GET") && parts.length == 6 && parts[3].equals("players") && parts[5].equals("inventory")) {
+                    require(caller, Role.MODERATOR);
+                    String name = playerName(parts[4]);
+                    Player p = Bukkit.getPlayerExact(name);
+                    if (p == null) {
+                        throw ApiException.notFound("player_offline", "Player " + name + " is not online");
+                    }
+                    // Read on the player's own thread (Folia); looking is logged like any action.
+                    JsonObject inventory = await(plugin.scheduler().entity(p, () -> Inventories.of(p)));
+                    plugin.audit().log(caller.who(), caller.ip(), "view inventory of " + name);
+                    return inventory;
+                }
                 if (method.equals("POST") && parts.length == 6 && parts[3].equals("players")) {
                     return playerAction(caller, parts[4], parts[5], readBody(ex));
                 }

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import de.remotemc.app.data.CommandHistory
 import de.remotemc.app.data.KeystoreBox
+import de.remotemc.app.data.PlayerNotes
 import de.remotemc.app.data.ServerRepository
 import de.remotemc.app.data.SettingsStore
 import de.remotemc.app.data.ShortcutStore
@@ -17,6 +18,9 @@ class RemoteMCApp : Application() {
         private set
     lateinit var history: CommandHistory
         private set
+    /** Private notes about players. */
+    lateinit var notes: PlayerNotes
+        private set
     /** Favorites and macros per server. */
     lateinit var shortcuts: ShortcutStore
         private set
@@ -29,6 +33,7 @@ class RemoteMCApp : Application() {
         servers = ServerRepository(getSharedPreferences("servers", MODE_PRIVATE), KeystoreBox())
         settings = SettingsStore(getSharedPreferences("settings", MODE_PRIVATE))
         history = CommandHistory(getSharedPreferences("history", MODE_PRIVATE))
+        notes = PlayerNotes(getSharedPreferences("notes", MODE_PRIVATE))
         shortcuts = ShortcutStore(getSharedPreferences("shortcuts", MODE_PRIVATE))
         snapshots = SnapshotStore(File(noBackupFilesDir, "snapshots"), KeystoreBox("remotemc.snapshots"))
     }

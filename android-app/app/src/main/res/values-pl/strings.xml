@@ -530,4 +530,13 @@
     <string name="players_whitelist_add">Biała lista</string>
     <string name="players_message">Wiadomość</string>
     <string name="players_select_hint">Przytrzymaj gracza, aby zaznaczyć kilku</string>
+    <string name="players_first_played">Pierwszy raz: %s</string>
+    <string name="players_online_since">Online od %1$s (%2$s)</string>
+    <string name="players_note">Notatka (tylko na tym telefonie)</string>
+    <string name="players_inventory">Ekwipunek</string>
+    <string name="players_ender_chest">Skrzynia Endu</string>
+    <string name="inventory_armor">Zbroja i druga ręka</string>
+    <string name="inventory_hotbar">Pasek szybkiego dostępu</string>
+    <string name="inventory_tap_hint">Dotknij przedmiotu, aby zobaczyć szczegóły</string>
+    <string name="inventory_durability">Wytrzymałość %1$d / %2$d</string>
 </resources>

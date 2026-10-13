@@ -192,6 +192,7 @@ private fun AppNavigation(
                     repo.delete(it.id)
                     context.app.snapshots.delete(it.id)
                     context.app.shortcuts.delete(it.id)
+                    context.app.notes.deleteServer(it.id)
                     ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(it.id))
                 },
                 onSettings = { nav.navigate(Routes.SETTINGS) },

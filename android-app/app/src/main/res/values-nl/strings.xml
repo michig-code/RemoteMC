@@ -502,4 +502,13 @@
     <string name="players_whitelist_add">Whitelist</string>
     <string name="players_message">Bericht</string>
     <string name="players_select_hint">Druk lang op een speler om er meerdere te selecteren</string>
+    <string name="players_first_played">Voor het eerst: %s</string>
+    <string name="players_online_since">Online sinds %1$s (%2$s)</string>
+    <string name="players_note">Notitie (alleen op deze telefoon)</string>
+    <string name="players_inventory">Inventaris</string>
+    <string name="players_ender_chest">Enderkist</string>
+    <string name="inventory_armor">Harnas en tweede hand</string>
+    <string name="inventory_hotbar">Sneltoetsbalk</string>
+    <string name="inventory_tap_hint">Tik op een voorwerp voor details</string>
+    <string name="inventory_durability">Duurzaamheid %1$d / %2$d</string>
 </resources>

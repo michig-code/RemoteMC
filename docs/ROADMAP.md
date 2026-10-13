@@ -98,7 +98,7 @@ Nach jedem größeren Block gibt es eine APK `RemoteMC-App-1.0.0-N.apk`.
 ### B3 – Mehrfachauswahl bei Spielern ✅
 Mehrere Spieler auf einmal kicken, eine Nachricht senden oder whitelisten.
 
-### B4 – Spieler-Details
+### B4 – Spieler-Details ✅
 - Spielzeit sowie erste und letzte Anmeldung
 - eigene Notizen
 - Position und Teleport

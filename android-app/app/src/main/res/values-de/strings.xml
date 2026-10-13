@@ -516,4 +516,13 @@
     <string name="players_whitelist_add">Whitelist</string>
     <string name="players_message">Nachricht</string>
     <string name="players_select_hint">Lange auf einen Spieler drücken, um mehrere auszuwählen</string>
+    <string name="players_first_played">Erstmals dabei: %s</string>
+    <string name="players_online_since">Online seit %1$s (%2$s)</string>
+    <string name="players_note">Notiz (nur auf diesem Handy)</string>
+    <string name="players_inventory">Inventar</string>
+    <string name="players_ender_chest">Endertruhe</string>
+    <string name="inventory_armor">Rüstung &amp; Zweithand</string>
+    <string name="inventory_hotbar">Schnellleiste</string>
+    <string name="inventory_tap_hint">Tippe auf einen Gegenstand für Details</string>
+    <string name="inventory_durability">Haltbarkeit %1$d / %2$d</string>
 </resources>

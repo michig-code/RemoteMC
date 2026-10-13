@@ -530,4 +530,13 @@
     <string name="players_whitelist_add">Белый список</string>
     <string name="players_message">Сообщение</string>
     <string name="players_select_hint">Удерживайте игрока, чтобы выбрать нескольких</string>
+    <string name="players_first_played">Впервые: %s</string>
+    <string name="players_online_since">В сети с %1$s (%2$s)</string>
+    <string name="players_note">Заметка (только на этом телефоне)</string>
+    <string name="players_inventory">Инвентарь</string>
+    <string name="players_ender_chest">Сундук Края</string>
+    <string name="inventory_armor">Броня и вторая рука</string>
+    <string name="inventory_hotbar">Панель быстрого доступа</string>
+    <string name="inventory_tap_hint">Нажмите на предмет, чтобы увидеть подробности</string>
+    <string name="inventory_durability">Прочность %1$d / %2$d</string>
 </resources>

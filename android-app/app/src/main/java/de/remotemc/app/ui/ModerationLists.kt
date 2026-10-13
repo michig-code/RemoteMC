@@ -108,6 +108,11 @@ fun PlayersSection(state: ServerUiState, actions: ServerActions, initialView: In
                     canTeleport = state.status?.supports("teleport") == true,
                     onBatch = actions.onPlayerBatch,
                     canWhitelist = actions.moderation != null,
+                    details = actions.playerDetails.let { d ->
+                        // The inventory needs a moderator and a plugin that offers it.
+                        if (state.status?.supports("inventory") == true && state.role.atLeast(Role.MODERATOR)) d
+                        else PlayerDetails(null, d.note, d.setNote)
+                    },
                 )
             }
             PlayersView.WHITELIST -> WhitelistView(moderation!!, canToggle = state.role.atLeast(Role.ADMIN))

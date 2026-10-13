@@ -11,6 +11,7 @@ import de.remotemc.app.data.FileEntry
 import de.remotemc.app.data.FileList
 import de.remotemc.app.data.PairResult
 import de.remotemc.app.data.PlayerInfo
+import de.remotemc.app.data.PlayerInventory
 import de.remotemc.app.data.PluginInfo
 import de.remotemc.app.data.ScheduleInfo
 import de.remotemc.app.data.ScheduleList
@@ -106,6 +107,10 @@ class ApiClient(private val profile: ServerProfile, base: OkHttpClient = Http.ba
         val slow = client.newBuilder().writeTimeout(5, TimeUnit.MINUTES).readTimeout(2, TimeUnit.MINUTES).build()
         return FileEntry.fromJson(execute(slow, profile.baseUrl, "POST", "/api/v1/files/upload?path=${enc(path)}", profile.token, null, body))
     }
+
+    /** Read-only inventory and ender chest of an online player (moderators; plugin with "inventory"). */
+    suspend fun inventory(player: String): PlayerInventory =
+        PlayerInventory.fromJson(call("GET", "/api/v1/players/${enc(player)}/inventory"))
 
     suspend fun players(): List<PlayerInfo> = PlayerInfo.listFromJson(call("GET", "/api/v1/players").optJSONArray("players"))
 

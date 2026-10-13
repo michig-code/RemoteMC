@@ -104,6 +104,10 @@ data class PlayerInfo(
     val skin: String? = null,
     /** Total time played on this server in seconds; -1 if unknown. */
     val playtime: Long = -1,
+    /** First join on this server (ms); 0 if unknown. */
+    val firstPlayed: Long = 0,
+    /** Start of the current session (ms); 0 if unknown (Spigot). */
+    val onlineSince: Long = 0,
 ) {
     fun toJson(): JSONObject = JSONObject()
         .put("name", name).put("uuid", uuid).put("world", world)
@@ -111,6 +115,7 @@ data class PlayerInfo(
         .put("health", health).put("maxHealth", maxHealth).put("food", food).put("level", level)
         .put("ping", ping).put("gameMode", gameMode).put("op", op)
         .put("skin", skin.orEmpty()).put("playtime", playtime)
+        .put("firstPlayed", firstPlayed).put("onlineSince", onlineSince)
 
     companion object {
         fun listFromJson(arr: JSONArray?): List<PlayerInfo> {
@@ -133,6 +138,8 @@ data class PlayerInfo(
                     op = p.optBoolean("op"),
                     skin = p.optString("skin").takeIf { it.startsWith("https://") },
                     playtime = p.optLong("playtime", -1),
+                    firstPlayed = p.optLong("firstPlayed", 0),
+                    onlineSince = p.optLong("onlineSince", 0),
                 )
             }
         }
@@ -427,5 +434,64 @@ data class ScheduleList(val schedules: List<ScheduleInfo>, val timezone: String,
                 o.optLong("now"),
             )
         }
+    }
+}
+
+/** One stack in a player's inventory ([id] like "minecraft:diamond_sword"). */
+data class InventoryItem(
+    val slot: Int,
+    val id: String,
+    val amount: Int,
+    /** Custom name given in an anvil, if any. */
+    val name: String? = null,
+    /** "sharpness 3", … */
+    val enchants: List<String> = emptyList(),
+    val durability: Int? = null,
+    val maxDurability: Int? = null,
+) {
+    /** "Diamond Sword" from "minecraft:diamond_sword". */
+    val displayName: String get() = name ?: prettyId(id)
+
+    companion object {
+        fun prettyId(id: String) = id.substringAfter(':').split('_')
+            .joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+
+        fun listFromJson(arr: JSONArray?): List<InventoryItem> {
+            if (arr == null) return emptyList()
+            return List(arr.length()) {
+                val o = arr.getJSONObject(it)
+                val enchants = o.optJSONArray("enchants")
+                InventoryItem(
+                    slot = o.optInt("slot"),
+                    id = o.optString("id"),
+                    amount = o.optInt("amount", 1),
+                    name = o.optString("name").takeIf { n -> n.isNotBlank() },
+                    enchants = if (enchants == null) emptyList() else List(enchants.length()) { i -> enchants.getString(i) },
+                    durability = if (o.has("durability")) o.optInt("durability") else null,
+                    maxDurability = if (o.has("maxDurability")) o.optInt("maxDurability") else null,
+                )
+            }
+        }
+    }
+}
+
+/** Read-only view of a player's inventory (GET /players/{name}/inventory). */
+data class PlayerInventory(
+    /** Slots 0–8 hotbar, 9–35 main inventory. */
+    val items: List<InventoryItem>,
+    /** Slots 0 boots, 1 leggings, 2 chestplate, 3 helmet. */
+    val armor: List<InventoryItem>,
+    val offhand: InventoryItem?,
+    val enderChest: List<InventoryItem>,
+    val selectedSlot: Int,
+) {
+    companion object {
+        fun fromJson(o: JSONObject) = PlayerInventory(
+            items = InventoryItem.listFromJson(o.optJSONArray("items")),
+            armor = InventoryItem.listFromJson(o.optJSONArray("armor")),
+            offhand = InventoryItem.listFromJson(o.optJSONArray("offhand")).firstOrNull(),
+            enderChest = InventoryItem.listFromJson(o.optJSONArray("enderChest")),
+            selectedSlot = o.optInt("selectedSlot", -1),
+        )
     }
 }

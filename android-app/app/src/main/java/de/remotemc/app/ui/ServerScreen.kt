@@ -164,6 +164,7 @@ class ServerActions(
     val onStopMacro: () -> Unit = {},
     /** The same action for several selected players (null: no multi-select). */
     val onPlayerBatch: ((players: List<String>, action: String, body: JSONObject) -> Unit)? = null,
+    val playerDetails: PlayerDetails = PlayerDetails(),
 )
 
 /** Files in the server folder; paths are relative to it ("" = the folder itself). */
@@ -258,6 +259,11 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
             onRunMacro = vm::runMacro,
             onStopMacro = vm::stopMacro,
             onPlayerBatch = vm::playerBatch,
+            playerDetails = PlayerDetails(
+                loadInventory = vm::inventory,
+                note = { uuid -> context.app.notes.get(vm.profile.id, uuid) },
+                setNote = { uuid, text -> context.app.notes.set(vm.profile.id, uuid, text) },
+            ),
         ),
         snackbar = snackbar,
     )

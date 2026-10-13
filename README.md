@@ -185,6 +185,7 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 | GET | `/api/v1/events` | viewer | Server-Sent Events: `hello`, `status`, `chat`, `console` (moderator+) |
 | GET | `/api/v1/console?since=<id>` | moderator | Console lines |
 | POST | `/api/v1/chat` | moderator | `{"message"}` broadcast |
+| GET | `/api/v1/players/<name>/inventory` | moderator | Inventory, armor, off hand and ender chest of an online player (read-only, logged in `audit.log`) |
 | POST | `/api/v1/players/<name>/<action>` | moderator | `kick`, `ban` (`reason`), `heal`, `gamemode` (`mode`), `message` (`message`); `op`/`deop` need admin |
 | POST | `/api/v1/command` | admin | `{"command"}` → `{"success","output","formatted"}` (formatted keeps `§` colour codes) |
 | GET | `/api/v1/commands` | admin | Commands the console can run (name, description, usage, aliases) |

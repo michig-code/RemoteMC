@@ -516,4 +516,13 @@
     <string name="players_whitelist_add">Lista blanca</string>
     <string name="players_message">Mensaje</string>
     <string name="players_select_hint">Mantén pulsado un jugador para seleccionar varios</string>
+    <string name="players_first_played">Primera vez: %s</string>
+    <string name="players_online_since">En línea desde %1$s (%2$s)</string>
+    <string name="players_note">Nota (solo en este teléfono)</string>
+    <string name="players_inventory">Inventario</string>
+    <string name="players_ender_chest">Cofre de ender</string>
+    <string name="inventory_armor">Armadura y mano secundaria</string>
+    <string name="inventory_hotbar">Barra rápida</string>
+    <string name="inventory_tap_hint">Toca un objeto para ver detalles</string>
+    <string name="inventory_durability">Durabilidad %1$d / %2$d</string>
 </resources>

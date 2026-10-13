@@ -516,4 +516,13 @@
     <string name="players_whitelist_add">Lista branca</string>
     <string name="players_message">Mensagem</string>
     <string name="players_select_hint">Toque e segure um jogador para selecionar vários</string>
+    <string name="players_first_played">Primeira vez: %s</string>
+    <string name="players_online_since">Online desde %1$s (%2$s)</string>
+    <string name="players_note">Nota (só neste celular)</string>
+    <string name="players_inventory">Inventário</string>
+    <string name="players_ender_chest">Baú do Ender</string>
+    <string name="inventory_armor">Armadura e mão secundária</string>
+    <string name="inventory_hotbar">Barra de atalhos</string>
+    <string name="inventory_tap_hint">Toque em um item para ver detalhes</string>
+    <string name="inventory_durability">Durabilidade %1$d / %2$d</string>
 </resources>

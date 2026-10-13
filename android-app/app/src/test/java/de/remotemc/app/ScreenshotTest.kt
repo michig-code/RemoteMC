@@ -138,6 +138,23 @@ class ScreenshotTest {
         }
     }
 
+    @Test fun inventory() = shot("05c_inventory") {
+        val inv = de.remotemc.app.data.PlayerInventory.fromJson(org.json.JSONObject("""
+            {"selectedSlot":1,
+             "items":[{"id":"minecraft:diamond_sword","amount":1,"enchants":["sharpness 3","unbreaking 2"],"durability":900,"maxDurability":1561,"slot":0},
+                      {"id":"minecraft:diamond_pickaxe","amount":1,"durability":200,"maxDurability":1561,"slot":1},
+                      {"id":"minecraft:cooked_beef","amount":24,"slot":2},{"id":"minecraft:torch","amount":64,"slot":3},
+                      {"id":"minecraft:oak_log","amount":32,"slot":9},{"id":"minecraft:cobblestone","amount":64,"slot":10},
+                      {"id":"minecraft:iron_ingot","amount":17,"slot":11},{"id":"minecraft:gold_ingot","amount":5,"slot":12},
+                      {"id":"minecraft:redstone","amount":40,"slot":20},{"id":"minecraft:name_tag","amount":1,"name":"Bello","slot":27}],
+             "armor":[{"id":"minecraft:iron_boots","amount":1,"slot":0},{"id":"minecraft:diamond_chestplate","amount":1,"enchants":["protection 4"],"slot":2},
+                      {"id":"minecraft:iron_helmet","amount":1,"slot":3}],
+             "offhand":[{"id":"minecraft:shield","amount":1,"durability":300,"maxDurability":336,"slot":0}],
+             "enderChest":[]}
+        """.trimIndent()))
+        Scaffoldless { de.remotemc.app.ui.InventoryContent("Steve", { inv }, initial = inv) }
+    }
+
     @Test fun consoleTab() = shot("06_console") {
         ServerScreenContent(
             ServerUiState("Survival", status, players, console, chat, Connection.LIVE, null, false, Role.ADMIN,

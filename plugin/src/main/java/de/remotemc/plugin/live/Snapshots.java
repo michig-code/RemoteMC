@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 /** Builds the status and player JSON. Call on the main / global region thread. */
 public final class Snapshots {
 
-    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport", "files"};
+    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport", "files", "inventory"};
 
     private final long startedAt = System.currentTimeMillis();
     private final String pluginVersion;
@@ -85,6 +85,14 @@ public final class Snapshots {
             o.addProperty("gameMode", p.getGameMode().name());
             o.addProperty("op", p.isOp());
             o.addProperty("playtime", safe(() -> p.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE) / 20));
+            long first = p.getFirstPlayed();
+            if (first > 0) {
+                o.addProperty("firstPlayed", first);
+            }
+            long since = sessionStart(p);
+            if (since > 0) {
+                o.addProperty("onlineSince", since);
+            }
             String skin = skinUrl(p);
             if (skin != null) {
                 o.addProperty("skin", skin);
@@ -112,6 +120,15 @@ public final class Snapshots {
             return url == null ? null : url.toString().replaceFirst("^http://", "https://");
         } catch (Throwable t) {
             return null;
+        }
+    }
+
+    /** When the player's current session started (Paper); 0 if the server cannot say (Spigot). */
+    private static long sessionStart(Player p) {
+        try {
+            return p.getLastLogin();
+        } catch (Throwable t) {
+            return 0;
         }
     }
 

@@ -302,6 +302,8 @@ class ServerViewModel(application: Application, profile: ServerProfile) : Androi
 
     suspend fun plugins() = api.plugins()
 
+    suspend fun inventory(player: String) = api.inventory(player)
+
     val scheduleActions = ScheduleActions(
         load = { api.schedules() },
         save = { api.saveSchedule(it) },
