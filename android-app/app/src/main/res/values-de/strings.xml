@@ -431,4 +431,5 @@
     <string name="error_file_too_large">Die Datei ist zu groß.</string>
     <string name="error_file_locked">Die Datei wird gerade benutzt oder ist schreibgeschützt (auf Windows-Servern lässt sich ein geladenes Plugin erst nach dem Stoppen löschen).</string>
     <string name="error_file_exists">Es gibt bereits etwas mit diesem Namen.</string>
+    <string name="settings_show_guide">Einführung erneut anzeigen</string>
 </resources>

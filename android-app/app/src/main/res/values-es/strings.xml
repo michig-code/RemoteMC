@@ -425,4 +425,5 @@
     <string name="error_file_too_large">El archivo es demasiado grande.</string>
     <string name="error_file_locked">El archivo está en uso o protegido contra escritura (en servidores Windows, un plugin cargado no se puede borrar hasta detener el servidor).</string>
     <string name="error_file_exists">Ya existe algo con este nombre.</string>
+    <string name="settings_show_guide">Ver la guía de inicio</string>
 </resources>

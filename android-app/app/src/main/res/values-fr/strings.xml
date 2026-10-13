@@ -425,4 +425,5 @@
     <string name="error_file_too_large">Le fichier est trop volumineux.</string>
     <string name="error_file_locked">Le fichier est utilisé ou protégé en écriture (sur un serveur Windows, un plugin chargé ne peut être supprimé qu’après l’arrêt).</string>
     <string name="error_file_exists">Un élément porte déjà ce nom.</string>
+    <string name="settings_show_guide">Revoir le guide de démarrage</string>
 </resources>

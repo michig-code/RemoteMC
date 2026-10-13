@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity() {
 
 private object Routes {
     const val ONBOARDING = "onboarding"
+    const val GUIDE = "guide"
     const val SERVERS = "servers"
     const val PAIR = "pair?repair={repair}"
     const val SCAN = "scan"
@@ -162,6 +163,17 @@ private fun AppNavigation(
                 onFinish = { name ->
                     context.app.settings.update { it.copy(onboardingDone = true, deviceName = name) }
                     nav.navigate(Routes.SERVERS) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
+                },
+            )
+        }
+        // The start guide again, from the settings (e.g. to show it to someone).
+        composable(Routes.GUIDE) {
+            val current = context.app.settings.settings.collectAsState().value
+            OnboardingScreen(
+                initialName = current.deviceName.ifBlank { suggestedDeviceName() },
+                onFinish = { name ->
+                    if (name.isNotBlank()) context.app.settings.update { it.copy(deviceName = name) }
+                    nav.popBackStack()
                 },
             )
         }
@@ -234,7 +246,10 @@ private fun AppNavigation(
         }
         composable(Routes.SETTINGS) {
             val settings by context.app.settings.settings.collectAsState()
-            SettingsScreen(settings, onChange = context.app.settings::update, onBack = { nav.popBackStack() })
+            SettingsScreen(
+                settings, onChange = context.app.settings::update, onBack = { nav.popBackStack() },
+                onShowGuide = { nav.navigate(Routes.GUIDE) },
+            )
         }
     }
 }

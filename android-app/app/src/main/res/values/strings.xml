@@ -448,4 +448,5 @@
     <string name="error_file_too_large">The file is too large.</string>
     <string name="error_file_locked">The file is in use or write-protected (on Windows servers, a loaded plugin cannot be deleted until the server stops).</string>
     <string name="error_file_exists">Something with this name already exists.</string>
+    <string name="settings_show_guide">Show the start guide</string>
 </resources>

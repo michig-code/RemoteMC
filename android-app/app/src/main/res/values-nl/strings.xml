@@ -417,4 +417,5 @@
     <string name="error_file_too_large">Het bestand is te groot.</string>
     <string name="error_file_locked">Het bestand is in gebruik of beveiligd (op Windows-servers kan een geladen plugin pas na het stoppen worden verwijderd).</string>
     <string name="error_file_exists">Er bestaat al iets met deze naam.</string>
+    <string name="settings_show_guide">Startgids opnieuw tonen</string>
 </resources>

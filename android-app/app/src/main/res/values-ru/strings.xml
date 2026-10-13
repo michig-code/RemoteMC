@@ -433,4 +433,5 @@
     <string name="error_file_too_large">Файл слишком большой.</string>
     <string name="error_file_locked">Файл используется или защищён от записи (на серверах Windows загруженный плагин можно удалить только после остановки).</string>
     <string name="error_file_exists">Объект с таким именем уже существует.</string>
+    <string name="settings_show_guide">Показать вводное руководство</string>
 </resources>
