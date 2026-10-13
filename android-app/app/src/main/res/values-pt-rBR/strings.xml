@@ -390,4 +390,6 @@
     <string name="players_teleport_spawn">Ponto de nascimento</string>
     <string name="players_teleported">%s teleportado</string>
     <string name="error_needs_plugin_update">Isso precisa de um plugin RemoteMC mais novo. Atualize-o no seu servidor.</string>
+    <string name="plugin_update_title">Atualize o plugin do servidor</string>
+    <string name="plugin_update_text">Este servidor usa um plugin RemoteMC antigo. Atualize-o para ter histórico, lista branca e de banimentos, configurações do mundo, tarefas agendadas e mais. Toque para baixar.</string>
 </resources>

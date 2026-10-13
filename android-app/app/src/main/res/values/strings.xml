@@ -413,4 +413,6 @@
     <string name="players_teleport_spawn">Spawn</string>
     <string name="players_teleported">%s teleported</string>
     <string name="error_needs_plugin_update">This needs a newer RemoteMC plugin. Update it on your server.</string>
+    <string name="plugin_update_title">Update the server plugin</string>
+    <string name="plugin_update_text">This server runs an older RemoteMC plugin. Update it to get the history, whitelist and ban list, world settings, scheduled tasks and more. Tap to download.</string>
 </resources>

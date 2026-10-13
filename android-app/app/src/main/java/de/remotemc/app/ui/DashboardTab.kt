@@ -24,6 +24,8 @@ import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -105,6 +107,7 @@ fun DashboardTab(
         if (wide) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (status.features.isEmpty()) PluginUpdateCard()
                     HeroCard(status, Modifier.staggeredAppear(0))
                     MemoryCard(status, Modifier.staggeredAppear(2))
                     TpsHistoryCard(status.tps, Modifier.staggeredAppear(3))
@@ -118,6 +121,7 @@ fun DashboardTab(
                 }
             }
         } else {
+            if (status.features.isEmpty()) PluginUpdateCard()
             HeroCard(status, Modifier.staggeredAppear(0))
             GaugeRow(status, Modifier.staggeredAppear(1))
             MemoryCard(status, Modifier.staggeredAppear(4))
@@ -347,5 +351,25 @@ internal fun formatUptime(seconds: Long): String {
         d > 0 -> "${d}d ${h}h"
         h > 0 -> "${h}h ${m}m"
         else -> "${m}m"
+    }
+}
+
+/** Shown for plugins older than the feature list: the new features need the newer plugin. */
+@Composable
+private fun PluginUpdateCard() {
+    val uri = LocalUriHandler.current
+    McCard(Modifier.fillMaxWidth(), onClick = { uri.openUri(PLUGIN_DOWNLOAD_URL) }) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.SystemUpdate, null, tint = McColors.Gold)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.plugin_update_title), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.plugin_update_text),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }

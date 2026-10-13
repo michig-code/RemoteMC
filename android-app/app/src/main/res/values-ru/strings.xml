@@ -398,4 +398,6 @@
     <string name="players_teleport_spawn">Точка появления</string>
     <string name="players_teleported">%s: телепортирован</string>
     <string name="error_needs_plugin_update">Для этого нужен более новый плагин RemoteMC. Обновите его на сервере.</string>
+    <string name="plugin_update_title">Обновите плагин сервера</string>
+    <string name="plugin_update_text">На сервере стоит старый плагин RemoteMC. Обновите его, чтобы получить историю, белый список и баны, настройки мира, запланированные задачи и другое. Нажмите, чтобы скачать.</string>
 </resources>

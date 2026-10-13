@@ -390,4 +390,6 @@
     <string name="players_teleport_spawn">Punto di rinascita</string>
     <string name="players_teleported">%s teletrasportato</string>
     <string name="error_needs_plugin_update">Serve un plugin RemoteMC più recente. Aggiornalo sul tuo server.</string>
+    <string name="plugin_update_title">Aggiorna il plugin del server</string>
+    <string name="plugin_update_text">Questo server usa un plugin RemoteMC vecchio. Aggiornalo per avere cronologia, whitelist e ban, impostazioni del mondo, attività pianificate e altro. Tocca per scaricarlo.</string>
 </resources>

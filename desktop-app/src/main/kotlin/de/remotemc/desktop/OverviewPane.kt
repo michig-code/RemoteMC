@@ -22,6 +22,8 @@ import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -81,6 +83,19 @@ fun OverviewPane(session: ServerSession, loadHistory: (suspend (HistoryRange) ->
         return
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        if (status.features.isEmpty()) {
+            val uri = LocalUriHandler.current
+            McCard(Modifier.fillMaxWidth(), onClick = { uri.openUri("https://github.com/michig-code/RemoteMC/releases/latest") }) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.SystemUpdate, null, tint = McColors.Gold)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(stringResource(Res.string.plugin_update_title), style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(Res.string.plugin_update_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Hero(status, Modifier.weight(1.4f))
             TpsCard(status, Modifier.weight(1f))
