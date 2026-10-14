@@ -58,7 +58,7 @@ jobs:
           path: RemoteMC-App-Play-*.aab
 
       - name: GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: |
@@ -116,7 +116,7 @@ jobs:
           cp build/compose/binaries/main/msi/*.msi "out/RemoteMC-Windows-$V.msi"
           cp build/compose/binaries/main/exe/*.exe "out/RemoteMC-Windows-$V-Setup.exe"
           cp build/compose/jars/*.jar "out/RemoteMC-Windows-$V-portable.jar"
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: desktop-app/out/*
 
