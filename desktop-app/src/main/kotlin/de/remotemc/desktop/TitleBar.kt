@@ -17,6 +17,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +54,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -106,9 +113,10 @@ val TitleBarHeight = 42.dp
 @Composable
 fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
     val servers = model.servers.servers.value
+    val drag = remember(tabs) { TabDrag(tabs) }
     Row(
         Modifier.fillMaxWidth().height(TitleBarHeight).background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .then(if (controls.native) Modifier.nativeCaption(controls) else Modifier.windowDrag(controls)),
+            .then(if (controls.native) Modifier.nativeCaption(controls) else Modifier.windowDrag(controls) { drag.key != null }),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(Modifier.width(10.dp))
@@ -120,8 +128,10 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
             leading = { Icon(Icons.Outlined.GridView, null, Modifier.size(16.dp)) },
             onClick = tabs::showHome,
         )
-        tabs.open.forEach { id ->
+        tabs.open.forEach { id -> key(id) {
             Spacer(Modifier.width(4.dp))
+            val place = drag.place(id)
+            val move = drag.handle(id)
             when (id) {
                 Tabs.SETTINGS -> Tab(
                     title = stringResource(Res.string.settings_title),
@@ -129,6 +139,8 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
                     leading = { Icon(Icons.Outlined.Settings, null, Modifier.size(16.dp)) },
                     onClick = { tabs.open(id) },
                     onClose = { tabs.close(id) },
+                    modifier = place,
+                    dragModifier = move,
                 )
                 Tabs.PAIR -> Tab(
                     title = stringResource(Res.string.servers_add),
@@ -136,20 +148,24 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
                     leading = { Icon(Icons.Outlined.Add, null, Modifier.size(16.dp)) },
                     onClick = { tabs.open(id) },
                     onClose = { tabs.close(id) },
+                    modifier = place,
+                    dragModifier = move,
                 )
                 else -> {
-                    val profile = servers.firstOrNull { it.id == id } ?: return@forEach
+                    val profile = servers.firstOrNull { it.id == id }
                     val session = tabs.existing(id)
-                    Tab(
+                    if (profile != null) Tab(
                         title = profile.name,
                         selected = tabs.active == id,
                         leading = { session?.let { StatusDot(it.connection, 4.dp) } },
                         onClick = { tabs.open(id) },
                         onClose = { tabs.close(id) },
+                        modifier = place,
+                        dragModifier = move,
                     )
                 }
             }
-        }
+        } }
         Spacer(Modifier.width(4.dp))
         BarButton(Icons.Outlined.Add, stringResource(Res.string.servers_add), onClick = { tabs.openSpecial(Tabs.PAIR) })
         // Empty space: drag to move the window, double-click to maximize.
@@ -189,7 +205,7 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
  * Holding the mouse anywhere on the bar and moving it drags the window (also on a tab, like in a
  * browser); a click without moving still reaches the tab or button.
  */
-private fun Modifier.windowDrag(controls: WindowControls): Modifier = pointerInput(controls) {
+private fun Modifier.windowDrag(controls: WindowControls, tabMoving: () -> Boolean): Modifier = pointerInput(controls) {
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
         var dragging = false
@@ -200,6 +216,7 @@ private fun Modifier.windowDrag(controls: WindowControls): Modifier = pointerInp
                 if (dragging) controls.dragEnd()
                 break
             }
+            if (!dragging && tabMoving()) break // a tab is being moved sideways, not the window
             if (!dragging && (change.position - down.position).getDistance() > viewConfiguration.touchSlop) {
                 dragging = true
                 controls.dragStart()
@@ -247,6 +264,9 @@ private fun Tab(
     leading: @Composable () -> Unit,
     onClick: () -> Unit,
     onClose: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    /** Goes inside the title-bar handling (which takes every event), before the click. */
+    dragModifier: Modifier = Modifier,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -256,7 +276,7 @@ private fun Tab(
         else -> Color.Transparent
     }
     Row(
-        Modifier.titleBarControl().height(32.dp).widthIn(max = 220.dp).clip(RoundedCornerShape(10.dp)).background(background)
+        modifier.titleBarControl().then(dragModifier).height(32.dp).widthIn(max = 220.dp).clip(RoundedCornerShape(10.dp)).background(background)
             .hoverable(interaction)
             // Middle click closes the tab, like in a browser.
             .pointerInput(onClose) {
@@ -437,3 +457,55 @@ fun UpdateToast(updates: UpdateState, onQuit: () -> Unit, modifier: Modifier = M
     }
 }
 
+
+/**
+ * Dragging a tab sideways moves it between the other tabs, like in a browser: once its middle
+ * passes the middle of a neighbour, the two swap. The order is saved with the open tabs.
+ */
+private class TabDrag(private val tabs: Tabs) {
+    var key by mutableStateOf<String?>(null)
+        private set
+    private var offset by mutableFloatStateOf(0f)
+    private val bounds = mutableMapOf<String, Pair<Float, Float>>() // left and right edge on the bar
+
+    /** Where the tab is (measured while it is not moved) and the shift while it is dragged. */
+    fun place(id: String): Modifier = Modifier
+        .onGloballyPositioned { c -> if (key != id) c.positionInParent().x.let { bounds[id] = it to it + c.size.width } }
+        .zIndex(if (key == id) 1f else 0f)
+        .graphicsLayer { translationX = if (key == id) offset else 0f }
+
+    fun handle(id: String): Modifier = Modifier.pointerInput(id) {
+        detectHorizontalDragGestures(
+            onDragStart = { key = id; offset = 0f },
+            onDragEnd = { key = null; offset = 0f },
+            onDragCancel = { key = null; offset = 0f },
+        ) { change, dx ->
+            change.consume()
+            drag(id, dx)
+        }
+    }
+
+    private fun drag(id: String, dx: Float) {
+        offset += dx
+        val i = tabs.open.indexOf(id)
+        val (l, r) = bounds[id] ?: return
+        val center = (l + r) / 2 + offset
+        val next = tabs.open.getOrNull(i + 1)?.let { n -> bounds[n]?.let { n to it } }
+        val prev = tabs.open.getOrNull(i - 1)?.let { p -> bounds[p]?.let { p to it } }
+        if (next != null && center > (next.second.first + next.second.second) / 2) {
+            val (n, nb) = next
+            tabs.move(i, i + 1)
+            val shift = nb.second - r // this tab now ends where the neighbour ended
+            offset -= shift
+            bounds[id] = l + shift to nb.second
+            bounds[n] = l to l + (nb.second - nb.first)
+        } else if (prev != null && center < (prev.second.first + prev.second.second) / 2) {
+            val (pv, pb) = prev
+            tabs.move(i, i - 1)
+            val shift = l - pb.first // this tab now starts where the neighbour started
+            offset += shift
+            bounds[id] = pb.first to pb.first + (r - l)
+            bounds[pv] = r - (pb.second - pb.first) to r
+        }
+    }
+}
