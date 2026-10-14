@@ -47,4 +47,6 @@
     <string name="update_toast_text">Серверы и настройки сохранятся.</string>
     <string name="desktop_demo_banner">Демо-сервер с примерными данными – ничего не покидает ваш ПК.</string>
     <string name="desktop_help_note">Справка показывает приложение для телефона: на ПК нажимайте мышью вместо касания; разделы слева, а не внизу.</string>
+    <string name="dock_main">Сделать основной вкладкой</string>
+    <string name="dock_undock">Открепить</string>
 </resources>

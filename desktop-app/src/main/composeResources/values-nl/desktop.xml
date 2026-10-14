@@ -41,4 +41,6 @@
     <string name="update_toast_text">Je servers en instellingen blijven bewaard.</string>
     <string name="desktop_demo_banner">Demoserver met voorbeeldgegevens – niets verlaat je pc.</string>
     <string name="desktop_help_note">De handleiding toont de telefoon-app: op de pc klik je in plaats van te tikken; de onderdelen staan links in plaats van onderaan.</string>
+    <string name="dock_main">Als hoofdtabblad tonen</string>
+    <string name="dock_undock">Losmaken</string>
 </resources>

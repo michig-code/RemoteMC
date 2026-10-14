@@ -41,4 +41,6 @@
     <string name="update_toast_text">Sunucuların ve ayarların korunur.</string>
     <string name="desktop_demo_banner">Örnek verilerle demo sunucu – hiçbir şey bilgisayarından çıkmaz.</string>
     <string name="desktop_help_note">Rehber telefon uygulamasını gösterir: PC’de dokunmak yerine tıkla; bölümler altta değil solda.</string>
+    <string name="dock_main">Ana sekme olarak göster</string>
+    <string name="dock_undock">Ayır</string>
 </resources>

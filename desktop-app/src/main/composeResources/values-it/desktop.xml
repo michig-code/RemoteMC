@@ -41,4 +41,6 @@
     <string name="update_toast_text">Server e impostazioni restano.</string>
     <string name="desktop_demo_banner">Server demo con dati di esempio – nulla lascia il tuo PC.</string>
     <string name="desktop_help_note">La guida mostra l’app per telefono: sul PC fai clic invece di toccare; le sezioni sono a sinistra invece che in basso.</string>
+    <string name="dock_main">Mostra come scheda principale</string>
+    <string name="dock_undock">Sgancia</string>
 </resources>

@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -473,28 +475,62 @@ fun UpdateToast(updates: UpdateState, onQuit: () -> Unit, modifier: Modifier = M
 
 /**
  * Dragging a tab sideways moves it between the other tabs, like in a browser: once its middle
- * passes the middle of a neighbour, the two swap. The order is saved with the open tabs.
+ * passes the middle of a neighbour, the two swap. Dragging a server tab down into the window
+ * docks it next to the active tab (left, right, top or bottom; see [Tabs.dropZone]).
+ * The order and the docked tab are saved with the open tabs.
  */
 private class TabDrag(private val tabs: Tabs) {
     var key by mutableStateOf<String?>(null)
         private set
     private var offset by mutableFloatStateOf(0f)
     private val bounds = mutableMapOf<String, Pair<Float, Float>>() // left and right edge on the bar
+    private val origins = mutableMapOf<String, Offset>() // top left of each tab in the window
+    private var pointer = Offset.Zero // the mouse in window coordinates while dragging
 
     /** Where the tab is (measured while it is not moved) and the shift while it is dragged. */
     fun place(id: String): Modifier = Modifier
-        .onGloballyPositioned { c -> if (key != id) c.positionInParent().x.let { bounds[id] = it to it + c.size.width } }
+        .onGloballyPositioned { c ->
+            if (key != id) {
+                c.positionInParent().x.let { bounds[id] = it to it + c.size.width }
+                origins[id] = c.positionInRoot()
+            }
+        }
         .zIndex(if (key == id) 1f else 0f)
-        .graphicsLayer { translationX = if (key == id) offset else 0f }
+        .graphicsLayer { translationX = if (key == id && tabs.dockDrag == null) offset else 0f }
 
     fun handle(id: String): Modifier = Modifier.pointerInput(id) {
-        detectHorizontalDragGestures(
-            onDragStart = { key = id; offset = 0f },
-            onDragEnd = { key = null; offset = 0f },
-            onDragCancel = { key = null; offset = 0f },
-        ) { change, dx ->
+        detectDragGestures(
+            onDragStart = { at ->
+                key = id
+                offset = 0f
+                pointer = (origins[id] ?: Offset.Zero) + at
+            },
+            onDragEnd = { finish(id, drop = true) },
+            onDragCancel = { finish(id, drop = false) },
+        ) { change, amount ->
             change.consume()
-            drag(id, dx)
+            pointer += amount
+            val top = tabs.contentBounds?.top
+            // Pulled down into the window: a server tab can be docked there.
+            if (!Tabs.isSpecial(id) && top != null && pointer.y > top + 16f) {
+                tabs.dockDrag = id to pointer
+            } else {
+                tabs.dockDrag = null
+                drag(id, amount.x)
+            }
+        }
+    }
+
+    private fun finish(id: String, drop: Boolean) {
+        val docking = tabs.dockDrag
+        tabs.dockDrag = null
+        key = null
+        offset = 0f
+        if (!drop || docking == null) return
+        val side = tabs.dropZone(docking.second)
+        when {
+            side != null -> tabs.dock(id, side)
+            tabs.contentBounds?.contains(docking.second) == true -> tabs.open(id) // the middle: the main tab
         }
     }
 

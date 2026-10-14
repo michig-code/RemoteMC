@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -63,8 +65,8 @@ object SplitPrefs {
 }
 
 /**
- * Two areas side by side with a divider the user can drag (double-click resets it). [fraction] is
- * the left side's share; each side keeps at least its minimum width.
+ * Two areas side by side (or one above the other with [vertical]) with a divider the user can drag
+ * (double-click resets it). [fraction] is the first area's share; each keeps at least its minimum size.
  */
 @Composable
 fun SplitView(
@@ -73,6 +75,7 @@ fun SplitView(
     modifier: Modifier = Modifier,
     minLeft: Dp = 240.dp,
     minRight: Dp = 300.dp,
+    vertical: Boolean = false,
     left: @Composable () -> Unit,
     right: @Composable () -> Unit,
 ) {
@@ -80,7 +83,7 @@ fun SplitView(
     val density = LocalDensity.current
     BoxWithConstraints(modifier) {
         val handle = 16.dp
-        val available = (maxWidth - handle).coerceAtLeast(1.dp)
+        val available = ((if (vertical) maxHeight else maxWidth) - handle).coerceAtLeast(1.dp)
         val min = (minLeft / available).coerceIn(0.1f, 0.5f)
         val max = (1f - minRight / available).coerceIn(0.5f, 0.9f)
         val shown = fraction.coerceIn(min, max)
@@ -90,13 +93,15 @@ fun SplitView(
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val dragged by interaction.collectIsDraggedAsState()
-        Row(Modifier.fillMaxSize()) {
-            Box(Modifier.width(available * shown).fillMaxHeight()) { left() }
+        val divider = @Composable {
             Box(
-                Modifier.width(handle).fillMaxHeight()
-                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                (if (vertical) Modifier.height(handle).fillMaxWidth() else Modifier.width(handle).fillMaxHeight())
+                    .pointerHoverIcon(PointerIcon(Cursor(if (vertical) Cursor.N_RESIZE_CURSOR else Cursor.E_RESIZE_CURSOR)))
                     .hoverable(interaction)
-                    .draggable(drag, Orientation.Horizontal, interactionSource = interaction, onDragStopped = { SplitPrefs.set(key, fraction) })
+                    .draggable(
+                        drag, if (vertical) Orientation.Vertical else Orientation.Horizontal,
+                        interactionSource = interaction, onDragStopped = { SplitPrefs.set(key, fraction) },
+                    )
                     .pointerInput(key) {
                         detectTapGestures(onDoubleTap = {
                             fraction = defaultFraction
@@ -106,12 +111,26 @@ fun SplitView(
                 contentAlignment = Alignment.Center,
             ) {
                 val active = hovered || dragged
+                val thick = if (active) 4.dp else 3.dp
+                val long = if (active) 64.dp else 40.dp
                 Box(
-                    Modifier.width(if (active) 4.dp else 3.dp).height(if (active) 64.dp else 40.dp).clip(CircleShape)
+                    (if (vertical) Modifier.height(thick).width(long) else Modifier.width(thick).height(long)).clip(CircleShape)
                         .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
                 )
             }
-            Box(Modifier.weight(1f).fillMaxHeight()) { right() }
+        }
+        if (vertical) {
+            Column(Modifier.fillMaxSize()) {
+                Box(Modifier.height(available * shown).fillMaxWidth()) { left() }
+                divider()
+                Box(Modifier.weight(1f).fillMaxWidth()) { right() }
+            }
+        } else {
+            Row(Modifier.fillMaxSize()) {
+                Box(Modifier.width(available * shown).fillMaxHeight()) { left() }
+                divider()
+                Box(Modifier.weight(1f).fillMaxHeight()) { right() }
+            }
         }
     }
 }

@@ -41,4 +41,6 @@
     <string name="update_toast_text">Your servers and settings stay.</string>
     <string name="desktop_demo_banner">Demo server with sample data – nothing leaves your PC.</string>
     <string name="desktop_help_note">The guide shows the phone app: on the PC, click instead of tap; the areas are on the left instead of at the bottom.</string>
+    <string name="dock_main">Show as main tab</string>
+    <string name="dock_undock">Undock</string>
 </resources>

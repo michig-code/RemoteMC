@@ -4,7 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import kotlinx.coroutines.CoroutineScope
+
+/** Where a docked server is shown next to the active tab. */
+enum class DockSide { LEFT, RIGHT, TOP, BOTTOM }
 
 /**
  * Everything opens as a tab in the title bar: servers (by id), the settings ([SETTINGS]) and
@@ -31,12 +36,56 @@ class Tabs(
     var pairRepair by mutableStateOf<String?>(null)
         private set
 
+    /** A server tab shown at the same time as the active one, on [DockSide] of it (docked). */
+    var docked by mutableStateOf<Pair<String, DockSide>?>(null)
+        private set
+
+    /** While a tab is dragged down into the window: which one and where the mouse is (window coordinates). */
+    var dockDrag by mutableStateOf<Pair<String, Offset>?>(null)
+    /** The area below the title bar, where tabs can be docked (window coordinates). */
+    var contentBounds: Rect? = null
+
     init {
         if (persist) {
             SplitPrefs.text("tabs").split(',').filter { it == SETTINGS || (it.isNotBlank() && model.servers.get(it) != null) }.distinct().forEach {
                 open += it
                 session(it)
             }
+            SplitPrefs.text("dock").split(':').takeIf { it.size == 2 }?.let { (id, side) ->
+                val s = DockSide.entries.firstOrNull { it.name == side }
+                if (s != null && id in open && !isSpecial(id)) docked = id to s
+            }
+        }
+    }
+
+    /** Shows server tab [id] next to the active one, on [side]. */
+    fun dock(id: String, side: DockSide) {
+        if (isSpecial(id) || model.servers.get(id) == null) return
+        if (id !in open) open += id
+        session(id)
+        docked = id to side
+        // The docked server is not also the main one: show the tab that was open before.
+        if (active == id) active = open.lastOrNull { it != id }
+        save()
+    }
+
+    fun undock() {
+        docked = null
+        save()
+    }
+
+    /** Which drop zone the mouse is over while a tab is dragged into the window; null = none. */
+    fun dropZone(p: Offset): DockSide? {
+        val b = contentBounds ?: return null
+        if (!b.contains(p)) return null
+        val x = (p.x - b.left) / b.width
+        val y = (p.y - b.top) / b.height
+        return when {
+            x < 0.25f -> DockSide.LEFT
+            x > 0.75f -> DockSide.RIGHT
+            y < 0.3f -> DockSide.TOP
+            y > 0.7f -> DockSide.BOTTOM
+            else -> null // the middle: shown as the main tab
         }
     }
 
@@ -55,6 +104,7 @@ class Tabs(
     fun open(id: String) {
         if (isSpecial(id)) return openSpecial(id)
         if (model.servers.get(id) == null) return
+        if (docked?.first == id) docked = null // a docked tab that is opened becomes the main one again
         if (id !in open) open += id
         session(id)
         active = id
@@ -69,6 +119,7 @@ class Tabs(
         val index = open.indexOf(id)
         if (index < 0) return
         open.removeAt(index)
+        if (docked?.first == id) docked = null
         sessions.remove(id)?.stop()
         if (active == id) active = open.getOrNull(index) ?: open.getOrNull(index - 1)
         save()
@@ -118,7 +169,10 @@ class Tabs(
 
     private fun save() {
         // The "add server" tab is not worth bringing back after a restart.
-        if (persist) SplitPrefs.setText("tabs", open.filter { it != PAIR }.joinToString(","))
+        if (persist) {
+            SplitPrefs.setText("tabs", open.filter { it != PAIR }.joinToString(","))
+            SplitPrefs.setText("dock", docked?.let { "${it.first}:${it.second.name}" }.orEmpty())
+        }
     }
 
     companion object {

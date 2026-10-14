@@ -41,4 +41,6 @@
     <string name="update_toast_text">Vos serveurs et réglages sont conservés.</string>
     <string name="desktop_demo_banner">Serveur de démo avec des données d’exemple – rien ne quitte ton PC.</string>
     <string name="desktop_help_note">Le guide montre l’app mobile : sur PC, clique au lieu de toucher ; les sections sont à gauche au lieu d’en bas.</string>
+    <string name="dock_main">Afficher comme onglet principal</string>
+    <string name="dock_undock">Détacher</string>
 </resources>

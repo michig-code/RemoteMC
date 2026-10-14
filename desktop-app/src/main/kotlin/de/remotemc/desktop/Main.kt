@@ -1,5 +1,14 @@
 package de.remotemc.desktop
 
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.OpenInFull
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -45,6 +54,8 @@ import de.remotemc.desktop.res.logo
 import de.remotemc.desktop.res.tray_open
 import de.remotemc.desktop.res.tray_quit
 import de.remotemc.desktop.res.tray_running
+import de.remotemc.desktop.res.dock_main
+import de.remotemc.desktop.res.dock_undock
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import javax.imageio.ImageIO
@@ -203,61 +214,83 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
             val animate = LocalAnimations.current
             // A server tab or one of the screens (server list, pairing, settings); switching fades over.
             val target: Any = tabs?.active?.let { "tab:$it" } ?: screen
-            AnimatedContent(
-                targetState = target,
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                transitionSpec = {
-                    if (!animate) EnterTransition.None togetherWith ExitTransition.None
-                    else (fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.985f)) togetherWith fadeOut(tween(120))
-                },
-                label = "screen",
-            ) { shown ->
-                Box(Modifier.fillMaxSize()) {
-                    if (shown is String && tabs != null) {
-                        val id = shown.removePrefix("tab:")
-                        // Each tab keeps its own state (area, scroll position) while others are shown.
-                        saveable.SaveableStateProvider(id) {
-                            when (id) {
-                                Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) }, onHelp = { tabs.openSpecial(Tabs.HELP) })
-                                Tabs.HELP -> HelpPane(onBack = { tabs.close(Tabs.HELP) })
-                                Tabs.PAIR -> PairScreen(model, tabs.pairLink, repair = tabs.pairRepair?.let(model.servers::get), onDone = { newId ->
-                                    tabs.close(Tabs.PAIR)
-                                    if (newId != null) {
-                                        tabs.restart(newId)
-                                        tabs.open(newId)
+            val mainContent = @Composable { modifier: Modifier ->
+                AnimatedContent(
+                    targetState = target,
+                    modifier = modifier,
+                    transitionSpec = {
+                        if (!animate) EnterTransition.None togetherWith ExitTransition.None
+                        else (fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.985f)) togetherWith fadeOut(tween(120))
+                    },
+                    label = "screen",
+                ) { shown ->
+                    Box(Modifier.fillMaxSize()) {
+                        if (shown is String && tabs != null) {
+                            val id = shown.removePrefix("tab:")
+                            // Each tab keeps its own state (area, scroll position) while others are shown.
+                            saveable.SaveableStateProvider(id) {
+                                when (id) {
+                                    Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) }, onHelp = { tabs.openSpecial(Tabs.HELP) })
+                                    Tabs.HELP -> HelpPane(onBack = { tabs.close(Tabs.HELP) })
+                                    Tabs.PAIR -> PairScreen(model, tabs.pairLink, repair = tabs.pairRepair?.let(model.servers::get), onDone = { newId ->
+                                        tabs.close(Tabs.PAIR)
+                                        if (newId != null) {
+                                            tabs.restart(newId)
+                                            tabs.open(newId)
+                                        }
+                                    })
+                                    else -> tabs.session(id)?.let {
+                                        ServerContent(
+                                            it, onBack = tabs::showHome, onRepair = { tabs.openSpecial(Tabs.PAIR, repair = id) },
+                                            requestedPane = tabs.paneRequest?.takeIf { r -> r.first == id }?.second,
+                                            onPaneShown = { tabs.paneRequest = null },
+                                        )
                                     }
-                                })
-                                else -> tabs.session(id)?.let {
-                                    ServerContent(
-                                        it, onBack = tabs::showHome, onRepair = { tabs.openSpecial(Tabs.PAIR, repair = id) },
-                                        requestedPane = tabs.paneRequest?.takeIf { r -> r.first == id }?.second,
-                                        onPaneShown = { tabs.paneRequest = null },
-                                    )
                                 }
                             }
+                            return@Box
                         }
-                        return@Box
-                    }
-                    when (val s = shown as Screen) {
-                        Screen.Servers -> ServerListScreen(
-                            model,
-                            onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
-                            onAdd = { link -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, link) else screen = Screen.Pair(link) },
-                            onSettings = { if (tabs != null) tabs.openSpecial(Tabs.SETTINGS) else screen = Screen.Settings },
-                            onRepair = { id -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, repair = id) else screen = Screen.Pair(repair = id) },
-                        )
-                        is Screen.Pair -> PairScreen(model, s.link, repair = s.repair?.let(model.servers::get), onDone = { id ->
-                            screen = Screen.Servers
-                            if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
-                        })
-                        is Screen.Server -> {
-                            val profile = model.servers.get(s.id)
-                            if (profile == null) screen = Screen.Servers
-                            else ServerScreen(model, profile, onBack = { screen = Screen.Servers }, onRepair = { screen = Screen.Pair(repair = s.id) })
+                        when (val s = shown as Screen) {
+                            Screen.Servers -> ServerListScreen(
+                                model,
+                                onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
+                                onAdd = { link -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, link) else screen = Screen.Pair(link) },
+                                onSettings = { if (tabs != null) tabs.openSpecial(Tabs.SETTINGS) else screen = Screen.Settings },
+                                onRepair = { id -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, repair = id) else screen = Screen.Pair(repair = id) },
+                            )
+                            is Screen.Pair -> PairScreen(model, s.link, repair = s.repair?.let(model.servers::get), onDone = { id ->
+                                screen = Screen.Servers
+                                if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
+                            })
+                            is Screen.Server -> {
+                                val profile = model.servers.get(s.id)
+                                if (profile == null) screen = Screen.Servers
+                                else ServerScreen(model, profile, onBack = { screen = Screen.Servers }, onRepair = { screen = Screen.Pair(repair = s.id) })
+                            }
+                            Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
                         }
-                        Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
                     }
                 }
+            }
+            // A docked server tab is shown next to the main one (dragged from the title bar).
+            val dock = tabs?.docked?.takeIf { it.first != tabs.active && tabs.session(it.first) != null }
+            Box(Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { tabs?.contentBounds = it.boundsInRoot() }) {
+                if (tabs == null || dock == null) {
+                    mainContent(Modifier.fillMaxSize())
+                } else {
+                    val (dockId, side) = dock
+                    val first = side == DockSide.LEFT || side == DockSide.TOP
+                    val docked = @Composable { DockedPane(tabs, dockId, saveable) }
+                    val main = @Composable { mainContent(Modifier.fillMaxSize()) }
+                    SplitView(
+                        "dock", 0.5f, Modifier.fillMaxSize(),
+                        minLeft = 320.dp, minRight = 320.dp,
+                        vertical = side == DockSide.TOP || side == DockSide.BOTTOM,
+                        left = { if (first) docked() else main() },
+                        right = { if (first) main() else docked() },
+                    )
+                }
+                if (tabs != null) DockZones(tabs)
             }
         }
         // New version: small pop-up in the bottom right corner (installer version only replaces itself).
@@ -266,4 +299,67 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
         }
         }
     }
+}
+
+/** A server tab docked next to the main one: its name, buttons to make it the main tab or undock it. */
+@Composable
+private fun DockedPane(tabs: Tabs, id: String, saveable: androidx.compose.runtime.saveable.SaveableStateHolder) {
+    val session = tabs.session(id) ?: return
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow).padding(start = 16.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StatusDot(session.connection, 4.dp)
+            Spacer(Modifier.width(8.dp))
+            Text(session.profile.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+            androidx.compose.material3.IconButton(onClick = { tabs.open(id) }) {
+                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Outlined.OpenInFull, org.jetbrains.compose.resources.stringResource(Res.string.dock_main))
+            }
+            androidx.compose.material3.IconButton(onClick = tabs::undock) {
+                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Outlined.Close, org.jetbrains.compose.resources.stringResource(Res.string.dock_undock))
+            }
+        }
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            saveable.SaveableStateProvider("dock:$id") {
+                ServerContent(session, onBack = tabs::undock)
+            }
+        }
+    }
+}
+
+/** While a tab is dragged into the window: where it would be docked (or opened, in the middle). */
+@Composable
+private fun DockZones(tabs: Tabs) {
+    val drag = tabs.dockDrag ?: return
+    val bounds = tabs.contentBounds ?: return
+    val side = tabs.dropZone(drag.second)
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val color = MaterialTheme.colorScheme.primary
+    androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+        val (l, t, r, b) = when (side) {
+            DockSide.LEFT -> listOf(0f, 0f, w / 2, h)
+            DockSide.RIGHT -> listOf(w / 2, 0f, w, h)
+            DockSide.TOP -> listOf(0f, 0f, w, h / 2)
+            DockSide.BOTTOM -> listOf(0f, h / 2, w, h)
+            null -> listOf(0f, 0f, w, h)
+        }
+        val pad = with(density) { 8.dp.toPx() }
+        drawRoundRect(
+            color.copy(alpha = 0.18f),
+            topLeft = androidx.compose.ui.geometry.Offset(l + pad, t + pad),
+            size = androidx.compose.ui.geometry.Size(r - l - 2 * pad, b - t - 2 * pad),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(pad * 2),
+        )
+        drawRoundRect(
+            color,
+            topLeft = androidx.compose.ui.geometry.Offset(l + pad, t + pad),
+            size = androidx.compose.ui.geometry.Size(r - l - 2 * pad, b - t - 2 * pad),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(pad * 2),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(with(density) { 2.dp.toPx() }),
+        )
+    }
+    if (bounds.isEmpty) return
 }
