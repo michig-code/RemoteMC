@@ -59,7 +59,7 @@ jobs:
       - name: Build and unit tests
         run: mvn -B package
         working-directory: plugin
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-plugin
           path: plugin/target/RemoteMC-*.jar
@@ -107,18 +107,18 @@ jobs:
       - name: Release build
         run: ./gradlew assembleGithubRelease bundlePlayRelease
         working-directory: android-app
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-app
           path: android-app/app/build/outputs/apk/github/release/*.apk
           if-no-files-found: error
       # Google Play version (signed with the debug key here; the release workflow signs it for upload).
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-app-play
           path: android-app/app/build/outputs/bundle/playRelease/*.aab
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: screenshot-diffs
@@ -141,7 +141,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Tests
         run: ./gradlew test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: desktop-screenshots
@@ -167,7 +167,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Installers and portable JAR
         run: ./gradlew packageMsi packageExe packageUberJarForCurrentOS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-Windows
           path: |
