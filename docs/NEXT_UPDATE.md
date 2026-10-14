@@ -7,11 +7,9 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| 1 | Übersicht anpassen: Knöpfe unten fest | Handy + Windows | Beim Bearbeiten der Übersicht ploppen „Zurücksetzen“ und „Fertig“ (Speichern) **unten am Bildschirm** auf und bleiben dort fest verankert – auch beim Herunterscrollen immer sichtbar. Der Hinweis „Karte halten und ziehen …“ bleibt oben. | ☐ |
 
-Zuletzt umgesetzt (siehe `CHANGELOG.md`): Updates direkt in der Handy-App (GitHub-Version) mit Popup,
-Update-Popup unten rechts in der Windows-App, Hilfe-Themen „App aktualisieren“ und „Neuigkeiten“,
-Changelog in den Einstellungen.
+Zuletzt umgesetzt (siehe `CHANGELOG.md`): Beim Anpassen der Übersicht bleiben „Zurücksetzen“ und
+„Fertig“ unten am Bildschirm fest (Handy + Windows).
 
 ## Offene Fragen
 

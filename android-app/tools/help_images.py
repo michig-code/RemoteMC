@@ -22,7 +22,7 @@ PICTURES = {
     "help_overview": ("03_dashboard.png", None),
     "help_offline": ("09_offline.png", None),
     "help_history": ("20_history.png", (0, 0, 1, 0.42)),
-    "help_customize": ("26_dashboard_edit.png", (0, 0, 1, 0.62)),
+    "help_customize": ("26_dashboard_edit.png", None),
     # Worlds, scheduled tasks, plugins and files at the bottom of the overview.
     "help_manage": ("27_dashboard_full.png", (0, 0.54, 1, 0.865)),
     "help_players": ("05_players.png", (0, 0, 1, 0.6)),

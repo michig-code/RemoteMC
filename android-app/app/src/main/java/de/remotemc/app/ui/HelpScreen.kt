@@ -143,7 +143,7 @@ val HelpTopics = listOf(
     HelpTopic("history", HelpSection.OVERVIEW, Icons.Outlined.ShowChart, R.string.help_history_title, R.string.help_history_where,
         R.string.help_history_text, R.string.help_history_keys, R.drawable.help_history),
     HelpTopic("customize", HelpSection.OVERVIEW, Icons.Outlined.DashboardCustomize, R.string.help_customize_title, R.string.help_customize_where,
-        R.string.help_customize_text, R.string.help_customize_keys, R.drawable.help_customize, Spot(0.02f, 0.32f, 0.96f, 0.33f)),
+        R.string.help_customize_text, R.string.help_customize_keys, R.drawable.help_customize, Spot(0.02f, 0.14f, 0.96f, 0.2f)),
     HelpTopic("worlds", HelpSection.OVERVIEW, Icons.Outlined.Public, R.string.help_worlds_title, R.string.help_worlds_where,
         R.string.help_worlds_text, R.string.help_worlds_keys, R.drawable.help_manage, Spot(0.02f, 0.0f, 0.96f, 0.505f)),
     HelpTopic("players", HelpSection.PLAYERS, Icons.Outlined.Person, R.string.help_players_title, R.string.help_players_where,

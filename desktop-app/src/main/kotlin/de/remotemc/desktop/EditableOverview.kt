@@ -1,6 +1,11 @@
 package de.remotemc.desktop
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -32,8 +38,9 @@ import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,60 +93,82 @@ fun EditableOverview(
         working = working.move(a, b)
     }
     val cards = working.cards.filter { content(it.id) != null && (editing || !it.hidden) }
-    LazyVerticalGrid(
-        GridCells.Fixed(6),
-        state = gridState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        if (editing) {
-            item(key = "edit-bar", span = { GridItemSpan(maxLineSpan) }) {
-                McCard(Modifier.fillMaxWidth()) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
+    Box(Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            GridCells.Fixed(6),
+            state = gridState,
+            modifier = Modifier.fillMaxSize(),
+            // While editing, room at the bottom so the last card can scroll above the buttons.
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = if (editing) 100.dp else 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            if (editing) {
+                item(key = "edit-bar", span = { GridItemSpan(maxLineSpan) }) {
+                    McCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp)) {
                             Text(stringResource(Res.string.dashboard_edit_title), style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(Res.string.desktop_dashboard_edit_hint), style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        TextButton(onClick = { working = defaults }) { Text(stringResource(Res.string.dashboard_edit_reset)) }
-                        Spacer(Modifier.width(8.dp))
-                        Button(onClick = { editing = false; onChange(working) }) { Text(stringResource(Res.string.dashboard_edit_done)) }
+                    }
+                }
+            } else {
+                header()
+            }
+            items(cards, key = { it.id }, span = { GridItemSpan(it.size.span(6)) }) { card ->
+                val draw = content(card.id) ?: return@items
+                ReorderableItem(reorder, key = card.id, enabled = editing) { dragging ->
+                    if (!editing) {
+                        Box(Modifier.holdToEdit { editing = true }) { draw(Modifier.fillMaxWidth()) }
+                    } else {
+                        val lift by animateDpAsState(if (dragging) 12.dp else 0.dp, label = "lift")
+                        val shape = RoundedCornerShape(20.dp)
+                        Box(Modifier.shadow(lift, shape)) {
+                            Box(Modifier.alpha(if (card.hidden) 0.4f else 1f)) { draw(Modifier.fillMaxWidth()) }
+                            // Covers the card so its own buttons don't react; drag it to move it.
+                            Box(
+                                Modifier.matchParentSize()
+                                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = if (dragging) 1f else 0.6f), shape)
+                                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.MOVE_CURSOR)))
+                                    .draggableHandle(onDragStopped = { onChange(working) }),
+                            ) {
+                                Row(Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                                    CardButton(Icons.Outlined.SwapHoriz, stringResource(Res.string.dashboard_card_width)) {
+                                        working = working.resize(card.id, allowThird = true)
+                                    }
+                                    Spacer(Modifier.width(4.dp))
+                                    CardButton(
+                                        if (card.hidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                        stringResource(if (card.hidden) Res.string.dashboard_card_show else Res.string.dashboard_card_hide),
+                                    ) { working = working.toggleHidden(card.id) }
+                                }
+                            }
+                        }
                     }
                 }
             }
-        } else {
-            header()
         }
-        items(cards, key = { it.id }, span = { GridItemSpan(it.size.span(6)) }) { card ->
-            val draw = content(card.id) ?: return@items
-            ReorderableItem(reorder, key = card.id, enabled = editing) { dragging ->
-                if (!editing) {
-                    Box(Modifier.holdToEdit { editing = true }) { draw(Modifier.fillMaxWidth()) }
-                } else {
-                    val lift by animateDpAsState(if (dragging) 12.dp else 0.dp, label = "lift")
-                    val shape = RoundedCornerShape(20.dp)
-                    Box(Modifier.shadow(lift, shape)) {
-                        Box(Modifier.alpha(if (card.hidden) 0.4f else 1f)) { draw(Modifier.fillMaxWidth()) }
-                        // Covers the card so its own buttons don't react; drag it to move it.
-                        Box(
-                            Modifier.matchParentSize()
-                                .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = if (dragging) 1f else 0.6f), shape)
-                                .pointerHoverIcon(PointerIcon(Cursor(Cursor.MOVE_CURSOR)))
-                                .draggableHandle(onDragStopped = { onChange(working) }),
-                        ) {
-                            Row(Modifier.align(Alignment.TopEnd).padding(8.dp)) {
-                                CardButton(Icons.Outlined.SwapHoriz, stringResource(Res.string.dashboard_card_width)) {
-                                    working = working.resize(card.id, allowThird = true)
-                                }
-                                Spacer(Modifier.width(4.dp))
-                                CardButton(
-                                    if (card.hidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                                    stringResource(if (card.hidden) Res.string.dashboard_card_show else Res.string.dashboard_card_hide),
-                                ) { working = working.toggleHidden(card.id) }
-                            }
-                        }
+        // "Reset" and "Done" stay at the bottom of the window while the cards scroll beneath them.
+        AnimatedVisibility(
+            visible = editing,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+        ) {
+            Surface(
+                Modifier.padding(20.dp).widthIn(max = 480.dp).fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 3.dp,
+                shadowElevation = 8.dp,
+            ) {
+                Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(onClick = { working = defaults }, modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand)) {
+                        Text(stringResource(Res.string.dashboard_edit_reset))
+                    }
+                    Button(onClick = { editing = false; onChange(working) }, modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand)) {
+                        Text(stringResource(Res.string.dashboard_edit_done))
                     }
                 }
             }
