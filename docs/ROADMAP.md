@@ -142,7 +142,7 @@ Nicht übernommen: Widget, Schnellantwort in der Benachrichtigung und Vibration 
 ---
 
 ## Hilfe und Verständlichkeit ✅
-- **Hilfe & Anleitung** (Einstellungen, ?-Symbol in Serverliste und Server-Seite): 23 Themen in 6 Bereichen, durchsuchbar („Wo ist …?“, ohne Rücksicht auf Groß-/Kleinschreibung und Umlaute), jeweils mit Weg dorthin, Erklärung und Bild mit markierter Stelle. Die Bilder kommen aus den Screenshot-Tests (`tools/help_images.py`).
+- **Hilfe & Anleitung** (Einstellungen ganz oben, ?-Symbol auf der Server-Seite): 23 Themen in 6 Bereichen, durchsuchbar („Wo ist …?“, ohne Rücksicht auf Groß-/Kleinschreibung und Umlaute), jeweils mit Weg dorthin, Erklärung und Bild mit markierter Stelle. Die Bilder kommen aus den Screenshot-Tests (`tools/help_images.py`).
 - Konsole: beschriftete Knöpfe „Suchen“ und „Kopieren“ über dem Log statt Symbolen über dem Text.
 - Übersicht: Aufgaben, Plugins und Dateien mit kurzer Erklärung, Hinweis „Welt antippen für …“.
 - Server hinzufügen: Der Token-Weg ist als „Für Fortgeschrittene“ gekennzeichnet und erklärt; im Formular steht das unterscheidende Feld (Code oder Token) oben.

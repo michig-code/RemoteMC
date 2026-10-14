@@ -469,7 +469,7 @@ class ScreenshotTest {
     fun serverListLargeFont() {
         RuntimeEnvironment.setFontScale(1.3f)
         shot("02d_servers_empty_large_de") {
-            ServerListScreen(emptyList(), {}, {}, { _, _ -> }, {}, {}, {}, onDemo = {}, onHelp = {})
+            ServerListScreen(emptyList(), {}, {}, { _, _ -> }, {}, {}, {}, onDemo = {})
         }
     }
 
