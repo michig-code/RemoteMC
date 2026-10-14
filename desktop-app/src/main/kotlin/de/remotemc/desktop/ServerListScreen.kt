@@ -1,6 +1,33 @@
 package de.remotemc.desktop
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.outlined.DashboardCustomize
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import de.remotemc.app.data.CardGrid
+import de.remotemc.app.data.CardPart
+import de.remotemc.app.data.ListLayout
+import de.remotemc.app.data.ScreenBlock
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -128,6 +155,7 @@ fun ServerListScreen(
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
     /** Pairs a server again (new token or certificate), keeping its name, folder and place. */
     onRepair: (String) -> Unit = {},
+    startEditing: Boolean = false, // screenshot tests
 ) {
     val servers by model.servers.servers.collectAsState()
     val alertsOn = model.settings.settings.collectAsState().value.alerts.enabled
@@ -178,174 +206,234 @@ fun ServerListScreen(
         model.servers.setOrder(result.servers)
     }
 
+    // Arranging: in edit mode every card has a blue frame whose handles change its size in grid
+    // cells; the panel at the bottom orders the parts of a card and the blocks of this screen.
+    val settings by model.settings.settings.collectAsState()
+    val layout = remember(settings.serverList) { ListLayout.decode(settings.serverList) }
+    var editing by remember { mutableStateOf(startEditing) }
+    var preview by remember { mutableStateOf<Triple<String, Int, Int>?>(null) }
+    var gridWidth by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val columns = with(density) { ((gridWidth - 56.dp.toPx() + 14.dp.toPx()) / (CellWidth + 14.dp).toPx()).toInt() }.coerceIn(4, 12)
+    val cellW = with(density) { (gridWidth - 56.dp.toPx() + 14.dp.toPx()) / columns }
+    val cellH = with(density) { (RowUnit + 14.dp).toPx() }
+    fun sizeOf(server: ServerProfile): Pair<Int, Int> =
+        preview?.takeIf { it.first == server.id }?.let { it.second to it.third } ?: CardGrid.size(server, columns, DefaultWidth)
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { onAdd(null) },
-                icon = { Icon(Icons.Default.Add, null) },
-                text = { Text(stringResource(Res.string.servers_add)) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            )
+            if (!editing) {
+                ExtendedFloatingActionButton(
+                    onClick = { onAdd(null) },
+                    icon = { Icon(Icons.Default.Add, null) },
+                    text = { Text(stringResource(Res.string.servers_add)) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
-                GridCells.Adaptive(340.dp),
-                Modifier.fillMaxSize().widthIn(max = 1200.dp),
+                GridCells.Fixed(columns),
+                Modifier.fillMaxSize().widthIn(max = 1200.dp).onSizeChanged { gridWidth = it.width },
                 state = gridState,
-                contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 96.dp),
+                contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 28.dp, bottom = if (editing) 300.dp else 96.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }, key = "header") {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        AppLogo(56.dp)
-                        Spacer(Modifier.width(16.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(Res.string.app_name), style = MaterialTheme.typography.headlineLarge)
-                            Text(
-                                if (servers.isEmpty()) stringResource(Res.string.servers_tagline)
-                                else pluralStringResource(Res.plurals.servers_count, servers.size, servers.size),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        OutlinedButton(onClick = {
-                            val text = clipboard.getText()?.text.orEmpty()
-                            onAdd(text.takeIf { ConnectLink.parse(it) != null })
-                        }) {
-                            Icon(Icons.Outlined.ContentPaste, null, Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(Res.string.scan_paste_link))
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        if (servers.isNotEmpty()) {
-                            IconButton(onClick = { ProbeCache.clear(); refreshAll++ }) { Icon(Icons.Outlined.Refresh, stringResource(Res.string.action_refresh)) }
-                        }
-                        IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, stringResource(Res.string.settings_title)) }
-                    }
-                }
-                if (servers.size > 1) {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "search") {
-                        TextField(
-                            query, { query = it },
-                            placeholder = { Text(stringResource(Res.string.servers_search)) },
-                            leadingIcon = { Icon(Icons.Outlined.Search, null) },
-                            trailingIcon = {
-                                if (query.isNotEmpty()) {
-                                    IconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_clear)) }
+                layout.blocks.forEach { block ->
+                    when (block) {
+                        ScreenBlock.HEADER -> {
+                            item(span = { GridItemSpan(maxLineSpan) }, key = "header") {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    AppLogo(56.dp)
+                                    Spacer(Modifier.width(16.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(stringResource(Res.string.app_name), style = MaterialTheme.typography.headlineLarge)
+                                        Text(
+                                            if (servers.isEmpty()) stringResource(Res.string.servers_tagline)
+                                            else pluralStringResource(Res.plurals.servers_count, servers.size, servers.size),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    OutlinedButton(onClick = {
+                                        val text = clipboard.getText()?.text.orEmpty()
+                                        onAdd(text.takeIf { ConnectLink.parse(it) != null })
+                                    }) {
+                                        Icon(Icons.Outlined.ContentPaste, null, Modifier.size(18.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(stringResource(Res.string.scan_paste_link))
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    if (servers.isNotEmpty()) {
+                                        IconButton(onClick = { ProbeCache.clear(); refreshAll++ }) { Icon(Icons.Outlined.Refresh, stringResource(Res.string.action_refresh)) }
+                                    }
+                                    if (servers.isNotEmpty()) {
+                                        IconButton(onClick = { editing = !editing }) {
+                                            Icon(Icons.Outlined.DashboardCustomize, stringResource(Res.string.servers_arrange))
+                                        }
+                                    }
+                                    IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, stringResource(Res.string.settings_title)) }
                                 }
-                            },
-                            singleLine = true,
-                            shape = CircleShape,
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
-                if (servers.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
-                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(Modifier.fillMaxWidth().height(180.dp)) {
-                                EmptyState(stringResource(Res.string.servers_empty_title), stringResource(Res.string.servers_empty_text))
-                            }
-                            // A made-up server inside the app, to look around without a server of one's own.
-                            OutlinedButton(onClick = {
-                                model.servers.upsert(DemoServer.profile(demoName))
-                                onOpen(DemoServer.ID)
-                            }) { Text(stringResource(Res.string.demo_try)) }
-                        }
-                    }
-                } else if (rows.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }, key = "no-match") {
-                        Text(
-                            stringResource(Res.string.servers_no_match, query.trim()),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-                        )
-                    }
-                }
-                rows.forEachIndexed { index, row ->
-                    when (row) {
-                        is ListRow.Title -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
-                            // Nothing can go above the first title.
-                            ReorderableItem(reorder, key = row.key, enabled = index > 0) {
-                                Text(
-                                    stringResource(if (row.title == ListTitle.PINNED) Res.string.servers_pinned else Res.string.servers_title),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(start = 4.dp, top = 8.dp),
-                                )
                             }
                         }
-                        is ListRow.Folder -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
-                            ReorderableItem(reorder, key = row.key) {
-                                FolderHeader(
-                                    row,
-                                    onToggle = { collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name },
-                                    onPin = { model.servers.setFolderPinned(row.name, !row.pinned) },
-                                    onRename = { renamingFolder = row.name },
-                                    onRemove = { removingFolder = row.name },
-                                )
-                            }
-                        }
-                        is ListRow.Server -> item(key = row.key) {
-                            val server = row.server
-                            ReorderableItem(
-                                reorder, key = row.key, enabled = canSwap(row.key),
-                                modifier = Modifier.onGloballyPositioned { c ->
-                                    val r = c.boundsInRoot()
-                                    if (slots[server.id] != r) slots[server.id] = r
-                                },
-                            ) { dragging ->
-                                Box(Modifier.staggeredAppear(index)) {
-                                    ServerCard(
-                                        server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
-                                        alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
-                                        onPin = { model.servers.setPinned(server.id, !server.pinned) },
-                                        onMoveToFolder = { moving = server },
-                                        onRepair = { onRepair(server.id) },
-                                        refreshAll = refreshAll,
-                                        dragging = dragging,
-                                        dropTarget = hoverTarget == server.id,
-                                        modifier = Modifier
-                                            .draggableHandle(
-                                                enabled = query.isBlank(),
-                                                onDragStarted = { dragStart = currentServers },
-                                                onDragStopped = {
-                                                    val target = hoverTarget
-                                                    hoverTarget = null
-                                                    held = null
-                                                    if (target != null) {
-                                                        val folder = folderOf(currentServers, target)
-                                                        if (folder != null) {
-                                                            // Onto a server in a folder: it simply joins that folder.
-                                                            model.servers.setOrder(mergeInto(currentServers, server.id, target, folder))
-                                                        } else {
-                                                            merging = server.id to target
-                                                        }
-                                                    }
-                                                },
-                                            )
-                                            .onGloballyPositioned { c ->
-                                                if (dragging) {
-                                                    val r = c.boundsInRoot()
-                                                    held = server.id to r
-                                                    hoverTarget = targetUnder(r, server.id)
-                                                }
-                                            },
+                        ScreenBlock.SEARCH -> {
+                            if (servers.size > 1) {
+                                item(span = { GridItemSpan(maxLineSpan) }, key = "search") {
+                                    TextField(
+                                        query, { query = it },
+                                        placeholder = { Text(stringResource(Res.string.servers_search)) },
+                                        leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                                        trailingIcon = {
+                                            if (query.isNotEmpty()) {
+                                                IconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_clear)) }
+                                            }
+                                        },
+                                        singleLine = true,
+                                        shape = CircleShape,
+                                        colors = TextFieldDefaults.colors(
+                                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        ),
+                                        modifier = Modifier.fillMaxWidth(),
                                     )
                                 }
                             }
                         }
+                        ScreenBlock.SERVERS -> {
+                            if (servers.isEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
+                                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Box(Modifier.fillMaxWidth().height(180.dp)) {
+                                            EmptyState(stringResource(Res.string.servers_empty_title), stringResource(Res.string.servers_empty_text))
+                                        }
+                                        // A made-up server inside the app, to look around without a server of one's own.
+                                        OutlinedButton(onClick = {
+                                            model.servers.upsert(DemoServer.profile(demoName))
+                                            onOpen(DemoServer.ID)
+                                        }) { Text(stringResource(Res.string.demo_try)) }
+                                    }
+                                }
+                            } else if (rows.isEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }, key = "no-match") {
+                                    Text(
+                                        stringResource(Res.string.servers_no_match, query.trim()),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                                    )
+                                }
+                            }
+                            rows.forEachIndexed { index, row ->
+                                when (row) {
+                                    is ListRow.Title -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
+                                        // Nothing can go above the first title.
+                                        ReorderableItem(reorder, key = row.key, enabled = index > 0) {
+                                            Text(
+                                                stringResource(if (row.title == ListTitle.PINNED) Res.string.servers_pinned else Res.string.servers_title),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                                            )
+                                        }
+                                    }
+                                    is ListRow.Folder -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
+                                        ReorderableItem(reorder, key = row.key) {
+                                            FolderHeader(
+                                                row,
+                                                onToggle = { collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name },
+                                                onPin = { model.servers.setFolderPinned(row.name, !row.pinned) },
+                                                onRename = { renamingFolder = row.name },
+                                                onRemove = { removingFolder = row.name },
+                                            )
+                                        }
+                                    }
+                                    is ListRow.Server -> item(key = row.key, span = { GridItemSpan(sizeOf(row.server).first.coerceAtMost(maxLineSpan)) }) {
+                                        val server = row.server
+                                        val (w, h) = sizeOf(server)
+                                        ReorderableItem(
+                                            reorder, key = row.key, enabled = canSwap(row.key),
+                                            modifier = Modifier.onGloballyPositioned { c ->
+                                                val r = c.boundsInRoot()
+                                                if (slots[server.id] != r) slots[server.id] = r
+                                            },
+                                        ) { dragging ->
+                                            Box(Modifier.staggeredAppear(index).height(RowUnit * h + 14.dp * (h - 1))) {
+                                                ServerCard(
+                                                    server, probe, { if (!editing) onOpen(server.id) }, { renaming = server }, { deleting = server },
+                                                    w = w, h = h, parts = layout,
+                                                    alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
+                                                    onPin = { model.servers.setPinned(server.id, !server.pinned) },
+                                                    onMoveToFolder = { moving = server },
+                                                    onRepair = { onRepair(server.id) },
+                                                    refreshAll = refreshAll,
+                                                    dragging = dragging,
+                                                    dropTarget = hoverTarget == server.id,
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .draggableHandle(
+                                                            enabled = query.isBlank(),
+                                                            onDragStarted = { dragStart = currentServers },
+                                                            onDragStopped = {
+                                                                val target = hoverTarget
+                                                                hoverTarget = null
+                                                                held = null
+                                                                if (target != null) {
+                                                                    val folder = folderOf(currentServers, target)
+                                                                    if (folder != null) {
+                                                                        // Onto a server in a folder: it simply joins that folder.
+                                                                        model.servers.setOrder(mergeInto(currentServers, server.id, target, folder))
+                                                                    } else {
+                                                                        merging = server.id to target
+                                                                    }
+                                                                }
+                                                            },
+                                                        )
+                                                        .onGloballyPositioned { c ->
+                                                            if (dragging) {
+                                                                val r = c.boundsInRoot()
+                                                                held = server.id to r
+                                                                hoverTarget = targetUnder(r, server.id)
+                                                            }
+                                                        },
+                                                )
+                                                if (editing && !dragging) {
+                                                    ResizeFrame(
+                                                        w = w, h = h, cellW = cellW, cellH = cellH, columns = columns,
+                                                        onPreview = { nw, nh -> preview = Triple(server.id, nw, nh) },
+                                                        onDone = {
+                                                            preview?.let { (_, nw, nh) -> model.servers.setCardSize(server.id, nw, nh) }
+                                                            preview = null
+                                                        },
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            AnimatedVisibility(
+                visible = editing,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+            ) {
+                ListEditPanel(
+                    layout = layout,
+                    onLayout = { l -> model.settings.update { it.copy(serverList = l.encode()) } },
+                    onReset = {
+                        model.settings.update { it.copy(serverList = "") }
+                        model.servers.resetCardSizes()
+                    },
+                    onDone = { editing = false },
+                )
             }
         }
     }
@@ -530,6 +618,10 @@ private fun ServerCard(
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    /** Size in grid cells and what the card shows. */
+    w: Int,
+    h: Int,
+    parts: ListLayout,
     alertsOn: Boolean = false,
     onToggleNotify: () -> Unit = {},
     onPin: () -> Unit = {},
@@ -570,105 +662,313 @@ private fun ServerCard(
             .then(if (dropTarget) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)) else Modifier),
         onClick = onOpen,
     ) {
-        Column(Modifier.padding(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium),
-                    contentAlignment = Alignment.Center,
-                ) { Text(server.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimaryContainer) }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                        if (server.pinned) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(Icons.Filled.PushPin, stringResource(Res.string.servers_pinned), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+        val conn = when (state) {
+            is Probe.Online -> Conn.LIVE
+            Probe.Offline -> Conn.OFFLINE
+            Probe.Loading -> Conn.CONNECTING
+        }
+        val online = (state as? Probe.Online)?.status
+        if (w == 1 && h == 1) {
+            // The smallest card: first letter and a dot for the status.
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { ServerIcon(server, 40.dp, conn) }
+            return@McCard
+        }
+        val lines = parts.lines(w, h)
+        val showsStatus = lines.any { CardPart.STATUS in it }
+        Column(
+            Modifier.fillMaxSize().clipToBounds().padding(horizontal = 16.dp, vertical = if (h == 1) 6.dp else 14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, if (h == 1) Alignment.CenterVertically else Alignment.Top),
+        ) {
+            lines.forEach { line ->
+                when (line.first()) {
+                    CardPart.NAME -> Row(verticalAlignment = Alignment.CenterVertically) {
+                        ServerIcon(server, if (h == 1 || w == 1) 36.dp else 44.dp, conn.takeUnless { showsStatus })
+                        if (w > 1) {
+                            Spacer(Modifier.width(12.dp))
+                            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                                Text(server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                if (server.pinned) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Icon(Icons.Filled.PushPin, stringResource(Res.string.servers_pinned), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                                }
+                                if (alertsOn && !server.notify) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Icon(Icons.Outlined.NotificationsOff, stringResource(Res.string.servers_notify_muted), Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                if (server.role != Role.ADMIN) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
+                                }
+                            }
+                        } else {
+                            Spacer(Modifier.weight(1f))
                         }
-                        if (alertsOn && !server.notify) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(Icons.Outlined.NotificationsOff, stringResource(Res.string.servers_notify_muted), Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        if (server.role != Role.ADMIN) {
-                            Spacer(Modifier.width(6.dp))
-                            Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
+                        Box {
+                            IconButton(onClick = { menu = true }, Modifier.size(36.dp)) { Icon(Icons.Default.MoreVert, stringResource(Res.string.action_more)) }
+                            DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                                DropdownMenuItem(
+                                    { Text(stringResource(if (server.pinned) Res.string.servers_unpin else Res.string.servers_pin)) },
+                                    { menu = false; onPin() }, leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                                )
+                                DropdownMenuItem(
+                                    { Text(stringResource(Res.string.servers_move_to_folder)) },
+                                    { menu = false; onMoveToFolder() }, leadingIcon = { Icon(Icons.Outlined.DriveFileMove, null) },
+                                )
+                                DropdownMenuItem(
+                                    { Text(stringResource(Res.string.action_pair_again)) },
+                                    { menu = false; onRepair() }, leadingIcon = { Icon(Icons.Outlined.QrCode2, null) },
+                                )
+                                DropdownMenuItem({ Text(stringResource(Res.string.servers_rename)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
+                                if (alertsOn) {
+                                    DropdownMenuItem(
+                                        { Text(stringResource(if (server.notify) Res.string.servers_notify_off else Res.string.servers_notify_on)) },
+                                        { menu = false; onToggleNotify() },
+                                        leadingIcon = { Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null) },
+                                    )
+                                }
+                                DropdownMenuItem({ Text(stringResource(Res.string.action_remove)) }, { menu = false; onDelete() }, leadingIcon = { Icon(Icons.Outlined.Delete, null) })
+                            }
                         }
                     }
-                    val demo = DemoServer.isDemo(server)
-                    Text(
-                        when {
-                            demo -> stringResource(Res.string.demo_name)
-                            !server.tls -> server.address + " · " + stringResource(Res.string.servers_unencrypted)
-                            else -> server.address
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (!server.tls && !demo) McColors.Warning else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(Res.string.action_more)) }
-                    DropdownMenu(menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(
-                            { Text(stringResource(if (server.pinned) Res.string.servers_unpin else Res.string.servers_pin)) },
-                            { menu = false; onPin() }, leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                    CardPart.ADDRESS -> {
+                        val demo = DemoServer.isDemo(server)
+                        Text(
+                            when {
+                                demo -> stringResource(Res.string.demo_name)
+                                !server.tls -> server.address + " · " + stringResource(Res.string.servers_unencrypted)
+                                else -> server.address
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (!server.tls && !demo) McColors.Warning else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        DropdownMenuItem(
-                            { Text(stringResource(Res.string.servers_move_to_folder)) },
-                            { menu = false; onMoveToFolder() }, leadingIcon = { Icon(Icons.Outlined.DriveFileMove, null) },
-                        )
-                        DropdownMenuItem(
-                            { Text(stringResource(Res.string.action_pair_again)) },
-                            { menu = false; onRepair() }, leadingIcon = { Icon(Icons.Outlined.QrCode2, null) },
-                        )
-                        DropdownMenuItem({ Text(stringResource(Res.string.servers_rename)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
-                        if (alertsOn) {
-                            DropdownMenuItem(
-                                { Text(stringResource(if (server.notify) Res.string.servers_notify_off else Res.string.servers_notify_on)) },
-                                { menu = false; onToggleNotify() },
-                                leadingIcon = { Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null) },
+                    }
+                    CardPart.MEMORY -> if (online != null && online.memoryMaxMb > 0) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                stringResource(Res.string.dashboard_memory) + " · ${online.memoryUsedMb}/${online.memoryMaxMb} MB",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            LinearProgressIndicator(
+                                progress = { (online.memoryUsedMb.toFloat() / online.memoryMaxMb).coerceIn(0f, 1f) },
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
-                        DropdownMenuItem({ Text(stringResource(Res.string.action_remove)) }, { menu = false; onDelete() }, leadingIcon = { Icon(Icons.Outlined.Delete, null) })
                     }
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(onClick = { refresh++ }, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-                    Row(Modifier.padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        StatusDot(
-                            when (state) {
-                                is Probe.Online -> Conn.LIVE
-                                Probe.Offline -> Conn.OFFLINE
-                                Probe.Loading -> Conn.CONNECTING
-                            },
-                            8.dp,
-                        )
+                    CardPart.VERSION -> if (online != null) {
                         Text(
-                            stringResource(
-                                when (state) {
-                                    is Probe.Online -> Res.string.status_online_short
-                                    Probe.Offline -> Res.string.status_offline_short
-                                    Probe.Loading -> Res.string.status_checking
-                                },
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
+                            listOf(online.platform, online.minecraftVersion).filter { it.isNotBlank() }.joinToString(" "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                }
-                Spacer(Modifier.weight(1f))
-                (state as? Probe.Online)?.status?.let { s ->
-                    Icon(Icons.Outlined.Group, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${s.onlinePlayers}/${s.maxPlayers}", style = MaterialTheme.typography.labelLarge)
-                    s.tps.firstOrNull()?.let { tps ->
-                        Spacer(Modifier.width(12.dp))
-                        Icon(Icons.Outlined.Speed, null, Modifier.size(16.dp), tint = tpsColor(tps))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(Res.string.unit_tps, "%.1f".format(tps)), style = MaterialTheme.typography.labelLarge, color = tpsColor(tps))
+                    CardPart.MOTD -> if (online != null && online.motd.isNotBlank()) {
+                        Text(
+                            online.motd.replace(Regex("§."), "").lines().joinToString(" ") { it.trim() },
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        line.forEach { part ->
+                            when (part) {
+                                CardPart.STATUS -> Surface(onClick = { refresh++ }, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                                    Row(Modifier.padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        StatusDot(conn, 8.dp)
+                                        Text(
+                                            stringResource(
+                                                when (state) {
+                                                    is Probe.Online -> Res.string.status_online_short
+                                                    Probe.Offline -> Res.string.status_offline_short
+                                                    Probe.Loading -> Res.string.status_checking
+                                                },
+                                            ),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            maxLines = 1,
+                                        )
+                                    }
+                                }
+                                CardPart.PLAYERS -> if (online != null) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Group, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Spacer(Modifier.width(4.dp))
+                                        Text("${online.onlinePlayers}/${online.maxPlayers}", style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                                    }
+                                }
+                                CardPart.TPS -> online?.tps?.firstOrNull()?.let { tps ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Speed, null, Modifier.size(16.dp), tint = tpsColor(tps))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(stringResource(Res.string.unit_tps, "%.1f".format(tps)), style = MaterialTheme.typography.labelLarge, color = tpsColor(tps), maxLines = 1)
+                                    }
+                                }
+                                else -> Unit
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
+/** Columns of the server list grid are at least this wide. */
+private val CellWidth = 96.dp
+
+/** Height of one grid row. */
+private val RowUnit = 64.dp
+
+/** New cards are this many columns wide. */
+private const val DefaultWidth = 3
+
+/** First letter of the server; with a status dot when the card has no status line. */
+@Composable
+private fun ServerIcon(server: ServerProfile, size: Dp, conn: Conn?) {
+    Box {
+        Box(
+            Modifier.size(size).background(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium),
+            contentAlignment = Alignment.Center,
+        ) { Text(server.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimaryContainer) }
+        if (conn != null) {
+            Box(Modifier.align(Alignment.BottomEnd).background(MaterialTheme.colorScheme.surface, CircleShape).padding(2.dp)) { StatusDot(conn, 8.dp) }
+        }
+    }
+}
+
+/**
+ * The blue frame around a card with handles on the right, at the bottom and in the corner, like
+ * resizing a widget on a phone's home screen. Dragging a handle changes the size in whole grid cells.
+ */
+@Composable
+private fun BoxScope.ResizeFrame(w: Int, h: Int, cellW: Float, cellH: Float, columns: Int, onPreview: (Int, Int) -> Unit, onDone: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    Box(Modifier.matchParentSize().border(2.dp, primary, RoundedCornerShape(20.dp)))
+    val size by rememberUpdatedState(w to h)
+    val label = stringResource(Res.string.servers_resize)
+    @Composable
+    fun Handle(align: Alignment, horizontal: Boolean, vertical: Boolean, cursor: Int) {
+        Box(
+            Modifier.align(align).size(32.dp)
+                .semantics { contentDescription = label }
+                .pointerHoverIcon(PointerIcon(java.awt.Cursor(cursor)))
+                .pointerInput(horizontal, vertical, cellW, cellH, columns) {
+                    var start = size
+                    var drag = Offset.Zero
+                    detectDragGestures(
+                        onDragStart = { start = size; drag = Offset.Zero },
+                        onDragEnd = onDone,
+                        onDragCancel = onDone,
+                    ) { change, amount ->
+                        change.consume()
+                        drag += amount
+                        val (nw, nh) = CardGrid.resize(
+                            start.first, start.second,
+                            if (horizontal) drag.x else 0f, if (vertical) drag.y else 0f,
+                            cellW, cellH, columns,
+                        )
+                        onPreview(nw, nh)
+                    }
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(Modifier.size(14.dp).background(MaterialTheme.colorScheme.surface, CircleShape).border(3.dp, primary, CircleShape))
+        }
+    }
+    Handle(Alignment.CenterEnd, horizontal = true, vertical = false, cursor = java.awt.Cursor.E_RESIZE_CURSOR)
+    Handle(Alignment.BottomCenter, horizontal = false, vertical = true, cursor = java.awt.Cursor.S_RESIZE_CURSOR)
+    Handle(Alignment.BottomEnd, horizontal = true, vertical = true, cursor = java.awt.Cursor.SE_RESIZE_CURSOR)
+}
+
+/** Bottom panel in edit mode: what a card shows and the screen's blocks, both in a draggable order. */
+@Composable
+private fun ListEditPanel(layout: ListLayout, onLayout: (ListLayout) -> Unit, onReset: () -> Unit, onDone: () -> Unit) {
+    Surface(
+        Modifier.padding(16.dp).widthIn(max = 640.dp).fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp,
+        shadowElevation = 8.dp,
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Text(stringResource(Res.string.servers_arrange), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 6.dp))
+            Text(
+                stringResource(Res.string.servers_arrange_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 6.dp),
+            )
+            ChipOrder(stringResource(Res.string.servers_arrange_card), layout.parts.map { partLabel(it) }) { from, to -> onLayout(layout.movePart(from, to)) }
+            ChipOrder(stringResource(Res.string.servers_arrange_screen), layout.blocks.map { blockLabel(it) }) { from, to -> onLayout(layout.moveBlock(from, to)) }
+            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.dashboard_edit_reset)) }
+                Button(onClick = onDone, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.dashboard_edit_done)) }
+            }
+        }
+    }
+}
+
+/** A row of chips that can be put in another order by dragging them. */
+@Composable
+private fun ChipOrder(title: String, labels: List<String>, onMove: (Int, Int) -> Unit) {
+    val state = rememberLazyListState()
+    val current by rememberUpdatedState(labels)
+    val reorder = rememberReorderableLazyListState(state) { from, to ->
+        if (from.index in current.indices && to.index in current.indices) onMove(from.index, to.index)
+    }
+    Text(
+        title,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 6.dp, top = 10.dp, bottom = 4.dp),
+    )
+    LazyRow(state = state, horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 4.dp)) {
+        items(labels, key = { it }) { label ->
+            ReorderableItem(reorder, key = label) { dragging ->
+                Surface(
+                    Modifier.draggableHandle().pointerHoverIcon(PointerIcon.Hand),
+                    shape = CircleShape,
+                    color = if (dragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (dragging) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                    shadowElevation = if (dragging) 6.dp else 0.dp,
+                ) {
+                    Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.DragIndicator, null, Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(label, style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun partLabel(part: CardPart) = stringResource(
+    when (part) {
+        CardPart.NAME -> Res.string.part_name
+        CardPart.ADDRESS -> Res.string.part_address
+        CardPart.STATUS -> Res.string.part_status
+        CardPart.PLAYERS -> Res.string.part_players
+        CardPart.TPS -> Res.string.part_tps
+        CardPart.MEMORY -> Res.string.dashboard_memory
+        CardPart.VERSION -> Res.string.part_version
+        CardPart.MOTD -> Res.string.part_motd
+    },
+)
+
+@Composable
+private fun blockLabel(block: ScreenBlock) = stringResource(
+    when (block) {
+        ScreenBlock.HEADER -> Res.string.block_header
+        ScreenBlock.SEARCH -> Res.string.block_search
+        ScreenBlock.SERVERS -> Res.string.block_servers
+    },
+)

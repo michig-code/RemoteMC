@@ -24,6 +24,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import de.remotemc.app.data.DashCard
+import kotlin.math.roundToInt
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,7 +40,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -73,7 +80,7 @@ typealias OverviewCard = (@Composable (Modifier) -> Unit)?
 
 /**
  * The overview as a 6-column grid the user can rearrange: hold any card to start, then drag cards
- * with the mouse, change their width (full, half, third) or hide them; "Done" saves the layout.
+ * with the mouse, change their width with the blue handle on the right edge or hide them; "Done" saves the layout.
  */
 @Composable
 fun EditableOverview(
@@ -93,18 +100,23 @@ fun EditableOverview(
         working = working.move(a, b)
     }
     val cards = working.cards.filter { content(it.id) != null && (editing || !it.hidden) }
+    // Width of one of the 6 columns (with the gap), for the handle that changes a card's width.
+    var gridWidth by remember { mutableIntStateOf(0) }
+    val cellW = with(LocalDensity.current) { (gridWidth - (48 - 14).dp.toPx()) / 6 }
+    var preview by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    fun spanOf(card: DashCard) = preview?.takeIf { it.first == card.id }?.second ?: card.span(6)
     Box(Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             GridCells.Fixed(6),
             state = gridState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().onSizeChanged { gridWidth = it.width },
             // While editing, room at the bottom so the last card can scroll above the buttons.
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = if (editing) 130.dp else 24.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             if (!editing) header()
-            items(cards, key = { it.id }, span = { GridItemSpan(it.size.span(6)) }) { card ->
+            items(cards, key = { it.id }, span = { GridItemSpan(spanOf(it)) }) { card ->
                 val draw = content(card.id) ?: return@items
                 ReorderableItem(reorder, key = card.id, enabled = editing) { dragging ->
                     if (!editing) {
@@ -117,15 +129,21 @@ fun EditableOverview(
                             // Covers the card so its own buttons don't react; drag it to move it.
                             Box(
                                 Modifier.matchParentSize()
-                                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = if (dragging) 1f else 0.6f), shape)
+                                    .border(2.dp, MaterialTheme.colorScheme.primary, shape)
                                     .pointerHoverIcon(PointerIcon(Cursor(Cursor.MOVE_CURSOR)))
                                     .draggableHandle(onDragStopped = { onChange(working) }),
                             ) {
+                                WidthHandle(
+                                    span = spanOf(card),
+                                    cellW = cellW,
+                                    onPreview = { preview = card.id to it },
+                                    onDone = {
+                                        preview?.let { (id, span) -> working = working.setSpan(id, span, 6) }
+                                        preview = null
+                                        onChange(working)
+                                    },
+                                )
                                 Row(Modifier.align(Alignment.TopEnd).padding(8.dp)) {
-                                    CardButton(Icons.Outlined.SwapHoriz, stringResource(Res.string.dashboard_card_width)) {
-                                        working = working.resize(card.id, allowThird = true)
-                                    }
-                                    Spacer(Modifier.width(4.dp))
                                     CardButton(
                                         if (card.hidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
                                         stringResource(if (card.hidden) Res.string.dashboard_card_show else Res.string.dashboard_card_hide),
@@ -208,5 +226,34 @@ private fun Modifier.holdToEdit(onHold: () -> Unit): Modifier = pointerInput(Uni
                 if (event.changes.none { it.pressed }) break
             }
         }
+    }
+}
+
+/** Blue handle on the right edge of a card in edit mode; dragging it changes the width in columns. */
+@Composable
+private fun BoxScope.WidthHandle(span: Int, cellW: Float, onPreview: (Int) -> Unit, onDone: () -> Unit) {
+    val current by rememberUpdatedState(span)
+    val label = stringResource(Res.string.servers_resize)
+    val primary = MaterialTheme.colorScheme.primary
+    Box(
+        Modifier.align(Alignment.CenterEnd).size(32.dp)
+            .semantics { contentDescription = label }
+            .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+            .pointerInput(cellW) {
+                var start = current
+                var dx = 0f
+                detectHorizontalDragGestures(
+                    onDragStart = { start = current; dx = 0f },
+                    onDragEnd = onDone,
+                    onDragCancel = onDone,
+                ) { change, amount ->
+                    change.consume()
+                    dx += amount
+                    if (cellW > 0) onPreview((start + (dx / cellW).roundToInt()).coerceIn(1, 6))
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(width = 10.dp, height = 28.dp).background(MaterialTheme.colorScheme.surface, CircleShape).border(3.dp, primary, CircleShape))
     }
 }

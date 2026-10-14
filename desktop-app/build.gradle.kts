@@ -28,6 +28,7 @@ kotlin {
             "de/remotemc/app/data/Models.kt",
             "de/remotemc/app/data/ServerProfile.kt",
             "de/remotemc/app/data/ServerList.kt",
+            "de/remotemc/app/data/ListLayout.kt",
             "de/remotemc/app/data/ConnectLink.kt",
             "de/remotemc/app/data/AlertSettings.kt",
             "de/remotemc/app/data/DashboardLayout.kt",

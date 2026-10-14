@@ -14,9 +14,9 @@ object CardGrid {
     /** Default height of a card, in rows (as tall as the cards were before the grid). */
     const val DEFAULT_ROWS = 2
 
-    /** Width and height of [server]'s card in a grid of [columns] columns. */
-    fun size(server: ServerProfile, columns: Int): Pair<Int, Int> {
-        val w = if (server.cardW <= 0) columns else server.cardW.coerceIn(1, columns)
+    /** Width and height of [server]'s card in a grid of [columns] columns; new cards are [defaultW] wide. */
+    fun size(server: ServerProfile, columns: Int, defaultW: Int = columns): Pair<Int, Int> {
+        val w = if (server.cardW <= 0) defaultW.coerceIn(1, columns) else server.cardW.coerceIn(1, columns)
         val h = if (server.cardH <= 0) DEFAULT_ROWS else server.cardH.coerceIn(1, MAX_ROWS)
         return w to h
     }
