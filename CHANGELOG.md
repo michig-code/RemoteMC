@@ -67,6 +67,7 @@ First public release of **RemoteMC**.
 
 ### App
 - Logo without the dark tile behind it (also on Windows and in the README)
+- Widget: a server that answers slowly in the background is checked again instead of shown offline
 - Animations can be turned off in the settings (on by default)
 - Customizable overview: hold a card to move cards, change their width or hide them;
   “Reset” and “Done” with a short how-to stay at the bottom of the screen while scrolling
