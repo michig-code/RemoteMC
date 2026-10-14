@@ -112,7 +112,22 @@ data class DesktopSettings(
     val animations: Boolean = true,
     /** Look for new RemoteMC versions on GitHub at start and every 6 hours. */
     val autoUpdate: Boolean = true,
+    /** App language as a tag ("de", "pt-BR"); blank = the system language. */
+    val language: String = "",
 )
+
+/** The app's languages (the same as on the phone); applied by setting the default locale. */
+object AppLanguage {
+    val all = listOf(
+        "en" to "English", "de" to "Deutsch", "es" to "Español", "fr" to "Français", "it" to "Italiano",
+        "nl" to "Nederlands", "pl" to "Polski", "pt-BR" to "Português (Brasil)", "tr" to "Türkçe", "ru" to "Русский",
+    )
+    private val system: java.util.Locale = java.util.Locale.getDefault()
+
+    fun apply(tag: String) {
+        java.util.Locale.setDefault(if (tag.isBlank()) system else java.util.Locale.forLanguageTag(tag))
+    }
+}
 
 fun defaultDeviceName(): String =
     (System.getenv("COMPUTERNAME") ?: runCatching { InetAddress.getLocalHost().hostName }.getOrNull() ?: "PC")
@@ -131,7 +146,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             .put("mentions", a.mentions).put("words", a.words)
             .put("quiet", a.quiet).put("quietFrom", a.quietFrom).put("quietTo", a.quietTo)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
-            .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate)
+            .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate).put("language", next.language)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -143,6 +158,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             deviceName = o.optString("deviceName").ifBlank { defaultDeviceName() },
             animations = o.optBoolean("animations", true),
             autoUpdate = o.optBoolean("autoUpdate", true),
+            language = o.optString("language"),
             alerts = o.optJSONObject("alerts")?.let { a ->
                 AlertSettings(
                     enabled = a.optBoolean("enabled", false),

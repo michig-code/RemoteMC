@@ -84,6 +84,24 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                             color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
                     }
                 }
+                SectionTitle(stringResource(Res.string.settings_language))
+                McCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(vertical = 8.dp)) {
+                        (listOf("" to stringResource(Res.string.settings_language_system)) + AppLanguage.all).forEach { (tag, label) ->
+                            Row(
+                                Modifier.fillMaxWidth().clickable {
+                                    AppLanguage.apply(tag)
+                                    model.settings.update { it.copy(language = tag) }
+                                }.padding(horizontal = 16.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(settings.language == tag, onClick = null)
+                                Spacer(Modifier.width(12.dp))
+                                Text(label)
+                            }
+                        }
+                    }
+                }
                 SectionTitle(stringResource(Res.string.settings_appearance))
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(vertical = 8.dp)) {

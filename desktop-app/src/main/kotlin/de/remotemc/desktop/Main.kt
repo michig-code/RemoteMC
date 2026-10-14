@@ -72,7 +72,7 @@ class AppModel(
 }
 
 fun main() = application {
-    val model = remember { AppModel() }
+    val model = remember { AppModel().also { AppLanguage.apply(it.settings.settings.value.language) } }
     val settings by model.settings.settings.collectAsState()
     val icon = remember {
         runCatching { BitmapPainter(ImageIO.read(AppModel::class.java.getResourceAsStream("/icon.png")).toComposeImageBitmap()) }.getOrNull()
@@ -156,7 +156,8 @@ fun main() = application {
         }
         // Windows' own buttons follow the colour theme.
         LaunchedEffect(dark) { (controls as? NativeWindowControls)?.setDark(dark) }
-        App(model, tabs = tabs, controls = controls)
+        // A new language takes effect at once: everything is drawn again with the new texts.
+        androidx.compose.runtime.key(settings.language) { App(model, tabs = tabs, controls = controls) }
         if (!controls.native) ResizeEdges(window)
     }
 }
