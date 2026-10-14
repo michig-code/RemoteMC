@@ -23,6 +23,7 @@
         <item>Ana ekran widget’ı ve hızlı ayarlar kutucuğu</item>
         <item>Son verilerle anında açılır; çevrimdışıyken ne kadar eski olduklarını gösterir</item>
         <item>Klasör, sabitleme ve aramayla birden fazla sunucu; moderatörler ve izleyiciler için sınırlı erişim</item>
+        <item>Bir sunucuyu diğerinin üzerine bırakarak klasör oluştur; klasörleri en üste sabitle</item>
         <item>Arama ve resimlerle yardım ve rehber</item>
         <item>Açık ve koyu, 9 renk veya kendi rengin, 10 dil, tablet görünümü</item>
         <item>Uygulama içinden güncellemeler (GitHub sürümü)</item>
@@ -40,6 +41,7 @@
         <item>10 dilde mesajlar ve güncelleme kontrolü</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Klasörlü ve sabitlemeli sunucu listesi; sıralamak için sürükle ya da klasör için bir sunucuyu diğerine bırak</item>
         <item>Telefondaki her şey bilgisayarda da: genel bakış, oyuncular, konsol, sohbet, dünyalar, eklentiler, görevler ve dosyalar</item>
         <item>Her şeyi önce yerleşik demo sunucuyla dene</item>
         <item>Sekmelerde birden fazla sunucu, ayarlanabilir bölünmüş görünümler</item>

@@ -649,7 +649,7 @@ private fun ServerCard(
     dragging: Boolean,
     refreshTick: Int,
     /** Another server is held over this one: dropping it makes a folder. */
-    dropTarget: Boolean = false,
+    dropTarget: Boolean,
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onPin: () -> Unit,

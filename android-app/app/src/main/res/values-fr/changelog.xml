@@ -23,6 +23,7 @@
         <item>Widget pour l’écran d’accueil et tuile des réglages rapides</item>
         <item>S’ouvre instantanément avec les dernières données ; hors ligne, leur âge est indiqué</item>
         <item>Plusieurs serveurs avec dossiers, épinglage et recherche ; accès limité pour modérateurs et spectateurs</item>
+        <item>Lâche un serveur sur un autre pour créer un dossier ; épingle des dossiers en haut</item>
         <item>Aide et guide avec recherche et images</item>
         <item>Clair et sombre, 9 couleurs ou la vôtre, 10 langues, affichage tablette</item>
         <item>Mises à jour directement dans l’app (version GitHub)</item>
@@ -40,6 +41,7 @@
         <item>Messages en 10 langues et vérification des mises à jour</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Liste des serveurs avec dossiers et épinglage ; glisse pour trier ou lâche un serveur sur un autre pour un dossier</item>
         <item>Tout ce que fait le téléphone, aussi sur PC : aperçu, joueurs, console, chat, mondes, plugins, tâches et fichiers</item>
         <item>Essayez tout d’abord avec le serveur de démo intégré</item>
         <item>Plusieurs serveurs en onglets, vues partagées réglables</item>

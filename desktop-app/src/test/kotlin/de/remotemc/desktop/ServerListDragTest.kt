@@ -26,15 +26,19 @@ class ServerListDragTest {
     private fun layout() = model.servers.servers.value.joinToString(" ") { if (it.folder.isBlank()) it.id else "${it.id}@${it.folder}" }
 
     private fun drag(from: String, onto: String, past: Offset = Offset.Zero) = runDesktopComposeUiTest(width = 500, height = 1000) {
+        // The cards check their server every few seconds forever: time only moves when the test says so.
+        mainClock.autoAdvance = false
         setContent { RemoteMCTheme(model.settings.settings.value) { ServerListScreen(model, {}, {}, {}, probe = { error("offline") }) } }
+        mainClock.advanceTimeBy(500)
         val a = onNodeWithText(from).fetchSemanticsNode().boundsInRoot.center
         val b = onNodeWithText(onto).fetchSemanticsNode().boundsInRoot.center
         val delta = b - a + past
-        onNodeWithText(from).performMouseInput {
+        val node = onNodeWithText(from)
+        node.performMouseInput {
+            moveTo(center)
             press()
             val steps = 40
             repeat(steps) { moveBy(delta / steps.toFloat(), delayMillis = 16) }
-            advanceEventTime(200)
             release()
         }
         mainClock.advanceTimeBy(1000)

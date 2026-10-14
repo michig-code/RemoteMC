@@ -35,6 +35,8 @@ First public release of **RemoteMC**.
 
 ### Windows app (new)
 - Built-in demo server with sample data, to try everything without a server of your own
+- Server list like on the phone: folders (open and close, rename, remove), pinned servers and
+  folders on top, drag to sort or drop a server onto another one for a new folder, search with ✕
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
 - File manager with editor (Ctrl+S), add and remove plugins; resizable split views
@@ -55,6 +57,7 @@ First public release of **RemoteMC**.
 - "What's new" in the settings lists everything RemoteMC can do
 
 ### App
+- Logo without the dark tile behind it (also on Windows and in the README)
 - Animations can be turned off in the settings (on by default)
 - Customizable overview: hold a card to move cards, change their width or hide them;
   “Reset” and “Done” with a short how-to stay at the bottom of the screen while scrolling
@@ -69,6 +72,8 @@ First public release of **RemoteMC**.
   and actions; coloured console with your recent commands and Minecraft-like suggestions; chat
 - Server list: hold a server and drag it to sort it, into or out of a folder, from folder to
   folder or into "Pinned"; pin servers to the top, group them in folders, search by name or address
+- Drop a server onto another one to put both into a new folder (the app asks for its name; Cancel
+  puts the server back); whole folders can be pinned to the top too
 - Background notifications (optional): server offline / back online, low TPS, player joins
   (all or chosen players) and chat mentions; per server on or off. Works without Google
   services through a live connection with a small permanent notification

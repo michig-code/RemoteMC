@@ -23,6 +23,7 @@
         <item>Widget para la pantalla de inicio y mosaico de ajustes rápidos</item>
         <item>Se abre al instante con los últimos datos; sin conexión muestra su antigüedad</item>
         <item>Varios servidores con carpetas, fijados y búsqueda; acceso limitado para moderadores y espectadores</item>
+        <item>Suelta un servidor sobre otro para crear una carpeta; fija carpetas arriba</item>
         <item>Ayuda y guía con búsqueda e imágenes</item>
         <item>Claro y oscuro, 9 colores o el tuyo, 10 idiomas, diseño para tablet</item>
         <item>Actualizaciones dentro de la app (versión de GitHub)</item>
@@ -40,6 +41,7 @@
         <item>Mensajes en 10 idiomas y comprobación de actualizaciones</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Lista de servidores con carpetas y fijados; arrastra para ordenar o suelta uno sobre otro para crear una carpeta</item>
         <item>Todo lo del móvil también en el PC: resumen, jugadores, consola, chat, mundos, plugins, tareas y archivos</item>
         <item>Pruébalo todo primero con el servidor de demostración integrado</item>
         <item>Varios servidores en pestañas, vistas divididas ajustables</item>

@@ -23,6 +23,7 @@
         <item>Home screen widget and quick settings tile</item>
         <item>Opens instantly with the last data; offline it shows how old it is</item>
         <item>Several servers with folders, pins and search; limited access for moderators and viewers</item>
+        <item>Drop a server onto another to make a folder; pin folders to the top</item>
         <item>Help &amp; guide with search and pictures</item>
         <item>Light and dark, 9 colours or your own, 10 languages, tablet layout</item>
         <item>Updates right in the app (GitHub version)</item>
@@ -40,6 +41,7 @@
         <item>Messages in 10 languages and an update check</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Server list with folders and pins; drag to sort or drop one server onto another for a folder</item>
         <item>Everything from the phone on the PC: overview, players, console, chat, worlds, plugins, tasks and files</item>
         <item>Try everything first with the built-in demo server</item>
         <item>Several servers in tabs, resizable split views</item>

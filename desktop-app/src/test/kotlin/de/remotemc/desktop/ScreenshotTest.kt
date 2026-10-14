@@ -93,6 +93,18 @@ class ScreenshotTest {
     }
 
     @Test fun servers() = shot("01_servers") { ServerListScreen(model, {}, {}, {}, probe = { if (it.port == 8765 && it.tls) sample else error("down") }) }
+    @Test fun serversFolders() = shot("01b_servers_folders") {
+        val d = Files.createTempDirectory("rmc").toFile()
+        val m = AppModel(ServerStore(File(d, "servers.dat")), model.settings, CommandHistory(File(d, "h.json")), ServerExtras.inMemory())
+        listOf(
+            ServerProfile(name = "Survival", host = "mc.example.com", token = "x", pinned = true),
+            ServerProfile(name = "Lobby", host = "lobby.example.com", token = "x", folder = "Network", folderPinned = true),
+            ServerProfile(name = "Minigames", host = "mini.example.com", token = "x", folder = "Network", folderPinned = true),
+            ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", role = Role.MODERATOR),
+            ServerProfile(name = "Test server", host = "10.0.0.5", token = "x", tls = false, folder = "Friends"),
+        ).forEach { m.servers.upsert(it) }
+        ServerListScreen(m, {}, {}, {}, probe = { if (it.host == "mc.example.com") sample else error("down") })
+    }
     @Test fun serversEmpty() = shot("02b_servers_empty") {
         val empty = Files.createTempDirectory("rmc").toFile()
         ServerListScreen(AppModel(ServerStore(File(empty, "servers.dat")), model.settings, CommandHistory(File(empty, "h.json")), ServerExtras.inMemory()), {}, {}, {})

@@ -23,6 +23,7 @@
         <item>Widget für den Startbildschirm und Kachel in den Schnelleinstellungen</item>
         <item>Öffnet sofort mit den letzten Daten; offline zeigt sie, wie alt sie sind</item>
         <item>Mehrere Server mit Ordnern, Anheften und Suche; eingeschränkter Zugriff für Moderatoren und Zuschauer</item>
+        <item>Server aufeinander ziehen ergibt einen Ordner; Ordner lassen sich oben anheften</item>
         <item>Hilfe &amp; Anleitung mit Suche und Bildern</item>
         <item>Hell und dunkel, 9 Farben oder eine eigene, 10 Sprachen, Tablet-Ansicht</item>
         <item>Updates direkt in der App (GitHub-Version)</item>
@@ -40,6 +41,7 @@
         <item>Meldungen in 10 Sprachen und Update-Prüfung</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Serverliste mit Ordnern und Anheften; ziehen zum Sortieren oder einen Server auf einen anderen für einen Ordner</item>
         <item>Alles vom Handy auch am PC: Übersicht, Spieler, Konsole, Chat, Welten, Plugins, Aufgaben und Dateien</item>
         <item>Alles zuerst mit dem eingebauten Demo-Server ausprobieren</item>
         <item>Mehrere Server in Tabs, verstellbare geteilte Ansichten</item>

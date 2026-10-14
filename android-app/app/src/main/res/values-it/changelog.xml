@@ -23,6 +23,7 @@
         <item>Widget per la schermata Home e riquadro nelle impostazioni rapide</item>
         <item>Si apre subito con gli ultimi dati; offline mostra quanto sono vecchi</item>
         <item>Più server con cartelle, fissati e ricerca; accesso limitato per moderatori e spettatori</item>
+        <item>Rilascia un server su un altro per creare una cartella; fissa le cartelle in alto</item>
         <item>Aiuto e guida con ricerca e immagini</item>
         <item>Chiaro e scuro, 9 colori o il tuo, 10 lingue, layout per tablet</item>
         <item>Aggiornamenti direttamente nell’app (versione GitHub)</item>
@@ -40,6 +41,7 @@
         <item>Messaggi in 10 lingue e controllo aggiornamenti</item>
     </string-array>
     <string-array name="changelog_windows_items">
+        <item>Elenco server con cartelle e fissati; trascina per ordinare o rilascia un server su un altro per una cartella</item>
         <item>Tutto ciò che fa il telefono anche sul PC: panoramica, giocatori, console, chat, mondi, plugin, attività e file</item>
         <item>Prova tutto prima con il server demo integrato</item>
         <item>Più server in schede, viste divise regolabili</item>
