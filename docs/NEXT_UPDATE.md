@@ -3,7 +3,7 @@
 Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmiert wird
 (siehe [`CLAUDE.md`](../CLAUDE.md)). Erst wenn die Liste freigegeben ist, beginnt die Umsetzung.
 
-**Status:** sammeln
+**Status:** in Arbeit – **Teil A** (jetzt): Punkte 2, 3, 4, 7 · **Teil B** (über Nacht): Punkte 1, 5, 6, 8
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
@@ -14,6 +14,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 | 5 | Server nebeneinander andocken | Windows | Einen Server-Tab an den Rand ziehen (links, rechts, oben, unten) oder in die Mitte (als Tab) – so sieht man mehrere Server gleichzeitig; Trennlinien verschiebbar, Anordnung bleibt gespeichert. | ☐ |
 | 6 | Restliche Handy-Funktionen am PC | Windows | „Erneut koppeln“ (auch im Hinweis bei geändertem Zertifikat/entzogenem Zugang), alle Server aktualisieren, Suche mit ✕ und „Keine Treffer“; Spieler suchen und sortieren (Name/Ping/Welt), Ping-Balken, Spielmodus-Abzeichen; Konsole: „Nach unten“-Knopf und Mitlaufen pausiert beim Hochscrollen, letzte Befehle vergessen; echte Skins im Chat; Welt-Karten der Übersicht anklickbar; Verlauf-Diagramm mit Wert beim Draufzeigen; Hilfe-Seite; Willkommens-Seiten beim ersten Start; Sprache wählen; Einstellungen: Plugin herunterladen, Quellcode, Lizenzen, Hinweis; Benachrichtigung anklicken öffnet den Server, auf Erwähnungen direkt antworten; Ruhezeiten wie am Handy (still statt verworfen); Schalter „auf Widget zeigen“ am PC ausblenden. | ☐ |
 | 7 | Logo ohne Hintergrund | Handy + Windows | Das bisherige Logo bleibt unverändert (Block mit Grasdeckel und >_, gleiche Farben), nur der dunkle Kasten dahinter fällt weg – in den Apps, als Windows-Symbol und in der README. Das Android-Startbildschirm-Symbol und das Play-Store-Symbol brauchen technisch einen Hintergrund und bleiben wie sie sind. | ☐ |
+| 8 | Tabs verschieben | Windows | Server-Tabs oben in der Leiste per Ziehen umsortieren, wie im Browser; die Reihenfolge bleibt gespeichert. | ☐ |
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Demo-Server in der Windows-App;
 beim Anpassen der Übersicht bleiben „Zurücksetzen“ und
