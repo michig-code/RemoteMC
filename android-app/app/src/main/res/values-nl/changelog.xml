@@ -32,7 +32,7 @@
     <string-array name="changelog_plugin_items">
         <item>Voor Paper, Purpur, Folia en Spigot vanaf Minecraft 1.20.6</item>
         <item>Koppelen met /remotemc pair: QR-code als kaart in het spel of in de console; de kaart verdwijnt na het koppelen of als je hem weggooit</item>
-        <item>Kleine webversie voor browser en iPhone: open de link uit /remotemc pair (overzicht, spelers, console, chat)</item>
+        <item>Kleine webversie voor browser en iPhone: open de link uit /remotemc pair (overzicht, spelers, console, chat) – standaard uit (web: true)</item>
         <item>Versleutelde verbinding met een eigen certificaat</item>
         <item>Rollen admin, moderator en kijker; de toegang van elke telefoon kan worden ingetrokken</item>
         <item>Live gegevens zonder vertraging: console, chat, spelers en status</item>

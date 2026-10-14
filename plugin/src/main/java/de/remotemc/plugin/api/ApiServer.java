@@ -127,11 +127,11 @@ public final class ApiServer {
 
     // ── Web app ─────────────────────────────────────────────────────────
 
-    /** The small web app for browsers (see {@link WebFiles}); turned off with "web: false". */
+    /** The small web app for browsers (see {@link WebFiles}); off unless "web: true" is set. */
     private void web(HttpExchange ex) {
         try {
             String method = ex.getRequestMethod().toUpperCase(Locale.ROOT);
-            WebFiles.File file = plugin.getConfig().getBoolean("web", true) && (method.equals("GET") || method.equals("HEAD"))
+            WebFiles.File file = plugin.getConfig().getBoolean("web", false) && (method.equals("GET") || method.equals("HEAD"))
                     ? WebFiles.find(ex.getRequestURI().getPath()) : null;
             var headers = ex.getResponseHeaders();
             if (file == null) {

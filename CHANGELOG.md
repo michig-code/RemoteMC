@@ -8,7 +8,7 @@ First public release of **RemoteMC**.
 - Small web app at `https://<address>:<port>/` (served by the plugin itself, for browsers and
   iPhones without the app): pair with the code from `/remotemc pair`, which now also shows a
   clickable "Browser / iPhone" link; overview, players, console with commands, chat; English and
-  German; strict content security policy; turned off with `web: false` in config.yml
+  German; strict content security policy; off by default – turned on with `web: true` in config.yml
 - Built-in HTTPS with a self-signed certificate; the app pins its fingerprint
 - `/remotemc pair`: one-time 6-digit code and QR code (in-game map or console)
 - The QR map disappears when the player throws it away or once a phone has paired with its code

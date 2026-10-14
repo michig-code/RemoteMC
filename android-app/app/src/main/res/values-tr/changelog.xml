@@ -32,7 +32,7 @@
     <string-array name="changelog_plugin_items">
         <item>Minecraft 1.20.6’dan itibaren Paper, Purpur, Folia ve Spigot için</item>
         <item>/remotemc pair ile eşleme: oyunda harita veya konsolda QR kodu – harita eşlemeden sonra veya atılınca kaybolur</item>
-        <item>Tarayıcı ve iPhone için küçük web sürümü: /remotemc pair bağlantısını aç (genel bakış, oyuncular, konsol, sohbet)</item>
+        <item>Tarayıcı ve iPhone için küçük web sürümü: /remotemc pair bağlantısını aç (genel bakış, oyuncular, konsol, sohbet) – varsayılan olarak kapalı (web: true)</item>
         <item>Kendi sertifikasıyla şifreli bağlantı</item>
         <item>Admin, moderatör ve izleyici rolleri; her telefonun erişimi iptal edilebilir</item>
         <item>Gecikmesiz canlı veriler: konsol, sohbet, oyuncular ve durum</item>

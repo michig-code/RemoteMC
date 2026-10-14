@@ -19,7 +19,7 @@
     <string name="files_row_text">Ayarları düzenle, logları oku, dosya yükle</string>
     <string name="help_add_server_title">Sunucu ekleme</string>
     <string name="help_add_server_where">Sunucu listesi › Sunucu ekle</string>
-    <string name="help_add_server_text">RemoteMC eklentisini Minecraft sunucuna kur ve oyunda ya da sunucu konsolunda /remotemc pair yaz. Sonra uygulamada “Sunucu ekle”ye dokun ve QR kodunu tara – ya da adresi ve 6 haneli kodu gir. /remotemc pair haritası bir telefon onunla eşleşince veya onu attığında kaybolur. Uygulama olmadan (ör. iPhone’da): /remotemc pair çıktısındaki “Tarayıcı / iPhone” bağlantısını aç – sunucu genel bakış, oyuncular, konsol ve sohbet içeren küçük bir web sürümü gösterir. Tarayıcı ilk seferde sunucunun kendi sertifikası hakkında uyarır.</string>
+    <string name="help_add_server_text">RemoteMC eklentisini Minecraft sunucuna kur ve oyunda ya da sunucu konsolunda /remotemc pair yaz. Sonra uygulamada “Sunucu ekle”ye dokun ve QR kodunu tara – ya da adresi ve 6 haneli kodu gir. /remotemc pair haritası bir telefon onunla eşleşince veya onu attığında kaybolur. Uygulama olmadan (ör. iPhone’da): eklentinin config.yml dosyasında web: true yap ve /remotemc reload çalıştır. Ardından /remotemc pair ayrıca genel bakış, oyuncular, konsol ve sohbet içeren küçük bir web sürümüne “Tarayıcı / iPhone” bağlantısı gösterir. Tarayıcı ilk seferde sunucunun kendi sertifikası hakkında uyarır.</string>
     <string name="help_add_server_keys">bağlan, eşle, QR, kod, yeni, eklenti, kur, bağlantı</string>
     <string name="help_demo_title">Demo sunucuyu dene</string>
     <string name="help_demo_where">Sunucu listesi (boş) › Demo sunucuyu dene</string>

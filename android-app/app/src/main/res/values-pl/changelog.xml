@@ -32,7 +32,7 @@
     <string-array name="changelog_plugin_items">
         <item>Dla Paper, Purpur, Folia i Spigot od Minecraft 1.20.6</item>
         <item>Parowanie przez /remotemc pair: kod QR jako mapa w grze lub w konsoli – mapa znika po sparowaniu lub po wyrzuceniu</item>
-        <item>Mała wersja webowa dla przeglądarki i iPhone’a: otwórz link z /remotemc pair (przegląd, gracze, konsola, czat)</item>
+        <item>Mała wersja webowa dla przeglądarki i iPhone’a: otwórz link z /remotemc pair (przegląd, gracze, konsola, czat) – domyślnie wyłączona (web: true)</item>
         <item>Szyfrowane połączenie z własnym certyfikatem</item>
         <item>Role admin, moderator i widz; dostęp każdego telefonu można cofnąć</item>
         <item>Dane na żywo bez opóźnień: konsola, czat, gracze i status</item>

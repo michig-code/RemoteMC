@@ -19,7 +19,7 @@
     <string name="files_row_text">Edit configs, read logs, upload files</string>
     <string name="help_add_server_title">Add a server</string>
     <string name="help_add_server_where">Server list › Add server</string>
-    <string name="help_add_server_text">Install the RemoteMC plugin on your Minecraft server and type /remotemc pair in the game or the server console. Then tap “Add server” in the app and scan the QR code – or type the address and the 6-digit code. The map from /remotemc pair disappears once a phone has paired with it or when you throw it away. Without the app (e.g. on an iPhone): open the “Browser / iPhone” link from /remotemc pair – the server shows a small web version with overview, players, console and chat. The browser warns about the server’s own certificate the first time.</string>
+    <string name="help_add_server_text">Install the RemoteMC plugin on your Minecraft server and type /remotemc pair in the game or the server console. Then tap “Add server” in the app and scan the QR code – or type the address and the 6-digit code. The map from /remotemc pair disappears once a phone has paired with it or when you throw it away. Without the app (e.g. on an iPhone): set web: true in the plugin’s config.yml and run /remotemc reload. /remotemc pair then also shows a “Browser / iPhone” link to a small web version with overview, players, console and chat. The browser warns about the server’s own certificate the first time.</string>
     <string name="help_add_server_keys">connect, pair, QR, code, new, plugin, install, link</string>
     <string name="help_demo_title">Try the demo server</string>
     <string name="help_demo_where">Server list (empty) › Try the demo server</string>

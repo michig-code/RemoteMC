@@ -63,14 +63,33 @@ served = base64.urlsafe_b64encode(hashlib.sha256(der).digest()).decode().rstrip(
 check("served certificate matches QR fingerprint", served == fp, served)
 check("TLS 1.2+ negotiated", tls_version in ("TLSv1.2", "TLSv1.3"), tls_version)
 
-# 2b. web app for browsers: its page with a strict policy, nothing else from the JAR or disk
-c = conn(); c.request("GET", "/"); r = c.getresponse(); page = r.read().decode()
-check("web app page", r.status == 200 and "app.js" in page and "default-src 'self'" in (r.getheader("Content-Security-Policy") or ""))
-c = conn(); c.request("GET", "/app.js"); r = c.getresponse(); r.read()
-check("web app script", r.status == 200 and r.getheader("Content-Type", "").startswith("text/javascript"))
-c = conn(); c.request("GET", "/config.yml"); r = c.getresponse(); r.read()
-check("web app serves no other files", r.status == 404)
+# 2b. web app for browsers: off by default; when on, its page with a strict policy and nothing
+# else from the JAR or disk
+def set_web(on):
+    path = f"{DIR}/plugins/RemoteMC/config.yml"
+    with open(path) as f:
+        text = re.sub(r"(?m)^web:.*\n?", "", f.read())
+    with open(path, "w") as f:
+        f.write(text if on is None else text + f"web: {'true' if on else 'false'}\n")
+    console("remotemc reload", r"(?i)reload")
+    time.sleep(1)
+
+def web_get(path):
+    c = conn(); c.request("GET", path); r = c.getresponse()
+    return r.status, r.getheader("Content-Security-Policy") or "", r.getheader("Content-Type") or "", r.read().decode(errors="replace")
+
+set_web(None)  # not in the config at all: the default applies
+check("web app off by default", web_get("/")[0] == 404)
+check("no browser link while off", console("remotemc pair", r"(https?://\S+/#code=\d{6})", timeout=5) is None)
+set_web(True)
+st, csp, _, page = web_get("/")
+check("web app page", st == 200 and "app.js" in page and "default-src 'self'" in csp)
+st, _, ctype, _ = web_get("/app.js")
+check("web app script", st == 200 and ctype.startswith("text/javascript"))
+check("web app serves no other files", web_get("/config.yml")[0] == 404)
 check("pair command prints browser link", console("remotemc pair", r"(https?://\S+/#code=\d{6})"))
+set_web(False)
+check("web app can be turned off", web_get("/")[0] == 404)
 
 # 3. ping + pairing
 st, d = req("GET", "/api/v1/ping")

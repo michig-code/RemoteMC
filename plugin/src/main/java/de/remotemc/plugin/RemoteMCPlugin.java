@@ -342,7 +342,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         clickable.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(messages.get("pair-link-hover"))));
         linkLine.addExtra(clickable);
         sender.spigot().sendMessage(linkLine);
-        if (getConfig().getBoolean("web", true)) {
+        if (getConfig().getBoolean("web", false)) {
             // The same code works in the browser (web app of the API server).
             String web = (tls != null ? "https://" : "http://") + hostForUri(address) + ":" + port + "/#code=" + code.code();
             TextComponent webLine = new TextComponent(messages.get("pair-web"));
