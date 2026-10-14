@@ -82,7 +82,7 @@ class AlertRules(private val settings: () -> AlertSettings) {
         const val OFFLINE_GRACE_MS = 30_000L
         const val TPS_COOLDOWN_MS = 10 * 60_000L
 
-        /** Whole word, ignoring case and a leading @ ("Michi", "@michi," but not "Michigan"). */
+        /** Whole word, ignoring case and a leading @ ("Kai", "@kai," but not "Kaiser"). */
         fun mentions(message: String, word: String): Boolean =
             Regex("(?<![\\p{L}\\p{N}_])@?" + Regex.escape(word) + "(?![\\p{L}\\p{N}_])", RegexOption.IGNORE_CASE)
                 .containsMatchIn(message)

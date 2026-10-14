@@ -52,7 +52,7 @@ class ScreenshotTest {
     }
 
     private val sample = ServerStatus(
-        "Welcome to Michi's survival server!", "git-Paper-123", "1.21.4", "Paper", "1.0.0", 3, 20, listOf(19.8, 19.6, 17.2), 12.4,
+        "Welcome to the Survival server!", "git-Paper-123", "1.21.4", "Paper", "1.0.0", 3, 20, listOf(19.8, 19.6, 17.2), 12.4,
         2850, 4096, 90_000, features = setOf("history", "moderation", "worlds", "plugins", "schedules", "teleport", "files"), worlds = listOf(WorldInfo("world", "NORMAL", 2, 812, 1450), WorldInfo("world_nether", "NETHER", 1, 120, 230), WorldInfo("world_the_end", "THE_END", 0, 40, 12)),
     )
     private val samplePlayers = listOf(
@@ -232,7 +232,7 @@ private class SampleManagement(private val now: Long) : Management {
     )
     override suspend fun readFile(path: String) = TextFile(
         path,
-        "#Minecraft server properties\nmotd=Welcome to Michi's survival server!\nmax-players=20\ndifficulty=normal\npvp=true\n" +
+        "#Minecraft server properties\nmotd=Welcome to the Survival server!\nmax-players=20\ndifficulty=normal\npvp=true\n" +
             "view-distance=10\nsimulation-distance=8\nwhite-list=true\nonline-mode=true\nspawn-protection=16\n",
         now,
     )

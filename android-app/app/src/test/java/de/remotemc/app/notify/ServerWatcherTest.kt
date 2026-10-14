@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 @RunWith(RobolectricTestRunner::class)
 class ServerWatcherTest {
 
-    private val settings = AlertSettings(enabled = true, joins = true, words = "Michi")
+    private val settings = AlertSettings(enabled = true, joins = true, words = "Kai")
     private val alerts = Collections.synchronizedList(mutableListOf<Alert>())
     private val client = OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS).build()
 
@@ -45,7 +45,7 @@ class ServerWatcherTest {
     @Test
     fun streamEventsBecomeAlerts() = runBlocking {
         val server = MockWebServer()
-        server.enqueue(sse(hello, chat("join", "flatsch"), chat("chat", "Steve", "where is michi?"), chat("chat", "Steve", "hi")))
+        server.enqueue(sse(hello, chat("join", "flatsch"), chat("chat", "Steve", "where is kai?"), chat("chat", "Steve", "hi")))
         server.start()
         val profile = profile(server)
         val watcher = ServerWatcher({ profile }, AlertRules { settings }, { true }, { _, a -> alerts += a }, client, minBackoff = 50)
@@ -53,7 +53,7 @@ class ServerWatcherTest {
         waitFor(2)
         job.cancel()
         server.shutdown()
-        assertEquals(listOf(Alert.Joined("flatsch"), Alert.Mention("Steve", "where is michi?")), alerts.toList())
+        assertEquals(listOf(Alert.Joined("flatsch"), Alert.Mention("Steve", "where is kai?")), alerts.toList())
     }
 
     @Test

@@ -11,7 +11,7 @@ import org.junit.Test
 
 class AlertRulesTest {
 
-    private var settings = AlertSettings(enabled = true, joins = true, words = "Michi, admin")
+    private var settings = AlertSettings(enabled = true, joins = true, words = "Kai, admin")
     private val rules = AlertRules { settings }
 
     private fun status(tps: Double?) = ServerStatus(
@@ -60,19 +60,19 @@ class AlertRulesTest {
     @Test
     fun joinsFilteredByPlayerList() {
         assertEquals(Alert.Joined("Steve"), rules.onChat(chat(ChatEntry.Type.JOIN, "Steve")))
-        settings = settings.copy(players = "flatsch, Micheeee14")
+        settings = settings.copy(players = "flatsch, Kai_Miner")
         assertNull(rules.onChat(chat(ChatEntry.Type.JOIN, "Steve")))
-        assertEquals(Alert.Joined("micheeee14"), rules.onChat(chat(ChatEntry.Type.JOIN, "micheeee14")))
+        assertEquals(Alert.Joined("kai_miner"), rules.onChat(chat(ChatEntry.Type.JOIN, "kai_miner")))
         settings = settings.copy(joins = false)
         assertNull(rules.onChat(chat(ChatEntry.Type.JOIN, "flatsch")))
     }
 
     @Test
     fun mentionsAreWholeWords() {
-        assertTrue(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "hey @michi, come here")) is Alert.Mention)
+        assertTrue(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "hey @kai, come here")) is Alert.Mention)
         assertTrue(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "ADMIN help")) is Alert.Mention)
-        assertNull(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "michigan is big")))
-        assertNull(rules.onChat(chat(ChatEntry.Type.BROADCAST, "Server", "Michi")))
+        assertNull(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "kaiser is big")))
+        assertNull(rules.onChat(chat(ChatEntry.Type.BROADCAST, "Server", "Kai")))
         assertFalse(AlertRules.mentions("administrator", "admin"))
     }
 
@@ -83,6 +83,6 @@ class AlertRulesTest {
         assertNull(rules.onDisconnected(31_000, true))
         assertNull(rules.onConnected())
         assertNull(rules.onStatus(status(5.0), 0))
-        assertNull(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "Michi")))
+        assertNull(rules.onChat(chat(ChatEntry.Type.CHAT, "Steve", "Kai")))
     }
 }

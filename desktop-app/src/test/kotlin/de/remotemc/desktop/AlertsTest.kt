@@ -19,5 +19,5 @@ class AlertsTest {
     @Test fun tps() = check(Alert.LowTps(12.34), DesktopNotice("notif_tps_title|Survival", "notif_tps_text|" + "%.1f".format(12.34), true))
     @Test fun join() = check(Alert.Joined("Steve"), DesktopNotice("notif_join_title|Steve|Survival", null, false))
     @Test fun joinsBundled() = check(Alert.Joined("Sam"), DesktopNotice("notif_joins_title|3|3|Survival", "Alex, Steve, Sam", false), listOf("Alex", "Steve", "Sam"))
-    @Test fun mention() = check(Alert.Mention("Alex", "hey @Michi"), DesktopNotice("notif_mention_title|Alex|Survival", "hey @Michi", false))
+    @Test fun mention() = check(Alert.Mention("Alex", "hey @Kai"), DesktopNotice("notif_mention_title|Alex|Survival", "hey @Kai", false))
 }

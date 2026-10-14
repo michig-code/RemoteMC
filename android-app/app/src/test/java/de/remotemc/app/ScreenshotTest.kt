@@ -51,7 +51,7 @@ class ScreenshotTest {
     val rule = createComposeRule()
 
     private val status = ServerStatus(
-        motd = "Welcome to Michi's survival server!", version = "1.21.4-232 (MC: 1.21.4)",
+        motd = "Welcome to the Survival server!", version = "1.21.4-232 (MC: 1.21.4)",
         minecraftVersion = "1.21.4", platform = "Paper", pluginVersion = "1.0.0",
         onlinePlayers = 3, maxPlayers = 20, tps = listOf(19.8, 19.6, 17.2), mspt = 12.4,
         memoryUsedMb = 2860, memoryMaxMb = 4096, uptimeSeconds = 93_000,
@@ -296,13 +296,13 @@ class ScreenshotTest {
         }
     }
     private val moderation = de.remotemc.app.ui.ModerationActions(
-        whitelist = { de.remotemc.app.data.Whitelist(true, listOf("Alex_Builds", "flatsch", "Micheeee14", "Notch")) },
+        whitelist = { de.remotemc.app.data.Whitelist(true, listOf("Alex_Builds", "flatsch", "Kai_Miner", "Notch")) },
         setWhitelist = { error("unused") },
         addToWhitelist = { error("unused") },
         removeFromWhitelist = { error("unused") },
         bans = {
             listOf(
-                de.remotemc.app.data.BanInfo("Griefer123", "Griefing at spawn", "Micheeee14", 1_760_000_000_000L, null),
+                de.remotemc.app.data.BanInfo("Griefer123", "Griefing at spawn", "Kai_Miner", 1_760_000_000_000L, null),
                 de.remotemc.app.data.BanInfo("SpamBot", "Spam", "Server", 1_759_000_000_000L, 1_762_000_000_000L),
             )
         },
@@ -336,7 +336,7 @@ class ScreenshotTest {
                 de.remotemc.app.data.FileList(path, emptyList())
             }
         },
-        read = { de.remotemc.app.data.TextFile(it, "#Minecraft server properties\nmotd=Welcome to Michi's server!\nmax-players=20\ndifficulty=normal\npvp=true\nview-distance=10\nwhite-list=true\nonline-mode=true\n", 0) },
+        read = { de.remotemc.app.data.TextFile(it, "#Minecraft server properties\nmotd=Welcome to the Survival server!\nmax-players=20\ndifficulty=normal\npvp=true\nview-distance=10\nwhite-list=true\nonline-mode=true\n", 0) },
         write = { _, _ -> },
         delete = { null },
         createFolder = {},
@@ -406,7 +406,7 @@ class ScreenshotTest {
         SettingsScreen(
             AppSettings(
                 deviceName = "Pixel 8",
-                alerts = de.remotemc.app.data.AlertSettings(enabled = true, joins = true, players = "flatsch, Micheeee14", words = "Michi"),
+                alerts = de.remotemc.app.data.AlertSettings(enabled = true, joins = true, players = "flatsch, Kai_Miner", words = "Kai"),
             ),
             {}, {}, versionName = "1.0.0",
         )

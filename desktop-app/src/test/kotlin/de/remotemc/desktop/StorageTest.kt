@@ -36,7 +36,7 @@ class StorageTest {
         settings.update { it.copy(theme = ThemeMode.DARK, accentHue = 212f, deviceName = "Gaming-PC") }
         assertEquals(DesktopSettings(ThemeMode.DARK, 212f, "Gaming-PC"), SettingsStore(File(dir, "settings.json")).settings.value)
 
-        val alerts = AlertSettings(enabled = true, lowTps = false, tpsThreshold = 12, joins = true, players = "Steve, Alex", words = "Michi", quiet = true, quietFrom = 23 * 60, quietTo = 6 * 60 + 30)
+        val alerts = AlertSettings(enabled = true, lowTps = false, tpsThreshold = 12, joins = true, players = "Steve, Alex", words = "Kai", quiet = true, quietFrom = 23 * 60, quietTo = 6 * 60 + 30)
         settings.update { it.copy(alerts = alerts) }
         assertEquals(alerts, SettingsStore(File(dir, "settings.json")).settings.value.alerts)
         settings.update { it.copy(animations = false) }
