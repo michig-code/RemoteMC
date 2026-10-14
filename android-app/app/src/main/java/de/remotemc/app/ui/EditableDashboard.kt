@@ -61,7 +61,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import de.remotemc.app.R
 import de.remotemc.app.data.DashboardLayout
-import de.remotemc.app.ui.components.McCard
 import de.remotemc.app.ui.util.rememberHaptics
 import kotlinx.coroutines.withTimeoutOrNull
 import sh.calvin.reorderable.ReorderableItem
@@ -102,15 +101,11 @@ internal fun EditableDashboard(
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             // While editing, room at the bottom so the last card can scroll above the buttons.
-            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = if (editing) 96.dp else 16.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = if (editing) 150.dp else 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (editing) {
-                item(key = "edit-hint", span = { GridItemSpan(maxLineSpan) }) { EditHint() }
-            } else {
-                header()
-            }
+            if (!editing) header()
             items(cards, key = { it.id }, span = { GridItemSpan(it.size.span(columns).coerceAtMost(maxLineSpan)) }) { card ->
                 val draw = content(card.id) ?: return@items
                 ReorderableItem(reorder, key = card.id, enabled = editing) { dragging ->
@@ -175,20 +170,6 @@ private fun CardButton(icon: androidx.compose.ui.graphics.vector.ImageVector, la
 }
 
 @Composable
-private fun EditHint() {
-    McCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text(stringResource(R.string.dashboard_edit_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(R.string.dashboard_edit_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
 private fun EditButtons(onReset: () -> Unit, onDone: () -> Unit) {
     Surface(
         Modifier.padding(16.dp).widthIn(max = 560.dp).fillMaxWidth(),
@@ -197,9 +178,23 @@ private fun EditButtons(onReset: () -> Unit, onDone: () -> Unit) {
         tonalElevation = 3.dp,
         shadowElevation = 8.dp,
     ) {
-        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_reset)) }
-            Button(onClick = onDone, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_done)) }
+        Column(Modifier.padding(12.dp)) {
+            // The short how-to sits here, so no card above the overview takes up room.
+            Text(
+                stringResource(R.string.dashboard_edit_title),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 6.dp),
+            )
+            Text(
+                stringResource(R.string.dashboard_edit_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 6.dp),
+            )
+            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_reset)) }
+                Button(onClick = onDone, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_done)) }
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ First public release of **RemoteMC**.
   history chart, players with all actions, coloured console with suggestions and history, chat
 - File manager with editor (Ctrl+S), add and remove plugins; resizable split views
 - Customizable overview: hold a card, then drag cards, change their width or hide them;
-  “Reset” and “Done” stay at the bottom of the window while scrolling
+  “Reset” and “Done” with a short how-to stay at the bottom of the window while scrolling
 - Animations like on the phone (areas and tabs slide and fade, cards appear one by one, numbers,
   gauges and bars move smoothly, cards light up under the mouse); can be turned off
 - Whitelist and ban list, world settings, plugin list and scheduled tasks, shown only when the
@@ -55,7 +55,7 @@ First public release of **RemoteMC**.
 ### App
 - Animations can be turned off in the settings (on by default)
 - Customizable overview: hold a card to move cards, change their width or hide them;
-  “Reset” and “Done” stay at the bottom of the screen while scrolling
+  “Reset” and “Done” with a short how-to stay at the bottom of the screen while scrolling
 - File manager: browse the server folder, edit config files, upload and delete files; add a plugin
   by picking its .jar, remove plugins
 - Console text can be selected and copied; a button copies the whole console

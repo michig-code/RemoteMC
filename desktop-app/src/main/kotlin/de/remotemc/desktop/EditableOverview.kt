@@ -99,23 +99,11 @@ fun EditableOverview(
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             // While editing, room at the bottom so the last card can scroll above the buttons.
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = if (editing) 100.dp else 24.dp),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = if (editing) 130.dp else 24.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            if (editing) {
-                item(key = "edit-bar", span = { GridItemSpan(maxLineSpan) }) {
-                    McCard(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text(stringResource(Res.string.dashboard_edit_title), style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(Res.string.desktop_dashboard_edit_hint), style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
-            } else {
-                header()
-            }
+            if (!editing) header()
             items(cards, key = { it.id }, span = { GridItemSpan(it.size.span(6)) }) { card ->
                 val draw = content(card.id) ?: return@items
                 ReorderableItem(reorder, key = card.id, enabled = editing) { dragging ->
@@ -157,13 +145,23 @@ fun EditableOverview(
             exit = slideOutVertically { it } + fadeOut(),
         ) {
             Surface(
-                Modifier.padding(20.dp).widthIn(max = 480.dp).fillMaxWidth(),
+                Modifier.padding(20.dp).widthIn(max = 900.dp).fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 tonalElevation = 3.dp,
                 shadowElevation = 8.dp,
             ) {
-                Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    Modifier.padding(start = 20.dp, top = 12.dp, end = 12.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // The short how-to sits here, so no card above the overview takes up room.
+                    Column(Modifier.weight(2f)) {
+                        Text(stringResource(Res.string.dashboard_edit_title), style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(Res.string.desktop_dashboard_edit_hint), style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     OutlinedButton(onClick = { working = defaults }, modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand)) {
                         Text(stringResource(Res.string.dashboard_edit_reset))
                     }

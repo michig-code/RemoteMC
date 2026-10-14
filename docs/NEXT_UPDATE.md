@@ -9,7 +9,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 |---|---|---|---|---|
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Beim Anpassen der Übersicht bleiben „Zurücksetzen“ und
-„Fertig“ unten am Bildschirm fest (Handy + Windows).
+„Fertig“ zusammen mit dem kurzen Hinweis unten am Bildschirm fest (Handy + Windows).
 
 ## Offene Fragen
 

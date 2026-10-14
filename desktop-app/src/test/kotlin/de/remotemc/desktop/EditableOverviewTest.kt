@@ -31,8 +31,8 @@ class EditableOverviewTest {
         var t = 0L
         fun frame() { t += 16_000_000; scene.render(t) }
         repeat(5) { frame() }
-        // Edit bar ~80 px + top padding; card "a" starts around y = 110. Grab it on the left side.
-        var y = 160f
+        // Card "a" starts below the top padding (y ≈ 8). Grab it on the left side.
+        var y = 60f
         scene.sendPointerEvent(PointerEventType.Press, Offset(100f, y))
         frame()
         repeat(30) {
