@@ -1,0 +1,4 @@
+build/
+Payload/
+*.ipa
+RemoteMC.xcodeproj/
