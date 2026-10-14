@@ -105,6 +105,7 @@ class ScreenshotTest {
         ).forEach { m.servers.upsert(it) }
         ServerListScreen(m, {}, {}, {}, probe = { if (it.host == "mc.example.com") sample else error("down") })
     }
+    @Test fun help() = shot("26_help") { HelpPane({}, initialQuery = "ban") }
     @Test fun serversEmpty() = shot("02b_servers_empty") {
         val empty = Files.createTempDirectory("rmc").toFile()
         ServerListScreen(AppModel(ServerStore(File(empty, "servers.dat")), model.settings, CommandHistory(File(empty, "h.json")), ServerExtras.inMemory()), {}, {}, {})

@@ -40,4 +40,5 @@
     <string name="settings_notify_quiet_text_pc">De %1$s a %2$s solo aparecen avisos de desconexión</string>
     <string name="update_toast_text">Tus servidores y ajustes se conservan.</string>
     <string name="desktop_demo_banner">Servidor de demostración con datos de ejemplo: nada sale de tu PC.</string>
+    <string name="desktop_help_note">La guía muestra la app del móvil: en el PC haz clic en lugar de tocar; las secciones están a la izquierda en vez de abajo.</string>
 </resources>

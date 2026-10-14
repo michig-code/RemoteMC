@@ -103,16 +103,16 @@ compose.desktop {
 // Copies the Android strings (and our own images) into the layout Compose resources expect.
 val syncStrings by tasks.registering(Sync::class) {
     from("../android-app/app/src/main/res") {
-        include("values*/strings.xml", "values*/changelog.xml")
+        include("values*/strings.xml", "values*/changelog.xml", "values*/help.xml")
     }
     from("src/main/composeResources")
     includeEmptyDirs = false
-    inputs.property("placeholderFormat", 4) // bump when composePlaceholders changes
+    inputs.property("placeholderFormat", 5) // bump when composePlaceholders changes
     // The strings are UTF-8; without this, Windows reads and writes them as cp1252.
     filteringCharset = "UTF-8"
     // Compose resources only fill in numbered string placeholders (%1$s). Android's %d, %s,
     // %.1f and %2$.0f become %1$s, %2$s, …; the app formats numbers itself before passing them.
-    filesMatching(listOf("**/strings.xml", "**/changelog.xml")) {
+    filesMatching(listOf("**/strings.xml", "**/changelog.xml", "**/help.xml")) {
         filter { line -> composePlaceholders(line) }
     }
     into(layout.projectDirectory.dir("build/sharedResources"))

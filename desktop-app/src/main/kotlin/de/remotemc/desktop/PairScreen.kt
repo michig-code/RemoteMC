@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,9 +142,11 @@ fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit, repair
                 val c = checked
                 if (c == null) {
                     Text(stringResource(Res.string.pair_intro_text), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
-                        Text("/remotemc pair", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp))
+                    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                        Row(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(Res.string.pair_command_hint), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                            Text("/remotemc pair", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         OutlinedTextField(host, { host = it.trim() }, label = { Text(stringResource(Res.string.pair_address)) }, singleLine = true, modifier = Modifier.weight(1f))
@@ -172,7 +175,7 @@ fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit, repair
                         enabled = !busy && host.isNotBlank() && port.toIntOrNull() != null && (if (useToken) token.isNotBlank() else code.length == 6),
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                     ) {
-                        if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) else Text(stringResource(Res.string.action_continue))
+                        if (busy) BusyLabel(stringResource(Res.string.pair_checking)) else Text(stringResource(Res.string.action_continue))
                     }
                 } else {
                     Text(stringResource(Res.string.pair_confirm_title), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -196,7 +199,7 @@ fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit, repair
                     }
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     Button(onClick = { pair(c) }, enabled = !busy && !c.mismatch && device.isNotBlank(), modifier = Modifier.fillMaxWidth().height(48.dp)) {
-                        if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        if (busy) BusyLabel(stringResource(Res.string.pair_pairing))
                         else Text(stringResource(if (useToken) Res.string.pair_action_token else Res.string.pair_action))
                     }
                 }
@@ -217,5 +220,15 @@ private fun Notice(icon: ImageVector, color: Color, title: String, text: String)
                 Text(text, style = MaterialTheme.typography.bodyMedium, fontFamily = if ('\n' in text) FontFamily.Default else null)
             }
         }
+    }
+}
+
+/** A spinner with what is happening (like the phone's pairing steps). */
+@Composable
+private fun BusyLabel(text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = LocalContentColor.current)
+        Spacer(Modifier.width(10.dp))
+        Text(text)
     }
 }

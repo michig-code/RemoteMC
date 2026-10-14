@@ -163,7 +163,10 @@ fun main() = application {
 
 /** Ctrl+W closes the current server tab, Ctrl+Tab / Ctrl+Shift+Tab switch tabs. */
 private fun tabShortcut(e: androidx.compose.ui.input.key.KeyEvent, tabs: Tabs): Boolean {
-    if (e.type != androidx.compose.ui.input.key.KeyEventType.KeyDown || !e.isCtrlPressed) return false
+    if (e.type != androidx.compose.ui.input.key.KeyEventType.KeyDown) return false
+    // F1 opens the help page, like in most Windows programs.
+    if (e.key == androidx.compose.ui.input.key.Key.F1) { tabs.openSpecial(Tabs.HELP); return true }
+    if (!e.isCtrlPressed) return false
     return when (e.key) {
         androidx.compose.ui.input.key.Key.W -> tabs.active?.let { tabs.close(it); true } ?: false
         androidx.compose.ui.input.key.Key.Tab -> { tabs.next(if (e.isShiftPressed) -1 else 1); true }
@@ -202,7 +205,8 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                         // Each tab keeps its own state (area, scroll position) while others are shown.
                         saveable.SaveableStateProvider(id) {
                             when (id) {
-                                Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) })
+                                Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) }, onHelp = { tabs.openSpecial(Tabs.HELP) })
+                                Tabs.HELP -> HelpPane(onBack = { tabs.close(Tabs.HELP) })
                                 Tabs.PAIR -> PairScreen(model, tabs.pairLink, repair = tabs.pairRepair?.let(model.servers::get), onDone = { newId ->
                                     tabs.close(Tabs.PAIR)
                                     if (newId != null) {

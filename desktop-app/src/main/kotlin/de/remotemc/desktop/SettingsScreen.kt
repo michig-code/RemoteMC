@@ -63,7 +63,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVersion) {
+fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVersion, onHelp: () -> Unit = {}) {
     val settings by model.settings.settings.collectAsState()
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
@@ -152,6 +152,7 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                         var licenses by remember { mutableStateOf(false) }
                         val uri = androidx.compose.ui.platform.LocalUriHandler.current
                         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = onHelp) { Text(stringResource(Res.string.help_title)) }
                             OutlinedButton(onClick = { changelog = true }) { Text(stringResource(Res.string.changelog_title)) }
                             OutlinedButton(onClick = { uri.openUri(PLUGIN_DOWNLOAD_URL) }) { Text(stringResource(Res.string.settings_get_plugin)) }
                             OutlinedButton(onClick = { uri.openUri(SOURCE_URL) }) { Text(stringResource(Res.string.settings_source)) }

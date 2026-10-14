@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CropSquare
@@ -142,6 +143,15 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
                     modifier = place,
                     dragModifier = move,
                 )
+                Tabs.HELP -> Tab(
+                    title = stringResource(Res.string.help_title),
+                    selected = tabs.active == id,
+                    leading = { Icon(Icons.AutoMirrored.Outlined.HelpOutline, null, Modifier.size(16.dp)) },
+                    onClick = { tabs.open(id) },
+                    onClose = { tabs.close(id) },
+                    modifier = place,
+                    dragModifier = move,
+                )
                 Tabs.PAIR -> Tab(
                     title = stringResource(Res.string.servers_add),
                     selected = tabs.active == id,
@@ -182,6 +192,9 @@ fun TitleBar(model: AppModel, tabs: Tabs, controls: WindowControls) {
                 if (open) UpdateDialog(updates, info, onQuit = controls::quit) { open = false }
                 Spacer(Modifier.width(8.dp))
             }
+        }
+        BarButton(Icons.AutoMirrored.Outlined.HelpOutline, stringResource(Res.string.help_title), selected = tabs.active == Tabs.HELP) {
+            tabs.openSpecial(Tabs.HELP)
         }
         BarButton(Icons.Outlined.Settings, stringResource(Res.string.settings_title), selected = tabs.active == Tabs.SETTINGS) {
             tabs.openSpecial(Tabs.SETTINGS)

@@ -46,4 +46,5 @@
     <string name="settings_notify_quiet_text_pc">С %1$s до %2$s показываются только оповещения об отключении</string>
     <string name="update_toast_text">Серверы и настройки сохранятся.</string>
     <string name="desktop_demo_banner">Демо-сервер с примерными данными – ничего не покидает ваш ПК.</string>
+    <string name="desktop_help_note">Справка показывает приложение для телефона: на ПК нажимайте мышью вместо касания; разделы слева, а не внизу.</string>
 </resources>

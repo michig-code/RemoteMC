@@ -40,4 +40,5 @@
     <string name="settings_notify_quiet_text_pc">Dalle %1$s alle %2$s compaiono solo gli avvisi offline</string>
     <string name="update_toast_text">Server e impostazioni restano.</string>
     <string name="desktop_demo_banner">Server demo con dati di esempio – nulla lascia il tuo PC.</string>
+    <string name="desktop_help_note">La guida mostra l’app per telefono: sul PC fai clic invece di toccare; le sezioni sono a sinistra invece che in basso.</string>
 </resources>

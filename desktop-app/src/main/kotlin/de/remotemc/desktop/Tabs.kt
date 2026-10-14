@@ -124,6 +124,7 @@ class Tabs(
     companion object {
         const val SETTINGS = "@settings"
         const val PAIR = "@pair"
+        const val HELP = "@help"
         fun isSpecial(key: String) = key.startsWith("@")
     }
 }
