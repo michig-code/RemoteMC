@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">Neuigkeiten</string>
+    <string name="changelog_intro">Alles, was RemoteMC %1$s kann.</string>
+    <string name="changelog_app">Handy-App</string>
+    <string name="changelog_plugin">Server-Plugin</string>
+    <string name="changelog_windows">Windows-App</string>
+    <string-array name="changelog_app_items">
+        <item>Server in Sekunden hinzufügen: QR-Code scannen oder 6-stelligen Code eingeben – verschlüsselt und mit Sicherheitsprüfung</item>
+        <item>Alles zuerst mit dem eingebauten Demo-Server ausprobieren</item>
+        <item>Live-Übersicht: Spieler, TPS, MSPT, Speicher, Laufzeit und Welten, mit Diagrammen der letzten Stunde, des Tages oder der Woche</item>
+        <item>Übersicht anpassen: Karten verschieben, ihre Größe ändern oder ausblenden</item>
+        <item>Spieler: Gesundheit, Position, Spielzeit, eigene Notizen und Inventar; Nachricht, heilen, Spielmodus, teleportieren, kicken oder bannen – auch mehrere auf einmal</item>
+        <item>Whitelist und Bannliste – mit Rückgängig</item>
+        <item>Farbige Live-Konsole mit Vorschlägen, die auch offline funktionieren, Suche und Filtern</item>
+        <item>Befehlsmenü mit allen Server-Befehlen, Favoriten und Makros</item>
+        <item>Chat: live mitlesen und allen schreiben</item>
+        <item>Welteinstellungen: Uhrzeit, Wetter, Schwierigkeit und Spielregeln</item>
+        <item>Geplante Aufgaben, z. B. ein nächtlicher Neustart mit Vorwarnung</item>
+        <item>Plugin-Liste und Serverdateien: Configs bearbeiten, Logs lesen, Plugins hochladen, gelöschte Dateien wiederherstellen</item>
+        <item>Benachrichtigungen: Server offline, Lag, Spieler kommen, Erwähnungen im Chat – mit Ruhezeiten und Schnellantwort</item>
+        <item>Widget für den Startbildschirm und Kachel in den Schnelleinstellungen</item>
+        <item>Öffnet sofort mit den letzten Daten; offline zeigt sie, wie alt sie sind</item>
+        <item>Mehrere Server mit Ordnern, Anheften und Suche; eingeschränkter Zugriff für Moderatoren und Zuschauer</item>
+        <item>Hilfe &amp; Anleitung mit Suche und Bildern</item>
+        <item>Hell und dunkel, 9 Farben oder eine eigene, 10 Sprachen, Tablet-Ansicht</item>
+        <item>Updates direkt in der App (GitHub-Version)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>Für Paper, Purpur, Folia und Spigot ab Minecraft 1.20.6</item>
+        <item>Pairen mit /remotemc pair: QR-Code als Karte im Spiel oder in der Konsole – die Karte verschwindet nach dem Pairen oder beim Wegwerfen</item>
+        <item>Verschlüsselte Verbindung mit eigenem Zertifikat</item>
+        <item>Rollen Admin, Moderator und Zuschauer; der Zugang jedes Handys lässt sich widerrufen</item>
+        <item>Live-Daten ohne Verzögerung: Konsole, Chat, Spieler und Status</item>
+        <item>Leistungsverlauf über 7 Tage</item>
+        <item>Zugangs-Tokens und Codes tauchen nie in der Konsole auf</item>
+        <item>Protokoll aller Aktionen</item>
+        <item>Geplante Befehle mit Countdown im Chat</item>
+        <item>Meldungen in 10 Sprachen und Update-Prüfung</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Alles vom Handy auch am PC: Übersicht, Spieler, Konsole, Chat, Welten, Plugins, Aufgaben und Dateien</item>
+        <item>Mehrere Server in Tabs, verstellbare geteilte Ansichten</item>
+        <item>Befehlsmenü, Favoriten, Makros und Konsolensuche (Strg+F)</item>
+        <item>Mehrere Spieler mit Strg+Klick auswählen</item>
+        <item>Windows-Benachrichtigungen mit Ruhezeiten; läuft im Infobereich weiter</item>
+        <item>Installer mit eigenem Java; aktualisiert sich selbst mit einem Popup unten rechts</item>
+        <item>Animationen, Farbthemen, hell und dunkel, 10 Sprachen</item>
+    </string-array>
+</resources>

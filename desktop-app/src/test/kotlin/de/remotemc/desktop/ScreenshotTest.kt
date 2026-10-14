@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import de.remotemc.app.ui.ConsoleEntry
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -141,6 +143,20 @@ class ScreenshotTest {
         androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
             PlayersPane(s, initialSelection = setOf("Steve", "Notch"))
         }
+    }
+    @Test fun updateToast() = shot("23_update_toast") {
+        val updates = androidx.compose.runtime.remember {
+            UpdateState(CoroutineScope(Dispatchers.Unconfined)) { false }.apply {
+                preview(UpdateInfo("1.1.0", "", "https://github.com", "https://github.com/x.msi", 1, null))
+            }
+        }
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+            ServerContent(session(), {}, Pane.OVERVIEW)
+            UpdateToast(updates, {}, androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.BottomEnd))
+        }
+    }
+    @Test fun changelog() = shot("24_changelog") {
+        androidx.compose.material3.Surface { ChangelogContent("1.0.0", androidx.compose.ui.Modifier.padding(24.dp)) }
     }
     @Test fun consoleSearch() = shot("19_console_search") {
         androidx.compose.material3.Surface { ConsolePane(session(), initialQuery = "server") }

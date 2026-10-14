@@ -1,5 +1,6 @@
 package de.remotemc.app
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -411,6 +412,39 @@ class ScreenshotTest {
             {}, {}, versionName = "1.0.0",
         )
     }
+    private val sampleRelease = de.remotemc.app.data.Release("1.1.0", "", "https://github.com", "https://github.com/x.apk", 1, null)
+
+    /** A new version pops up at the bottom (GitHub version). */
+    @Test fun updatePopup() = shot("29_update_popup") {
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+            ServerListScreen(servers, {}, {}, { _, _ -> }, {}, {}, {}, probe = { status })
+            de.remotemc.app.ui.UpdatePopup(
+                de.remotemc.app.update.AppUpdates.State.Available(sampleRelease), false, {}, {},
+                androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.BottomCenter),
+            )
+        }
+    }
+    @Test fun updateDownloading() = shot("29b_update_downloading") {
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+            de.remotemc.app.ui.UpdatePopup(
+                de.remotemc.app.update.AppUpdates.State.Downloading(sampleRelease, 0.4f), false, {}, {},
+                androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.BottomCenter),
+            )
+        }
+    }
+    @Test
+    @Config(qualifiers = "w400dp-h2400dp-xxhdpi")
+    fun settingsUpdates() = shot("14d_settings_updates") {
+        SettingsScreen(
+            AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "1.0.0",
+            onHelp = {}, updateState = de.remotemc.app.update.AppUpdates.State.UpToDate, onChangelog = {},
+        )
+    }
+    @Test fun changelog() = shot("30_changelog") { de.remotemc.app.ui.ChangelogScreen({}, version = "1.0.0") }
+    @Test
+    @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")
+    fun changelogGerman() = shot("30b_changelog_de") { de.remotemc.app.ui.ChangelogScreen({}, version = "1.0.0") }
+
     @Test fun settings() = shot("14_settings") { SettingsScreen(AppSettings(deviceName = "Pixel 8"), {}, {}, versionName = "1.0.0") }
 
     @Test

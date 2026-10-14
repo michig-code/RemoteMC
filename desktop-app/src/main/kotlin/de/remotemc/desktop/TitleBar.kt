@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -377,3 +379,61 @@ fun UpdateDialog(updates: UpdateState, info: UpdateInfo, onQuit: () -> Unit, onD
         },
     )
 }
+
+/** Small pop-up in the bottom right corner when a new version is available. */
+@Composable
+fun UpdateToast(updates: UpdateState, onQuit: () -> Unit, modifier: Modifier = Modifier) {
+    val info = updates.available
+    val animate = LocalAnimations.current
+    val uri = LocalUriHandler.current
+    androidx.compose.animation.AnimatedVisibility(
+        visible = info != null && !updates.dismissed,
+        enter = if (animate) androidx.compose.animation.slideInHorizontally { it } + androidx.compose.animation.fadeIn() else androidx.compose.animation.EnterTransition.None,
+        exit = if (animate) androidx.compose.animation.slideOutHorizontally { it } + androidx.compose.animation.fadeOut() else androidx.compose.animation.ExitTransition.None,
+        modifier = modifier,
+    ) {
+        if (info == null) return@AnimatedVisibility
+        val installable = Updater.canInstall && info.msiUrl != null
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shape = MaterialTheme.shapes.large,
+            shadowElevation = 10.dp,
+            modifier = Modifier.padding(16.dp).width(380.dp),
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.SystemUpdate, null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(Res.string.update_title, info.version), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            when {
+                                updates.progress != null -> stringResource(Res.string.update_downloading)
+                                updates.error != null -> stringResource(Res.string.update_failed, updates.error.orEmpty())
+                                installable -> stringResource(Res.string.update_toast_text)
+                                else -> stringResource(Res.string.update_portable_hint)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (updates.error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                val progress = updates.progress
+                if (progress != null) {
+                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
+                } else {
+                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = updates::later) { Text(stringResource(Res.string.update_later)) }
+                        Spacer(Modifier.width(8.dp))
+                        if (installable) {
+                            Button(onClick = { updates.install(onQuit) }) { Text(stringResource(Res.string.update_install)) }
+                        } else {
+                            Button(onClick = { uri.openUri(info.page) }) { Text(stringResource(Res.string.update_page)) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

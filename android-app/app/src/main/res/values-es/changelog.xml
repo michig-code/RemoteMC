@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">Novedades</string>
+    <string name="changelog_intro">Todo lo que puede hacer RemoteMC %1$s.</string>
+    <string name="changelog_app">App del móvil</string>
+    <string name="changelog_plugin">Plugin del servidor</string>
+    <string name="changelog_windows">App de Windows</string>
+    <string-array name="changelog_app_items">
+        <item>Añade servidores en segundos: escanea el código QR o escribe el código de 6 cifras, cifrado y con comprobación de seguridad</item>
+        <item>Pruébalo todo primero con el servidor de demostración integrado</item>
+        <item>Resumen en vivo: jugadores, TPS, MSPT, memoria, tiempo activo y mundos, con gráficos de la última hora, día o semana</item>
+        <item>Personaliza el resumen: mueve tarjetas, cambia su tamaño u ocúltalas</item>
+        <item>Jugadores: salud, posición, tiempo de juego, tus notas e inventario; mensaje, curar, modo de juego, teletransportar, expulsar o banear, también a varios a la vez</item>
+        <item>Lista blanca y lista de baneos, con deshacer</item>
+        <item>Consola en vivo a color con sugerencias que funcionan sin conexión, búsqueda y filtros</item>
+        <item>Menú de comandos con todos los comandos del servidor, favoritos y macros</item>
+        <item>Chat: lee en vivo y escribe a todos</item>
+        <item>Ajustes del mundo: hora, clima, dificultad y reglas</item>
+        <item>Tareas programadas, p. ej. un reinicio nocturno con aviso</item>
+        <item>Lista de plugins y archivos del servidor: edita configuraciones, lee logs, sube plugins, recupera archivos borrados</item>
+        <item>Notificaciones: servidor caído, lag, jugadores que entran, menciones en el chat, con horas de silencio y respuesta rápida</item>
+        <item>Widget para la pantalla de inicio y mosaico de ajustes rápidos</item>
+        <item>Se abre al instante con los últimos datos; sin conexión muestra su antigüedad</item>
+        <item>Varios servidores con carpetas, fijados y búsqueda; acceso limitado para moderadores y espectadores</item>
+        <item>Ayuda y guía con búsqueda e imágenes</item>
+        <item>Claro y oscuro, 9 colores o el tuyo, 10 idiomas, diseño para tablet</item>
+        <item>Actualizaciones dentro de la app (versión de GitHub)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>Para Paper, Purpur, Folia y Spigot desde Minecraft 1.20.6</item>
+        <item>Vinculación con /remotemc pair: código QR como mapa en el juego o en la consola; el mapa desaparece tras vincular o al tirarlo</item>
+        <item>Conexión cifrada con certificado propio</item>
+        <item>Roles administrador, moderador y espectador; el acceso de cada móvil se puede revocar</item>
+        <item>Datos en vivo sin retraso: consola, chat, jugadores y estado</item>
+        <item>Historial de rendimiento de 7 días</item>
+        <item>Los tokens y códigos nunca aparecen en la consola</item>
+        <item>Registro de todas las acciones</item>
+        <item>Comandos programados con cuenta atrás en el chat</item>
+        <item>Mensajes en 10 idiomas y comprobación de actualizaciones</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Todo lo del móvil también en el PC: resumen, jugadores, consola, chat, mundos, plugins, tareas y archivos</item>
+        <item>Varios servidores en pestañas, vistas divididas ajustables</item>
+        <item>Menú de comandos, favoritos, macros y búsqueda en la consola (Ctrl+F)</item>
+        <item>Selecciona varios jugadores con Ctrl+clic</item>
+        <item>Notificaciones de Windows con horas de silencio; sigue en la bandeja</item>
+        <item>Instalador con Java propio; se actualiza solo con un aviso abajo a la derecha</item>
+        <item>Animaciones, temas de color, claro y oscuro, 10 idiomas</item>
+    </string-array>
+</resources>

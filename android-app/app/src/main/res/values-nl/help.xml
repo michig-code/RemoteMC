@@ -109,4 +109,12 @@
     <string name="help_appearance_where">Instellingen › Weergave</string>
     <string name="help_appearance_text">Kies licht of donker, een kleur of de kleuren van je achtergrond, zet animaties en trillen aan of uit en kies de taal van de app.</string>
     <string name="help_appearance_keys">thema, donkere modus, kleur, taal, animatie, trillen</string>
+    <string name="help_updates_title">App bijwerken</string>
+    <string name="help_updates_where">Pop-up onderaan · Instellingen › Updates</string>
+    <string name="help_updates_text">Is er een nieuwe versie, dan verschijnt onderaan een melding: ‘Nu bijwerken’ downloadt hem, controleert hem en opent de installer van Android – je servers en instellingen blijven bewaard. In de instellingen kun je zelf zoeken of het automatisch zoeken uitzetten.</string>
+    <string name="help_updates_keys">update, nieuwe versie, downloaden, installeren, bijwerken</string>
+    <string name="help_changelog_title">Nieuw</string>
+    <string name="help_changelog_where">Instellingen › Over › Nieuw</string>
+    <string name="help_changelog_text">Een lijst van alles wat RemoteMC kan: de telefoon-app, de serverplugin en de Windows-app.</string>
+    <string name="help_changelog_keys">changelog, nieuw, functies, versie</string>
 </resources>

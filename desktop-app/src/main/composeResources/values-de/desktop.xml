@@ -38,4 +38,5 @@
         <item quantity="other">vor %d Tagen</item>
     </plurals>
     <string name="settings_notify_quiet_text_pc">Von %1$s bis %2$s erscheinen nur Offline-Meldungen</string>
+    <string name="update_toast_text">Deine Server und Einstellungen bleiben erhalten.</string>
 </resources>

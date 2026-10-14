@@ -148,7 +148,43 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                         }
                         Text(stringResource(Res.string.settings_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("Data: " + AppDirs.dir.path, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        var changelog by remember { mutableStateOf(false) }
+                        OutlinedButton(onClick = { changelog = true }) { Text(stringResource(Res.string.changelog_title)) }
+                        if (changelog) ChangelogDialog(version) { changelog = false }
                     }
+                }
+            }
+        }
+    }
+}
+
+/** Everything RemoteMC can do, by part (the same list as in the phone app). */
+@Composable
+fun ChangelogDialog(version: String, onDismiss: () -> Unit) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.changelog_title)) },
+        text = { ChangelogContent(version, Modifier.widthIn(min = 480.dp, max = 640.dp).heightIn(max = 520.dp)) },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_close)) } },
+    )
+}
+
+@Composable
+fun ChangelogContent(version: String, modifier: Modifier = Modifier) {
+    Column(modifier.verticalScroll(rememberScrollState())) {
+        Text(stringResource(Res.string.changelog_intro, version), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        listOf(
+            Res.string.changelog_app to Res.array.changelog_app_items,
+            Res.string.changelog_plugin to Res.array.changelog_plugin_items,
+            Res.string.changelog_windows to Res.array.changelog_windows_items,
+        ).forEach { (title, items) ->
+            Spacer(Modifier.size(14.dp))
+            Text(stringResource(title), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            org.jetbrains.compose.resources.stringArrayResource(items).forEach { line ->
+                Row(Modifier.padding(top = 6.dp)) {
+                    Text("✓", color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(10.dp))
+                    Text(line, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

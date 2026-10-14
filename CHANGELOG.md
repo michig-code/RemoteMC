@@ -46,8 +46,10 @@ First public release of **RemoteMC**.
 - Colour themes, light/dark, 10 languages; tokens protected with Windows DPAPI
 - MSI and EXE installers with their own Java runtime, built by CI on Windows
 - Updates itself: looks for new releases on GitHub (at start and every 6 hours, can be turned off),
-  shows an "Update" button in the title bar, downloads the installer, checks its checksum, installs
-  it and restarts; the portable version opens the download page instead
+  shows a small pop-up in the bottom right corner and an "Update" button in the title bar, downloads
+  the installer, checks its checksum, installs it and restarts; the portable version opens the
+  download page instead
+- "What's new" in the settings lists everything RemoteMC can do
 
 ### App
 - Animations can be turned off in the settings (on by default)
@@ -77,3 +79,8 @@ First public release of **RemoteMC**.
 - Teleport a player to the spawn or another player; play time per player
 - Role-aware UI; settings for theme, colour (9 presets or any custom colour), Material You, language and haptics
 - 10 languages, tablet layout, accessibility, targets Android 16 (API 36)
+- Updates right in the app (GitHub version): looks for new releases at start and every 6 hours (can
+  be turned off), a pop-up at the bottom offers "Update now", the APK is checked (size, SHA-256) and
+  handed to Android's installer; the Google Play version updates through the store
+- "What's new" in the settings lists everything RemoteMC can do, in all 10 languages
+- Help & guide with search and pictures; built-in demo server

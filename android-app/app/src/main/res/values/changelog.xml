@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">What\'s new</string>
+    <string name="changelog_intro">Everything RemoteMC %1$s can do.</string>
+    <string name="changelog_app">Phone app</string>
+    <string name="changelog_plugin">Server plugin</string>
+    <string name="changelog_windows">Windows app</string>
+    <string-array name="changelog_app_items">
+        <item>Add servers in seconds: scan the QR code or type the 6-digit code – encrypted, with a security check</item>
+        <item>Try everything first with the built-in demo server</item>
+        <item>Live overview: players, TPS, MSPT, memory, uptime and worlds, with charts of the last hour, day or week</item>
+        <item>Customize the overview: move cards, change their size or hide them</item>
+        <item>Players: health, position, playtime, your own notes and the inventory; message, heal, game mode, teleport, kick or ban – also several at once</item>
+        <item>Whitelist and ban list – with undo</item>
+        <item>Coloured live console with suggestions that also work offline, search and filters</item>
+        <item>Command menu with all server commands, favorites and macros</item>
+        <item>Chat: read along live and write to everyone</item>
+        <item>World settings: time, weather, difficulty and game rules</item>
+        <item>Scheduled tasks, e.g. a nightly restart with a warning</item>
+        <item>Plugin list and server files: edit configs, read logs, upload plugins, deleted files can be restored</item>
+        <item>Notifications: server offline, lag, players joining, chat mentions – with quiet hours and quick reply</item>
+        <item>Home screen widget and quick settings tile</item>
+        <item>Opens instantly with the last data; offline it shows how old it is</item>
+        <item>Several servers with folders, pins and search; limited access for moderators and viewers</item>
+        <item>Help &amp; guide with search and pictures</item>
+        <item>Light and dark, 9 colours or your own, 10 languages, tablet layout</item>
+        <item>Updates right in the app (GitHub version)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>For Paper, Purpur, Folia and Spigot from Minecraft 1.20.6</item>
+        <item>Pairing with /remotemc pair: QR code as an in-game map or in the console – the map disappears after pairing or when thrown away</item>
+        <item>Encrypted connection with its own certificate</item>
+        <item>Roles admin, moderator and viewer; every phone\'s access can be revoked</item>
+        <item>Live data without delay: console, chat, players and status</item>
+        <item>Performance history for 7 days</item>
+        <item>Access tokens and codes never show up in the console</item>
+        <item>Audit log of every action</item>
+        <item>Scheduled commands with a countdown in the chat</item>
+        <item>Messages in 10 languages and an update check</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Everything from the phone on the PC: overview, players, console, chat, worlds, plugins, tasks and files</item>
+        <item>Several servers in tabs, resizable split views</item>
+        <item>Command menu, favorites, macros and console search (Ctrl+F)</item>
+        <item>Select several players with Ctrl+click</item>
+        <item>Windows notifications with quiet hours; keeps running in the tray</item>
+        <item>Installer with its own Java; updates itself with a pop-up in the bottom right corner</item>
+        <item>Animations, colour themes, light and dark, 10 languages</item>
+    </string-array>
+</resources>

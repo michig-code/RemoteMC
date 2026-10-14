@@ -43,7 +43,14 @@ import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
 import de.remotemc.app.ui.ServerViewModel
+import de.remotemc.app.ui.ChangelogScreen
 import de.remotemc.app.ui.HelpScreen
+import de.remotemc.app.update.AppUpdater
+import de.remotemc.app.ui.UpdatePopup
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import de.remotemc.app.ui.SettingsScreen
 import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.pair.PairScreen
@@ -65,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null) handleIntent(intent)
+        app.updates.start()
         setContent {
             val settings by app.settings.settings.collectAsState()
             val dark = when (settings.theme) {
@@ -74,12 +82,25 @@ class MainActivity : AppCompatActivity() {
             }
             RemoteMCTheme(darkTheme = dark, dynamicColor = settings.dynamicColor, accentHue = settings.accentHue) {
                 CompositionLocalProvider(LocalHapticsEnabled provides settings.haptics, LocalAnimations provides settings.animations) {
-                    AppNavigation(
-                        startOnboarding = !settings.onboardingDone || settings.deviceName.isBlank(),
-                        pendingLink = pendingLink,
-                        pendingServer = pendingServer,
-                        onIntentConsumed = { pendingLink = null; pendingServer = null },
-                    )
+                    Box(Modifier.fillMaxSize()) {
+                        AppNavigation(
+                            startOnboarding = !settings.onboardingDone || settings.deviceName.isBlank(),
+                            pendingLink = pendingLink,
+                            pendingServer = pendingServer,
+                            onIntentConsumed = { pendingLink = null; pendingServer = null },
+                        )
+                        // New version of the app (GitHub version): pops up at the bottom on every screen.
+                        val updates = app.updates
+                        val update by updates.state.collectAsState()
+                        val dismissed by updates.dismissed.collectAsState()
+                        UpdatePopup(
+                            update, dismissed,
+                            onLater = updates::later,
+                            onUpdate = { updates.install(::startActivity) },
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            needsPermission = !AppUpdater.mayInstall(this@MainActivity),
+                        )
+                    }
                 }
             }
         }
@@ -109,6 +130,7 @@ private object Routes {
     const val SERVER = "server/{id}"
     const val SETTINGS = "settings"
     const val HELP = "help"
+    const val CHANGELOG = "changelog"
 
     fun pair(repair: String? = null) = if (repair == null) "pair" else "pair?repair=$repair"
     fun server(id: String) = "server/$id"
@@ -261,11 +283,18 @@ private fun AppNavigation(
         }
         composable(Routes.SETTINGS) {
             val settings by context.app.settings.settings.collectAsState()
+            val updateState by context.app.updates.state.collectAsState()
             SettingsScreen(
                 settings, onChange = context.app.settings::update, onBack = { nav.popBackStack() },
                 onShowGuide = { nav.navigate(Routes.GUIDE) },
                 onHelp = { nav.navigate(Routes.HELP) },
+                updateState = if (AppUpdater.enabled) updateState else null,
+                onCheckUpdates = { context.app.updates.check() },
+                onChangelog = { nav.navigate(Routes.CHANGELOG) },
             )
+        }
+        composable(Routes.CHANGELOG) {
+            ChangelogScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.HELP) {
             HelpScreen(onBack = { nav.popBackStack() })

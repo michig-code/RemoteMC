@@ -43,6 +43,7 @@ import androidx.compose.material.icons.outlined.DashboardCustomize
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Person
@@ -53,6 +54,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -170,6 +172,10 @@ val HelpTopics = listOf(
         R.string.help_notifications_text, R.string.help_notifications_keys, R.drawable.help_settings, Spot(0.03f, 0.82f, 0.94f, 0.15f)),
     HelpTopic("widget", HelpSection.APP, Icons.Outlined.Widgets, R.string.help_widget_title, R.string.help_widget_where,
         R.string.help_widget_text, R.string.help_widget_keys),
+    HelpTopic("updates", HelpSection.APP, Icons.Outlined.SystemUpdate, R.string.help_updates_title, R.string.help_updates_where,
+        R.string.help_updates_text, R.string.help_updates_keys, R.drawable.help_update, Spot(0.01f, 0.66f, 0.98f, 0.33f)),
+    HelpTopic("changelog", HelpSection.APP, Icons.Outlined.NewReleases, R.string.help_changelog_title, R.string.help_changelog_where,
+        R.string.help_changelog_text, R.string.help_changelog_keys),
     HelpTopic("appearance", HelpSection.APP, Icons.Outlined.Palette, R.string.help_appearance_title, R.string.help_appearance_where,
         R.string.help_appearance_text, R.string.help_appearance_keys, R.drawable.help_settings, Spot(0.03f, 0.33f, 0.94f, 0.45f)),
 )
@@ -198,7 +204,9 @@ fun HelpScreen(onBack: () -> Unit, initialQuery: String = "", initialOpen: Set<S
             t.id to listOf(t.title, t.where, t.text, t.keys).joinToString(" ") { context.getString(it) }
         }
     }
-    val results = if (query.isBlank()) HelpTopics else HelpTopics.filter { HelpSearch.matches(searchable.getValue(it.id), query) }
+    // The Google Play version updates through the store, so it has no "Update the app" topic.
+    val topics = HelpTopics.filter { it.id != "updates" || de.remotemc.app.update.AppUpdater.enabled }
+    val results = if (query.isBlank()) topics else topics.filter { HelpSearch.matches(searchable.getValue(it.id), query) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

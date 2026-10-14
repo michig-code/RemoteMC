@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">Nieuw</string>
+    <string name="changelog_intro">Alles wat RemoteMC %1$s kan.</string>
+    <string name="changelog_app">Telefoon-app</string>
+    <string name="changelog_plugin">Serverplugin</string>
+    <string name="changelog_windows">Windows-app</string>
+    <string-array name="changelog_app_items">
+        <item>Servers in seconden toevoegen: scan de QR-code of typ de 6-cijferige code, versleuteld en met beveiligingscontrole</item>
+        <item>Probeer eerst alles uit met de ingebouwde demoserver</item>
+        <item>Live overzicht: spelers, TPS, MSPT, geheugen, uptime en werelden, met grafieken van het laatste uur, de dag of de week</item>
+        <item>Overzicht aanpassen: kaarten verplaatsen, hun grootte wijzigen of verbergen</item>
+        <item>Spelers: gezondheid, positie, speeltijd, je eigen notities en de inventaris; bericht, genezen, spelmodus, teleporteren, kicken of bannen, ook meerdere tegelijk</item>
+        <item>Whitelist en banlijst, met ongedaan maken</item>
+        <item>Gekleurde live console met suggesties die ook offline werken, zoeken en filters</item>
+        <item>Commandomenu met alle servercommando’s, favorieten en macro’s</item>
+        <item>Chat: live meelezen en iedereen schrijven</item>
+        <item>Wereldinstellingen: tijd, weer, moeilijkheid en spelregels</item>
+        <item>Geplande taken, bijv. een herstart ’s nachts met waarschuwing</item>
+        <item>Pluginlijst en serverbestanden: configs bewerken, logs lezen, plugins uploaden, verwijderde bestanden terughalen</item>
+        <item>Meldingen: server offline, lag, spelers die komen, vermeldingen in de chat, met stille uren en snel antwoorden</item>
+        <item>Widget voor het startscherm en tegel in de snelle instellingen</item>
+        <item>Opent meteen met de laatste gegevens; offline toont hij hoe oud ze zijn</item>
+        <item>Meerdere servers met mappen, vastzetten en zoeken; beperkte toegang voor moderators en kijkers</item>
+        <item>Hulp en uitleg met zoeken en afbeeldingen</item>
+        <item>Licht en donker, 9 kleuren of je eigen, 10 talen, tabletweergave</item>
+        <item>Updates direct in de app (GitHub-versie)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>Voor Paper, Purpur, Folia en Spigot vanaf Minecraft 1.20.6</item>
+        <item>Koppelen met /remotemc pair: QR-code als kaart in het spel of in de console; de kaart verdwijnt na het koppelen of als je hem weggooit</item>
+        <item>Versleutelde verbinding met een eigen certificaat</item>
+        <item>Rollen admin, moderator en kijker; de toegang van elke telefoon kan worden ingetrokken</item>
+        <item>Live gegevens zonder vertraging: console, chat, spelers en status</item>
+        <item>Prestatiegeschiedenis van 7 dagen</item>
+        <item>Toegangstokens en codes verschijnen nooit in de console</item>
+        <item>Logboek van alle acties</item>
+        <item>Geplande commando’s met aftellen in de chat</item>
+        <item>Meldingen in 10 talen en controle op updates</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Alles van de telefoon ook op de pc: overzicht, spelers, console, chat, werelden, plugins, taken en bestanden</item>
+        <item>Meerdere servers in tabbladen, verstelbare gesplitste weergaven</item>
+        <item>Commandomenu, favorieten, macro’s en console doorzoeken (Ctrl+F)</item>
+        <item>Meerdere spelers kiezen met Ctrl+klik</item>
+        <item>Windows-meldingen met stille uren; blijft actief in het systeemvak</item>
+        <item>Installatieprogramma met eigen Java; werkt zichzelf bij met een pop-up rechtsonder</item>
+        <item>Animaties, kleurthema’s, licht en donker, 10 talen</item>
+    </string-array>
+</resources>

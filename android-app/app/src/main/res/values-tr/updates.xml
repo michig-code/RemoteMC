@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App updates (GitHub version). Texts shared in wording with the Windows app (desktop.xml). -->
+<resources>
+    <string name="update_title">RemoteMC %1$s kullanılabilir</string>
+    <string name="update_later">Sonra</string>
+    <string name="update_downloading">Güncelleme indiriliyor …</string>
+    <string name="update_failed">Güncelleme başarısız: %1$s</string>
+    <string name="settings_updates">Güncellemeler</string>
+    <string name="settings_auto_update">Güncellemeleri otomatik ara</string>
+    <string name="settings_auto_update_text">Başlangıçta ve her 6 saatte bir (GitHub Releases)</string>
+    <string name="update_check_now">Şimdi kontrol et</string>
+    <string name="update_up_to_date">RemoteMC güncel (%1$s).</string>
+    <string name="update_checking">Kontrol ediliyor …</string>
+    <string name="update_now">Şimdi güncelle</string>
+    <string name="update_keeps">Sunucuların ve ayarların korunur.</string>
+    <string name="update_permission">RemoteMC’nin uygulama yüklemesine izin ver, sonra tekrar “Şimdi güncelle”ye dokun.</string>
+    <string name="update_ready">Yükle</string>
+</resources>

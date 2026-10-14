@@ -3,6 +3,7 @@ package de.remotemc.desktop
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import de.remotemc.app.data.Releases
 import de.remotemc.app.net.Http
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
@@ -36,59 +36,22 @@ data class UpdateInfo(
  * checksum, starts the Windows installer and restarts RemoteMC afterwards.
  */
 object Updater {
-    const val RELEASES_API = "https://api.github.com/repos/michig-code/RemoteMC/releases/latest"
-    private val TRUSTED_HOSTS = setOf("github.com", "api.github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com")
+    const val RELEASES_API = Releases.LATEST_API
 
     /** True when RemoteMC was installed with the MSI/EXE (it can replace itself then). */
     val canInstall: Boolean get() = AppDirs.isWindows && System.getProperty("jpackage.app-path") != null
 
     /** "1.2.0" > "1.1.9"; a version with a suffix ("1.2.0-beta") counts as older than without. */
-    fun isNewer(latest: String, current: String): Boolean {
-        fun parts(v: String): Pair<List<Int>, Boolean> {
-            val clean = v.trim().removePrefix("v").removePrefix("V")
-            val main = clean.substringBefore('-').substringBefore('+')
-            return main.split('.').map { it.toIntOrNull() ?: 0 } to clean.contains('-')
-        }
-        val (a, aPre) = parts(latest)
-        val (b, bPre) = parts(current)
-        for (i in 0 until maxOf(a.size, b.size)) {
-            val x = a.getOrElse(i) { 0 }
-            val y = b.getOrElse(i) { 0 }
-            if (x != y) return x > y
-        }
-        return bPre && !aPre
-    }
+    fun isNewer(latest: String, current: String): Boolean = Releases.isNewer(latest, current)
 
     /** Reads GitHub's "latest release" answer; null when it is not newer than [current]. */
-    fun parseRelease(json: String, current: String): UpdateInfo? {
-        val o = JSONObject(json)
-        if (o.optBoolean("draft") || o.optBoolean("prerelease")) return null
-        val version = o.optString("tag_name").removePrefix("v")
-        if (version.isBlank() || !isNewer(version, current)) return null
-        val assets = o.optJSONArray("assets")
-        var msi: JSONObject? = null
-        if (assets != null) {
-            for (i in 0 until assets.length()) {
-                val a = assets.getJSONObject(i)
-                if (a.optString("name").endsWith(".msi", ignoreCase = true)) msi = a
-            }
+    fun parseRelease(json: String, current: String): UpdateInfo? =
+        Releases.parse(json, current, Releases::isWindowsInstaller)?.let {
+            UpdateInfo(it.version, it.notes, it.page, it.fileUrl, it.fileSize, it.sha256)
         }
-        val url = msi?.optString("browser_download_url")?.takeIf { isTrusted(it) }
-        return UpdateInfo(
-            version = version,
-            notes = o.optString("body").trim().take(4000),
-            page = o.optString("html_url").takeIf { isTrusted(it) } ?: "https://github.com/michig-code/RemoteMC/releases/latest",
-            msiUrl = url,
-            msiSize = msi?.optLong("size") ?: 0,
-            sha256 = msi?.optString("digest")?.takeIf { it.startsWith("sha256:") }?.removePrefix("sha256:")?.lowercase(),
-        )
-    }
 
     /** Only downloads from GitHub over HTTPS. */
-    fun isTrusted(url: String): Boolean = runCatching {
-        val uri = java.net.URI(url)
-        uri.scheme == "https" && uri.host in TRUSTED_HOSTS
-    }.getOrDefault(false)
+    fun isTrusted(url: String): Boolean = Releases.isTrusted(url)
 
     suspend fun check(current: String = AppVersion, client: OkHttpClient = Http.base, api: String = RELEASES_API): UpdateInfo? =
         withContext(Dispatchers.IO) {
@@ -176,6 +139,18 @@ class UpdateState(private val scope: CoroutineScope, private val enabled: () -> 
     /** Result of the last manual check, for "RemoteMC is up to date". */
     var upToDate by mutableStateOf(false)
         private set
+    /** "Later" on the pop-up hides it until RemoteMC starts again (the title bar button stays). */
+    var dismissed by mutableStateOf(false)
+        private set
+
+    fun later() {
+        dismissed = true
+    }
+
+    /** Shows [info] as found (screenshot tests). */
+    internal fun preview(info: UpdateInfo) {
+        available = info
+    }
 
     fun start() = scope.launch {
         delay(5_000) // not while the window is still opening

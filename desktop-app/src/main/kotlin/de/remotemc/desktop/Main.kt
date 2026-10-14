@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -167,6 +168,7 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
     LaunchedEffect(servers) { tabs?.prune() }
     val saveable = rememberSaveableStateHolder()
     RemoteMCTheme(settings) {
+        Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             if (tabs != null && controls != null) {
                 TitleBar(model, tabs, controls)
@@ -219,6 +221,11 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                     }
                 }
             }
+        }
+        // New version: small pop-up in the bottom right corner (installer version only replaces itself).
+        model.updates?.let { updates ->
+            UpdateToast(updates, onQuit = { controls?.quit() ?: model.quit() }, modifier = Modifier.align(Alignment.BottomEnd))
+        }
         }
     }
 }

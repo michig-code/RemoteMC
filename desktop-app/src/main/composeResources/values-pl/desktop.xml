@@ -44,4 +44,5 @@
         <item quantity="other">%d dnia temu</item>
     </plurals>
     <string name="settings_notify_quiet_text_pc">Od %1$s do %2$s pojawiają się tylko alerty offline</string>
+    <string name="update_toast_text">Serwery i ustawienia zostaną zachowane.</string>
 </resources>

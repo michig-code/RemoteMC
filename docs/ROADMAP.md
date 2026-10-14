@@ -123,7 +123,7 @@ Die letzten Daten werden mit Zeitstempel angezeigt statt nur einer Fehlermeldung
 - Whitelist-Entfernung
 - Papierkorb für gelöschte Dateien (24 h, im Plugin)
 
-### B9 – App-Updates direkt in der App (APK)
+### B9 – App-Updates direkt in der App (APK) ✅
 Für alle, die die App als APK installieren (nicht über einen Store):
 - Die App prüft beim Start und alle 6 Stunden GitHub Releases auf eine neuere Version. Das ist abschaltbar.
 - Gibt es eine, erscheint ein Hinweis mit den Änderungen und „Jetzt aktualisieren“.

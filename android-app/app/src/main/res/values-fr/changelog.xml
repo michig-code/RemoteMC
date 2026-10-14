@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">Nouveautés</string>
+    <string name="changelog_intro">Tout ce que RemoteMC %1$s sait faire.</string>
+    <string name="changelog_app">App mobile</string>
+    <string name="changelog_plugin">Plugin serveur</string>
+    <string name="changelog_windows">App Windows</string>
+    <string-array name="changelog_app_items">
+        <item>Ajoutez un serveur en quelques secondes : scannez le QR code ou saisissez le code à 6 chiffres, chiffré et avec contrôle de sécurité</item>
+        <item>Essayez tout d’abord avec le serveur de démo intégré</item>
+        <item>Aperçu en direct : joueurs, TPS, MSPT, mémoire, durée de fonctionnement et mondes, avec graphiques sur l’heure, le jour ou la semaine</item>
+        <item>Personnalisez l’aperçu : déplacez les cartes, changez leur taille ou masquez-les</item>
+        <item>Joueurs : santé, position, temps de jeu, vos notes et l’inventaire ; message, soin, mode de jeu, téléportation, expulsion ou bannissement, aussi pour plusieurs à la fois</item>
+        <item>Liste blanche et bannissements, avec annulation</item>
+        <item>Console en direct en couleurs, avec suggestions même hors ligne, recherche et filtres</item>
+        <item>Menu des commandes avec toutes les commandes du serveur, favoris et macros</item>
+        <item>Chat : lisez en direct et écrivez à tous</item>
+        <item>Réglages du monde : heure, météo, difficulté et règles</item>
+        <item>Tâches planifiées, p. ex. un redémarrage la nuit avec avertissement</item>
+        <item>Liste des plugins et fichiers du serveur : modifier les configs, lire les logs, envoyer des plugins, restaurer les fichiers supprimés</item>
+        <item>Notifications : serveur hors ligne, lag, joueurs qui arrivent, mentions dans le chat, avec heures calmes et réponse rapide</item>
+        <item>Widget pour l’écran d’accueil et tuile des réglages rapides</item>
+        <item>S’ouvre instantanément avec les dernières données ; hors ligne, leur âge est indiqué</item>
+        <item>Plusieurs serveurs avec dossiers, épinglage et recherche ; accès limité pour modérateurs et spectateurs</item>
+        <item>Aide et guide avec recherche et images</item>
+        <item>Clair et sombre, 9 couleurs ou la vôtre, 10 langues, affichage tablette</item>
+        <item>Mises à jour directement dans l’app (version GitHub)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>Pour Paper, Purpur, Folia et Spigot dès Minecraft 1.20.6</item>
+        <item>Association avec /remotemc pair : QR code en carte dans le jeu ou dans la console ; la carte disparaît après l’association ou si on la jette</item>
+        <item>Connexion chiffrée avec son propre certificat</item>
+        <item>Rôles admin, modérateur et spectateur ; l’accès de chaque téléphone peut être révoqué</item>
+        <item>Données en direct sans délai : console, chat, joueurs et statut</item>
+        <item>Historique des performances sur 7 jours</item>
+        <item>Les jetons et codes n’apparaissent jamais dans la console</item>
+        <item>Journal de toutes les actions</item>
+        <item>Commandes planifiées avec compte à rebours dans le chat</item>
+        <item>Messages en 10 langues et vérification des mises à jour</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Tout ce que fait le téléphone, aussi sur PC : aperçu, joueurs, console, chat, mondes, plugins, tâches et fichiers</item>
+        <item>Plusieurs serveurs en onglets, vues partagées réglables</item>
+        <item>Menu des commandes, favoris, macros et recherche dans la console (Ctrl+F)</item>
+        <item>Sélectionner plusieurs joueurs avec Ctrl+clic</item>
+        <item>Notifications Windows avec heures calmes ; reste dans la zone de notification</item>
+        <item>Installateur avec son propre Java ; se met à jour seul avec une fenêtre en bas à droite</item>
+        <item>Animations, thèmes de couleur, clair et sombre, 10 langues</item>
+    </string-array>
+</resources>

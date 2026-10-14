@@ -122,6 +122,11 @@ fun SettingsScreen(
     versionName: String = BuildConfig.VERSION_NAME + if (BuildConfig.STORE == "play") " · Google Play" else "",
     onShowGuide: () -> Unit = {},
     onHelp: (() -> Unit)? = null,
+    /** Update check of the GitHub version; null hides the section (Google Play version). */
+    updateState: de.remotemc.app.update.AppUpdates.State? = null,
+    onCheckUpdates: () -> Unit = {},
+    /** Opens the list of what is new; null hides it. */
+    onChangelog: (() -> Unit)? = null,
 ) {
     val uri = LocalUriHandler.current
     val view = LocalView.current
@@ -243,6 +248,38 @@ fun SettingsScreen(
                     }
                 }
 
+                if (updateState != null) {
+                    SectionTitle(stringResource(R.string.settings_updates))
+                    McCard(Modifier.fillMaxWidth()) {
+                        Column {
+                            SwitchRow(stringResource(R.string.settings_auto_update), stringResource(R.string.settings_auto_update_text), settings.autoUpdate) { v ->
+                                onChange { it.copy(autoUpdate = v) }
+                            }
+                            Row(
+                                Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    when (updateState) {
+                                        is de.remotemc.app.update.AppUpdates.State.Checking -> stringResource(R.string.update_checking)
+                                        is de.remotemc.app.update.AppUpdates.State.UpToDate -> stringResource(R.string.update_up_to_date, versionName)
+                                        is de.remotemc.app.update.AppUpdates.State.Available -> stringResource(R.string.update_title, updateState.release.version)
+                                        is de.remotemc.app.update.AppUpdates.State.Failed -> stringResource(R.string.update_failed, updateState.message)
+                                        else -> stringResource(R.string.settings_version, versionName)
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                TextButton(
+                                    onClick = onCheckUpdates,
+                                    enabled = updateState !is de.remotemc.app.update.AppUpdates.State.Checking,
+                                ) { Text(stringResource(R.string.update_check_now)) }
+                            }
+                        }
+                    }
+                }
+
                 SectionTitle(stringResource(R.string.settings_about))
                 McCard(Modifier.fillMaxWidth()) {
                     Column {
@@ -257,6 +294,9 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
+                        }
+                        if (onChangelog != null) {
+                            LinkRow(stringResource(R.string.changelog_title), Icons.AutoMirrored.Outlined.KeyboardArrowRight, onChangelog)
                         }
                         LinkRow(stringResource(R.string.settings_show_guide), Icons.AutoMirrored.Outlined.KeyboardArrowRight, onShowGuide)
                         LinkRow(stringResource(R.string.settings_get_plugin)) { uri.openUri(PLUGIN_DOWNLOAD_URL) }

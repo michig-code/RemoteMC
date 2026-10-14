@@ -109,4 +109,12 @@
     <string name="help_appearance_where">Impostazioni › Aspetto</string>
     <string name="help_appearance_text">Scegli tema chiaro o scuro, un colore o i colori del tuo sfondo, attiva o disattiva animazioni e vibrazione e scegli la lingua dell’app.</string>
     <string name="help_appearance_keys">tema, modalità scura, colore, lingua, animazione, vibrazione</string>
+    <string name="help_updates_title">Aggiornare l’app</string>
+    <string name="help_updates_where">Avviso in basso · Impostazioni › Aggiornamenti</string>
+    <string name="help_updates_text">Quando esce una nuova versione, in basso compare un avviso: «Aggiorna ora» la scarica, la controlla e apre l’installer di Android; server e impostazioni restano. Nelle impostazioni puoi cercare aggiornamenti o disattivare la ricerca automatica.</string>
+    <string name="help_updates_keys">aggiornamento, nuova versione, scaricare, installare</string>
+    <string name="help_changelog_title">Novità</string>
+    <string name="help_changelog_where">Impostazioni › Informazioni › Novità</string>
+    <string name="help_changelog_text">L’elenco di tutto ciò che RemoteMC sa fare: app per telefono, plugin del server e app per Windows.</string>
+    <string name="help_changelog_keys">changelog, novità, funzioni, versione</string>
 </resources>

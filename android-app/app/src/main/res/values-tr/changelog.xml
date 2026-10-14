@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What RemoteMC can do (Settings › What's new). Shared with the Windows app; keep all languages in step. -->
+<resources>
+    <string name="changelog_title">Yenilikler</string>
+    <string name="changelog_intro">RemoteMC %1$s’in yapabildiği her şey.</string>
+    <string name="changelog_app">Telefon uygulaması</string>
+    <string name="changelog_plugin">Sunucu eklentisi</string>
+    <string name="changelog_windows">Windows uygulaması</string>
+    <string-array name="changelog_app_items">
+        <item>Sunucuları saniyeler içinde ekle: QR kodunu tara veya 6 haneli kodu gir – şifreli ve güvenlik kontrollü</item>
+        <item>Her şeyi önce yerleşik demo sunucuyla dene</item>
+        <item>Canlı genel bakış: oyuncular, TPS, MSPT, bellek, çalışma süresi ve dünyalar; son saat, gün veya haftanın grafikleriyle</item>
+        <item>Genel bakışı özelleştir: kartları taşı, boyutlarını değiştir veya gizle</item>
+        <item>Oyuncular: can, konum, oyun süresi, kendi notların ve envanter; mesaj, iyileştirme, oyun modu, ışınlama, atma veya yasaklama – birkaçına birden de</item>
+        <item>Beyaz liste ve yasak listesi – geri alma ile</item>
+        <item>Çevrimdışı da çalışan önerilerle renkli canlı konsol, arama ve filtreler</item>
+        <item>Tüm sunucu komutları, favoriler ve makrolarla komut menüsü</item>
+        <item>Sohbet: canlı oku ve herkese yaz</item>
+        <item>Dünya ayarları: saat, hava, zorluk ve oyun kuralları</item>
+        <item>Zamanlanmış görevler, ör. uyarılı gece yeniden başlatması</item>
+        <item>Eklenti listesi ve sunucu dosyaları: ayarları düzenle, logları oku, eklenti yükle, silinen dosyaları geri getir</item>
+        <item>Bildirimler: sunucu çevrimdışı, lag, giren oyuncular, sohbette bahsetmeler – sessiz saatler ve hızlı yanıtla</item>
+        <item>Ana ekran widget’ı ve hızlı ayarlar kutucuğu</item>
+        <item>Son verilerle anında açılır; çevrimdışıyken ne kadar eski olduklarını gösterir</item>
+        <item>Klasör, sabitleme ve aramayla birden fazla sunucu; moderatörler ve izleyiciler için sınırlı erişim</item>
+        <item>Arama ve resimlerle yardım ve rehber</item>
+        <item>Açık ve koyu, 9 renk veya kendi rengin, 10 dil, tablet görünümü</item>
+        <item>Uygulama içinden güncellemeler (GitHub sürümü)</item>
+    </string-array>
+    <string-array name="changelog_plugin_items">
+        <item>Minecraft 1.20.6’dan itibaren Paper, Purpur, Folia ve Spigot için</item>
+        <item>/remotemc pair ile eşleme: oyunda harita veya konsolda QR kodu – harita eşlemeden sonra veya atılınca kaybolur</item>
+        <item>Kendi sertifikasıyla şifreli bağlantı</item>
+        <item>Admin, moderatör ve izleyici rolleri; her telefonun erişimi iptal edilebilir</item>
+        <item>Gecikmesiz canlı veriler: konsol, sohbet, oyuncular ve durum</item>
+        <item>7 günlük performans geçmişi</item>
+        <item>Erişim anahtarları ve kodlar konsolda asla görünmez</item>
+        <item>Tüm işlemlerin kaydı</item>
+        <item>Sohbette geri sayımlı zamanlanmış komutlar</item>
+        <item>10 dilde mesajlar ve güncelleme kontrolü</item>
+    </string-array>
+    <string-array name="changelog_windows_items">
+        <item>Telefondaki her şey bilgisayarda da: genel bakış, oyuncular, konsol, sohbet, dünyalar, eklentiler, görevler ve dosyalar</item>
+        <item>Sekmelerde birden fazla sunucu, ayarlanabilir bölünmüş görünümler</item>
+        <item>Komut menüsü, favoriler, makrolar ve konsol araması (Ctrl+F)</item>
+        <item>Ctrl+tık ile birkaç oyuncu seç</item>
+        <item>Sessiz saatli Windows bildirimleri; sistem tepsisinde çalışmaya devam eder</item>
+        <item>Kendi Java’sıyla yükleyici; sağ altta bir pencereyle kendini günceller</item>
+        <item>Animasyonlar, renk temaları, açık ve koyu, 10 dil</item>
+    </string-array>
+</resources>

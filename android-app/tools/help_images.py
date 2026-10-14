@@ -34,6 +34,7 @@ PICTURES = {
     "help_chat": ("07_chat.png", None),
     "help_files": ("24_files.png", (0, 0, 1, 0.6)),
     "help_settings": ("14_settings.png", None),
+    "help_update": ("29_update_popup.png", (0, 0.45, 1, 1)),
 }
 
 

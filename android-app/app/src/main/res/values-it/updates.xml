@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App updates (GitHub version). Texts shared in wording with the Windows app (desktop.xml). -->
+<resources>
+    <string name="update_title">RemoteMC %1$s è disponibile</string>
+    <string name="update_later">Più tardi</string>
+    <string name="update_downloading">Download dell’aggiornamento …</string>
+    <string name="update_failed">Aggiornamento non riuscito: %1$s</string>
+    <string name="settings_updates">Aggiornamenti</string>
+    <string name="settings_auto_update">Cerca aggiornamenti automaticamente</string>
+    <string name="settings_auto_update_text">All’avvio e ogni 6 ore (GitHub Releases)</string>
+    <string name="update_check_now">Controlla ora</string>
+    <string name="update_up_to_date">RemoteMC è aggiornato (%1$s).</string>
+    <string name="update_checking">Controllo …</string>
+    <string name="update_now">Aggiorna ora</string>
+    <string name="update_keeps">Server e impostazioni restano.</string>
+    <string name="update_permission">Consenti a RemoteMC di installare app, poi tocca di nuovo «Aggiorna ora».</string>
+    <string name="update_ready">Installa</string>
+</resources>

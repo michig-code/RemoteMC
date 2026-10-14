@@ -9,6 +9,7 @@ import de.remotemc.app.data.ServerRepository
 import de.remotemc.app.data.SettingsStore
 import de.remotemc.app.data.ShortcutStore
 import de.remotemc.app.data.SnapshotStore
+import de.remotemc.app.update.AppUpdates
 import java.io.File
 
 class RemoteMCApp : Application() {
@@ -27,6 +28,9 @@ class RemoteMCApp : Application() {
     /** Last shown data per server, for an instant start (see [de.remotemc.app.data.ServerSnapshot]). */
     lateinit var snapshots: SnapshotStore
         private set
+    /** New versions of the GitHub version of the app (does nothing in the Google Play version). */
+    lateinit var updates: AppUpdates
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -36,6 +40,7 @@ class RemoteMCApp : Application() {
         notes = PlayerNotes(getSharedPreferences("notes", MODE_PRIVATE))
         shortcuts = ShortcutStore(getSharedPreferences("shortcuts", MODE_PRIVATE))
         snapshots = SnapshotStore(File(noBackupFilesDir, "snapshots"), KeystoreBox("remotemc.snapshots"))
+        updates = AppUpdates(this) { settings.settings.value.autoUpdate }
     }
 }
 
