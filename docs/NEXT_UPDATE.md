@@ -9,7 +9,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 |---|---|---|---|---|
 | 1 | Serverliste als Raster | Handy + Windows | Wie auf dem Android-Startbildschirm: Karte gedrückt halten → blauer Rahmen mit Griffen; Griff ziehen ändert die Größe **frei in Rasterzellen** (Breite und Höhe einzeln, z. B. 1×1, 2×1, 3×2 … bis zur vollen Breite), die Karte rastet ein. Der Inhalt passt sich der Größe an (klein: Name + Status; größer: Spieler, TPS, Spielerköpfe, Verlauf). Karten im Raster verschieben; Ordner und Anpinnen bleiben. | ☐ |
 | 2 | Gleiche Größen-Griffe in der Übersicht | Handy + Windows | Die Karten der Server-Übersicht bekommen beim Anpassen denselben blauen Rahmen mit Griffen statt des ⇄-Knopfs. | ☐ |
-| 3 | Alles im Bearbeiten-Modus verschiebbar | Handy + Windows | Im Bearbeiten-Modus lassen sich alle einzelnen Elemente frei bewegen (genauer Umfang siehe offene Frage). | ☐ |
+| 3 | Alles im Bearbeiten-Modus verschiebbar | Handy + Windows | Im Bearbeiten-Modus lassen sich **beides** frei anordnen: die Teile in einer Karte (Name, Status, Spieler, TPS …) und die Bausteine des Bildschirms (Kopfzeile, Suche, Karten, Knöpfe). „Zurücksetzen“ stellt alles wieder her. | ☐ |
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Ordner durch Ineinanderziehen und Ordner anpinnen (Handy +
 PC), Server-Ordner am PC, Logo ohne Kasten, Tabs verschieben und Server andocken (PC), die übrigen
@@ -18,8 +18,6 @@ u. a.), Installer in RemoteMC-Farben.
 
 ## Offene Fragen
 
-- Punkt 3: Welche Elemente genau – (a) die Teile **in** einer Karte (Name, Status, Spieler, TPS …) innerhalb der Karte, (b) alle Bausteine eines Bildschirms (Kopfzeile, Suche, Karten, Knöpfe) oder (c) beides?
-- Raster: Welche Größen sollen Karten haben können (z. B. 1×1, 2×1, 2×2) und was zeigt eine große Karte zusätzlich?
 
 ## Hinweise
 
