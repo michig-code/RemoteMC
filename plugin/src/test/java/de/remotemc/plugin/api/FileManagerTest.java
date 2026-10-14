@@ -52,6 +52,26 @@ class FileManagerTest {
     }
 
     @Test
+    void ownJarCannotBeDeletedOrReplaced() throws Exception {
+        Path jar = server.resolve("plugins/RemoteMC-1.0.0.jar");
+        Files.writeString(jar, "jar");
+        files.lock(jar);
+        String plugins = files.list("plugins").toString();
+        assertTrue(plugins.contains("\"name\":\"RemoteMC-1.0.0.jar\""), plugins);
+        assertTrue(plugins.matches(".*\"RemoteMC-1.0.0.jar\"[^}]*\"locked\":true.*"), plugins);
+        assertFalse(plugins.matches(".*\"Essentials\"[^}]*\"locked\".*"), plugins);
+        assertTrue(files.list("").toString().matches(".*\"plugins\"[^}]*\"locked\":true.*"));
+        assertEquals(403, status(() -> files.delete("plugins/RemoteMC-1.0.0.jar")));
+        assertEquals(403, status(() -> files.delete("plugins")));
+        assertEquals(403, status(() -> files.write("plugins/RemoteMC-1.0.0.jar", "x")));
+        assertEquals(403, status(() -> files.upload("plugins/RemoteMC-1.0.0.jar", new java.io.ByteArrayInputStream(new byte[] {1}), 1)));
+        assertEquals("jar", Files.readString(jar));
+        // Other plugins can still be removed.
+        files.delete("plugins/Essentials");
+        assertFalse(Files.exists(server.resolve("plugins/Essentials")));
+    }
+
+    @Test
     void staysInsideTheServerFolder() throws Exception {
         assertEquals(403, status(() -> files.read("../outside.txt")));
         assertEquals(403, status(() -> files.read("plugins/../../outside.txt")));

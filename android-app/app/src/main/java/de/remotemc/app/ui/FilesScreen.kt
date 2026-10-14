@@ -258,8 +258,12 @@ internal fun FolderView(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            IconButton(onClick = { deleting = entry }, enabled = busy == null) {
-                                Icon(Icons.Outlined.Delete, stringResource(R.string.files_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            if (entry.locked) {
+                                Spacer(Modifier.size(48.dp)) // RemoteMC itself cannot be deleted
+                            } else {
+                                IconButton(onClick = { deleting = entry }, enabled = busy == null) {
+                                    Icon(Icons.Outlined.Delete, stringResource(R.string.files_delete), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
                         }
                     }

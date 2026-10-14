@@ -20,6 +20,16 @@ class DemoServerTest {
         assertTrue(status.onlinePlayers > 0)
         assertEquals(status.onlinePlayers, api.players().size)
     }
+
+    @Test
+    fun ownJarIsLocked() = runBlocking {
+        val jar = api.files("plugins").entries.single { it.name.startsWith("RemoteMC") && it.name.endsWith(".jar") }
+        assertTrue(jar.locked)
+        assertTrue(api.files("").entries.single { it.name == "plugins" }.locked)
+        val error = runCatching { api.deleteFile(jar.path) }.exceptionOrNull()
+        assertEquals(403, (error as de.remotemc.app.net.ApiError.Http).status)
+        assertTrue(api.files("plugins").entries.any { it.name == jar.name })
+    }
 }
 
 class DemoStreamTest {

@@ -42,6 +42,7 @@ object DemoServer {
     }
 
     private val state = State()
+    private const val OWN_JAR = "plugins/RemoteMC-1.0.0.jar"
 
     private class Fail(val code: Int, val error: String, message: String) : Exception(message)
 
@@ -84,7 +85,7 @@ object DemoServer {
             files["eula.txt"] = "eula=true\n"
             files["whitelist.json"] = ""
             files["plugins"] = null
-            files["plugins/RemoteMC-1.0.0.jar"] = ""
+            files[OWN_JAR] = ""
             files["plugins/RemoteMC"] = null
             files["plugins/RemoteMC/config.yml"] = "port: 8765\nlanguage: en\nupdate-check: true\n"
             files["logs"] = null
@@ -363,11 +364,12 @@ object DemoServer {
         private fun fileAction(action: String, body: JSONObject, query: String, request: Request): JSONObject {
             val p = body.optString("path", query).trim('/')
             return when (action) {
-                "content" -> { files[p] = body.optString("content"); entry(p, files[p]) }
-                "upload" -> { files[p] = ""; entry(p, "x".repeat((request.body?.contentLength() ?: 0).toInt().coerceIn(0, 1_000_000))) }
+                "content" -> { requireUnlocked(p); files[p] = body.optString("content"); entry(p, files[p]) }
+                "upload" -> { requireUnlocked(p); files[p] = ""; entry(p, "x".repeat((request.body?.contentLength() ?: 0).toInt().coerceIn(0, 1_000_000))) }
                 "mkdir" -> { files[p] = null; entry(p, null) }
                 "delete" -> {
                     if (p !in files) throw Fail(404, "not_found", "No such file")
+                    requireUnlocked(p)
                     val id = "t${nextId++}"
                     trash[id] = p to files.remove(p)
                     files.keys.filter { it.startsWith("$p/") }.forEach { files.remove(it) }
@@ -386,6 +388,14 @@ object DemoServer {
 
         private fun entry(path: String, content: String?) = JSONObject().put("path", path).put("name", path.substringAfterLast('/'))
             .put("dir", content == null).put("size", if (path.endsWith(".jar")) 225_707 else content?.length ?: 0).put("modified", start)
+            .apply { if (isLocked(path)) put("locked", true) }
+
+        /** Like the plugin: RemoteMC's own JAR (and the folder it is in) cannot be deleted or replaced. */
+        private fun isLocked(path: String) = OWN_JAR == path || OWN_JAR.startsWith("$path/")
+
+        private fun requireUnlocked(path: String) {
+            if (isLocked(path)) throw Fail(403, "forbidden", "RemoteMC itself cannot be deleted or replaced from the app")
+        }
 
         private fun logText() = console.joinToString("\n") { "[${it.getString("level")}] ${it.getString("message")}" }
 

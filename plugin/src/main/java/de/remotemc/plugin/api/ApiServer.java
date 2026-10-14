@@ -82,6 +82,15 @@ public final class ApiServer {
         files = new FileManager(dataFolder.getParentFile().getParentFile().toPath(), dataFolder.toPath());
         // Deleted files stay restorable for a day (in RemoteMC's own, hidden folder).
         files.useTrash(dataFolder.toPath().resolve("trash"));
+        // RemoteMC's own JAR can be seen but not deleted: that would cut off the app for good.
+        String ownJar = pluginFile(plugin, files);
+        if (ownJar != null) {
+            try {
+                files.lock(files.resolve(ownJar));
+            } catch (ApiException e) {
+                // not inside the server folder: nothing the app could delete
+            }
+        }
         String host = plugin.getConfig().getString("api.host", "0.0.0.0");
         int port = plugin.getConfig().getInt("api.port", 8765);
         InetSocketAddress address = new InetSocketAddress(host, port);

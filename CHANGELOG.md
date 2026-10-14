@@ -24,7 +24,8 @@ First public release of **RemoteMC**.
   (`schedules.json`, `/api/v1/schedules`, admin; blocked commands stay blocked)
 - Server folder for admins: list, read and save text files, upload (e.g. plugin JARs), delete and
   create folders (`/api/v1/files…`); stays inside the server folder, never reaches RemoteMC's own
-  files, every change in the audit log; `security.allow-files: false` turns it off
+  files, every change in the audit log; `security.allow-files: false` turns it off;
+  RemoteMC’s own JAR is shown but cannot be deleted or replaced from the app
 - Teleport players to the spawn or to another player (also on Folia); play time in the player list;
   world spawn in the world details
 - Supports Paper, Purpur, Folia and Spigot from 1.20.6 up to 26.x

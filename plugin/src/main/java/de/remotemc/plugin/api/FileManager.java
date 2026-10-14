@@ -39,6 +39,8 @@ public final class FileManager {
 
     private final Path root;
     private final List<Path> hidden = new ArrayList<>();
+    /** Files that are shown but can never be deleted or replaced (RemoteMC's own JAR). */
+    private final List<Path> locked = new ArrayList<>();
     /** Deleted files wait here for [TRASH_KEEP_MILLIS] (inside a hidden folder); null = delete at once. */
     private Path trash;
     public static final long TRASH_KEEP_MILLIS = 24L * 60 * 60 * 1000;
@@ -50,6 +52,34 @@ public final class FileManager {
         for (Path h : hidden) {
             Path abs = h.isAbsolute() ? h : this.root.resolve(h);
             this.hidden.add(Files.exists(abs) ? abs.toRealPath() : abs.normalize());
+        }
+    }
+
+    /** [file] stays visible but cannot be deleted or replaced, nor can the folders around it. */
+    public void lock(Path file) throws IOException {
+        locked.add(file.toRealPath());
+    }
+
+    /** True for a locked file and for folders that contain one (or RemoteMC's hidden folder). */
+    private boolean isLocked(Path p) {
+        for (Path l : locked) {
+            if (l.startsWith(p)) {
+                return true;
+            }
+        }
+        for (Path h : hidden) {
+            if (h.startsWith(p)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void requireUnlocked(Path p) throws ApiException {
+        for (Path l : locked) {
+            if (l.startsWith(p)) {
+                throw ApiException.forbidden("RemoteMC itself cannot be deleted or replaced from the app");
+            }
         }
     }
 
@@ -133,6 +163,9 @@ public final class FileManager {
                 o.addProperty("dir", a.isDirectory());
                 o.addProperty("size", a.isDirectory() ? 0 : a.size());
                 o.addProperty("modified", a.lastModifiedTime().toMillis());
+                if (isLocked(child.normalize())) {
+                    o.addProperty("locked", true); // the apps offer no delete button
+                }
                 entries.add(o);
             }
         }
@@ -181,6 +214,7 @@ public final class FileManager {
         if (file.equals(root) || Files.isDirectory(file)) {
             throw ApiException.badRequest("bad_path", "Not a file");
         }
+        requireUnlocked(file);
         if (!Files.isDirectory(file.getParent())) {
             throw ApiException.notFound("file_not_found", "The folder does not exist");
         }
@@ -204,6 +238,7 @@ public final class FileManager {
         if (file.equals(root) || Files.isDirectory(file) || file.getFileName().toString().isBlank()) {
             throw ApiException.badRequest("bad_path", "Not a file");
         }
+        requireUnlocked(file);
         if (!Files.isDirectory(file.getParent())) {
             throw ApiException.notFound("file_not_found", "The folder does not exist");
         }
@@ -243,6 +278,7 @@ public final class FileManager {
         if (!Files.exists(p, LinkOption.NOFOLLOW_LINKS)) {
             throw ApiException.notFound("file_not_found", "No such file: " + relative);
         }
+        requireUnlocked(p);
         for (Path h : hidden) {
             if (h.startsWith(p)) {
                 throw ApiException.forbidden("This folder contains RemoteMC's own files");

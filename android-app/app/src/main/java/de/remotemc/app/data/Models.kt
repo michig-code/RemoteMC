@@ -347,12 +347,20 @@ val WorldDetails.daylightCycle: Boolean
 fun WorldDetails.timeAfter(elapsedMs: Long): Long = if (daylightCycle) time + elapsedMs.coerceAtLeast(0) / 50 else time
 
 /** A file or folder in the server folder; [path] is relative to it with "/" separators. */
-data class FileEntry(val path: String, val name: String, val dir: Boolean, val size: Long, val modified: Long) {
+data class FileEntry(
+    val path: String,
+    val name: String,
+    val dir: Boolean,
+    val size: Long,
+    val modified: Long,
+    /** RemoteMC's own JAR and the folders around it: the plugin refuses to delete them. */
+    val locked: Boolean = false,
+) {
     companion object {
         fun fromJson(o: JSONObject, parent: String? = null): FileEntry {
             val name = o.optString("name")
             val path = parent?.let { if (it.isEmpty()) name else "$it/$name" } ?: o.optString("path")
-            return FileEntry(path, name, o.optBoolean("dir"), o.optLong("size"), o.optLong("modified"))
+            return FileEntry(path, name, o.optBoolean("dir"), o.optLong("size"), o.optLong("modified"), o.optBoolean("locked"))
         }
     }
 }

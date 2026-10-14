@@ -201,9 +201,13 @@ fun FilesPane(session: ServerSession, initialPath: String = "", initialFile: Str
                                     (if (entry.dir) "" else formatSize(entry.size) + "  ·  ") + dates.format(Date(entry.modified)),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                IconButton(onClick = { deleting = entry }, enabled = busy == null) {
-                                    Icon(Icons.Outlined.Delete, stringResource(Res.string.files_delete), Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                if (entry.locked) {
+                                    Spacer(Modifier.size(48.dp)) // RemoteMC itself cannot be deleted
+                                } else {
+                                    IconButton(onClick = { deleting = entry }, enabled = busy == null) {
+                                        Icon(Icons.Outlined.Delete, stringResource(Res.string.files_delete), Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
                                 }
                             }
                         }
