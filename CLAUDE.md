@@ -54,5 +54,7 @@ cd desktop-app && ./gradlew test                               # Windows-App (l�
 - Kein Upload zu Modrinth, keine GitHub-Releases und keine Pull Requests ohne ausdrücklichen Auftrag.
 - **Der erste Release kommt noch nicht.** Keine Versions-Tags (`v*`) pushen – ein solches Tag
   startet `release.yml` und veröffentlicht Plugin und Apps. Erst auf ausdrückliche Anweisung.
+- **Bis zum ersten Release bleibt alles Version 1.0.0:** keine Versionserhöhung (App, Plugin,
+  Windows); neue Funktionen kommen im `CHANGELOG.md` und im Changelog der Apps unter `1.0.0`.
 - Die Handy-App wird dem Besitzer als `RemoteMC-App-1.0.0.apk` geschickt (mit dem Plugin-JAR,
   wenn sich das Plugin geändert hat).
