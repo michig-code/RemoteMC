@@ -1,12 +1,53 @@
 name: Build
 
+# Saves build minutes (private repos have a monthly limit):
+# - only the parts whose files changed are built and tested,
+# - a newer push cancels the build still running for the same branch,
+# - the Windows installers are built only on request ("Run workflow" with "windows") and for
+#   releases (release.yml); the Windows app's tests run on Linux, which costs half as much.
 on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      windows:
+        description: Also build the Windows installers (MSI/EXE)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      plugin: ${{ steps.filter.outputs.plugin }}
+      android: ${{ steps.filter.outputs.android }}
+      desktop: ${{ steps.filter.outputs.desktop }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            plugin:
+              - 'plugin/**'
+              - '.github/workflows/build.yml'
+            android:
+              - 'android-app/**'
+              - '.github/workflows/build.yml'
+            desktop:
+              - 'desktop-app/**'
+              # The Windows app shares network code, models and texts with the phone app.
+              - 'android-app/app/src/main/java/**'
+              - 'android-app/app/src/main/res/values*/strings.xml'
+              - '.github/workflows/build.yml'
+
   plugin:
+    needs: changes
+    if: needs.changes.outputs.plugin == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +91,8 @@ jobs:
         run: tail -n 200 "$RUNNER_TEMP/paper/server.log" || true
 
   android:
+    needs: changes
+    if: needs.changes.outputs.android == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,8 +124,33 @@ jobs:
           name: screenshot-diffs
           path: android-app/app/build/outputs/roborazzi
 
+  desktop:
+    # Windows app: tests incl. screenshots of every screen (Compose Desktop runs on Linux too).
+    needs: changes
+    if: needs.changes.outputs.desktop == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: jetbrains
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Tests
+        run: ./gradlew test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-screenshots
+          path: desktop-app/build/screenshots
+
   desktop-windows:
-    # Windows app: tests, then MSI and EXE installers with their own Java runtime (jpackage needs Windows).
+    # MSI and EXE installers with their own Java runtime (jpackage needs Windows) – only on request.
+    needs: desktop
+    if: github.event_name == 'workflow_dispatch' && inputs.windows
     runs-on: windows-latest
     defaults:
       run:
@@ -97,8 +165,6 @@ jobs:
           distribution: jetbrains
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - name: Tests (incl. screenshots of every screen)
-        run: ./gradlew test
       - name: Installers and portable JAR
         run: ./gradlew packageMsi packageExe packageUberJarForCurrentOS
       - uses: actions/upload-artifact@v4
@@ -109,8 +175,3 @@ jobs:
             desktop-app/build/compose/binaries/main/exe/*.exe
             desktop-app/build/compose/jars/*.jar
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: desktop-screenshots
-          path: desktop-app/build/screenshots

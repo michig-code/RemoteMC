@@ -3,14 +3,14 @@ updates:
   - package-ecosystem: gradle
     directory: /android-app
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       androidx:
         patterns: ["androidx.*"]
   - package-ecosystem: maven
     directory: /plugin
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: github-actions
     directory: /
     schedule:
