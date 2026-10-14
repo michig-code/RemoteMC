@@ -342,6 +342,16 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         clickable.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(messages.get("pair-link-hover"))));
         linkLine.addExtra(clickable);
         sender.spigot().sendMessage(linkLine);
+        if (getConfig().getBoolean("web", true)) {
+            // The same code works in the browser (web app of the API server).
+            String web = (tls != null ? "https://" : "http://") + hostForUri(address) + ":" + port + "/#code=" + code.code();
+            TextComponent webLine = new TextComponent(messages.get("pair-web"));
+            TextComponent open = new TextComponent(web);
+            open.setColor(net.md_5.bungee.api.ChatColor.AQUA);
+            open.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, web));
+            webLine.addExtra(open);
+            sender.spigot().sendMessage(webLine);
+        }
     }
 
     private void info(CommandSender sender) {

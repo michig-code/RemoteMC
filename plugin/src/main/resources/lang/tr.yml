@@ -16,6 +16,7 @@ pair-manual: "&7Veya uygulamaya gir: adres &f{address}&7, port &f{port}&7, kod &
 pair-verify: "&7Güvenlik kontrolü: uygulama &f{short} &7göstermeli"
 pair-link: "&7Bağlantı: "
 pair-link-hover: "Kopyalamak için tıkla"
+pair-web: "&7Tarayıcı / iPhone: "
 pair-map-name: "RemoteMC eşleme – {code}"
 pair-success: "&a{device} eşlendi, rol: {role}."
 role-invalid: "&cBilinmeyen rol. admin, moderator veya viewer kullan."

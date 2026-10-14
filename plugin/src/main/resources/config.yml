@@ -20,6 +20,10 @@ api:
   # Only disable this if a reverse proxy in front of RemoteMC handles HTTPS.
   tls: true
 
+# Small web app at https://<address>:<port>/ for browsers and iPhones (no app needed): pair it
+# with the code from /remotemc pair. Browsers warn about the own certificate the first time.
+web: true
+
 security:
   # Invalid tokens / pairing codes before an IP address is locked out ...
   max-failed-attempts: 5

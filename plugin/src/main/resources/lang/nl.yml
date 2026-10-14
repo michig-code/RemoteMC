@@ -16,6 +16,7 @@ pair-manual: "&7Of voer in de app in: adres &f{address}&7, poort &f{port}&7, cod
 pair-verify: "&7Veiligheidscontrole: de app moet &f{short} &7tonen"
 pair-link: "&7Link: "
 pair-link-hover: "Klik om te kopiëren"
+pair-web: "&7Browser / iPhone: "
 pair-map-name: "RemoteMC-koppeling – {code}"
 pair-success: "&a{device} gekoppeld als {role}."
 role-invalid: "&cOnbekende rol. Gebruik admin, moderator of viewer."

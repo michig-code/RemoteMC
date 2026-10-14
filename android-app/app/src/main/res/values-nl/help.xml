@@ -19,7 +19,7 @@
     <string name="files_row_text">Configs bewerken, logs lezen, bestanden uploaden</string>
     <string name="help_add_server_title">Server toevoegen</string>
     <string name="help_add_server_where">Serverlijst › Server toevoegen</string>
-    <string name="help_add_server_text">Installeer de RemoteMC-plugin op je Minecraft-server en typ /remotemc pair in het spel of in de serverconsole. Tik daarna in de app op ‘Server toevoegen’ en scan de QR-code – of typ het adres en de 6-cijferige code. De kaart van /remotemc pair verdwijnt zodra een telefoon ermee gekoppeld is of als je hem weggooit.</string>
+    <string name="help_add_server_text">Installeer de RemoteMC-plugin op je Minecraft-server en typ /remotemc pair in het spel of in de serverconsole. Tik daarna in de app op ‘Server toevoegen’ en scan de QR-code – of typ het adres en de 6-cijferige code. De kaart van /remotemc pair verdwijnt zodra een telefoon ermee gekoppeld is of als je hem weggooit. Zonder app (bijv. op een iPhone): open de link ‘Browser / iPhone’ uit /remotemc pair – de server toont een kleine webversie met overzicht, spelers, console en chat. De eerste keer waarschuwt de browser voor het eigen certificaat van de server.</string>
     <string name="help_add_server_keys">verbinden, koppelen, QR, code, nieuw, plugin, installeren, link</string>
     <string name="help_demo_title">Demoserver proberen</string>
     <string name="help_demo_where">Serverlijst (leeg) › Probeer de demoserver</string>

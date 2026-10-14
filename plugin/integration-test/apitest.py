@@ -63,6 +63,15 @@ served = base64.urlsafe_b64encode(hashlib.sha256(der).digest()).decode().rstrip(
 check("served certificate matches QR fingerprint", served == fp, served)
 check("TLS 1.2+ negotiated", tls_version in ("TLSv1.2", "TLSv1.3"), tls_version)
 
+# 2b. web app for browsers: its page with a strict policy, nothing else from the JAR or disk
+c = conn(); c.request("GET", "/"); r = c.getresponse(); page = r.read().decode()
+check("web app page", r.status == 200 and "app.js" in page and "default-src 'self'" in (r.getheader("Content-Security-Policy") or ""))
+c = conn(); c.request("GET", "/app.js"); r = c.getresponse(); r.read()
+check("web app script", r.status == 200 and r.getheader("Content-Type", "").startswith("text/javascript"))
+c = conn(); c.request("GET", "/config.yml"); r = c.getresponse(); r.read()
+check("web app serves no other files", r.status == 404)
+check("pair command prints browser link", console("remotemc pair", r"(https?://\S+/#code=\d{6})"))
+
 # 3. ping + pairing
 st, d = req("GET", "/api/v1/ping")
 check("ping without auth", st == 200 and d.get("apiVersion") == 1, d)

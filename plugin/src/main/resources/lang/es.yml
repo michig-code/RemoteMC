@@ -16,6 +16,7 @@ pair-manual: "&7O introduce en la app: dirección &f{address}&7, puerto &f{port}
 pair-verify: "&7Control de seguridad: la app debe mostrar &f{short}"
 pair-link: "&7Enlace: "
 pair-link-hover: "Haz clic para copiar"
+pair-web: "&7Navegador / iPhone: "
 pair-map-name: "Vinculación RemoteMC – {code}"
 pair-success: "&a{device} vinculado como {role}."
 role-invalid: "&cRol desconocido. Usa admin, moderator o viewer."

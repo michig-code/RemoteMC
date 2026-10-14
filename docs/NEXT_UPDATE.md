@@ -9,7 +9,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 |---|---|---|---|---|
 | | | | | |
 
-Zuletzt umgesetzt (siehe `CHANGELOG.md`): iPhone-Testversion (`ios-app/`), Serverliste als Raster mit Größen-Anfassern (Handy +
+Zuletzt umgesetzt (siehe `CHANGELOG.md`): Web-Oberfläche im Plugin (Browser/iPhone), iPhone-Testversion (`ios-app/`), Serverliste als Raster mit Größen-Anfassern (Handy +
 PC), Anfasser in der Übersicht, Karteninhalt und Bildschirm-Bausteine frei anordnen.
 
 ## Offene Fragen

@@ -16,6 +16,7 @@ pair-manual: "&7Oder in der App eingeben: Adresse &f{address}&7, Port &f{port}&7
 pair-verify: "&7Sicherheitsprüfung: Die App muss &f{short} &7anzeigen"
 pair-link: "&7Link: "
 pair-link-hover: "Klicken zum Kopieren"
+pair-web: "&7Browser / iPhone: "
 pair-map-name: "RemoteMC-Kopplung – {code}"
 pair-success: "&a{device} als {role} gekoppelt."
 role-invalid: "&cUnbekannte Rolle. Erlaubt: admin, moderator, viewer."

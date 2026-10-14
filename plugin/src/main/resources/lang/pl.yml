@@ -16,6 +16,7 @@ pair-manual: "&7Lub wpisz w aplikacji: adres &f{address}&7, port &f{port}&7, kod
 pair-verify: "&7Kontrola bezpieczeństwa: aplikacja musi pokazać &f{short}"
 pair-link: "&7Link: "
 pair-link-hover: "Kliknij, aby skopiować"
+pair-web: "&7Przeglądarka / iPhone: "
 pair-map-name: "Parowanie RemoteMC – {code}"
 pair-success: "&a{device} sparowano jako {role}."
 role-invalid: "&cNieznana rola. Użyj admin, moderator lub viewer."

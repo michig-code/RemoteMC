@@ -108,6 +108,7 @@ public final class ApiServer {
         });
         server.setExecutor(executor);
         server.createContext("/api/", this::handle);
+        server.createContext("/", this::web);
         server.start();
     }
 
@@ -122,6 +123,42 @@ public final class ApiServer {
 
     public int openStreams() {
         return openStreams.get();
+    }
+
+    // ── Web app ─────────────────────────────────────────────────────────
+
+    /** The small web app for browsers (see {@link WebFiles}); turned off with "web: false". */
+    private void web(HttpExchange ex) {
+        try {
+            String method = ex.getRequestMethod().toUpperCase(Locale.ROOT);
+            WebFiles.File file = plugin.getConfig().getBoolean("web", true) && (method.equals("GET") || method.equals("HEAD"))
+                    ? WebFiles.find(ex.getRequestURI().getPath()) : null;
+            var headers = ex.getResponseHeaders();
+            if (file == null) {
+                headers.set("Content-Type", "text/plain; charset=utf-8");
+                byte[] text = "Not found".getBytes(StandardCharsets.UTF_8);
+                ex.sendResponseHeaders(404, text.length);
+                ex.getResponseBody().write(text);
+                return;
+            }
+            headers.set("Content-Type", file.type());
+            // Only its own files and the player heads; never inside a frame of another site.
+            headers.set("Content-Security-Policy", "default-src 'self'; img-src 'self' https://minotar.net; "
+                    + "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+            headers.set("X-Content-Type-Options", "nosniff");
+            headers.set("Referrer-Policy", "no-referrer");
+            headers.set("Cache-Control", "no-cache");
+            if (method.equals("HEAD")) {
+                ex.sendResponseHeaders(200, -1);
+                return;
+            }
+            ex.sendResponseHeaders(200, file.bytes().length);
+            ex.getResponseBody().write(file.bytes());
+        } catch (IOException ignored) {
+            // client gone
+        } finally {
+            ex.close();
+        }
     }
 
     // ── Dispatch ────────────────────────────────────────────────────────

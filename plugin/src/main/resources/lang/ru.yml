@@ -16,6 +16,7 @@ pair-manual: "&7Или введите в приложении: адрес &f{add
 pair-verify: "&7Проверка безопасности: приложение должно показать &f{short}"
 pair-link: "&7Ссылка: "
 pair-link-hover: "Нажмите, чтобы скопировать"
+pair-web: "&7Браузер / iPhone: "
 pair-map-name: "Привязка RemoteMC – {code}"
 pair-success: "&a{device} привязано с ролью {role}."
 role-invalid: "&cНеизвестная роль. Используйте admin, moderator или viewer."
