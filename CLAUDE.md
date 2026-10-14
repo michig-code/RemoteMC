@@ -39,8 +39,11 @@ cd android-app && ./gradlew lintGithubDebug lintPlayDebug testGithubDebugUnitTes
 cd desktop-app && ./gradlew test                               # Windows-App (läuft auch unter Linux)
 ```
 
-- Nach UI-Änderungen Screenshots neu aufnehmen (`-Proborazzi.test.record=true`), ansehen und
-  danach `python3 android-app/tools/help_images.py` ausführen (Bilder der Hilfe-Seite).
+- Nach UI-Änderungen in dieser Reihenfolge: Screenshots neu aufnehmen
+  (`-Proborazzi.test.record=true`) und ansehen → `python3 android-app/tools/help_images.py`
+  (Bilder der Hilfe-Seite) → die Hilfe-Screenshots noch einmal aufnehmen
+  (`--tests '*ScreenshotTest.help*' -Proborazzi.test.record=true`), da sie diese Bilder zeigen.
+- Erst committen, wenn alle Prüfungen grün sind (Befehle mit `&&` verketten).
 - Neue Funktionen bekommen ein Thema auf der Hilfe-Seite (`ui/HelpScreen.kt`, Texte in
   `res/values*/help.xml`, alle 10 Sprachen).
 - Plugin-Änderungen zusätzlich gegen einen echten Paper-Server testen
