@@ -242,6 +242,8 @@
     <string name="servers_move_to_folder">Klasöre taşı</string>
     <string name="servers_no_folder">Klasör yok</string>
     <string name="servers_new_folder">Yeni klasör</string>
+    <string name="servers_new_folder_text">Klasörün adı ne olsun?</string>
+    <string name="servers_folder_create">Oluştur</string>
     <string name="servers_folder_name">Klasör adı</string>
     <string name="servers_rename_folder">Klasörü yeniden adlandır</string>
     <string name="servers_remove_folder">Klasörü kaldır</string>

@@ -249,6 +249,8 @@
     <string name="servers_move_to_folder">Déplacer vers un dossier</string>
     <string name="servers_no_folder">Aucun dossier</string>
     <string name="servers_new_folder">Nouveau dossier</string>
+    <string name="servers_new_folder_text">Comment doit s’appeler le dossier ?</string>
+    <string name="servers_folder_create">Créer</string>
     <string name="servers_folder_name">Nom du dossier</string>
     <string name="servers_rename_folder">Renommer le dossier</string>
     <string name="servers_remove_folder">Supprimer le dossier</string>

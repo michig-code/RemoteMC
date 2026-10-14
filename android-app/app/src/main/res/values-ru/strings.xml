@@ -256,6 +256,8 @@
     <string name="servers_move_to_folder">Переместить в папку</string>
     <string name="servers_no_folder">Без папки</string>
     <string name="servers_new_folder">Новая папка</string>
+    <string name="servers_new_folder_text">Как назвать папку?</string>
+    <string name="servers_folder_create">Создать</string>
     <string name="servers_folder_name">Название папки</string>
     <string name="servers_rename_folder">Переименовать папку</string>
     <string name="servers_remove_folder">Удалить папку</string>

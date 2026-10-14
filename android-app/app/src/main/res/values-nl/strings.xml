@@ -242,6 +242,8 @@
     <string name="servers_move_to_folder">Naar map verplaatsen</string>
     <string name="servers_no_folder">Geen map</string>
     <string name="servers_new_folder">Nieuwe map</string>
+    <string name="servers_new_folder_text">Hoe moet de map heten?</string>
+    <string name="servers_folder_create">Maken</string>
     <string name="servers_folder_name">Mapnaam</string>
     <string name="servers_rename_folder">Map hernoemen</string>
     <string name="servers_remove_folder">Map opheffen</string>

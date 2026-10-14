@@ -42,10 +42,19 @@ class ServerRepository(private val prefs: SharedPreferences, private val box: Se
 
     fun setPinned(id: String, pinned: Boolean) = update(id) { it.copy(pinned = pinned) }
 
-    fun setFolder(id: String, folder: String) = update(id) { it.copy(folder = folder.trim()) }
+    /** Moves a server into [folder] (blank = out of any folder); it takes over the folder's pin. */
+    fun setFolder(id: String, folder: String) =
+        save(_servers.value.map { if (it.id == id) it.copy(folder = folder.trim(), folderPinned = false) else it }.withFolderPins())
 
-    fun renameFolder(old: String, new: String) =
-        save(_servers.value.map { if (it.folder == old) it.copy(folder = new.trim()) else it })
+    fun renameFolder(old: String, new: String) = save(
+        _servers.value.map {
+            if (it.folder == old) it.copy(folder = new.trim(), folderPinned = it.folderPinned && new.isNotBlank()) else it
+        }.withFolderPins(),
+    )
+
+    /** Pins or unpins a whole folder. */
+    fun setFolderPinned(folder: String, pinned: Boolean) =
+        save(_servers.value.map { if (it.folder == folder) it.copy(folderPinned = pinned) else it })
 
     /** Removes the folder; its servers stay, without a folder. */
     fun removeFolder(name: String) = renameFolder(name, "")

@@ -249,6 +249,8 @@
     <string name="servers_move_to_folder">Sposta in cartella</string>
     <string name="servers_no_folder">Nessuna cartella</string>
     <string name="servers_new_folder">Nuova cartella</string>
+    <string name="servers_new_folder_text">Come deve chiamarsi la cartella?</string>
+    <string name="servers_folder_create">Crea</string>
     <string name="servers_folder_name">Nome cartella</string>
     <string name="servers_rename_folder">Rinomina cartella</string>
     <string name="servers_remove_folder">Rimuovi cartella</string>

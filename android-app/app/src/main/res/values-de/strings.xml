@@ -256,6 +256,8 @@
     <string name="servers_move_to_folder">In Ordner verschieben</string>
     <string name="servers_no_folder">Kein Ordner</string>
     <string name="servers_new_folder">Neuer Ordner</string>
+    <string name="servers_new_folder_text">Wie soll der Ordner heißen?</string>
+    <string name="servers_folder_create">Erstellen</string>
     <string name="servers_folder_name">Ordnername</string>
     <string name="servers_rename_folder">Ordner umbenennen</string>
     <string name="servers_remove_folder">Ordner auflösen</string>

@@ -256,6 +256,8 @@
     <string name="servers_move_to_folder">Przenieś do folderu</string>
     <string name="servers_no_folder">Bez folderu</string>
     <string name="servers_new_folder">Nowy folder</string>
+    <string name="servers_new_folder_text">Jak ma się nazywać folder?</string>
+    <string name="servers_folder_create">Utwórz</string>
     <string name="servers_folder_name">Nazwa folderu</string>
     <string name="servers_rename_folder">Zmień nazwę folderu</string>
     <string name="servers_remove_folder">Usuń folder</string>

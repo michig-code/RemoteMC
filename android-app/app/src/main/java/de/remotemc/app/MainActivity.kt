@@ -225,6 +225,7 @@ private fun AppNavigation(
                 onMoveToFolder = { profile, folder -> repo.setFolder(profile.id, folder) },
                 onRenameFolder = repo::renameFolder,
                 onRemoveFolder = repo::removeFolder,
+                onPinFolder = repo::setFolderPinned,
                 onReorder = repo::setOrder,
                 onToggleNotify = { repo.upsert(it.copy(notify = !it.notify)) },
                 alertsOn = settings.alerts.enabled,

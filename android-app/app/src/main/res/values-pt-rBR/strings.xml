@@ -249,6 +249,8 @@
     <string name="servers_move_to_folder">Mover para pasta</string>
     <string name="servers_no_folder">Sem pasta</string>
     <string name="servers_new_folder">Nova pasta</string>
+    <string name="servers_new_folder_text">Como a pasta deve se chamar?</string>
+    <string name="servers_folder_create">Criar</string>
     <string name="servers_folder_name">Nome da pasta</string>
     <string name="servers_rename_folder">Renomear pasta</string>
     <string name="servers_remove_folder">Remover pasta</string>

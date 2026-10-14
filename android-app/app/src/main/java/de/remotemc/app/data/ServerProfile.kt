@@ -30,6 +30,8 @@ data class ServerProfile(
     val pinned: Boolean = false,
     /** Folder in the server list; blank = no folder. */
     val folder: String = "",
+    /** Its folder is pinned (listed on top); the same for every server of the folder. */
+    val folderPinned: Boolean = false,
     /** Background notifications for this server (when they are on in the settings). */
     val notify: Boolean = true,
 ) {
@@ -59,6 +61,7 @@ data class ServerProfile(
         .put("deviceName", deviceName)
         .put("pinned", pinned)
         .put("folder", folder)
+        .put("folderPinned", folderPinned)
         .put("notify", notify)
 
     companion object {
@@ -75,6 +78,7 @@ data class ServerProfile(
             deviceName = o.optString("deviceName"),
             pinned = o.optBoolean("pinned", false),
             folder = o.optString("folder"),
+            folderPinned = o.optBoolean("folderPinned", false),
             notify = o.optBoolean("notify", true),
         )
     }

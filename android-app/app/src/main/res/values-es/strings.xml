@@ -249,6 +249,8 @@
     <string name="servers_move_to_folder">Mover a carpeta</string>
     <string name="servers_no_folder">Sin carpeta</string>
     <string name="servers_new_folder">Nueva carpeta</string>
+    <string name="servers_new_folder_text">¿Cómo debe llamarse la carpeta?</string>
+    <string name="servers_folder_create">Crear</string>
     <string name="servers_folder_name">Nombre de la carpeta</string>
     <string name="servers_rename_folder">Renombrar carpeta</string>
     <string name="servers_remove_folder">Quitar carpeta</string>

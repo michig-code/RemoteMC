@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,6 +77,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -100,7 +106,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import de.remotemc.app.R
+import de.remotemc.app.data.ListRow
+import de.remotemc.app.data.ListTitle
 import de.remotemc.app.data.Role
+import de.remotemc.app.data.buildRows
+import de.remotemc.app.data.drop
+import de.remotemc.app.data.folderOf
+import de.remotemc.app.data.mergeInto
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.net.ApiClient
@@ -167,6 +179,7 @@ fun ServerListScreen(
     onMoveToFolder: (ServerProfile, String) -> Unit = { _, _ -> },
     onRenameFolder: (old: String, new: String) -> Unit = { _, _ -> },
     onRemoveFolder: (String) -> Unit = {},
+    onPinFolder: (String, Boolean) -> Unit = { _, _ -> },
     onReorder: (List<ServerProfile>) -> Unit = {},
     onToggleNotify: (ServerProfile) -> Unit = {},
     alertsOn: Boolean = false,
@@ -185,6 +198,33 @@ fun ServerListScreen(
     val haptics = rememberHaptics()
     val folders = remember(servers) { servers.map { it.folder }.filter { it.isNotBlank() }.distinct() }
     val rows = buildRows(servers, query, collapsed)
+
+    // Drop a server onto another one to put both into a folder: the card under the middle of the
+    // dragged one is the target while it is over its middle part (above or below that, they swap).
+    val bounds = remember { mutableStateMapOf<String, Rect>() }
+    var hoverTarget by remember { mutableStateOf<String?>(null) }
+    var dragStart by remember { mutableStateOf<List<ServerProfile>?>(null) }
+    var merging by remember { mutableStateOf<Pair<String, String>?>(null) } // dragged to target
+    val currentServers by rememberUpdatedState(servers)
+    var held by remember { mutableStateOf<Pair<String, Rect>?>(null) } // the held server and where it is now
+    val shownIds = rows.mapNotNullTo(HashSet()) { (it as? ListRow.Server)?.server?.id }
+    fun targetUnder(dragged: Rect, self: String): String? {
+        val c = dragged.center
+        return bounds.entries.firstOrNull { (id, b) ->
+            id != self && id in shownIds && c.x in b.left..b.right &&
+                c.y in (b.top + b.height * 0.3f)..(b.bottom - b.height * 0.3f)
+        }?.key
+    }
+    LaunchedEffect(hoverTarget) { if (hoverTarget != null) haptics.tick() }
+    /** Another server only swaps with the held one once that is past its middle part. */
+    fun canSwap(id: String, rowIndex: Int): Boolean {
+        val (heldId, rect) = held ?: return true
+        val b = bounds[id] ?: return true
+        if (id == heldId) return true
+        val heldIndex = rows.indexOfFirst { it.key == heldId }
+        val y = rect.center.y
+        return if (rowIndex < heldIndex) y < b.top + b.height * 0.3f else y > b.bottom - b.height * 0.3f
+    }
 
     // Pull down to check all servers again (also those in collapsed folders).
     var refreshing by remember { mutableStateOf(false) }
@@ -265,7 +305,7 @@ fun ServerListScreen(
                     itemsIndexed(rows, key = { _, row -> row.key }) { i, row ->
                         when (row) {
                             is ListRow.Title -> ReorderableItem(reorder, key = row.key) {
-                                SectionTitle(stringResource(row.text))
+                                SectionTitle(stringResource(if (row.title == ListTitle.PINNED) R.string.servers_pinned else R.string.servers_title))
                             }
                             is ListRow.Folder -> ReorderableItem(reorder, key = row.key) { FolderHeader(
                                 row,
@@ -275,14 +315,16 @@ fun ServerListScreen(
                                 },
                                 onRename = { renamingFolder = row.name },
                                 onRemove = { removingFolder = row.name },
+                                onPin = { haptics.tap(); onPinFolder(row.name, !row.pinned) },
                             ) }
-                            is ListRow.Server -> ReorderableItem(reorder, key = row.key) { dragging ->
+                            is ListRow.Server -> ReorderableItem(reorder, key = row.key, enabled = canSwap(row.key, i)) { dragging ->
                                 val server = row.server
                                 ServerCard(
                                     server = server,
                                     probe = probe,
                                     refreshTick = refreshTick,
                                     dragging = dragging,
+                                    dropTarget = hoverTarget == server.id,
                                     onOpen = { onOpen(server) },
                                     onRename = { renaming = server },
                                     onPin = { onPin(server, !server.pinned) },
@@ -293,7 +335,34 @@ fun ServerListScreen(
                                     onDelete = { deleting = server },
                                     // Hold a server to drag it; not while searching, the list is filtered then.
                                     modifier = Modifier
-                                        .longPressDraggableHandle(enabled = query.isBlank(), onDragStarted = { haptics.heavy() })
+                                        .longPressDraggableHandle(
+                                            enabled = query.isBlank(),
+                                            onDragStarted = { haptics.heavy(); dragStart = currentServers },
+                                            onDragStopped = {
+                                                val target = hoverTarget
+                                                hoverTarget = null
+                                                held = null
+                                                if (target != null) {
+                                                    val folder = folderOf(currentServers, target)
+                                                    if (folder != null) {
+                                                        // Onto a server in a folder: it simply joins that folder.
+                                                        onReorder(mergeInto(currentServers, server.id, target, folder))
+                                                        haptics.success()
+                                                    } else {
+                                                        merging = server.id to target
+                                                    }
+                                                }
+                                            },
+                                        )
+                                        .onGloballyPositioned { c ->
+                                            val r = c.boundsInRoot()
+                                            if (dragging) {
+                                                held = server.id to r
+                                                hoverTarget = targetUnder(r, server.id)
+                                            } else if (bounds[server.id] != r) {
+                                                bounds[server.id] = r
+                                            }
+                                        }
                                         .staggeredAppear(i + 1),
                                 )
                             }
@@ -311,6 +380,27 @@ fun ServerListScreen(
             initial = profile.name,
             onDismiss = { renaming = null },
             onSave = { onRename(profile, it); renaming = null },
+        )
+    }
+
+    merging?.let { (id, target) ->
+        // A new folder from two servers: name it, or cancel and the server goes back where it was.
+        NameDialog(
+            title = stringResource(R.string.servers_new_folder),
+            text = stringResource(R.string.servers_new_folder_text),
+            label = stringResource(R.string.servers_folder_name),
+            initial = "",
+            confirm = stringResource(R.string.servers_folder_create),
+            onDismiss = {
+                dragStart?.let(onReorder)
+                merging = null
+            },
+            onSave = { name ->
+                onReorder(mergeInto(servers, id, target, name))
+                collapsed = collapsed - name
+                haptics.success()
+                merging = null
+            },
         )
     }
 
@@ -392,7 +482,14 @@ private fun SearchField(query: String, onQuery: (String) -> Unit) {
 }
 
 @Composable
-private fun FolderHeader(row: ListRow.Folder, onToggle: () -> Unit, onRename: () -> Unit, onRemove: () -> Unit, modifier: Modifier = Modifier) {
+private fun FolderHeader(
+    row: ListRow.Folder,
+    onToggle: () -> Unit,
+    onRename: () -> Unit,
+    onRemove: () -> Unit,
+    onPin: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var menu by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(if (row.expanded) 0f else -90f, motion(), label = "chevron")
     Row(
@@ -418,10 +515,19 @@ private fun FolderHeader(row: ListRow.Folder, onToggle: () -> Unit, onRename: ()
             )
             Spacer(Modifier.width(8.dp))
             Badge(row.count.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+            if (row.pinned) {
+                Spacer(Modifier.width(6.dp))
+                Icon(Icons.Filled.PushPin, stringResource(R.string.servers_pinned), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+            }
         }
         Box {
             IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.action_more)) }
             DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(if (row.pinned) R.string.servers_unpin else R.string.servers_pin)) },
+                    leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                    onClick = { menu = false; onPin() },
+                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.servers_rename_folder)) },
                     leadingIcon = { Icon(Icons.Outlined.Edit, null) },
@@ -438,16 +544,27 @@ private fun FolderHeader(row: ListRow.Folder, onToggle: () -> Unit, onRename: ()
 }
 
 @Composable
-private fun NameDialog(title: String, label: String, initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+private fun NameDialog(
+    title: String,
+    label: String,
+    initial: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+    text: String? = null,
+    confirm: String = stringResource(R.string.action_save),
+) {
     var name by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(label) })
+            Column {
+                if (text != null) Text(text, Modifier.padding(bottom = 12.dp))
+                OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(label) })
+            }
         },
         confirmButton = {
-            TextButton(enabled = name.isNotBlank(), onClick = { onSave(name.trim()) }) { Text(stringResource(R.string.action_save)) }
+            TextButton(enabled = name.isNotBlank(), onClick = { onSave(name.trim()) }) { Text(confirm) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
@@ -530,6 +647,8 @@ private fun ServerCard(
     probe: suspend (ServerProfile) -> ServerStatus,
     dragging: Boolean,
     refreshTick: Int,
+    /** Another server is held over this one: dropping it makes a folder. */
+    dropTarget: Boolean = false,
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onPin: () -> Unit,
@@ -568,7 +687,7 @@ private fun ServerCard(
         ServerProbe.Loading -> ConnectionState.Connecting
     }
 
-    val lift by animateFloatAsState(if (dragging) 1.03f else 1f, label = "lift")
+    val lift by animateFloatAsState(if (dragging) 1.03f else if (dropTarget) 0.96f else 1f, label = "lift")
     McCard(
         modifier.fillMaxWidth().zIndex(if (dragging) 1f else 0f).graphicsLayer {
             scaleX = lift
@@ -576,7 +695,7 @@ private fun ServerCard(
             shadowElevation = if (dragging) 16.dp.toPx() else 0f
             shape = RoundedCornerShape(24.dp)
             clip = false
-        },
+        }.then(if (dropTarget) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp)) else Modifier),
         onClick = { haptics.tap(); onOpen() },
     ) {
         Column(Modifier.padding(16.dp)) {
