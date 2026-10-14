@@ -27,7 +27,7 @@
     <string name="help_demo_keys">teste, exemplo, experimentar, demo</string>
     <string name="help_organize_title">Ordenar, fixar e agrupar servidores</string>
     <string name="help_organize_where">Lista de servidores › ⋮ ao lado de um servidor</string>
-    <string name="help_organize_text">O menu ⋮ fixa um servidor no topo, move para uma pasta, renomeia, liga ou desliga as notificações dele, pareia de novo ou remove. Segure um servidor e arraste para mudar a ordem. Com vários servidores aparece uma busca no topo. Solte um servidor sobre outro para colocar os dois numa pasta nova – o app pergunta o nome (Cancelar devolve o servidor ao lugar). Pastas também podem ser fixadas no topo (⋮ ao lado da pasta).</string>
+    <string name="help_organize_text">O menu ⋮ fixa um servidor no topo, move para uma pasta, renomeia, liga ou desliga as notificações dele, pareia de novo ou remove. Segure um servidor e arraste para mudar a ordem. Com vários servidores aparece uma busca no topo. Solte um servidor sobre outro para colocar os dois numa pasta nova – o app pergunta o nome (Cancelar devolve o servidor ao lugar). Pastas também podem ser fixadas no topo (⋮ ao lado da pasta). O botão de grade no topo (ou segurar um cartão sem movê-lo) mostra alças azuis: arraste-as para mudar o tamanho em células. Ali você também reordena o conteúdo dos cartões e as partes da tela; “Redefinir” desfaz tudo.</string>
     <string name="help_organize_keys">ordem, pasta, renomear, apagar, remover, fixar, buscar, ordenar</string>
     <string name="help_roles_title">Moderadores e espectadores</string>
     <string name="help_roles_where">No seu servidor › /remotemc pair moderator</string>

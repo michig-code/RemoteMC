@@ -39,4 +39,14 @@ class DashboardLayoutTest {
         assertEquals(CardSize.FULL, CardSize.HALF.next(allowThird = false))
         assertEquals(CardSize.THIRD, CardSize.HALF.next(allowThird = true))
     }
+
+    @Test
+    fun handleSetsAFreeWidth() {
+        val layout = DashboardLayout(defaults).setSpan("players", 5, 6).setSpan("tps", 3, 4)
+        assertEquals(5, layout.cards[0].span(6))
+        assertEquals(3, layout.cards[1].span(4))
+        assertEquals("players:5,tps:4,memory:third,history:full", layout.encode())
+        assertEquals(layout, DashboardLayout.decode(layout.encode(), defaults))
+        assertEquals(4, DashCard("x", CardSize.HALF, width = 4).span(6))
+    }
 }

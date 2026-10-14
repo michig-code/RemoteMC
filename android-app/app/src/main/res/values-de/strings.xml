@@ -438,10 +438,9 @@
     <string name="error_file_exists">Es gibt bereits etwas mit diesem Namen.</string>
     <string name="settings_show_guide">Einführung erneut anzeigen</string>
     <string name="dashboard_edit_title">Übersicht anpassen</string>
-    <string name="dashboard_edit_hint">Karte gedrückt halten und ziehen, um sie zu verschieben. Mit den Knöpfen änderst du die Breite oder blendest sie aus.</string>
+    <string name="dashboard_edit_hint">Karte gedrückt halten und ziehen, um sie zu verschieben. Am blauen Anfasser rechts ziehen ändert die Breite, das Auge blendet sie aus.</string>
     <string name="dashboard_edit_reset">Zurücksetzen</string>
     <string name="dashboard_edit_done">Fertig</string>
-    <string name="dashboard_card_width">Breite ändern</string>
     <string name="dashboard_card_hide">Karte ausblenden</string>
     <string name="dashboard_card_show">Karte einblenden</string>
     <string name="settings_animations">Animationen</string>
@@ -549,4 +548,19 @@
     <string name="demo_name">Demo-Server</string>
     <string name="demo_banner">Demo-Server mit Beispieldaten – nichts verlässt dein Handy.</string>
     <string name="settings_disclaimer">Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden.</string>
+    <string name="servers_arrange">Anordnen</string>
+    <string name="servers_arrange_hint">Ziehe an den blauen Anfassern, um eine Karte größer oder kleiner zu machen. Halte unten einen Teil und ziehe ihn, um die Reihenfolge zu ändern.</string>
+    <string name="servers_arrange_card">Karte</string>
+    <string name="servers_arrange_screen">Bildschirm</string>
+    <string name="servers_resize">Größe ändern</string>
+    <string name="part_name">Name</string>
+    <string name="part_address">Adresse</string>
+    <string name="part_status">Status</string>
+    <string name="part_players">Spieler</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Version</string>
+    <string name="part_motd">Beschreibung (MOTD)</string>
+    <string name="block_header">Kopf</string>
+    <string name="block_search">Suche</string>
+    <string name="block_servers">Server</string>
 </resources>

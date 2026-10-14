@@ -24,6 +24,7 @@
         <item>Se abre al instante con los últimos datos; sin conexión muestra su antigüedad</item>
         <item>Varios servidores con carpetas, fijados y búsqueda; acceso limitado para moderadores y espectadores</item>
         <item>Suelta un servidor sobre otro para crear una carpeta; fija carpetas arriba</item>
+        <item>Lista de servidores en cuadrícula: arrastra los tiradores azules para agrandar o achicar cada tarjeta – las grandes muestran más (jugadores, TPS, memoria, versión); ordena lo que muestra una tarjeta y la pantalla</item>
         <item>Ayuda y guía con búsqueda e imágenes</item>
         <item>Claro y oscuro, 9 colores o el tuyo, 10 idiomas, diseño para tablet</item>
         <item>Actualizaciones dentro de la app (versión de GitHub)</item>
@@ -42,6 +43,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Lista de servidores con carpetas y fijados; arrastra para ordenar o suelta uno sobre otro para crear una carpeta</item>
+        <item>Lista de servidores en cuadrícula: arrastra los tiradores azules para agrandar o achicar cada tarjeta – las grandes muestran más (jugadores, TPS, memoria, versión); ordena lo que muestra una tarjeta y la pantalla</item>
         <item>Arrastra pestañas para ordenarlas o a la ventana para ver dos servidores a la vez</item>
         <item>Página de ayuda (F1), páginas de bienvenida, elección de idioma, volver a vincular, buscar y ordenar jugadores, instalador con los colores de RemoteMC</item>
         <item>Todo lo del móvil también en el PC: resumen, jugadores, consola, chat, mundos, plugins, tareas y archivos</item>

@@ -24,6 +24,7 @@
         <item>Si apre subito con gli ultimi dati; offline mostra quanto sono vecchi</item>
         <item>Più server con cartelle, fissati e ricerca; accesso limitato per moderatori e spettatori</item>
         <item>Rilascia un server su un altro per creare una cartella; fissa le cartelle in alto</item>
+        <item>Elenco server a griglia: trascina le maniglie blu per ingrandire o rimpicciolire ogni scheda – le più grandi mostrano di più (giocatori, TPS, memoria, versione); disponi il contenuto delle schede e la schermata</item>
         <item>Aiuto e guida con ricerca e immagini</item>
         <item>Chiaro e scuro, 9 colori o il tuo, 10 lingue, layout per tablet</item>
         <item>Aggiornamenti direttamente nell’app (versione GitHub)</item>
@@ -42,6 +43,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Elenco server con cartelle e fissati; trascina per ordinare o rilascia un server su un altro per una cartella</item>
+        <item>Elenco server a griglia: trascina le maniglie blu per ingrandire o rimpicciolire ogni scheda – le più grandi mostrano di più (giocatori, TPS, memoria, versione); disponi il contenuto delle schede e la schermata</item>
         <item>Trascina le schede per riordinarle o nella finestra per vedere due server affiancati</item>
         <item>Pagina di aiuto (F1), pagine di benvenuto, scelta della lingua, riassocia, cerca e ordina i giocatori, installer con i colori di RemoteMC</item>
         <item>Tutto ciò che fa il telefono anche sul PC: panoramica, giocatori, console, chat, mondi, plugin, attività e file</item>

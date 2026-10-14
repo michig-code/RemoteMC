@@ -27,7 +27,7 @@
     <string name="help_demo_keys">test, example, sample, try out, demo</string>
     <string name="help_organize_title">Sort, pin and group servers</string>
     <string name="help_organize_where">Server list › ⋮ next to a server</string>
-    <string name="help_organize_text">The ⋮ menu pins a server to the top, moves it into a folder, renames it, turns its notifications on or off, pairs it again or removes it. Hold a server and drag it to change the order. With several servers a search field appears at the top. Drop a server onto another one to put both into a new folder – the app asks for its name (Cancel puts the server back). Folders can be pinned to the top too (⋮ next to the folder).</string>
+    <string name="help_organize_text">The ⋮ menu pins a server to the top, moves it into a folder, renames it, turns its notifications on or off, pairs it again or removes it. Hold a server and drag it to change the order. With several servers a search field appears at the top. Drop a server onto another one to put both into a new folder – the app asks for its name (Cancel puts the server back). Folders can be pinned to the top too (⋮ next to the folder). The grid button at the top (or holding a card without moving it) shows blue handles: drag them to change a card\'s size in grid cells. In that mode you can also reorder what cards show and the parts of the screen; “Reset” undoes everything.</string>
     <string name="help_organize_keys">order, folder, rename, delete, remove, pin, search, sort</string>
     <string name="help_roles_title">Moderators and viewers</string>
     <string name="help_roles_where">On your server › /remotemc pair moderator</string>
@@ -47,7 +47,7 @@
     <string name="help_history_keys">chart, graph, statistics, trend, week, day</string>
     <string name="help_customize_title">Customize the overview</string>
     <string name="help_customize_where">Overview › hold a card</string>
-    <string name="help_customize_text">Hold any card on the overview to edit the layout. Then drag cards to move them, change their width or hide them. “Reset” brings back the original layout.</string>
+    <string name="help_customize_text">Hold any card on the overview to edit the layout. Then drag cards to move them, drag the blue handle on the right edge to change their width, or hide them. “Reset” brings back the original layout.</string>
     <string name="help_customize_keys">layout, arrange, hide, move, edit, cards, order</string>
     <string name="help_worlds_title">Time, weather and game rules</string>
     <string name="help_worlds_where">Overview › Worlds › tap a world</string>

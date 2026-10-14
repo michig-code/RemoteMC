@@ -27,7 +27,7 @@
     <string name="help_demo_keys">Test, Beispiel, ausprobieren, Demo</string>
     <string name="help_organize_title">Server sortieren, anheften, gruppieren</string>
     <string name="help_organize_where">Serverliste › ⋮ neben einem Server</string>
-    <string name="help_organize_text">Das ⋮-Menü heftet einen Server oben an, verschiebt ihn in einen Ordner, benennt ihn um, schaltet seine Benachrichtigungen ein oder aus, koppelt ihn neu oder entfernt ihn. Server gedrückt halten und ziehen ändert die Reihenfolge. Ab mehreren Servern erscheint oben ein Suchfeld. Lässt du einen Server auf einem anderen los, landen beide in einem neuen Ordner – die App fragt nach dem Namen (Abbrechen legt den Server zurück). Auch Ordner lassen sich oben anheften (⋮ neben dem Ordner).</string>
+    <string name="help_organize_text">Das ⋮-Menü heftet einen Server oben an, verschiebt ihn in einen Ordner, benennt ihn um, schaltet seine Benachrichtigungen ein oder aus, koppelt ihn neu oder entfernt ihn. Server gedrückt halten und ziehen ändert die Reihenfolge. Ab mehreren Servern erscheint oben ein Suchfeld. Lässt du einen Server auf einem anderen los, landen beide in einem neuen Ordner – die App fragt nach dem Namen (Abbrechen legt den Server zurück). Auch Ordner lassen sich oben anheften (⋮ neben dem Ordner). Der Raster-Knopf oben (oder eine Karte halten, ohne sie zu bewegen) zeigt blaue Anfasser: Ziehen ändert die Größe der Karte in Rasterfeldern. Dort lassen sich auch der Inhalt der Karten und die Teile des Bildschirms umsortieren; „Zurücksetzen“ macht alles rückgängig.</string>
     <string name="help_organize_keys">Reihenfolge, Ordner, umbenennen, löschen, entfernen, anheften, suchen, sortieren</string>
     <string name="help_roles_title">Moderatoren und Zuschauer</string>
     <string name="help_roles_where">Auf deinem Server › /remotemc pair moderator</string>
@@ -47,7 +47,7 @@
     <string name="help_history_keys">Diagramm, Grafik, Statistik, Verlauf, Woche, Tag</string>
     <string name="help_customize_title">Übersicht anpassen</string>
     <string name="help_customize_where">Übersicht › Karte gedrückt halten</string>
-    <string name="help_customize_text">Halte eine beliebige Karte der Übersicht gedrückt, um das Layout zu bearbeiten. Dann Karten ziehen, ihre Breite ändern oder sie ausblenden. „Zurücksetzen“ stellt das ursprüngliche Layout wieder her.</string>
+    <string name="help_customize_text">Halte eine Karte der Übersicht gedrückt, um den Aufbau zu bearbeiten. Dann Karten ziehen zum Verschieben, am blauen Anfasser rechts ziehen für die Breite, oder ausblenden. „Zurücksetzen“ stellt den ursprünglichen Aufbau wieder her.</string>
     <string name="help_customize_keys">Layout, anordnen, ausblenden, verschieben, bearbeiten, Karten, Reihenfolge</string>
     <string name="help_worlds_title">Uhrzeit, Wetter und Spielregeln</string>
     <string name="help_worlds_where">Übersicht › Welten › Welt antippen</string>

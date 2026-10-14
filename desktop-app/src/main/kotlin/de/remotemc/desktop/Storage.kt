@@ -66,6 +66,12 @@ class ServerStore(private val file: File = File(AppDirs.dir, "servers.dat")) {
 
     fun setPinned(id: String, pinned: Boolean) = update(id) { it.copy(pinned = pinned) }
 
+    /** New size of a server's card (grid cells; 0 = default). */
+    fun setCardSize(id: String, w: Int, h: Int) = update(id) { it.copy(cardW = w, cardH = h) }
+
+    /** All cards back to their default size. */
+    fun resetCardSizes() = save(_servers.value.map { it.copy(cardW = 0, cardH = 0) })
+
     /** Moves a server into [folder] (blank = out of any folder); it takes over the folder's pin. */
     fun setFolder(id: String, folder: String) =
         save(_servers.value.map { if (it.id == id) it.copy(folder = folder.trim(), folderPinned = false) else it }.withFolderPins())
@@ -116,6 +122,8 @@ data class DesktopSettings(
     val language: String = "",
     /** The welcome pages were shown (or skipped) once. */
     val welcomed: Boolean = false,
+    /** Card parts and screen blocks of the server list ([de.remotemc.app.data.ListLayout.encode]). */
+    val serverList: String = "",
 )
 
 /** The app's languages (the same as on the phone); applied by setting the default locale. */
@@ -149,6 +157,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             .put("quiet", a.quiet).put("quietFrom", a.quietFrom).put("quietTo", a.quietTo)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
             .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate).put("language", next.language).put("welcomed", next.welcomed)
+            .put("serverList", next.serverList)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -162,6 +171,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             autoUpdate = o.optBoolean("autoUpdate", true),
             language = o.optString("language"),
             welcomed = o.optBoolean("welcomed", false),
+            serverList = o.optString("serverList"),
             alerts = o.optJSONObject("alerts")?.let { a ->
                 AlertSettings(
                     enabled = a.optBoolean("enabled", false),

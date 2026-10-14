@@ -105,6 +105,18 @@ class ScreenshotTest {
         ).forEach { m.servers.upsert(it) }
         ServerListScreen(m, {}, {}, {}, probe = { if (it.host == "mc.example.com") sample else error("down") })
     }
+    @Test fun serversGrid() = shot("01c_servers_grid") {
+        val d = Files.createTempDirectory("rmc").toFile()
+        val m = AppModel(ServerStore(File(d, "servers.dat")), model.settings, CommandHistory(File(d, "h.json")), ServerExtras.inMemory())
+        listOf(
+            ServerProfile(name = "Survival", host = "mc.example.com", token = "x", cardW = 5, cardH = 3),
+            ServerProfile(name = "Lobby", host = "lobby.example.com", token = "x", cardW = 3, cardH = 1),
+            ServerProfile(name = "Minigames", host = "mini.example.com", token = "x", cardW = 1, cardH = 1),
+            ServerProfile(name = "Creative world", host = "192.168.178.20", port = 8766, token = "x", cardW = 2, cardH = 2),
+            ServerProfile(name = "Test server", host = "10.0.0.5", token = "x", tls = false),
+        ).forEach { m.servers.upsert(it) }
+        ServerListScreen(m, {}, {}, {}, probe = { if (it.host == "mc.example.com") sample else error("down") }, startEditing = true)
+    }
     @Test fun help() = shot("26_help") { HelpPane({}, initialQuery = "ban") }
     @Test fun welcome() = shot("27_welcome") { OnboardingPane {} }
     @Test fun serversEmpty() = shot("02b_servers_empty") {

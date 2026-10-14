@@ -440,10 +440,9 @@
     <string name="error_file_exists">Coś o tej nazwie już istnieje.</string>
     <string name="settings_show_guide">Pokaż przewodnik startowy</string>
     <string name="dashboard_edit_title">Dostosuj przegląd</string>
-    <string name="dashboard_edit_hint">Przytrzymaj kartę i przeciągnij, aby ją przesunąć. Przyciskami zmienisz jej szerokość lub ją ukryjesz.</string>
+    <string name="dashboard_edit_hint">Przytrzymaj kartę i przeciągnij, aby ją przesunąć. Przeciągnij niebieski uchwyt po prawej, aby zmienić szerokość; oko ją ukrywa.</string>
     <string name="dashboard_edit_reset">Przywróć</string>
     <string name="dashboard_edit_done">Gotowe</string>
-    <string name="dashboard_card_width">Zmień szerokość</string>
     <string name="dashboard_card_hide">Ukryj kartę</string>
     <string name="dashboard_card_show">Pokaż kartę</string>
     <string name="settings_animations">Animacje</string>
@@ -565,4 +564,19 @@
     <string name="demo_name">Serwer demo</string>
     <string name="demo_banner">Serwer demo z przykładowymi danymi – nic nie opuszcza telefonu.</string>
     <string name="settings_disclaimer">To nie jest oficjalny produkt Minecraft. Niezatwierdzony przez Mojang ani Microsoft i niezwiązany z nimi.</string>
+    <string name="servers_arrange">Ułóż</string>
+    <string name="servers_arrange_hint">Przeciągnij niebieskie uchwyty, aby zmienić rozmiar karty. Przytrzymaj element poniżej i przeciągnij go, aby zmienić kolejność.</string>
+    <string name="servers_arrange_card">Karta</string>
+    <string name="servers_arrange_screen">Ekran</string>
+    <string name="servers_resize">Zmień rozmiar</string>
+    <string name="part_name">Nazwa</string>
+    <string name="part_address">Adres</string>
+    <string name="part_status">Status</string>
+    <string name="part_players">Gracze</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Wersja</string>
+    <string name="part_motd">Opis (MOTD)</string>
+    <string name="block_header">Nagłówek</string>
+    <string name="block_search">Wyszukiwanie</string>
+    <string name="block_servers">Serwery</string>
 </resources>

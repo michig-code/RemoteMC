@@ -455,10 +455,9 @@
     <string name="error_file_exists">Something with this name already exists.</string>
     <string name="settings_show_guide">Show the start guide</string>
     <string name="dashboard_edit_title">Customize overview</string>
-    <string name="dashboard_edit_hint">Hold a card and drag it to move it. Use the buttons to change its width or hide it.</string>
+    <string name="dashboard_edit_hint">Hold a card and drag it to move it. Drag the blue handle on the right to change its width; the eye hides it.</string>
     <string name="dashboard_edit_reset">Reset</string>
     <string name="dashboard_edit_done">Done</string>
-    <string name="dashboard_card_width">Change width</string>
     <string name="dashboard_card_hide">Hide card</string>
     <string name="dashboard_card_show">Show card</string>
     <string name="settings_animations">Animations</string>
@@ -566,4 +565,19 @@
     <string name="demo_name">Demo server</string>
     <string name="demo_banner">Demo server with sample data – nothing leaves your phone.</string>
     <string name="settings_disclaimer">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</string>
+    <string name="servers_arrange">Arrange</string>
+    <string name="servers_arrange_hint">Drag the blue handles to change a card\'s size. Hold a part below and drag it to change the order.</string>
+    <string name="servers_arrange_card">Card</string>
+    <string name="servers_arrange_screen">Screen</string>
+    <string name="servers_resize">Change size</string>
+    <string name="part_name">Name</string>
+    <string name="part_address">Address</string>
+    <string name="part_status">Status</string>
+    <string name="part_players">Players</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Version</string>
+    <string name="part_motd">Description (MOTD)</string>
+    <string name="block_header">Header</string>
+    <string name="block_search">Search</string>
+    <string name="block_servers">Servers</string>
 </resources>

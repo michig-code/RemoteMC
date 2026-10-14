@@ -34,6 +34,14 @@ First public release of **RemoteMC**.
 - Imports settings and the access token from the McRemote prototype
 
 ### Windows app (new)
+- Server list as a grid: the grid button (or holding a card without moving it) shows a blue frame
+  with handles like a home-screen widget; drag them to size each card in grid cells (1×1 up to full
+  width, 1–4 rows). Bigger cards show more: players, TPS, memory bar, version, MOTD; a 1×1 card
+  shows the first letter with a status dot
+- Edit mode of the server list: reorder what the cards show (name, address, status, players, TPS,
+  memory, version, MOTD) and the screen's blocks (header, search, servers); "Reset" restores all
+- Overview: the width of a card is set with a blue handle on its right edge (instead of the ⇄
+  button), freely in grid columns
 - Built-in demo server with sample data, to try everything without a server of your own
 - Server list like on the phone: folders (open and close, rename, remove), pinned servers and
   folders on top, drag to sort or drop a server onto another one for a new folder, search with ✕
@@ -66,6 +74,14 @@ First public release of **RemoteMC**.
 - "What's new" in the settings lists everything RemoteMC can do
 
 ### App
+- Server list as a grid: the grid button (or holding a card without moving it) shows a blue frame
+  with handles like a home-screen widget; drag them to size each card in grid cells (1×1 up to full
+  width, 1–4 rows). Bigger cards show more: players, TPS, memory bar, version, MOTD; a 1×1 card
+  shows the first letter with a status dot
+- Edit mode of the server list: reorder what the cards show (name, address, status, players, TPS,
+  memory, version, MOTD) and the screen's blocks (header, search, servers); "Reset" restores all
+- Overview: the width of a card is set with a blue handle on its right edge (instead of the ⇄
+  button), freely in grid columns
 - Logo without the dark tile behind it (also on Windows and in the README)
 - Widget: a server that answers slowly in the background is checked again instead of shown offline
 - Animations can be turned off in the settings (on by default)

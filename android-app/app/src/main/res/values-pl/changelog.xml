@@ -24,6 +24,7 @@
         <item>Otwiera się od razu z ostatnimi danymi; offline pokazuje, jak są stare</item>
         <item>Wiele serwerów z folderami, przypinaniem i wyszukiwaniem; ograniczony dostęp dla moderatorów i widzów</item>
         <item>Upuść serwer na inny, by utworzyć folder; przypinaj foldery na górze</item>
+        <item>Lista serwerów jako siatka: przeciągnij niebieskie uchwyty, aby powiększyć lub zmniejszyć kartę – większe karty pokazują więcej (gracze, TPS, pamięć, wersja); ułóż zawartość kart i ekranu</item>
         <item>Pomoc i przewodnik z wyszukiwarką i obrazkami</item>
         <item>Jasny i ciemny motyw, 9 kolorów lub własny, 10 języków, widok na tablet</item>
         <item>Aktualizacje bezpośrednio w aplikacji (wersja z GitHuba)</item>
@@ -42,6 +43,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Lista serwerów z folderami i przypinaniem; przeciągnij, by sortować, lub upuść serwer na inny, by utworzyć folder</item>
+        <item>Lista serwerów jako siatka: przeciągnij niebieskie uchwyty, aby powiększyć lub zmniejszyć kartę – większe karty pokazują więcej (gracze, TPS, pamięć, wersja); ułóż zawartość kart i ekranu</item>
         <item>Przeciągaj karty, by zmienić kolejność, lub do okna, by widzieć dwa serwery obok siebie</item>
         <item>Strona pomocy (F1), strony powitalne, wybór języka, ponowne parowanie, wyszukiwanie i sortowanie graczy, instalator w kolorach RemoteMC</item>
         <item>Wszystko z telefonu także na PC: przegląd, gracze, konsola, czat, światy, pluginy, zadania i pliki</item>

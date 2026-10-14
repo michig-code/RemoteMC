@@ -128,6 +128,16 @@ class ScreenshotTest {
     @Test fun serverListEmpty() = shot("02c_servers_empty") {
         ServerListScreen(emptyList(), {}, {}, { _, _ -> }, {}, {}, {}, onDemo = {})
     }
+    @Test fun serverGrid() = shot("02d_servers_grid") {
+        ServerListScreen(
+            servers.mapIndexed { i, s ->
+                when (i) { 0 -> s.copy(cardW = 4, cardH = 3); 1 -> s.copy(cardW = 2, cardH = 2); 2 -> s.copy(cardW = 1, cardH = 1); else -> s.copy(cardW = 3, cardH = 1) }
+            },
+            {}, {}, { _, _ -> }, {}, {}, {},
+            probe = { if (it.port == 8765 && it.tls && it.folder.isEmpty()) status else throw java.io.IOException("down") },
+            startEditing = true,
+        )
+    }
     @Test fun serverSearch() = shot("02b_servers_search", content = list("192.168"))
     @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
     @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }

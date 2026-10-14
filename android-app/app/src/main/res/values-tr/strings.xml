@@ -424,10 +424,9 @@
     <string name="error_file_exists">Bu adda bir şey zaten var.</string>
     <string name="settings_show_guide">Başlangıç rehberini göster</string>
     <string name="dashboard_edit_title">Genel bakışı düzenle</string>
-    <string name="dashboard_edit_hint">Bir kartı basılı tutup sürükleyerek taşı. Düğmelerle genişliğini değiştir veya gizle.</string>
+    <string name="dashboard_edit_hint">Bir kartı basılı tutup sürükleyerek taşı. Genişliği değiştirmek için sağdaki mavi tutamacı sürükle; göz simgesi gizler.</string>
     <string name="dashboard_edit_reset">Sıfırla</string>
     <string name="dashboard_edit_done">Bitti</string>
-    <string name="dashboard_card_width">Genişliği değiştir</string>
     <string name="dashboard_card_hide">Kartı gizle</string>
     <string name="dashboard_card_show">Kartı göster</string>
     <string name="settings_animations">Animasyonlar</string>
@@ -535,4 +534,19 @@
     <string name="demo_name">Demo sunucu</string>
     <string name="demo_banner">Örnek verilerle demo sunucu – hiçbir şey telefonundan çıkmaz.</string>
     <string name="settings_disclaimer">Resmi bir Minecraft ürünü değildir. Mojang veya Microsoft tarafından onaylanmamıştır ve onlarla ilişkili değildir.</string>
+    <string name="servers_arrange">Düzenle</string>
+    <string name="servers_arrange_hint">Bir kartın boyutunu değiştirmek için mavi tutamaçları sürükleyin. Sırayı değiştirmek için aşağıdaki bir parçayı basılı tutup sürükleyin.</string>
+    <string name="servers_arrange_card">Kart</string>
+    <string name="servers_arrange_screen">Ekran</string>
+    <string name="servers_resize">Boyutu değiştir</string>
+    <string name="part_name">Ad</string>
+    <string name="part_address">Adres</string>
+    <string name="part_status">Durum</string>
+    <string name="part_players">Oyuncular</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Sürüm</string>
+    <string name="part_motd">Açıklama (MOTD)</string>
+    <string name="block_header">Başlık</string>
+    <string name="block_search">Arama</string>
+    <string name="block_servers">Sunucular</string>
 </resources>

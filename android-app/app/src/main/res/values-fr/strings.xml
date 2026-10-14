@@ -432,10 +432,9 @@
     <string name="error_file_exists">Un élément porte déjà ce nom.</string>
     <string name="settings_show_guide">Revoir le guide de démarrage</string>
     <string name="dashboard_edit_title">Personnaliser l’aperçu</string>
-    <string name="dashboard_edit_hint">Maintenez une carte et faites-la glisser pour la déplacer. Les boutons changent sa largeur ou la masquent.</string>
+    <string name="dashboard_edit_hint">Maintenez une carte et faites-la glisser pour la déplacer. Faites glisser la poignée bleue à droite pour changer sa largeur ; l\'œil la masque.</string>
     <string name="dashboard_edit_reset">Réinitialiser</string>
     <string name="dashboard_edit_done">Terminé</string>
-    <string name="dashboard_card_width">Changer la largeur</string>
     <string name="dashboard_card_hide">Masquer la carte</string>
     <string name="dashboard_card_show">Afficher la carte</string>
     <string name="settings_animations">Animations</string>
@@ -550,4 +549,19 @@
     <string name="demo_name">Serveur de démo</string>
     <string name="demo_banner">Serveur de démo avec des données d’exemple – rien ne quitte ton téléphone.</string>
     <string name="settings_disclaimer">Produit non officiel de Minecraft. Non approuvé par Mojang ou Microsoft et sans lien avec eux.</string>
+    <string name="servers_arrange">Organiser</string>
+    <string name="servers_arrange_hint">Faites glisser les poignées bleues pour changer la taille d\'une carte. Maintenez un élément ci-dessous et faites-le glisser pour changer l\'ordre.</string>
+    <string name="servers_arrange_card">Carte</string>
+    <string name="servers_arrange_screen">Écran</string>
+    <string name="servers_resize">Changer la taille</string>
+    <string name="part_name">Nom</string>
+    <string name="part_address">Adresse</string>
+    <string name="part_status">Statut</string>
+    <string name="part_players">Joueurs</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Version</string>
+    <string name="part_motd">Description (MOTD)</string>
+    <string name="block_header">En-tête</string>
+    <string name="block_search">Recherche</string>
+    <string name="block_servers">Serveurs</string>
 </resources>

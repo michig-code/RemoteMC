@@ -24,6 +24,7 @@
         <item>Opent meteen met de laatste gegevens; offline toont hij hoe oud ze zijn</item>
         <item>Meerdere servers met mappen, vastzetten en zoeken; beperkte toegang voor moderators en kijkers</item>
         <item>Laat een server los op een andere voor een map; zet mappen bovenaan vast</item>
+        <item>Serverlijst als raster: sleep de blauwe grepen om elke kaart groter of kleiner te maken – grotere kaarten tonen meer (spelers, TPS, geheugen, versie); deel de inhoud van kaarten en het scherm zelf in</item>
         <item>Hulp en uitleg met zoeken en afbeeldingen</item>
         <item>Licht en donker, 9 kleuren of je eigen, 10 talen, tabletweergave</item>
         <item>Updates direct in de app (GitHub-versie)</item>
@@ -42,6 +43,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Serverlijst met mappen en vastzetten; sleep om te sorteren of laat een server op een andere los voor een map</item>
+        <item>Serverlijst als raster: sleep de blauwe grepen om elke kaart groter of kleiner te maken – grotere kaarten tonen meer (spelers, TPS, geheugen, versie); deel de inhoud van kaarten en het scherm zelf in</item>
         <item>Sleep tabbladen om ze te ordenen, of het venster in om twee servers naast elkaar te zien</item>
         <item>Helppagina (F1), welkomstpagina’s, taalkeuze, opnieuw koppelen, spelers zoeken en sorteren, installatieprogramma in RemoteMC-kleuren</item>
         <item>Alles van de telefoon ook op de pc: overzicht, spelers, console, chat, werelden, plugins, taken en bestanden</item>

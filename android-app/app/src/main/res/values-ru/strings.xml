@@ -440,10 +440,9 @@
     <string name="error_file_exists">Объект с таким именем уже существует.</string>
     <string name="settings_show_guide">Показать вводное руководство</string>
     <string name="dashboard_edit_title">Настроить обзор</string>
-    <string name="dashboard_edit_hint">Удерживайте карточку и перетащите её. Кнопками можно изменить ширину или скрыть её.</string>
+    <string name="dashboard_edit_hint">Удерживайте карточку и перетащите её. Потяните синий маркер справа, чтобы изменить ширину; глаз скрывает её.</string>
     <string name="dashboard_edit_reset">Сбросить</string>
     <string name="dashboard_edit_done">Готово</string>
-    <string name="dashboard_card_width">Изменить ширину</string>
     <string name="dashboard_card_hide">Скрыть карточку</string>
     <string name="dashboard_card_show">Показать карточку</string>
     <string name="settings_animations">Анимации</string>
@@ -565,4 +564,19 @@
     <string name="demo_name">Демо-сервер</string>
     <string name="demo_banner">Демо-сервер с примерами данных – ничего не покидает телефон.</string>
     <string name="settings_disclaimer">Не является официальным продуктом Minecraft. Не одобрено Mojang или Microsoft и не связано с ними.</string>
+    <string name="servers_arrange">Упорядочить</string>
+    <string name="servers_arrange_hint">Потяните за синие маркеры, чтобы изменить размер карточки. Удерживайте элемент ниже и перетащите его, чтобы изменить порядок.</string>
+    <string name="servers_arrange_card">Карточка</string>
+    <string name="servers_arrange_screen">Экран</string>
+    <string name="servers_resize">Изменить размер</string>
+    <string name="part_name">Название</string>
+    <string name="part_address">Адрес</string>
+    <string name="part_status">Статус</string>
+    <string name="part_players">Игроки</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Версия</string>
+    <string name="part_motd">Описание (MOTD)</string>
+    <string name="block_header">Заголовок</string>
+    <string name="block_search">Поиск</string>
+    <string name="block_servers">Серверы</string>
 </resources>
