@@ -463,6 +463,16 @@ class ScreenshotTest {
     @Config(qualifiers = "w840dp-h600dp-xhdpi")
     fun tablet() = shot("16_tablet") { server(Tab.Dashboard) }
 
+    /** Large font in German: "RemoteMC" stays on one line next to the help and settings buttons. */
+    @Test
+    @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")
+    fun serverListLargeFont() {
+        RuntimeEnvironment.setFontScale(1.3f)
+        shot("02d_servers_empty_large_de") {
+            ServerListScreen(emptyList(), {}, {}, { _, _ -> }, {}, {}, {}, onDemo = {}, onHelp = {})
+        }
+    }
+
     @Test
     fun largeFont() {
         RuntimeEnvironment.setFontScale(2f)

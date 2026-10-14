@@ -78,6 +78,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -513,7 +514,8 @@ private fun Header(count: Int, onSettings: () -> Unit, onHelp: (() -> Unit)?) {
         )
         Spacer(Modifier.width(16.dp))
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
+            // Always one line: with large fonts the name gets smaller instead of breaking ("RemoteM / C").
+            OneLineTitle(stringResource(R.string.app_name), MaterialTheme.typography.headlineLarge)
             Text(
                 if (count == 0) stringResource(R.string.servers_tagline) else pluralStringResource(R.plurals.servers_count, count, count),
                 style = MaterialTheme.typography.bodyMedium,
@@ -722,3 +724,19 @@ fun roleLabel(role: Role) = stringResource(
         Role.VIEWER -> R.string.role_viewer
     },
 )
+
+/** Text that stays on one line and shrinks (down to 60 %) when there is not enough room. */
+@Composable
+private fun OneLineTitle(text: String, style: androidx.compose.ui.text.TextStyle) {
+    var scale by remember(text, style) { mutableFloatStateOf(1f) }
+    Text(
+        text,
+        style = style.copy(fontSize = style.fontSize * scale, lineHeight = style.lineHeight * scale),
+        maxLines = 1,
+        softWrap = false,
+        onTextLayout = { layout ->
+            if (layout.didOverflowWidth && scale > 0.6f) scale = (scale - 0.08f).coerceAtLeast(0.6f)
+        },
+    )
+}
+
