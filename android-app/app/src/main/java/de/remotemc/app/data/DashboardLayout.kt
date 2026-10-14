@@ -17,7 +17,12 @@ enum class CardSize {
     }
 }
 
-data class DashCard(val id: String, val size: CardSize, val hidden: Boolean = false)
+/** A card of the overview; [width] in sixths of the row (1–6) when the user dragged its handle, else 0. */
+data class DashCard(val id: String, val size: CardSize, val hidden: Boolean = false, val width: Int = 0) {
+    /** Columns taken in a grid of [columns]. */
+    fun span(columns: Int): Int =
+        if (width <= 0) size.span(columns) else ((width * columns + 5) / 6).coerceIn(1, columns)
+}
 
 /**
  * Which overview cards are shown, in which order and how wide – chosen by the user by holding a
@@ -39,7 +44,14 @@ data class DashboardLayout(val cards: List<DashCard>) {
     fun resize(id: String, allowThird: Boolean) =
         DashboardLayout(cards.map { if (it.id == id) it.copy(size = it.size.next(allowThird)) else it })
 
-    fun encode(): String = cards.joinToString(",") { (if (it.hidden) "-" else "") + it.id + ":" + it.size.name.lowercase() }
+    /** Card [id] made [span] columns wide in a grid of [columns] (dragging the frame's handle). */
+    fun setSpan(id: String, span: Int, columns: Int) = DashboardLayout(
+        cards.map { if (it.id == id) it.copy(width = (span.coerceIn(1, columns) * 6 / columns).coerceIn(1, 6)) else it },
+    )
+
+    fun encode(): String = cards.joinToString(",") {
+        (if (it.hidden) "-" else "") + it.id + ":" + if (it.width > 0) it.width.toString() else it.size.name.lowercase()
+    }
 
     companion object {
         /**
@@ -53,8 +65,9 @@ data class DashboardLayout(val cards: List<DashCard>) {
                 val hidden = part.startsWith("-")
                 val (id, size) = part.removePrefix("-").split(':', limit = 2).let { it[0].trim() to it.getOrNull(1) }
                 val base = known[id] ?: return@mapNotNull null
+                val width = size?.toIntOrNull()?.takeIf { it in 1..6 } ?: 0
                 val parsed = size?.let { s -> CardSize.entries.firstOrNull { it.name.equals(s, ignoreCase = true) } } ?: base.size
-                DashCard(id, parsed, hidden)
+                DashCard(id, parsed, hidden, width)
             }.distinctBy { it.id }
             val result = saved.toMutableList()
             // A card new in this version goes right after the card it follows by default.

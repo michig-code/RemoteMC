@@ -424,10 +424,9 @@
     <string name="error_file_exists">Er bestaat al iets met deze naam.</string>
     <string name="settings_show_guide">Startgids opnieuw tonen</string>
     <string name="dashboard_edit_title">Overzicht aanpassen</string>
-    <string name="dashboard_edit_hint">Houd een kaart vast en sleep om haar te verplaatsen. Met de knoppen wijzig je de breedte of verberg je haar.</string>
+    <string name="dashboard_edit_hint">Houd een kaart vast en sleep om haar te verplaatsen. Sleep de blauwe greep rechts om de breedte te wijzigen; het oog verbergt haar.</string>
     <string name="dashboard_edit_reset">Herstellen</string>
     <string name="dashboard_edit_done">Klaar</string>
-    <string name="dashboard_card_width">Breedte wijzigen</string>
     <string name="dashboard_card_hide">Kaart verbergen</string>
     <string name="dashboard_card_show">Kaart tonen</string>
     <string name="settings_animations">Animaties</string>

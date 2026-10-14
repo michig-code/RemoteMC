@@ -249,11 +249,18 @@ fun ServerListScreen(
         return bounds.entries.firstOrNull { (id, b) -> id != self && id in shownIds && b.middle(c) }?.key
     }
     LaunchedEffect(hoverTarget) { if (hoverTarget != null) haptics.tick() }
-    /** Another server only swaps with the held one while that is not over its middle part. */
-    fun canSwap(id: String): Boolean {
+    /** Another server only swaps with the held one once that is past its middle part. */
+    fun canSwap(id: String, rowIndex: Int): Boolean {
         val (heldId, rect) = held ?: return true
         val b = bounds[id] ?: return true
-        return id == heldId || !b.middle(rect.center)
+        if (id == heldId) return true
+        val c = rect.center
+        val inBand = c.y in (b.top + b.height * 0.3f)..(b.bottom - b.height * 0.3f)
+        return if (rowIndex < rows.indexOfFirst { it.key == heldId }) {
+            c.y < b.top + b.height * 0.3f || (inBand && c.x < b.left + b.width * 0.25f)
+        } else {
+            c.y > b.bottom - b.height * 0.3f || (inBand && c.x > b.right - b.width * 0.25f)
+        }
     }
 
     // Pull down to check all servers again (also those in collapsed folders).
@@ -380,7 +387,7 @@ fun ServerListScreen(
                                         onRemove = { removingFolder = row.name },
                                         onPin = { haptics.tap(); onPinFolder(row.name, !row.pinned) },
                                     ) }
-                                    is ListRow.Server -> ReorderableItem(reorder, key = row.key, enabled = canSwap(row.key)) { dragging ->
+                                    is ListRow.Server -> ReorderableItem(reorder, key = row.key, enabled = canSwap(row.key, i)) { dragging ->
                                         val server = row.server
                                         val (w, h) = sizeOf(server)
                                         val framed = editing || selected == server.id

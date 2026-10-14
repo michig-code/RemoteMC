@@ -115,7 +115,7 @@ fun DashboardTab(
     EditableDashboard(
         layout = layout,
         defaults = defaults,
-        columns = if (wide) 6 else 2,
+        columns = if (wide) 6 else 4,
         onChange = { onLayout(it.encode()) },
         startEditing = startEditing,
         header = {

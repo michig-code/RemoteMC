@@ -424,10 +424,9 @@
     <string name="error_file_exists">Bu adda bir şey zaten var.</string>
     <string name="settings_show_guide">Başlangıç rehberini göster</string>
     <string name="dashboard_edit_title">Genel bakışı düzenle</string>
-    <string name="dashboard_edit_hint">Bir kartı basılı tutup sürükleyerek taşı. Düğmelerle genişliğini değiştir veya gizle.</string>
+    <string name="dashboard_edit_hint">Bir kartı basılı tutup sürükleyerek taşı. Genişliği değiştirmek için sağdaki mavi tutamacı sürükle; göz simgesi gizler.</string>
     <string name="dashboard_edit_reset">Sıfırla</string>
     <string name="dashboard_edit_done">Bitti</string>
-    <string name="dashboard_card_width">Genişliği değiştir</string>
     <string name="dashboard_card_hide">Kartı gizle</string>
     <string name="dashboard_card_show">Kartı göster</string>
     <string name="settings_animations">Animasyonlar</string>
