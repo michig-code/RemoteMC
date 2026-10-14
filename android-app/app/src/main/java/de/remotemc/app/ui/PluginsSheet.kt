@@ -63,16 +63,8 @@ import kotlinx.coroutines.launch
 
 /** Card on the overview that opens the plugin list. */
 @Composable
-internal fun PluginsRow(onClick: () -> Unit) {
-    McCard(Modifier.fillMaxWidth(), onClick = onClick) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Extension, null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(12.dp))
-            Text(stringResource(R.string.dashboard_plugins), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
+internal fun PluginsRow(onClick: () -> Unit) =
+    ManageRow(Icons.Outlined.Extension, stringResource(R.string.dashboard_plugins), stringResource(R.string.plugins_row_text), onClick)
 
 /** Installed plugins with version, authors and whether they are enabled; admins can add and remove them. */
 @OptIn(ExperimentalMaterial3Api::class)

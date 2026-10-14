@@ -158,9 +158,9 @@
     <string name="pair_scan_text">En hızlısı: kamerayı haritaya veya konsola tut</string>
     <string name="pair_enter_code">Kodu gir</string>
     <string name="pair_enter_code_text">Adresi ve 6 haneli kodu yaz</string>
-    <string name="pair_use_token">Erişim anahtarıyla bağlan</string>
+    <string name="pair_use_token">Gelişmiş: erişim anahtarıyla bağlan</string>
     <string name="pair_code_form_text">Sunucunun adresini, portunu ve /remotemc pair sonrasında gösterilen kodu gir.</string>
-    <string name="pair_token_form_text">/remotemc token create ile oluşturulan anahtarlar için.</string>
+    <string name="pair_token_form_text">Yalnızca bir admin sana uzun bir erişim anahtarı verdiyse (rmc_ ile başlar, /remotemc token create ile oluşturulur). Normalde buna gerek yok – 6 haneli kodu kullan.</string>
     <string name="pair_address">Adres</string>
     <string name="pair_port">RemoteMC portu</string>
     <string name="pair_code">6 haneli kod</string>

@@ -172,9 +172,9 @@
     <string name="pair_scan_text">Najszybciej: skieruj aparat na mapę lub konsolę</string>
     <string name="pair_enter_code">Wpisz kod</string>
     <string name="pair_enter_code_text">Wpisz adres i 6-cyfrowy kod</string>
-    <string name="pair_use_token">Połącz za pomocą tokenu dostępu</string>
+    <string name="pair_use_token">Zaawansowane: połącz za pomocą tokenu dostępu</string>
     <string name="pair_code_form_text">Wpisz adres i port serwera oraz kod wyświetlony po /remotemc pair.</string>
-    <string name="pair_token_form_text">Dla tokenów utworzonych przez /remotemc token create.</string>
+    <string name="pair_token_form_text">Tylko jeśli admin dał ci długi token dostępu (zaczyna się od rmc_, utworzony przez /remotemc token create). Zwykle nie jest potrzebny – użyj 6-cyfrowego kodu.</string>
     <string name="pair_address">Adres</string>
     <string name="pair_port">Port RemoteMC</string>
     <string name="pair_code">6-cyfrowy kod</string>

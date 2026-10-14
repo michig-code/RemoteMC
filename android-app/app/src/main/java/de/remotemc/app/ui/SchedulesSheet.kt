@@ -75,12 +75,26 @@ import kotlinx.coroutines.launch
 
 /** Card on the overview that opens the scheduled tasks. */
 @Composable
-internal fun SchedulesRow(onClick: () -> Unit) {
+internal fun SchedulesRow(onClick: () -> Unit) =
+    ManageRow(Icons.Outlined.Schedule, stringResource(R.string.schedules_title), stringResource(R.string.schedules_row_text), onClick)
+
+/** Card on the overview that opens a management screen, with a line saying what it is for. */
+@Composable
+internal fun ManageRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, text: String, onClick: () -> Unit) {
     McCard(Modifier.fillMaxWidth(), onClick = onClick) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Schedule, null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(12.dp))
-            Text(stringResource(R.string.schedules_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

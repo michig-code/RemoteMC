@@ -158,9 +158,9 @@
     <string name="pair_scan_text">Het snelst: richt je camera op de kaart of de console</string>
     <string name="pair_enter_code">Code invoeren</string>
     <string name="pair_enter_code_text">Typ het adres en de 6-cijferige code</string>
-    <string name="pair_use_token">Verbinden met een toegangstoken</string>
+    <string name="pair_use_token">Gevorderd: verbinden met een toegangstoken</string>
     <string name="pair_code_form_text">Voer het adres en de poort van je server in, plus de code die na /remotemc pair wordt getoond.</string>
-    <string name="pair_token_form_text">Voor tokens gemaakt met /remotemc token create.</string>
+    <string name="pair_token_form_text">Alleen als een admin je een lange toegangstoken gaf (begint met rmc_, gemaakt met /remotemc token create). Meestal heb je dit niet nodig – gebruik de 6-cijferige code.</string>
     <string name="pair_address">Adres</string>
     <string name="pair_port">RemoteMC-poort</string>
     <string name="pair_code">6-cijferige code</string>

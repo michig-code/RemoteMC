@@ -43,6 +43,7 @@ import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
 import de.remotemc.app.ui.ServerViewModel
+import de.remotemc.app.ui.HelpScreen
 import de.remotemc.app.ui.SettingsScreen
 import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.pair.PairScreen
@@ -107,6 +108,7 @@ private object Routes {
     const val SCAN = "scan"
     const val SERVER = "server/{id}"
     const val SETTINGS = "settings"
+    const val HELP = "help"
 
     fun pair(repair: String? = null) = if (repair == null) "pair" else "pair?repair=$repair"
     fun server(id: String) = "server/$id"
@@ -204,6 +206,7 @@ private fun AppNavigation(
                 onReorder = repo::setOrder,
                 onToggleNotify = { repo.upsert(it.copy(notify = !it.notify)) },
                 alertsOn = settings.alerts.enabled,
+                onHelp = { nav.navigate(Routes.HELP) },
                 onDemo = {
                     repo.upsert(DemoServer.profile(context.getString(R.string.demo_name)))
                     nav.navigate(Routes.server(DemoServer.ID))
@@ -254,14 +257,18 @@ private fun AppNavigation(
             val vm: ServerViewModel = viewModel(
                 factory = viewModelFactory { initializer { ServerViewModel(context.app, profile) } },
             )
-            ServerScreen(vm, onBack = { nav.popBackStack() }, onRepair = { nav.navigate(Routes.pair(id)) })
+            ServerScreen(vm, onBack = { nav.popBackStack() }, onRepair = { nav.navigate(Routes.pair(id)) }, onHelp = { nav.navigate(Routes.HELP) })
         }
         composable(Routes.SETTINGS) {
             val settings by context.app.settings.settings.collectAsState()
             SettingsScreen(
                 settings, onChange = context.app.settings::update, onBack = { nav.popBackStack() },
                 onShowGuide = { nav.navigate(Routes.GUIDE) },
+                onHelp = { nav.navigate(Routes.HELP) },
             )
+        }
+        composable(Routes.HELP) {
+            HelpScreen(onBack = { nav.popBackStack() })
         }
     }
 }

@@ -152,6 +152,14 @@ private val WideDefaults = listOf(
 @Composable
 private fun Worlds(worlds: List<WorldInfo>, onOpen: ((String) -> Unit)?) {
     SectionTitle(stringResource(R.string.dashboard_worlds))
+    if (onOpen != null) {
+        Text(
+            stringResource(R.string.worlds_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+        )
+    }
     worlds.forEachIndexed { i, w -> WorldRow(w, Modifier.staggeredAppear(6 + i), onOpen?.let { { it(w.name) } }) }
 }
 

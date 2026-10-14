@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
@@ -166,6 +167,8 @@ class ServerActions(
     /** The same action for several selected players (null: no multi-select). */
     val onPlayerBatch: ((players: List<String>, action: String, body: JSONObject) -> Unit)? = null,
     val playerDetails: PlayerDetails = PlayerDetails(),
+    /** Opens the help page; null hides the button. */
+    val onHelp: (() -> Unit)? = null,
 )
 
 /** Files in the server folder; paths are relative to it ("" = the folder itself). */
@@ -209,7 +212,7 @@ class ModerationActions(
 )
 
 @Composable
-fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) {
+fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit, onHelp: (() -> Unit)? = null) {
     val snackbar = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -285,6 +288,7 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
                 note = { uuid -> context.app.notes.get(vm.profile.id, uuid) },
                 setNote = { uuid, text -> context.app.notes.set(vm.profile.id, uuid, text) },
             ),
+            onHelp = onHelp,
         ),
         snackbar = snackbar,
     )
@@ -350,6 +354,11 @@ fun ServerScreenContent(
                 navigationIcon = {
                     IconButton(onClick = actions.onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                    }
+                },
+                actions = {
+                    actions.onHelp?.let { help ->
+                        IconButton(onClick = help) { Icon(Icons.AutoMirrored.Outlined.HelpOutline, stringResource(R.string.help_title)) }
                     }
                 },
             )

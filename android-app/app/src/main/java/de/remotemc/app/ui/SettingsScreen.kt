@@ -36,6 +36,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -120,6 +121,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     versionName: String = BuildConfig.VERSION_NAME + if (BuildConfig.STORE == "play") " · Google Play" else "",
     onShowGuide: () -> Unit = {},
+    onHelp: (() -> Unit)? = null,
 ) {
     val uri = LocalUriHandler.current
     val view = LocalView.current
@@ -146,6 +148,24 @@ fun SettingsScreen(
                 Modifier.widthIn(max = 640.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                // Help first: people who look for something often look in the settings.
+                if (onHelp != null) {
+                    McCard(Modifier.fillMaxWidth(), onClick = onHelp) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.AutoMirrored.Outlined.HelpOutline, null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(16.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(stringResource(R.string.help_title), style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    stringResource(R.string.help_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
                 SectionTitle(stringResource(R.string.settings_this_phone))
                 McCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {

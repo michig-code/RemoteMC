@@ -276,7 +276,7 @@ class ScreenshotTest {
 
     @Test fun onboarding() = shot("13_onboarding") { OnboardingScreen("Pixel 8", {}) }
     @Test fun onboardingName() = shot("13b_onboarding_name") { OnboardingScreen("Pixel 8", {}, onlyName = true) }
-    @Test fun history() = shot("20_history") {
+    private val historyData: de.remotemc.app.data.PerformanceHistory get() {
         val now = 1_760_000_000_000L
         val points = (0 until 288).map { i ->
             val t = now - (288 - i) * 300_000L
@@ -286,7 +286,11 @@ class ScreenshotTest {
                 (3 + 8 * kotlin.math.sin(i / 288.0 * 2 * Math.PI).coerceAtLeast(0.0)).toInt(),
             )
         }.filterIndexed { i, _ -> i !in 230..245 } // server was off
-        val data = de.remotemc.app.data.PerformanceHistory(now - 86_400_000L, now, 300_000L, points)
+        return de.remotemc.app.data.PerformanceHistory(now - 86_400_000L, now, 300_000L, points)
+    }
+
+    @Test fun history() = shot("20_history") {
+        val data = historyData
         androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
             androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.padding(16.dp)) { HistoryCard({ data }) }
         }
@@ -344,6 +348,30 @@ class ScreenshotTest {
         androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
             de.remotemc.app.ui.DashboardTab(status, null, startEditing = true, layoutText = "players:full,-tps_trend:full,gauges:half,memory:half")
         }
+    }
+
+    /** The whole overview on one tall screen (help pictures show the cards further down). */
+    @Test @Config(qualifiers = "w400dp-h1900dp-xxhdpi") fun dashboardFull() = shot("27_dashboard_full") {
+        androidx.compose.material3.Surface(color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
+            de.remotemc.app.ui.DashboardTab(
+                status.copy(features = status.features + "files"), null,
+                loadHistory = { historyData },
+                worldActions = de.remotemc.app.ui.WorldActions({ error("unused") }, { _, _, _ -> error("unused") }),
+                loadPlugins = { emptyList() },
+                schedules = de.remotemc.app.ui.ScheduleActions({ error("unused") }, { error("unused") }, { error("unused") }, { error("unused") }),
+                files = fileActions,
+            )
+        }
+    }
+
+    @Test fun help() = shot("28_help") { de.remotemc.app.ui.HelpScreen({}) }
+    /** A single search hit opens with its picture. */
+    @Test fun helpSearch() = shot("28b_help_search") { de.remotemc.app.ui.HelpScreen({}, initialQuery = "macro") }
+    @Test
+    @Config(qualifiers = "de-w400dp-h860dp-xxhdpi")
+    fun helpGerman() = shot("28c_help_de") {
+        // Searching ignores case and accents.
+        de.remotemc.app.ui.HelpScreen({}, initialQuery = "ubersicht anpassen")
     }
 
     @Test fun files() = shot("24_files") { de.remotemc.app.ui.FolderView(fileActions, "", {}, {}, {}) }

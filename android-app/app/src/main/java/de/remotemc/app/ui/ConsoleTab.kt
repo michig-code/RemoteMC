@@ -74,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -219,11 +220,41 @@ fun ConsoleTab(
                 },
             )
         }
+        // Labelled buttons above the log (they used to float over the text).
+        if (!searchOpen && entries.isNotEmpty()) {
+            val clipboard = LocalClipboardManager.current
+            val context = LocalContext.current
+            val copied = stringResource(R.string.console_copied)
+            Row(Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 4.dp), horizontalArrangement = Arrangement.End) {
+                // Screen readers hear the longer "Search console" / "Copy console".
+                val searchLabel = stringResource(R.string.console_search)
+                val copyLabel = stringResource(R.string.console_copy)
+                TextButton(onClick = { haptics.tap(); searchOpen = true }, modifier = Modifier.semantics { contentDescription = searchLabel }) {
+                    Icon(Icons.Outlined.Search, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.action_search))
+                }
+                TextButton(
+                    onClick = {
+                        haptics.tap()
+                        // Copies what is shown (all lines, or only the filtered ones).
+                        clipboard.setText(AnnotatedString(shown.joinToString("\n") { it.text }))
+                        // Android 13+ shows its own confirmation for copied text.
+                        if (Build.VERSION.SDK_INT < 33) Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.semantics { contentDescription = copyLabel },
+                ) {
+                    Icon(Icons.Outlined.ContentCopy, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.action_copy))
+                }
+            }
+        }
         Box(
             Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+                .padding(start = 12.dp, end = 12.dp, top = if (searchOpen || entries.isEmpty()) 8.dp else 0.dp)
                 .clip(MaterialTheme.shapes.large)
                 .background(McColors.Terminal),
         ) {
@@ -247,29 +278,6 @@ fun ConsoleTab(
                     items(reversed, key = { it.key }) { line ->
                         ConsoleLineView(line, highlight = query, current = line.key == selectedKey)
                     }
-                }
-            }
-            if (entries.isNotEmpty()) {
-                val clipboard = LocalClipboardManager.current
-                val context = LocalContext.current
-                val copied = stringResource(R.string.console_copied)
-                Row(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                    if (!searchOpen) {
-                        IconButton(
-                            onClick = { haptics.tap(); searchOpen = true },
-                            modifier = Modifier.background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
-                        ) { Icon(Icons.Outlined.Search, stringResource(R.string.console_search), tint = TerminalDim) }
-                    }
-                    IconButton(
-                        onClick = {
-                            haptics.tap()
-                            // Copies what is shown (all lines, or only the filtered ones).
-                            clipboard.setText(AnnotatedString(shown.joinToString("\n") { it.text }))
-                            // Android 13+ shows its own confirmation for copied text.
-                            if (Build.VERSION.SDK_INT < 33) Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier.background(McColors.Terminal.copy(alpha = 0.85f), CircleShape),
-                    ) { Icon(Icons.Outlined.ContentCopy, stringResource(R.string.console_copy), tint = TerminalDim) }
                 }
             }
             androidx.compose.animation.AnimatedVisibility(

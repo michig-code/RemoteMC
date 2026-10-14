@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandMore
@@ -173,6 +174,7 @@ fun ServerListScreen(
     initialQuery: String = "",
     /** Adds and opens the built-in demo server (shown while the list is empty). */
     onDemo: (() -> Unit)? = null,
+    onHelp: (() -> Unit)? = null,
 ) {
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
@@ -236,7 +238,7 @@ fun ServerListScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(key = "header") { Header(servers.size, onSettings) }
+                item(key = "header") { Header(servers.size, onSettings, onHelp) }
                 if (servers.isEmpty()) {
                     item(key = "empty") {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -492,7 +494,7 @@ private fun MoveToFolderDialog(current: String, folders: List<String>, onDismiss
 }
 
 @Composable
-private fun Header(count: Int, onSettings: () -> Unit) {
+private fun Header(count: Int, onSettings: () -> Unit, onHelp: (() -> Unit)?) {
     // Logo pops in with a little bounce and wobble on first show.
     val scale = remember { Animatable(0.4f) }
     val rotation = remember { Animatable(-18f) }
@@ -517,6 +519,9 @@ private fun Header(count: Int, onSettings: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        if (onHelp != null) {
+            IconButton(onClick = onHelp) { Icon(Icons.AutoMirrored.Outlined.HelpOutline, stringResource(R.string.help_title)) }
         }
         IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, stringResource(R.string.settings_title)) }
     }

@@ -222,6 +222,27 @@ private fun FormStep(vm: PairViewModel, method: PairMethod) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     ErrorBox(vm.error)
+    // The code or token first: it is what tells the two forms apart.
+    if (method == PairMethod.CODE) {
+        OutlinedTextField(
+            vm.code, { vm.code = it.filter(Char::isDigit).take(6) },
+            label = { Text(stringResource(R.string.pair_code)) },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.headlineSmall.copy(letterSpacing = 8.sp, fontFamily = FontFamily.Monospace),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        OutlinedTextField(
+            vm.token, { vm.token = it.trim() },
+            label = { Text(stringResource(R.string.pair_token)) },
+            placeholder = { Text("rmc_…") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
     OutlinedTextField(
         vm.host, { vm.host = it.trim() },
         label = { Text(stringResource(R.string.pair_address)) },
@@ -235,29 +256,10 @@ private fun FormStep(vm: PairViewModel, method: PairMethod) {
         label = { Text(stringResource(R.string.pair_port)) },
         singleLine = true,
         isError = vm.port.isNotEmpty() && !portValid,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { if (valid) vm.submitForm(method) }),
         modifier = Modifier.fillMaxWidth(),
     )
-    if (method == PairMethod.CODE) {
-        OutlinedTextField(
-            vm.code, { vm.code = it.filter(Char::isDigit).take(6) },
-            label = { Text(stringResource(R.string.pair_code)) },
-            singleLine = true,
-            textStyle = MaterialTheme.typography.headlineSmall.copy(letterSpacing = 8.sp, fontFamily = FontFamily.Monospace),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { if (valid) vm.submitForm(method) }),
-            modifier = Modifier.fillMaxWidth(),
-        )
-    } else {
-        OutlinedTextField(
-            vm.token, { vm.token = it.trim() },
-            label = { Text(stringResource(R.string.pair_token)) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.pair_https), style = MaterialTheme.typography.bodyLarge)

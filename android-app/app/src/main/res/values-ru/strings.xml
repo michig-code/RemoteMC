@@ -172,9 +172,9 @@
     <string name="pair_scan_text">Быстрее всего: наведите камеру на карту или консоль</string>
     <string name="pair_enter_code">Ввести код</string>
     <string name="pair_enter_code_text">Введите адрес и 6-значный код</string>
-    <string name="pair_use_token">Подключиться по токену доступа</string>
+    <string name="pair_use_token">Для опытных: подключиться по токену доступа</string>
     <string name="pair_code_form_text">Введите адрес и порт сервера, а также код, показанный после /remotemc pair.</string>
-    <string name="pair_token_form_text">Для токенов, созданных через /remotemc token create.</string>
+    <string name="pair_token_form_text">Только если админ дал вам длинный токен доступа (начинается с rmc_, создан через /remotemc token create). Обычно это не нужно – используйте 6-значный код.</string>
     <string name="pair_address">Адрес</string>
     <string name="pair_port">Порт RemoteMC</string>
     <string name="pair_code">6-значный код</string>

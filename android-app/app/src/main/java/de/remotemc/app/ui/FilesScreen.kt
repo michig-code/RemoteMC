@@ -88,16 +88,8 @@ import java.util.Date
 
 /** Card on the overview that opens the server folder. */
 @Composable
-internal fun FilesRow(onClick: () -> Unit) {
-    McCard(Modifier.fillMaxWidth(), onClick = onClick) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.FolderOpen, null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(12.dp))
-            Text(stringResource(R.string.files_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
+internal fun FilesRow(onClick: () -> Unit) =
+    ManageRow(Icons.Outlined.FolderOpen, stringResource(R.string.files_title), stringResource(R.string.files_row_text), onClick)
 
 /** Full-screen file manager for the server folder: browse, edit text files, upload, delete. */
 @Composable

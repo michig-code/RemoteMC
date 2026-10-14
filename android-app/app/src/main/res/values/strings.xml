@@ -183,9 +183,9 @@
     <string name="pair_scan_text">Fastest: point your camera at the map or console</string>
     <string name="pair_enter_code">Enter code</string>
     <string name="pair_enter_code_text">Type the address and 6-digit code</string>
-    <string name="pair_use_token">Connect with an access token</string>
+    <string name="pair_use_token">Advanced: connect with an access token</string>
     <string name="pair_code_form_text">Enter the address and port of your server and the code shown after /remotemc pair.</string>
-    <string name="pair_token_form_text">For tokens created with /remotemc token create.</string>
+    <string name="pair_token_form_text">Only if an admin gave you a long access token (starts with rmc_, made with /remotemc token create). Normally you don’t need this – use the 6-digit code instead.</string>
     <string name="pair_address">Address</string>
     <string name="pair_port">RemoteMC port</string>
     <string name="pair_code">6-digit code</string>

@@ -165,9 +165,9 @@
     <string name="pair_scan_text">Le plus rapide : visez la carte ou la console avec l\'appareil photo</string>
     <string name="pair_enter_code">Saisir le code</string>
     <string name="pair_enter_code_text">Saisissez l\'adresse et le code à 6 chiffres</string>
-    <string name="pair_use_token">Se connecter avec un jeton d\'accès</string>
+    <string name="pair_use_token">Avancé : se connecter avec un jeton d’accès</string>
     <string name="pair_code_form_text">Saisissez l\'adresse et le port de votre serveur ainsi que le code affiché après /remotemc pair.</string>
-    <string name="pair_token_form_text">Pour les jetons créés avec /remotemc token create.</string>
+    <string name="pair_token_form_text">Seulement si un admin vous a donné un long jeton d’accès (commence par rmc_, créé avec /remotemc token create). En général, ce n’est pas nécessaire – utilisez le code à 6 chiffres.</string>
     <string name="pair_address">Adresse</string>
     <string name="pair_port">Port RemoteMC</string>
     <string name="pair_code">Code à 6 chiffres</string>
