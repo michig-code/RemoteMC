@@ -22,15 +22,21 @@ concurrency:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    # When the comparison fails (e.g. after a branch was renamed), everything is built.
     outputs:
-      plugin: ${{ steps.filter.outputs.plugin }}
-      android: ${{ steps.filter.outputs.android }}
-      desktop: ${{ steps.filter.outputs.desktop }}
+      plugin: ${{ steps.filter.outcome == 'success' && steps.filter.outputs.plugin || 'true' }}
+      android: ${{ steps.filter.outcome == 'success' && steps.filter.outputs.android || 'true' }}
+      desktop: ${{ steps.filter.outcome == 'success' && steps.filter.outputs.desktop || 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
+        continue-on-error: true
         with:
+          # A push is compared with the commit before it, not with a branch name.
+          base: ${{ github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && github.event.before || '' }}
           filters: |
             plugin:
               - 'plugin/**'
