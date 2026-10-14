@@ -565,4 +565,19 @@
     <string name="demo_name">Демо-сервер</string>
     <string name="demo_banner">Демо-сервер с примерами данных – ничего не покидает телефон.</string>
     <string name="settings_disclaimer">Не является официальным продуктом Minecraft. Не одобрено Mojang или Microsoft и не связано с ними.</string>
+    <string name="servers_arrange">Упорядочить</string>
+    <string name="servers_arrange_hint">Потяните за синие маркеры, чтобы изменить размер карточки. Удерживайте элемент ниже и перетащите его, чтобы изменить порядок.</string>
+    <string name="servers_arrange_card">Карточка</string>
+    <string name="servers_arrange_screen">Экран</string>
+    <string name="servers_resize">Изменить размер</string>
+    <string name="part_name">Название</string>
+    <string name="part_address">Адрес</string>
+    <string name="part_status">Статус</string>
+    <string name="part_players">Игроки</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Версия</string>
+    <string name="part_motd">Описание (MOTD)</string>
+    <string name="block_header">Заголовок</string>
+    <string name="block_search">Поиск</string>
+    <string name="block_servers">Серверы</string>
 </resources>

@@ -34,6 +34,9 @@ data class ServerProfile(
     val folderPinned: Boolean = false,
     /** Background notifications for this server (when they are on in the settings). */
     val notify: Boolean = true,
+    /** Size of its card in the server list, in grid cells; 0 = the default size (see [CardGrid]). */
+    val cardW: Int = 0,
+    val cardH: Int = 0,
 ) {
     val baseUrl: String
         get() {
@@ -63,6 +66,8 @@ data class ServerProfile(
         .put("folder", folder)
         .put("folderPinned", folderPinned)
         .put("notify", notify)
+        .put("cardW", cardW)
+        .put("cardH", cardH)
 
     companion object {
         fun fromJson(o: JSONObject) = ServerProfile(
@@ -80,6 +85,8 @@ data class ServerProfile(
             folder = o.optString("folder"),
             folderPinned = o.optBoolean("folderPinned", false),
             notify = o.optBoolean("notify", true),
+            cardW = o.optInt("cardW", 0),
+            cardH = o.optInt("cardH", 0),
         )
     }
 }

@@ -2,6 +2,35 @@ package de.remotemc.app.ui
 
 import android.annotation.SuppressLint
 import android.os.SystemClock
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.outlined.DashboardCustomize
+import androidx.compose.material.icons.outlined.DragIndicator
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import de.remotemc.app.data.CardGrid
+import de.remotemc.app.data.CardPart
+import de.remotemc.app.data.ListLayout
+import de.remotemc.app.data.ScreenBlock
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -28,7 +57,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -187,6 +215,14 @@ fun ServerListScreen(
     initialQuery: String = "",
     /** Adds and opens the built-in demo server (shown while the list is empty). */
     onDemo: (() -> Unit)? = null,
+    /** Card parts and screen blocks as arranged by the user. */
+    layout: ListLayout = ListLayout(),
+    onLayout: (ListLayout) -> Unit = {},
+    /** New card size in grid cells. */
+    onResize: (ServerProfile, Int, Int) -> Unit = { _, _, _ -> },
+    /** All cards back to their default size ("Reset" in edit mode). */
+    onResetSizes: () -> Unit = {},
+    startEditing: Boolean = false, // screenshot tests
 ) {
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
@@ -210,20 +246,14 @@ fun ServerListScreen(
     val shownIds = rows.mapNotNullTo(HashSet()) { (it as? ListRow.Server)?.server?.id }
     fun targetUnder(dragged: Rect, self: String): String? {
         val c = dragged.center
-        return bounds.entries.firstOrNull { (id, b) ->
-            id != self && id in shownIds && c.x in b.left..b.right &&
-                c.y in (b.top + b.height * 0.3f)..(b.bottom - b.height * 0.3f)
-        }?.key
+        return bounds.entries.firstOrNull { (id, b) -> id != self && id in shownIds && b.middle(c) }?.key
     }
     LaunchedEffect(hoverTarget) { if (hoverTarget != null) haptics.tick() }
-    /** Another server only swaps with the held one once that is past its middle part. */
-    fun canSwap(id: String, rowIndex: Int): Boolean {
+    /** Another server only swaps with the held one while that is not over its middle part. */
+    fun canSwap(id: String): Boolean {
         val (heldId, rect) = held ?: return true
         val b = bounds[id] ?: return true
-        if (id == heldId) return true
-        val heldIndex = rows.indexOfFirst { it.key == heldId }
-        val y = rect.center.y
-        return if (rowIndex < heldIndex) y < b.top + b.height * 0.3f else y > b.bottom - b.height * 0.3f
+        return id == heldId || !b.middle(rect.center)
     }
 
     // Pull down to check all servers again (also those in collapsed folders).
@@ -245,131 +275,214 @@ fun ServerListScreen(
         }
     }
 
-    val listState = rememberLazyListState()
-    val reorder = rememberReorderableLazyListState(listState) { from, to ->
-        val id = from.key as? String ?: return@rememberReorderableLazyListState
-        val result = drop(servers, rows, id, to.key, collapsed) ?: return@rememberReorderableLazyListState
+    val gridState = rememberLazyGridState()
+    val reorder = rememberReorderableLazyGridState(gridState) { from, to ->
+        val id = from.key as? String ?: return@rememberReorderableLazyGridState
+        val result = drop(servers, rows, id, to.key, collapsed) ?: return@rememberReorderableLazyGridState
         result.expand?.let { collapsed = collapsed - it }
         onReorder(result.servers)
         haptics.tick()
     }
 
+    // Arranging: in edit mode every card has the blue frame; otherwise holding a card without
+    // moving it selects just that one. The frame's handles change its size in grid cells.
+    var editing by rememberSaveable { mutableStateOf(startEditing) }
+    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    var preview by remember { mutableStateOf<Triple<String, Int, Int>?>(null) } // size while a handle is dragged
+    var dragOrigin by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var gridWidth by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val cellW = with(density) { (gridWidth - (32 - 12).dp.toPx()) / GridColumns }
+    val cellH = with(density) { (RowUnit + 12.dp).toPx() }
+    fun sizeOf(server: ServerProfile): Pair<Int, Int> =
+        preview?.takeIf { it.first == server.id }?.let { it.second to it.third } ?: CardGrid.size(server, GridColumns)
+    if (editing || selected != null) BackHandler { editing = false; selected = null }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onAdd,
-                icon = { Icon(Icons.Default.Add, null) },
-                text = { Text(stringResource(R.string.servers_add)) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            )
+            if (!editing) {
+                ExtendedFloatingActionButton(
+                    onClick = onAdd,
+                    icon = { Icon(Icons.Default.Add, null) },
+                    text = { Text(stringResource(R.string.servers_add)) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
         },
     ) { padding ->
-        PullToRefreshBox(refreshing, refresh, Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            LazyColumn(
-                Modifier.fillMaxSize().widthIn(max = 720.dp),
-                state = listState,
+        PullToRefreshBox(
+            refreshing, refresh,
+            // A tap next to the cards ends the selection.
+            Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { selected = null } },
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            LazyVerticalGrid(
+                GridCells.Fixed(GridColumns),
+                Modifier.fillMaxSize().widthIn(max = 720.dp).onSizeChanged { gridWidth = it.width },
+                state = gridState,
                 contentPadding = PaddingValues(
                     start = 16.dp, end = 16.dp,
                     top = padding.calculateTopPadding() + 24.dp,
-                    bottom = padding.calculateBottomPadding() + 96.dp,
+                    bottom = padding.calculateBottomPadding() + if (editing) 300.dp else 96.dp,
                 ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(key = "header") { Header(servers.size, onSettings) }
-                if (servers.isEmpty()) {
-                    item(key = "empty") {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            EmptyState(Icons.Outlined.Dns, stringResource(R.string.servers_empty_title), stringResource(R.string.servers_empty_text))
-                            if (onDemo != null) {
-                                OutlinedButton(onClick = onDemo) { Text(stringResource(R.string.demo_try)) }
-                            }
+                val full: (androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope.() -> GridItemSpan) = { GridItemSpan(maxLineSpan) }
+                layout.blocks.forEach { block ->
+                    when (block) {
+                        ScreenBlock.HEADER -> item(key = "header", span = full) {
+                            Header(servers.size, onSettings, onEdit = if (servers.isEmpty()) null else { { haptics.heavy(); selected = null; editing = true } })
                         }
-                    }
-                } else {
-                    if (servers.size > 1) {
-                        item(key = "search") { SearchField(query) { query = it } }
-                    }
-                    if (rows.isEmpty()) {
-                        item(key = "no-match") {
-                            Text(
-                                stringResource(R.string.servers_no_match, query.trim()),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-                                textAlign = TextAlign.Center,
-                            )
+                        ScreenBlock.SEARCH -> if (servers.size > 1) {
+                            item(key = "search", span = full) { SearchField(query) { query = it } }
                         }
-                    }
-                    itemsIndexed(rows, key = { _, row -> row.key }) { i, row ->
-                        when (row) {
-                            // Nothing can go above the first title (it would only stall the drag).
-                            is ListRow.Title -> ReorderableItem(reorder, key = row.key, enabled = i > 0) {
-                                SectionTitle(stringResource(if (row.title == ListTitle.PINNED) R.string.servers_pinned else R.string.servers_title))
+                        ScreenBlock.SERVERS -> if (servers.isEmpty()) {
+                            item(key = "empty", span = full) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    EmptyState(Icons.Outlined.Dns, stringResource(R.string.servers_empty_title), stringResource(R.string.servers_empty_text))
+                                    if (onDemo != null) {
+                                        OutlinedButton(onClick = onDemo) { Text(stringResource(R.string.demo_try)) }
+                                    }
+                                }
                             }
-                            is ListRow.Folder -> ReorderableItem(reorder, key = row.key) { FolderHeader(
-                                row,
-                                onToggle = {
-                                    haptics.tap()
-                                    collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name
-                                },
-                                onRename = { renamingFolder = row.name },
-                                onRemove = { removingFolder = row.name },
-                                onPin = { haptics.tap(); onPinFolder(row.name, !row.pinned) },
-                            ) }
-                            is ListRow.Server -> ReorderableItem(reorder, key = row.key, enabled = canSwap(row.key, i)) { dragging ->
-                                val server = row.server
-                                ServerCard(
-                                    server = server,
-                                    probe = probe,
-                                    refreshTick = refreshTick,
-                                    dragging = dragging,
-                                    dropTarget = hoverTarget == server.id,
-                                    onOpen = { onOpen(server) },
-                                    onRename = { renaming = server },
-                                    onPin = { onPin(server, !server.pinned) },
-                                    onMoveToFolder = { moving = server },
-                                    alertsOn = alertsOn,
-                                    onToggleNotify = { onToggleNotify(server) },
-                                    onRepair = { onRepair(server) },
-                                    onDelete = { deleting = server },
-                                    // Hold a server to drag it; not while searching, the list is filtered then.
-                                    modifier = Modifier
-                                        .longPressDraggableHandle(
-                                            enabled = query.isBlank(),
-                                            onDragStarted = { haptics.heavy(); dragStart = currentServers },
-                                            onDragStopped = {
-                                                val target = hoverTarget
-                                                hoverTarget = null
-                                                held = null
-                                                if (target != null) {
-                                                    val folder = folderOf(currentServers, target)
-                                                    if (folder != null) {
-                                                        // Onto a server in a folder: it simply joins that folder.
-                                                        onReorder(mergeInto(currentServers, server.id, target, folder))
-                                                        haptics.success()
-                                                    } else {
-                                                        merging = server.id to target
+                        } else {
+                            if (rows.isEmpty()) {
+                                item(key = "no-match", span = full) {
+                                    Text(
+                                        stringResource(R.string.servers_no_match, query.trim()),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
+                            itemsIndexed(
+                                rows,
+                                key = { _, row -> row.key },
+                                span = { _, row -> if (row is ListRow.Server) GridItemSpan(sizeOf(row.server).first.coerceAtMost(maxLineSpan)) else GridItemSpan(maxLineSpan) },
+                            ) { i, row ->
+                                when (row) {
+                                    // Nothing can go above the first title (it would only stall the drag).
+                                    is ListRow.Title -> ReorderableItem(reorder, key = row.key, enabled = i > 0) {
+                                        SectionTitle(stringResource(if (row.title == ListTitle.PINNED) R.string.servers_pinned else R.string.servers_title))
+                                    }
+                                    is ListRow.Folder -> ReorderableItem(reorder, key = row.key) { FolderHeader(
+                                        row,
+                                        onToggle = {
+                                            haptics.tap()
+                                            collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name
+                                        },
+                                        onRename = { renamingFolder = row.name },
+                                        onRemove = { removingFolder = row.name },
+                                        onPin = { haptics.tap(); onPinFolder(row.name, !row.pinned) },
+                                    ) }
+                                    is ListRow.Server -> ReorderableItem(reorder, key = row.key, enabled = canSwap(row.key)) { dragging ->
+                                        val server = row.server
+                                        val (w, h) = sizeOf(server)
+                                        val framed = editing || selected == server.id
+                                        Box(Modifier.height(RowUnit * h + 12.dp * (h - 1))) {
+                                            ServerCard(
+                                                server = server,
+                                                w = w,
+                                                h = h,
+                                                parts = layout,
+                                                probe = probe,
+                                                refreshTick = refreshTick,
+                                                dragging = dragging,
+                                                dropTarget = hoverTarget == server.id,
+                                                onOpen = {
+                                                    when {
+                                                        editing -> Unit
+                                                        selected != null -> selected = null
+                                                        else -> onOpen(server)
                                                     }
-                                                }
-                                            },
-                                        )
-                                        .onGloballyPositioned { c ->
-                                            val r = c.boundsInRoot()
-                                            if (dragging) {
-                                                held = server.id to r
-                                                hoverTarget = targetUnder(r, server.id)
-                                            } else if (bounds[server.id] != r) {
-                                                bounds[server.id] = r
+                                                },
+                                                onRename = { renaming = server },
+                                                onPin = { onPin(server, !server.pinned) },
+                                                onMoveToFolder = { moving = server },
+                                                alertsOn = alertsOn,
+                                                onToggleNotify = { onToggleNotify(server) },
+                                                onRepair = { onRepair(server) },
+                                                onDelete = { deleting = server },
+                                                // Hold a server to drag it; not while searching, the list is filtered then.
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .longPressDraggableHandle(
+                                                        enabled = query.isBlank(),
+                                                        onDragStarted = {
+                                                            haptics.heavy()
+                                                            dragStart = currentServers
+                                                            dragOrigin = bounds[server.id]?.center
+                                                        },
+                                                        onDragStopped = {
+                                                            val target = hoverTarget
+                                                            val moved = held?.second?.center?.let { c -> dragOrigin?.let { (c - it).getDistance() } } ?: 0f
+                                                            hoverTarget = null
+                                                            held = null
+                                                            dragOrigin = null
+                                                            if (target != null) {
+                                                                val folder = folderOf(currentServers, target)
+                                                                if (folder != null) {
+                                                                    // Onto a server in a folder: it simply joins that folder.
+                                                                    onReorder(mergeInto(currentServers, server.id, target, folder))
+                                                                    haptics.success()
+                                                                } else {
+                                                                    merging = server.id to target
+                                                                }
+                                                            } else if (!editing && moved < with(density) { 24.dp.toPx() }) {
+                                                                // Held without moving: show the frame to change its size.
+                                                                selected = server.id
+                                                            }
+                                                        },
+                                                    )
+                                                    .onGloballyPositioned { c ->
+                                                        val r = c.boundsInRoot()
+                                                        if (dragging) {
+                                                            held = server.id to r
+                                                            hoverTarget = targetUnder(r, server.id)
+                                                        } else if (bounds[server.id] != r) {
+                                                            bounds[server.id] = r
+                                                        }
+                                                    }
+                                                    .staggeredAppear(i + 1),
+                                            )
+                                            if (framed && !dragging) {
+                                                ResizeFrame(
+                                                    w = w, h = h, cellW = cellW, cellH = cellH, columns = GridColumns,
+                                                    onPreview = { nw, nh ->
+                                                        if (preview?.let { it.second to it.third } != nw to nh) haptics.tick()
+                                                        preview = Triple(server.id, nw, nh)
+                                                    },
+                                                    onDone = {
+                                                        preview?.let { (_, nw, nh) -> onResize(server, nw, nh) }
+                                                        preview = null
+                                                    },
+                                                )
                                             }
                                         }
-                                        .staggeredAppear(i + 1),
-                                )
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            }
+            AnimatedVisibility(
+                visible = editing,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+            ) {
+                ListEditPanel(
+                    layout = layout,
+                    onLayout = onLayout,
+                    onReset = { haptics.tap(); onLayout(ListLayout()); onResetSizes() },
+                    onDone = { haptics.success(); editing = false },
+                )
             }
         }
     }
@@ -456,6 +569,16 @@ fun ServerListScreen(
         )
     }
 }
+
+/** Columns of the server list grid; a card is 1 to 4 columns wide. */
+private const val GridColumns = 4
+
+/** Height of one grid row. */
+private val RowUnit = 64.dp
+
+/** The middle part of a card: a server dropped there makes a folder with it. */
+private fun Rect.middle(p: androidx.compose.ui.geometry.Offset) =
+    p.x in (left + width * 0.25f)..(right - width * 0.25f) && p.y in (top + height * 0.3f)..(bottom - height * 0.3f)
 
 @Composable
 private fun SearchField(query: String, onQuery: (String) -> Unit) {
@@ -611,7 +734,7 @@ private fun MoveToFolderDialog(current: String, folders: List<String>, onDismiss
 }
 
 @Composable
-private fun Header(count: Int, onSettings: () -> Unit) {
+private fun Header(count: Int, onSettings: () -> Unit, onEdit: (() -> Unit)? = null) {
     // Logo pops in with a little bounce and wobble on first show.
     val scale = remember { Animatable(0.4f) }
     val rotation = remember { Animatable(-18f) }
@@ -638,6 +761,9 @@ private fun Header(count: Int, onSettings: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        if (onEdit != null) {
+            IconButton(onClick = onEdit) { Icon(Icons.Outlined.DashboardCustomize, stringResource(R.string.servers_arrange)) }
+        }
         IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, stringResource(R.string.settings_title)) }
     }
 }
@@ -645,6 +771,10 @@ private fun Header(count: Int, onSettings: () -> Unit) {
 @Composable
 private fun ServerCard(
     server: ServerProfile,
+    /** Size in grid cells. */
+    w: Int,
+    h: Int,
+    parts: ListLayout,
     probe: suspend (ServerProfile) -> ServerStatus,
     dragging: Boolean,
     refreshTick: Int,
@@ -690,7 +820,7 @@ private fun ServerCard(
 
     val lift by animateFloatAsState(if (dragging) 1.03f else if (dropTarget) 0.96f else 1f, label = "lift")
     McCard(
-        modifier.fillMaxWidth().zIndex(if (dragging) 1f else 0f).graphicsLayer {
+        modifier.zIndex(if (dragging) 1f else 0f).graphicsLayer {
             scaleX = lift
             scaleY = lift
             shadowElevation = if (dragging) 16.dp.toPx() else 0f
@@ -699,45 +829,51 @@ private fun ServerCard(
         }.then(if (dropTarget) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp)) else Modifier),
         onClick = { haptics.tap(); onOpen() },
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        server.name.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1,
-                            overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
-                        )
-                        if (server.pinned) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                Icons.Filled.PushPin, stringResource(R.string.servers_pinned),
-                                Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary,
-                            )
+        val pill: @Composable () -> Unit = {
+            StatusPill(
+                state = connection,
+                text = when (state) {
+                    is ServerProbe.Online -> stringResource(R.string.status_online_short)
+                    is ServerProbe.Offline -> stringResource(R.string.status_offline_short)
+                    ServerProbe.Loading -> stringResource(R.string.status_checking)
+                },
+                refreshing = state == ServerProbe.Loading,
+                onClick = { haptics.tap(); refreshKey++ },
+            )
+        }
+        val online = (state as? ServerProbe.Online)?.status
+        if (w == 1 && h == 1) {
+            // The smallest card: first letter and a dot for the status.
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                ServerIcon(server, 40.dp, connection)
+            }
+            return@McCard
+        }
+        val lines = parts.lines(w, h)
+        val showsStatus = lines.any { CardPart.STATUS in it }
+        Column(
+            Modifier.fillMaxSize().clipToBounds().padding(horizontal = 14.dp, vertical = if (h == 1) 6.dp else 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, if (h == 1) Alignment.CenterVertically else Alignment.Top),
+        ) {
+            lines.forEach { line ->
+                when (line.first()) {
+                    CardPart.NAME -> Row(verticalAlignment = Alignment.CenterVertically) {
+                        ServerIcon(server, if (h == 1 || w == 1) 36.dp else 44.dp, connection.takeUnless { showsStatus })
+                        if (w > 1) {
+                            Spacer(Modifier.width(12.dp))
+                            NameLine(server, alertsOn, Modifier.weight(1f))
+                        } else {
+                            Spacer(Modifier.weight(1f))
                         }
-                        if (alertsOn && !server.notify) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                Icons.Outlined.NotificationsOff, stringResource(R.string.servers_notify_muted),
-                                Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Box {
+                            IconButton(onClick = { menu = true }, Modifier.size(36.dp)) { Icon(Icons.Default.MoreVert, stringResource(R.string.action_more)) }
+                            ServerMenu(
+                                menu, { menu = false }, server, alertsOn,
+                                onPin, onToggleNotify, onMoveToFolder, onRename, onRepair, onDelete,
                             )
-                        }
-                        if (server.role != Role.ADMIN) {
-                            Spacer(Modifier.width(6.dp))
-                            Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
                         }
                     }
-                    Text(
+                    CardPart.ADDRESS -> Text(
                         when {
                             DemoServer.isDemo(server) -> stringResource(R.string.demo_name)
                             !server.tls -> server.address + " · " + stringResource(R.string.servers_unencrypted)
@@ -748,88 +884,319 @@ private fun ServerCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                }
-                Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.action_more)) }
-                    DropdownMenu(menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(if (server.pinned) R.string.servers_unpin else R.string.servers_pin)) },
-                            leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
-                            onClick = { menu = false; onPin() },
-                        )
-                        if (alertsOn) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(if (server.notify) R.string.servers_notify_off else R.string.servers_notify_on)) },
-                                leadingIcon = {
-                                    Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null)
-                                },
-                                onClick = { menu = false; onToggleNotify() },
+                    CardPart.MEMORY -> if (online != null && online.memoryMaxMb > 0) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                stringResource(R.string.dashboard_memory) + " · ${online.memoryUsedMb}/${online.memoryMaxMb} MB",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            LinearProgressIndicator(
+                                progress = { (online.memoryUsedMb.toFloat() / online.memoryMaxMb).coerceIn(0f, 1f) },
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.servers_move_to_folder)) },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Outlined.DriveFileMove, null) },
-                            onClick = { menu = false; onMoveToFolder() },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.servers_rename)) },
-                            leadingIcon = { Icon(Icons.Outlined.Edit, null) },
-                            onClick = { menu = false; onRename() },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_pair_again)) },
-                            leadingIcon = { Icon(Icons.Outlined.Link, null) },
-                            onClick = { menu = false; onRepair() },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_remove)) },
-                            leadingIcon = { Icon(Icons.Outlined.Delete, null) },
-                            onClick = { menu = false; onDelete() },
+                    }
+                    CardPart.VERSION -> if (online != null) {
+                        Text(
+                            listOf(online.platform, online.minecraftVersion).filter { it.isNotBlank() }.joinToString(" "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusPill(
-                    state = connection,
-                    text = when (state) {
-                        is ServerProbe.Online -> stringResource(R.string.status_online_short)
-                        is ServerProbe.Offline -> stringResource(R.string.status_offline_short)
-                        ServerProbe.Loading -> stringResource(R.string.status_checking)
-                    },
-                    refreshing = state == ServerProbe.Loading,
-                    onClick = { haptics.tap(); refreshKey++ },
-                )
-                Spacer(Modifier.weight(1f))
-                val animate = LocalAnimations.current
-                AnimatedContent(state, label = "probe", transitionSpec = { if (animate) fadeIn() togetherWith fadeOut() else EnterTransition.None togetherWith ExitTransition.None }) { s ->
-                    if (s is ServerProbe.Online) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.Group, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.width(4.dp))
-                            Text("${s.status.onlinePlayers}/${s.status.maxPlayers}", style = MaterialTheme.typography.labelLarge)
-                            s.status.tps.firstOrNull()?.let { tps ->
-                                Spacer(Modifier.width(12.dp))
-                                Icon(Icons.Outlined.Speed, null, Modifier.size(16.dp), tint = tpsColor(tps))
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    stringResource(R.string.unit_tps, tps),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = statusTextColor(tpsColor(tps)),
-                                )
+                    CardPart.MOTD -> if (online != null && online.motd.isNotBlank()) {
+                        Text(
+                            online.motd.replace(Regex("§."), "").lines().joinToString(" ") { it.trim() },
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        line.forEach { inline ->
+                            when (inline) {
+                                CardPart.STATUS -> pill()
+                                CardPart.PLAYERS -> if (online != null) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Group, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Spacer(Modifier.width(4.dp))
+                                        Text("${online.onlinePlayers}/${online.maxPlayers}", style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                                    }
+                                }
+                                CardPart.TPS -> online?.tps?.firstOrNull()?.let { tps ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Speed, null, Modifier.size(16.dp), tint = tpsColor(tps))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(
+                                            stringResource(R.string.unit_tps, tps),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = statusTextColor(tpsColor(tps)),
+                                            maxLines = 1,
+                                        )
+                                    }
+                                }
+                                else -> Unit
                             }
                         }
-                    } else {
-                        Spacer(Modifier.width(1.dp))
                     }
                 }
             }
         }
     }
 }
+
+/** First letter of the server; with a status dot when the card has no status line. */
+@Composable
+private fun ServerIcon(server: ServerProfile, size: androidx.compose.ui.unit.Dp, status: ConnectionState?) {
+    Box {
+        Box(
+            Modifier.size(size).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                server.name.take(1).uppercase(),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+        if (status != null) {
+            val color = when (status) {
+                ConnectionState.Online -> McColors.Online
+                ConnectionState.Offline -> McColors.Offline
+                else -> MaterialTheme.colorScheme.outline
+            }
+            Box(
+                Modifier.align(Alignment.BottomEnd).size(12.dp).clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface).padding(2.dp).clip(CircleShape).background(color),
+            )
+        }
+    }
+}
+
+@Composable
+private fun NameLine(server: ServerProfile, alertsOn: Boolean, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1,
+            overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
+        )
+        if (server.pinned) {
+            Spacer(Modifier.width(6.dp))
+            Icon(Icons.Filled.PushPin, stringResource(R.string.servers_pinned), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+        }
+        if (alertsOn && !server.notify) {
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                Icons.Outlined.NotificationsOff, stringResource(R.string.servers_notify_muted),
+                Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (server.role != Role.ADMIN) {
+            Spacer(Modifier.width(6.dp))
+            Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
+        }
+    }
+}
+
+@Composable
+private fun ServerMenu(
+    open: Boolean,
+    onClose: () -> Unit,
+    server: ServerProfile,
+    alertsOn: Boolean,
+    onPin: () -> Unit,
+    onToggleNotify: () -> Unit,
+    onMoveToFolder: () -> Unit,
+    onRename: () -> Unit,
+    onRepair: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    DropdownMenu(open, onDismissRequest = onClose) {
+        DropdownMenuItem(
+            text = { Text(stringResource(if (server.pinned) R.string.servers_unpin else R.string.servers_pin)) },
+            leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+            onClick = { onClose(); onPin() },
+        )
+        if (alertsOn) {
+            DropdownMenuItem(
+                text = { Text(stringResource(if (server.notify) R.string.servers_notify_off else R.string.servers_notify_on)) },
+                leadingIcon = { Icon(if (server.notify) Icons.Outlined.NotificationsOff else Icons.Outlined.Notifications, null) },
+                onClick = { onClose(); onToggleNotify() },
+            )
+        }
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.servers_move_to_folder)) },
+            leadingIcon = { Icon(Icons.AutoMirrored.Outlined.DriveFileMove, null) },
+            onClick = { onClose(); onMoveToFolder() },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.servers_rename)) },
+            leadingIcon = { Icon(Icons.Outlined.Edit, null) },
+            onClick = { onClose(); onRename() },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.action_pair_again)) },
+            leadingIcon = { Icon(Icons.Outlined.Link, null) },
+            onClick = { onClose(); onRepair() },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.action_remove)) },
+            leadingIcon = { Icon(Icons.Outlined.Delete, null) },
+            onClick = { onClose(); onDelete() },
+        )
+    }
+}
+
+/**
+ * The blue frame around a card with handles on the right, at the bottom and in the corner, like
+ * resizing a widget on the home screen. Dragging a handle changes the size in whole grid cells.
+ */
+@Composable
+private fun BoxScope.ResizeFrame(
+    w: Int,
+    h: Int,
+    cellW: Float,
+    cellH: Float,
+    columns: Int,
+    onPreview: (Int, Int) -> Unit,
+    onDone: () -> Unit,
+) {
+    val primary = MaterialTheme.colorScheme.primary
+    Box(Modifier.matchParentSize().border(2.dp, primary, RoundedCornerShape(24.dp)))
+    val size by rememberUpdatedState(w to h)
+    val label = stringResource(R.string.servers_resize)
+    @Composable
+    fun Handle(align: Alignment, horizontal: Boolean, vertical: Boolean) {
+        Box(
+            Modifier.align(align).size(40.dp)
+                .semantics { contentDescription = label }
+                .pointerInput(horizontal, vertical, cellW, cellH) {
+                    var start = size
+                    var drag = androidx.compose.ui.geometry.Offset.Zero
+                    detectDragGestures(
+                        onDragStart = { start = size; drag = androidx.compose.ui.geometry.Offset.Zero },
+                        onDragEnd = onDone,
+                        onDragCancel = onDone,
+                    ) { change, amount ->
+                        change.consume()
+                        drag += amount
+                        val (nw, nh) = CardGrid.resize(
+                            start.first, start.second,
+                            if (horizontal) drag.x else 0f, if (vertical) drag.y else 0f,
+                            cellW, cellH, columns,
+                        )
+                        onPreview(nw, nh)
+                    }
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier.size(14.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surface)
+                    .border(3.dp, primary, CircleShape),
+            )
+        }
+    }
+    Handle(Alignment.CenterEnd, horizontal = true, vertical = false)
+    Handle(Alignment.BottomCenter, horizontal = false, vertical = true)
+    Handle(Alignment.BottomEnd, horizontal = true, vertical = true)
+}
+
+/** Bottom panel in edit mode: what a card shows and the screen's blocks, both in a draggable order. */
+@Composable
+private fun ListEditPanel(layout: ListLayout, onLayout: (ListLayout) -> Unit, onReset: () -> Unit, onDone: () -> Unit) {
+    val haptics = rememberHaptics()
+    Surface(
+        Modifier.padding(16.dp).widthIn(max = 560.dp).fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp,
+        shadowElevation = 8.dp,
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(stringResource(R.string.servers_arrange), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 6.dp))
+            Text(
+                stringResource(R.string.servers_arrange_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 6.dp),
+            )
+            ChipOrder(
+                stringResource(R.string.servers_arrange_card),
+                layout.parts.map { partLabel(it) },
+            ) { from, to -> haptics.tick(); onLayout(layout.movePart(from, to)) }
+            ChipOrder(
+                stringResource(R.string.servers_arrange_screen),
+                layout.blocks.map { blockLabel(it) },
+            ) { from, to -> haptics.tick(); onLayout(layout.moveBlock(from, to)) }
+            Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_reset)) }
+                Button(onClick = onDone, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.dashboard_edit_done)) }
+            }
+        }
+    }
+}
+
+/** A row of chips that can be put in another order by holding and dragging them. */
+@Composable
+private fun ChipOrder(title: String, labels: List<String>, onMove: (Int, Int) -> Unit) {
+    val state = rememberLazyListState()
+    val current by rememberUpdatedState(labels)
+    val reorder = rememberReorderableLazyListState(state) { from, to ->
+        if (from.index in current.indices && to.index in current.indices) onMove(from.index, to.index)
+    }
+    Text(
+        title,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 6.dp, top = 10.dp, bottom = 4.dp),
+    )
+    LazyRow(state = state, horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 4.dp)) {
+        itemsIndexed(labels, key = { _, label -> label }) { _, label ->
+            ReorderableItem(reorder, key = label) { dragging ->
+                Surface(
+                    Modifier.longPressDraggableHandle(),
+                    shape = CircleShape,
+                    color = if (dragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (dragging) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                    shadowElevation = if (dragging) 6.dp else 0.dp,
+                ) {
+                    Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.DragIndicator, null, Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(label, style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun partLabel(part: CardPart) = stringResource(
+    when (part) {
+        CardPart.NAME -> R.string.part_name
+        CardPart.ADDRESS -> R.string.part_address
+        CardPart.STATUS -> R.string.part_status
+        CardPart.PLAYERS -> R.string.part_players
+        CardPart.TPS -> R.string.part_tps
+        CardPart.MEMORY -> R.string.dashboard_memory
+        CardPart.VERSION -> R.string.part_version
+        CardPart.MOTD -> R.string.part_motd
+    },
+)
+
+@Composable
+private fun blockLabel(block: ScreenBlock) = stringResource(
+    when (block) {
+        ScreenBlock.HEADER -> R.string.block_header
+        ScreenBlock.SEARCH -> R.string.block_search
+        ScreenBlock.SERVERS -> R.string.block_servers
+    },
+)
 
 @Composable
 fun roleLabel(role: Role) = stringResource(

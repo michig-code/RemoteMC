@@ -550,4 +550,19 @@
     <string name="demo_name">Serveur de démo</string>
     <string name="demo_banner">Serveur de démo avec des données d’exemple – rien ne quitte ton téléphone.</string>
     <string name="settings_disclaimer">Produit non officiel de Minecraft. Non approuvé par Mojang ou Microsoft et sans lien avec eux.</string>
+    <string name="servers_arrange">Organiser</string>
+    <string name="servers_arrange_hint">Faites glisser les poignées bleues pour changer la taille d\'une carte. Maintenez un élément ci-dessous et faites-le glisser pour changer l\'ordre.</string>
+    <string name="servers_arrange_card">Carte</string>
+    <string name="servers_arrange_screen">Écran</string>
+    <string name="servers_resize">Changer la taille</string>
+    <string name="part_name">Nom</string>
+    <string name="part_address">Adresse</string>
+    <string name="part_status">Statut</string>
+    <string name="part_players">Joueurs</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Version</string>
+    <string name="part_motd">Description (MOTD)</string>
+    <string name="block_header">En-tête</string>
+    <string name="block_search">Recherche</string>
+    <string name="block_servers">Serveurs</string>
 </resources>

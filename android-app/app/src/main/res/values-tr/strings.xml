@@ -535,4 +535,19 @@
     <string name="demo_name">Demo sunucu</string>
     <string name="demo_banner">Örnek verilerle demo sunucu – hiçbir şey telefonundan çıkmaz.</string>
     <string name="settings_disclaimer">Resmi bir Minecraft ürünü değildir. Mojang veya Microsoft tarafından onaylanmamıştır ve onlarla ilişkili değildir.</string>
+    <string name="servers_arrange">Düzenle</string>
+    <string name="servers_arrange_hint">Bir kartın boyutunu değiştirmek için mavi tutamaçları sürükleyin. Sırayı değiştirmek için aşağıdaki bir parçayı basılı tutup sürükleyin.</string>
+    <string name="servers_arrange_card">Kart</string>
+    <string name="servers_arrange_screen">Ekran</string>
+    <string name="servers_resize">Boyutu değiştir</string>
+    <string name="part_name">Ad</string>
+    <string name="part_address">Adres</string>
+    <string name="part_status">Durum</string>
+    <string name="part_players">Oyuncular</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Sürüm</string>
+    <string name="part_motd">Açıklama (MOTD)</string>
+    <string name="block_header">Başlık</string>
+    <string name="block_search">Arama</string>
+    <string name="block_servers">Sunucular</string>
 </resources>

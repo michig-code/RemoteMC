@@ -535,4 +535,19 @@
     <string name="demo_name">Demoserver</string>
     <string name="demo_banner">Demoserver met voorbeeldgegevens – er verlaat niets je telefoon.</string>
     <string name="settings_disclaimer">Geen officieel Minecraft-product. Niet goedgekeurd door of verbonden met Mojang of Microsoft.</string>
+    <string name="servers_arrange">Indelen</string>
+    <string name="servers_arrange_hint">Sleep aan de blauwe grepen om een kaart groter of kleiner te maken. Houd hieronder een onderdeel vast en sleep het om de volgorde te wijzigen.</string>
+    <string name="servers_arrange_card">Kaart</string>
+    <string name="servers_arrange_screen">Scherm</string>
+    <string name="servers_resize">Grootte wijzigen</string>
+    <string name="part_name">Naam</string>
+    <string name="part_address">Adres</string>
+    <string name="part_status">Status</string>
+    <string name="part_players">Spelers</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Versie</string>
+    <string name="part_motd">Beschrijving (MOTD)</string>
+    <string name="block_header">Kop</string>
+    <string name="block_search">Zoeken</string>
+    <string name="block_servers">Servers</string>
 </resources>

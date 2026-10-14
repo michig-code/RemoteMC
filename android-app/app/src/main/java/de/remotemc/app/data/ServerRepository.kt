@@ -56,6 +56,12 @@ class ServerRepository(private val prefs: SharedPreferences, private val box: Se
     fun setFolderPinned(folder: String, pinned: Boolean) =
         save(_servers.value.map { if (it.folder == folder) it.copy(folderPinned = pinned) else it })
 
+    /** New size of a server's card (grid cells; 0 = default). */
+    fun setCardSize(id: String, w: Int, h: Int) = update(id) { it.copy(cardW = w, cardH = h) }
+
+    /** All cards back to their default size. */
+    fun resetCardSizes() = save(_servers.value.map { it.copy(cardW = 0, cardH = 0) })
+
     /** Removes the folder; its servers stay, without a folder. */
     fun removeFolder(name: String) = renameFolder(name, "")
 

@@ -22,6 +22,8 @@ data class AppSettings(
     val alerts: AlertSettings = AlertSettings(),
     /** Order, width and visibility of the overview cards ([DashboardLayout.encode]); empty = default. */
     val dashboard: String = "",
+    /** Card parts and screen blocks of the server list ([ListLayout.encode]); empty = default. */
+    val serverList: String = "",
     /** Look for new versions on GitHub at start and every 6 hours (GitHub version of the app only). */
     val autoUpdate: Boolean = true,
 )
@@ -43,6 +45,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
             putString("deviceName", next.deviceName)
             putFloat("accentHue", next.accentHue ?: -1f)
             putString("dashboard", next.dashboard)
+            putString("serverList", next.serverList)
             putBoolean("autoUpdate", next.autoUpdate)
             next.alerts.let {
                 putBoolean("alerts.enabled", it.enabled)
@@ -69,6 +72,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         deviceName = prefs.getString("deviceName", "").orEmpty(),
         accentHue = prefs.getFloat("accentHue", -1f).takeIf { it >= 0f },
         dashboard = prefs.getString("dashboard", "").orEmpty(),
+        serverList = prefs.getString("serverList", "").orEmpty(),
         autoUpdate = prefs.getBoolean("autoUpdate", true),
         alerts = AlertSettings(
             enabled = prefs.getBoolean("alerts.enabled", false),

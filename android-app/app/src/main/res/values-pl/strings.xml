@@ -565,4 +565,19 @@
     <string name="demo_name">Serwer demo</string>
     <string name="demo_banner">Serwer demo z przykładowymi danymi – nic nie opuszcza telefonu.</string>
     <string name="settings_disclaimer">To nie jest oficjalny produkt Minecraft. Niezatwierdzony przez Mojang ani Microsoft i niezwiązany z nimi.</string>
+    <string name="servers_arrange">Ułóż</string>
+    <string name="servers_arrange_hint">Przeciągnij niebieskie uchwyty, aby zmienić rozmiar karty. Przytrzymaj element poniżej i przeciągnij go, aby zmienić kolejność.</string>
+    <string name="servers_arrange_card">Karta</string>
+    <string name="servers_arrange_screen">Ekran</string>
+    <string name="servers_resize">Zmień rozmiar</string>
+    <string name="part_name">Nazwa</string>
+    <string name="part_address">Adres</string>
+    <string name="part_status">Status</string>
+    <string name="part_players">Gracze</string>
+    <string name="part_tps">TPS</string>
+    <string name="part_version">Wersja</string>
+    <string name="part_motd">Opis (MOTD)</string>
+    <string name="block_header">Nagłówek</string>
+    <string name="block_search">Wyszukiwanie</string>
+    <string name="block_servers">Serwery</string>
 </resources>

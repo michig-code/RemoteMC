@@ -1,5 +1,7 @@
 package de.remotemc.app
 
+import androidx.compose.runtime.remember
+import de.remotemc.app.data.ListLayout
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -229,6 +231,10 @@ private fun AppNavigation(
                 onReorder = repo::setOrder,
                 onToggleNotify = { repo.upsert(it.copy(notify = !it.notify)) },
                 alertsOn = settings.alerts.enabled,
+                layout = remember(settings.serverList) { ListLayout.decode(settings.serverList) },
+                onLayout = { l -> context.app.settings.update { it.copy(serverList = l.encode()) } },
+                onResize = { profile, w, h -> repo.setCardSize(profile.id, w, h) },
+                onResetSizes = repo::resetCardSizes,
                 onDemo = {
                     repo.upsert(DemoServer.profile(context.getString(R.string.demo_name)))
                     nav.navigate(Routes.server(DemoServer.ID))
