@@ -100,7 +100,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Lint, unit tests and screenshot comparison
         run: ./gradlew lintGithubDebug lintPlayDebug testGithubDebugUnitTest -Proborazzi.test.verify=true
         working-directory: android-app
@@ -138,7 +138,7 @@ jobs:
         with:
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Tests
         run: ./gradlew test
       - uses: actions/upload-artifact@v4
@@ -164,7 +164,7 @@ jobs:
           # (native dragging, snapping and animations) with RemoteMC's tabs in the title bar.
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Installers and portable JAR
         run: ./gradlew packageMsi packageExe packageUberJarForCurrentOS
       - uses: actions/upload-artifact@v4

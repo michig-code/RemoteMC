@@ -31,7 +31,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Build app (signed when the keystore secrets are set)
         working-directory: android-app
         env:
@@ -107,7 +107,7 @@ jobs:
           # (native dragging, snapping and animations) with RemoteMC's tabs in the title bar.
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Installers
         run: |
           V="${GITHUB_REF_NAME#v}"
