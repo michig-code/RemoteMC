@@ -114,6 +114,8 @@ data class DesktopSettings(
     val autoUpdate: Boolean = true,
     /** App language as a tag ("de", "pt-BR"); blank = the system language. */
     val language: String = "",
+    /** The welcome pages were shown (or skipped) once. */
+    val welcomed: Boolean = false,
 )
 
 /** The app's languages (the same as on the phone); applied by setting the default locale. */
@@ -146,7 +148,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             .put("mentions", a.mentions).put("words", a.words)
             .put("quiet", a.quiet).put("quietFrom", a.quietFrom).put("quietTo", a.quietTo)
         val o = JSONObject().put("theme", next.theme.name).put("accentHue", next.accentHue ?: -1.0).put("deviceName", next.deviceName)
-            .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate).put("language", next.language)
+            .put("alerts", alerts).put("animations", next.animations).put("autoUpdate", next.autoUpdate).put("language", next.language).put("welcomed", next.welcomed)
         writePrivate(file, o.toString(2).toByteArray(Charsets.UTF_8))
     }
 
@@ -159,6 +161,7 @@ class SettingsStore(private val file: File = File(AppDirs.dir, "settings.json"))
             animations = o.optBoolean("animations", true),
             autoUpdate = o.optBoolean("autoUpdate", true),
             language = o.optString("language"),
+            welcomed = o.optBoolean("welcomed", false),
             alerts = o.optJSONObject("alerts")?.let { a ->
                 AlertSettings(
                     enabled = a.optBoolean("enabled", false),

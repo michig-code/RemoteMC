@@ -182,11 +182,23 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
     val servers by model.servers.servers.collectAsState()
     LaunchedEffect(servers) { tabs?.prune() }
     val saveable = rememberSaveableStateHolder()
+    // First start: welcome pages (not for people who already added servers).
+    val welcome = !settings.welcomed && servers.isEmpty()
     RemoteMCTheme(settings) {
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             if (tabs != null && controls != null) {
                 TitleBar(model, tabs, controls)
+            }
+            if (welcome) {
+                // Below the title bar, so the window can still be moved and closed.
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    OnboardingPane { addServer ->
+                        model.settings.update { it.copy(welcomed = true) }
+                        if (addServer) { if (tabs != null) tabs.openSpecial(Tabs.PAIR) else screen = Screen.Pair() }
+                    }
+                }
+                return@Column
             }
             val animate = LocalAnimations.current
             // A server tab or one of the screens (server list, pairing, settings); switching fades over.
