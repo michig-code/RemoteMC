@@ -3,7 +3,7 @@
 Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmiert wird
 (siehe [`CLAUDE.md`](../CLAUDE.md)). Erst wenn die Liste freigegeben ist, beginnt die Umsetzung.
 
-**Status:** sammeln
+**Status:** freigegeben, in Arbeit
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
