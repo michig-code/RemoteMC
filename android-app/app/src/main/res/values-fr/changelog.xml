@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Liste des serveurs avec dossiers et épinglage ; glisse pour trier ou lâche un serveur sur un autre pour un dossier</item>
+        <item>Glisse les onglets pour les réordonner, ou dans la fenêtre pour voir deux serveurs côte à côte</item>
+        <item>Page d’aide (F1), pages d’accueil, choix de la langue, réassocier, chercher et trier les joueurs, installateur aux couleurs de RemoteMC</item>
         <item>Tout ce que fait le téléphone, aussi sur PC : aperçu, joueurs, console, chat, mondes, plugins, tâches et fichiers</item>
         <item>Essayez tout d’abord avec le serveur de démo intégré</item>
         <item>Plusieurs serveurs en onglets, vues partagées réglables</item>

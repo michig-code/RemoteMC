@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Elenco server con cartelle e fissati; trascina per ordinare o rilascia un server su un altro per una cartella</item>
+        <item>Trascina le schede per riordinarle o nella finestra per vedere due server affiancati</item>
+        <item>Pagina di aiuto (F1), pagine di benvenuto, scelta della lingua, riassocia, cerca e ordina i giocatori, installer con i colori di RemoteMC</item>
         <item>Tutto ciò che fa il telefono anche sul PC: panoramica, giocatori, console, chat, mondi, plugin, attività e file</item>
         <item>Prova tutto prima con il server demo integrato</item>
         <item>Più server in schede, viste divise regolabili</item>

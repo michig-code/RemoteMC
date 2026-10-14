@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Klasörlü ve sabitlemeli sunucu listesi; sıralamak için sürükle ya da klasör için bir sunucuyu diğerine bırak</item>
+        <item>Sekmeleri sıralamak için sürükle ya da iki sunucuyu yan yana görmek için pencereye bırak</item>
+        <item>Yardım sayfası (F1), karşılama sayfaları, dil seçimi, yeniden eşleştirme, oyuncu arama ve sıralama, RemoteMC renklerinde kurulum</item>
         <item>Telefondaki her şey bilgisayarda da: genel bakış, oyuncular, konsol, sohbet, dünyalar, eklentiler, görevler ve dosyalar</item>
         <item>Her şeyi önce yerleşik demo sunucuyla dene</item>
         <item>Sekmelerde birden fazla sunucu, ayarlanabilir bölünmüş görünümler</item>

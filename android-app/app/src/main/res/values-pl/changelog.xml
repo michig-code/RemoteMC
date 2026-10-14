@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Lista serwerów z folderami i przypinaniem; przeciągnij, by sortować, lub upuść serwer na inny, by utworzyć folder</item>
+        <item>Przeciągaj karty, by zmienić kolejność, lub do okna, by widzieć dwa serwery obok siebie</item>
+        <item>Strona pomocy (F1), strony powitalne, wybór języka, ponowne parowanie, wyszukiwanie i sortowanie graczy, instalator w kolorach RemoteMC</item>
         <item>Wszystko z telefonu także na PC: przegląd, gracze, konsola, czat, światy, pluginy, zadania i pliki</item>
         <item>Wypróbuj wszystko najpierw na wbudowanym serwerze demo</item>
         <item>Wiele serwerów w kartach, regulowane widoki dzielone</item>

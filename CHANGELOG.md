@@ -37,6 +37,15 @@ First public release of **RemoteMC**.
 - Built-in demo server with sample data, to try everything without a server of your own
 - Server list like on the phone: folders (open and close, rename, remove), pinned servers and
   folders on top, drag to sort or drop a server onto another one for a new folder, search with ✕
+- Tabs: drag them to change their order (like in a browser) or down into the window to dock a
+  server on the left, right, top or bottom of the active one (two servers at once; divider movable)
+- Like on the phone: help page with search (F1 or ?), welcome pages on the first start, language
+  choice, "Pair again" (menu and banner when the certificate changed or access was revoked), refresh
+  all servers, search and sort players with ping bars and game mode, console that stops following
+  when you scroll up (button to jump back) and forgets recent commands (✕), real skins in the chat,
+  clickable worlds on the overview, chart value under the mouse, player count on the Players icon;
+  a click on a notification opens that server (mentions: its chat)
+- Installer in RemoteMC's colours with the logo instead of WiX's red defaults
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
 - File manager with editor (Ctrl+S), add and remove plugins; resizable split views

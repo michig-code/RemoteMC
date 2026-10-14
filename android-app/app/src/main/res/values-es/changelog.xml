@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Lista de servidores con carpetas y fijados; arrastra para ordenar o suelta uno sobre otro para crear una carpeta</item>
+        <item>Arrastra pestañas para ordenarlas o a la ventana para ver dos servidores a la vez</item>
+        <item>Página de ayuda (F1), páginas de bienvenida, elección de idioma, volver a vincular, buscar y ordenar jugadores, instalador con los colores de RemoteMC</item>
         <item>Todo lo del móvil también en el PC: resumen, jugadores, consola, chat, mundos, plugins, tareas y archivos</item>
         <item>Pruébalo todo primero con el servidor de demostración integrado</item>
         <item>Varios servidores en pestañas, vistas divididas ajustables</item>

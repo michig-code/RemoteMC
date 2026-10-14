@@ -133,3 +133,22 @@ fun composePlaceholders(line: String): String {
         "%$index\$s"
     }
 }
+
+// Windows installer in RemoteMC's colours instead of WiX's red defaults: jpackage takes our
+// main.wxs (its own, plus the two pictures) from this folder. The paths in it are filled in here.
+val installerResources by tasks.registering(Copy::class) {
+    val target = layout.buildDirectory.dir("installer")
+    from("installer") {
+        include("main.wxs", "*.bmp")
+        filesMatching("main.wxs") {
+            filter { line -> line.replace("@INSTALLER_DIR@", target.get().asFile.absolutePath.replace('\\', '/')) }
+        }
+    }
+    into(target)
+}
+tasks.withType<org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask>().configureEach {
+    if (name.contains("Msi") || name.contains("Exe")) {
+        dependsOn(installerResources)
+        freeArgs.addAll("--resource-dir", layout.buildDirectory.dir("installer").get().asFile.absolutePath)
+    }
+}

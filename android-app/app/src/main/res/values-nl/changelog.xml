@@ -42,6 +42,8 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Serverlijst met mappen en vastzetten; sleep om te sorteren of laat een server op een andere los voor een map</item>
+        <item>Sleep tabbladen om ze te ordenen, of het venster in om twee servers naast elkaar te zien</item>
+        <item>Helppagina (F1), welkomstpagina’s, taalkeuze, opnieuw koppelen, spelers zoeken en sorteren, installatieprogramma in RemoteMC-kleuren</item>
         <item>Alles van de telefoon ook op de pc: overzicht, spelers, console, chat, werelden, plugins, taken en bestanden</item>
         <item>Probeer eerst alles uit met de ingebouwde demoserver</item>
         <item>Meerdere servers in tabbladen, verstelbare gesplitste weergaven</item>
