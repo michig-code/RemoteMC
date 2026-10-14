@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -306,16 +308,20 @@ private fun HistoryCard(load: suspend (HistoryRange) -> PerformanceHistory) {
     var metric by remember { mutableStateOf(Metric.TPS) }
     var data by remember { mutableStateOf<PerformanceHistory?>(null) }
     var hidden by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
     LaunchedEffect(range) {
         data = null
+        failed = false
         while (true) {
             try {
                 data = load(range)
+                failed = false
             } catch (e: CancellationException) {
                 throw e
             } catch (e: ApiError.Http) {
-                if (e.status == 404) hidden = true
+                if (e.status == 404) hidden = true else failed = data == null
             } catch (_: Exception) {
+                failed = data == null
             }
             delay(60_000)
         }
@@ -341,16 +347,26 @@ private fun HistoryCard(load: suspend (HistoryRange) -> PerformanceHistory) {
             val points = d?.points.orEmpty()
             val values = points.mapNotNull { metric.value(it) }
             when {
+                d == null && failed -> Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(Res.string.history_failed), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 d == null -> Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 values.isEmpty() -> Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
                     Text(stringResource(Res.string.history_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 else -> {
-                    Text(stringResource(Res.string.history_summary, metric.format(values.average()), metric.format(values.min()), metric.format(values.max())),
-                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(8.dp))
-                    Chart(d, metric)
                     val fmt = if (d.to - d.from >= 86_400_000L) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT) else DateFormat.getTimeInstance(DateFormat.SHORT)
+                    // Pointing at the chart shows that minute's value (a tap on the phone).
+                    var pointed by remember(d, metric) { mutableStateOf<HistoryPoint?>(null) }
+                    val shown = pointed
+                    Text(
+                        if (shown != null) "${fmt.format(Date(shown.time))} · ${metric.value(shown)?.let(metric::format) ?: "–"}"
+                        else stringResource(Res.string.history_summary, metric.format(values.average()), metric.format(values.min()), metric.format(values.max())),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (shown != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Chart(d, metric, shown) { pointed = it }
                     Row(Modifier.fillMaxWidth()) {
                         Text(fmt.format(Date(d.from)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.weight(1f))
@@ -372,13 +388,25 @@ private fun Chip(selected: Boolean, label: String, onClick: () -> Unit) = Filter
 )
 
 @Composable
-private fun Chart(history: PerformanceHistory, metric: Metric) {
+private fun Chart(history: PerformanceHistory, metric: Metric, pointed: HistoryPoint? = null, onPoint: (HistoryPoint?) -> Unit = {}) {
     val line = MaterialTheme.colorScheme.primary
     val grid = MaterialTheme.colorScheme.outlineVariant
     val values = history.points.mapNotNull { metric.value(it) }
     val max = if (metric == Metric.TPS) 20.0 else (values.maxOrNull() ?: 1.0).coerceAtLeast(1.0) * 1.15
     val span = (history.to - history.from).coerceAtLeast(1)
-    Canvas(Modifier.fillMaxWidth().height(180.dp)) {
+    Canvas(
+        Modifier.fillMaxWidth().height(180.dp).pointerInput(history, metric) {
+            awaitPointerEventScope {
+                while (true) {
+                    val e = awaitPointerEvent()
+                    if (e.type == PointerEventType.Exit) { onPoint(null); continue }
+                    val x = e.changes.firstOrNull()?.position?.x ?: continue
+                    val t = history.from + (x / size.width * span).toLong()
+                    onPoint(history.points.filter { metric.value(it) != null }.minByOrNull { kotlin.math.abs(it.time - t) })
+                }
+            }
+        },
+    ) {
         fun x(p: HistoryPoint) = ((p.time - history.from).toFloat() / span) * size.width
         fun y(v: Double) = size.height - (v / max * size.height).toFloat()
         for (i in 1..3) drawLine(grid, Offset(0f, size.height * i / 4f), Offset(size.width, size.height * i / 4f), 1.dp.toPx())
@@ -411,6 +439,12 @@ private fun Chart(history: PerformanceHistory, metric: Metric) {
             last = pt
         }
         close()
+        // The pointed minute: a thin line and a dot on the value.
+        pointed?.let { p ->
+            val v = metric.value(p) ?: return@let
+            drawLine(grid, Offset(x(p), 0f), Offset(x(p), size.height), 1.dp.toPx())
+            drawCircle(line, 4.dp.toPx(), Offset(x(p), y(v)))
+        }
     }
 }
 
