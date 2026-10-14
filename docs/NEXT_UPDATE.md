@@ -7,7 +7,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| 1 | Serverliste als Raster | Handy + Windows | Wie beim Bearbeiten der Startseite: Karte gedrückt halten → blauer Rahmen mit Griffen an den Ecken/Kanten; Griff ziehen macht die Karte größer oder kleiner (rastet im Raster ein: z. B. klein = Name + Status, breit = mit Spielern/TPS, groß = mit Spielerköpfen). Karten im Raster verschieben; Ordner und Anpinnen bleiben. | ☐ |
+| 1 | Serverliste als Raster | Handy + Windows | Wie auf dem Android-Startbildschirm: Karte gedrückt halten → blauer Rahmen mit Griffen; Griff ziehen ändert die Größe **frei in Rasterzellen** (Breite und Höhe einzeln, z. B. 1×1, 2×1, 3×2 … bis zur vollen Breite), die Karte rastet ein. Der Inhalt passt sich der Größe an (klein: Name + Status; größer: Spieler, TPS, Spielerköpfe, Verlauf). Karten im Raster verschieben; Ordner und Anpinnen bleiben. | ☐ |
 | 2 | Gleiche Größen-Griffe in der Übersicht | Handy + Windows | Die Karten der Server-Übersicht bekommen beim Anpassen denselben blauen Rahmen mit Griffen statt des ⇄-Knopfs. | ☐ |
 | 3 | Alles im Bearbeiten-Modus verschiebbar | Handy + Windows | Im Bearbeiten-Modus lassen sich alle einzelnen Elemente frei bewegen (genauer Umfang siehe offene Frage). | ☐ |
 
