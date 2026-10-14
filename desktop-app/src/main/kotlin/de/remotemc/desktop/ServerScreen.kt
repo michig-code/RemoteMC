@@ -100,8 +100,23 @@ fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit, on
 
 /** Separate from the connection so screenshot tests can show it with fixed data. */
 @Composable
-fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0, onRepair: () -> Unit = {}) {
+fun ServerContent(
+    session: ServerSession,
+    onBack: () -> Unit,
+    initialPane: Pane = Pane.OVERVIEW,
+    playersView: Int = 0,
+    onRepair: () -> Unit = {},
+    /** Shows this area once (e.g. the chat after clicking a mention notification). */
+    requestedPane: Pane? = null,
+    onPaneShown: () -> Unit = {},
+) {
     var pane by rememberSaveable { mutableStateOf(initialPane) }
+    LaunchedEffect(requestedPane) {
+        if (requestedPane != null) {
+            pane = requestedPane
+            onPaneShown()
+        }
+    }
     var openWorld by remember { mutableStateOf<String?>(null) } // world card clicked on the overview
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(session) {

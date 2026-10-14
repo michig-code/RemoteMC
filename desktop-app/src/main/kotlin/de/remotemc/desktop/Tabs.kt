@@ -24,6 +24,9 @@ class Tabs(
     /** remotemc:// link to start the "add server" tab with (pasted or from the clipboard). */
     var pairLink by mutableStateOf<String?>(null)
         private set
+    /** An area to show in a server tab once it is open (e.g. the chat after clicking a mention). */
+    var paneRequest by mutableStateOf<Pair<String, Pane>?>(null)
+
     /** Server to pair again in the "add server" tab (keeps its name, folder and place). */
     var pairRepair by mutableStateOf<String?>(null)
         private set

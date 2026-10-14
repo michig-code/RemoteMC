@@ -81,10 +81,22 @@ fun main() = application {
     val scope = rememberCoroutineScope()
     var visible by remember { mutableStateOf(true) }
     var trayHintShown by remember { mutableStateOf(false) }
+    val tabs = remember { Tabs(model, scope) }
+    var lastNotice by remember { mutableStateOf<DesktopNotice?>(null) }
     LaunchedEffect(Unit) {
         AlertCenter(model, scope) { n ->
+            lastNotice = n
             tray.sendNotification(Notification(n.title, n.text.orEmpty(), if (n.warning) Notification.Type.Warning else Notification.Type.Info))
         }.start()
+    }
+    /** A click on the notification (or the tray icon) shows the window with that server. */
+    val openFromTray = {
+        visible = true
+        lastNotice?.serverId?.let { id ->
+            tabs.open(id)
+            if (lastNotice?.chat == true) tabs.paneRequest = id to Pane.CHAT
+        }
+        lastNotice = null
     }
     // With notifications on, RemoteMC lives on in the tray when the window is closed.
     val inTray = settings.alerts.enabled
@@ -92,7 +104,7 @@ fun main() = application {
         val trayIcon = icon ?: painterResource(Res.drawable.logo)
         val open = stringResource(Res.string.tray_open)
         val quit = stringResource(Res.string.tray_quit)
-        Tray(trayIcon, state = tray, tooltip = "RemoteMC", onAction = { visible = true }) {
+        Tray(trayIcon, state = tray, tooltip = "RemoteMC", onAction = openFromTray) {
             Item(open) { visible = true }
             Item(quit, onClick = ::exitApplication)
         }
@@ -110,7 +122,6 @@ fun main() = application {
             exitApplication()
         }
     }
-    val tabs = remember { Tabs(model, scope) }
     // On quitting, each open server saves what it shows (instant start next time).
     DisposableEffect(tabs) { onDispose { tabs.stopAll() } }
     LaunchedEffect(Unit) {
@@ -200,7 +211,11 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                                     }
                                 })
                                 else -> tabs.session(id)?.let {
-                                    ServerContent(it, onBack = tabs::showHome, onRepair = { tabs.openSpecial(Tabs.PAIR, repair = id) })
+                                    ServerContent(
+                                        it, onBack = tabs::showHome, onRepair = { tabs.openSpecial(Tabs.PAIR, repair = id) },
+                                        requestedPane = tabs.paneRequest?.takeIf { r -> r.first == id }?.second,
+                                        onPaneShown = { tabs.paneRequest = null },
+                                    )
                                 }
                             }
                         }

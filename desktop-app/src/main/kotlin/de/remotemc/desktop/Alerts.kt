@@ -19,7 +19,14 @@ import org.jetbrains.compose.resources.getString
 import java.net.NetworkInterface
 
 /** One Windows notification. */
-data class DesktopNotice(val title: String, val text: String?, val warning: Boolean)
+data class DesktopNotice(
+    val title: String,
+    val text: String?,
+    val warning: Boolean,
+    /** Clicking the notification opens this server (and its chat for a mention). */
+    val serverId: String? = null,
+    val chat: Boolean = false,
+)
 
 /** Same texts as the phone's notifications. */
 suspend fun describe(
@@ -79,7 +86,7 @@ class AlertCenter(
         val joined = (alert as? Alert.Joined)?.let { joins.add(server.id, it.player, System.currentTimeMillis()) }.orEmpty()
         // Quiet hours: Windows has no silent notifications, so only offline/online still pop up.
         if (alert !is Alert.Offline && alert !is Alert.BackOnline && model.settings.settings.value.alerts.isQuiet(minuteOfDay())) return
-        scope.launch { show(describe(server, alert, joined)) }
+        scope.launch { show(describe(server, alert, joined).copy(serverId = server.id, chat = alert is Alert.Mention)) }
     }
 
     private fun minuteOfDay() = java.time.LocalTime.now().let { it.hour * 60 + it.minute }
