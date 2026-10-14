@@ -20,6 +20,24 @@ android {
         versionCode = (project.findProperty("rmc.versionCode") as String?)?.toIntOrNull() ?: (major * 10_000 + minor * 100 + patch)
     }
 
+    // Two versions of the same app: "github" (APK from GitHub Releases, may update itself later) and
+    // "play" (Google Play: own package name, so both can be installed side by side despite their
+    // different signatures; updates only through the store, as Play requires).
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            buildConfigField("String", "STORE", "\"github\"")
+            buildConfigField("boolean", "SELF_UPDATE", "true")
+        }
+        create("play") {
+            dimension = "store"
+            applicationIdSuffix = ".play"
+            buildConfigField("String", "STORE", "\"play\"")
+            buildConfigField("boolean", "SELF_UPDATE", "false")
+        }
+    }
+
     signingConfigs {
         // CI passes the release keystore via environment variables (see .github/workflows/release.yml).
         create("release") {

@@ -130,7 +130,7 @@ Für alle, die die App als APK installieren (nicht über einen Store):
 - Die APK wird heruntergeladen und ihre Prüfsumme (SHA-256) kontrolliert. Danach öffnet sich der Android-Installer, die Einstellungen bleiben erhalten.
 - Download nur von GitHub über HTTPS. Android prüft zusätzlich, dass die neue APK mit demselben Schlüssel signiert ist.
 - In den Einstellungen gibt es „Nach Updates suchen“ und die aktuelle Version.
-- Nur in der GitHub-APK: Google Play verbietet Apps, die sich selbst aktualisieren. Die Play-Version bekommt Updates über den Play Store.
+- Nur in der GitHub-Version (`BuildConfig.SELF_UPDATE`): Google Play verbietet Apps, die sich selbst aktualisieren. Die Play-Version (`de.remotemc.app.play`) bekommt Updates über den Play Store.
 - Technik: wie der Updater der Windows-App. Nötig sind die Berechtigung `REQUEST_INSTALL_PACKAGES` und ein `FileProvider` für die heruntergeladene Datei.
 
 ---

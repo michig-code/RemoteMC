@@ -46,16 +46,16 @@ jobs:
           else
             echo "::warning::No signing secrets set – the APK is signed with a debug key."
           fi
-          ./gradlew assembleRelease bundleRelease -Prmc.version="${GITHUB_REF_NAME#v}"
-          cp app/build/outputs/apk/release/app-release.apk "../RemoteMC-App-${GITHUB_REF_NAME#v}.apk"
-          # App bundle for Google Play (upload it in the Play Console; not attached to the release).
-          cp app/build/outputs/bundle/release/app-release.aab "../RemoteMC-App-${GITHUB_REF_NAME#v}.aab"
+          ./gradlew assembleGithubRelease bundlePlayRelease -Prmc.version="${GITHUB_REF_NAME#v}"
+          cp app/build/outputs/apk/github/release/app-github-release.apk "../RemoteMC-App-${GITHUB_REF_NAME#v}.apk"
+          # Google Play version as app bundle (upload it in the Play Console; not attached to the release).
+          cp app/build/outputs/bundle/playRelease/app-play-release.aab "../RemoteMC-App-Play-${GITHUB_REF_NAME#v}.aab"
 
       - name: Keep the Play bundle
         uses: actions/upload-artifact@v4
         with:
-          name: RemoteMC-App-bundle
-          path: RemoteMC-App-*.aab
+          name: RemoteMC-App-Play
+          path: RemoteMC-App-Play-*.aab
 
       - name: GitHub release
         uses: softprops/action-gh-release@v2

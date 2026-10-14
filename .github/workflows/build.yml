@@ -59,15 +59,21 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Lint, unit tests and screenshot comparison
-        run: ./gradlew lintDebug testDebugUnitTest -Proborazzi.test.verify=true
+        run: ./gradlew lintGithubDebug lintPlayDebug testGithubDebugUnitTest -Proborazzi.test.verify=true
         working-directory: android-app
       - name: Release build
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleGithubRelease bundlePlayRelease
         working-directory: android-app
       - uses: actions/upload-artifact@v4
         with:
           name: RemoteMC-app
-          path: android-app/app/build/outputs/apk/release/*.apk
+          path: android-app/app/build/outputs/apk/github/release/*.apk
+          if-no-files-found: error
+      # Google Play version (signed with the debug key here; the release workflow signs it for upload).
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RemoteMC-app-play
+          path: android-app/app/build/outputs/bundle/playRelease/*.aab
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: failure()

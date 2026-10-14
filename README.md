@@ -195,8 +195,9 @@ JSON over HTTPS, `Authorization: Bearer <token>`. Errors are `{"error": "<code>"
 ## Development
 ```bash
 cd plugin && mvn package                      # plugin + unit tests → target/RemoteMC-*.jar
-cd android-app && ./gradlew lintDebug testDebugUnitTest assembleRelease
-./gradlew testDebugUnitTest -Proborazzi.test.record=true   # update screenshots after UI changes
+cd android-app && ./gradlew lintGithubDebug lintPlayDebug testGithubDebugUnitTest assembleGithubRelease bundlePlayRelease
+# Two versions: "github" (de.remotemc.app, APK) and "play" (de.remotemc.app.play, bundle for Google Play) – see docs/store/google-play.md
+./gradlew testGithubDebugUnitTest -Proborazzi.test.record=true   # update screenshots after UI changes
 ```
 CI (`.github/workflows/build.yml`) runs unit tests, an end-to-end test against a real Paper server,
 Android lint and a screenshot comparison.

@@ -2,13 +2,27 @@
 
 Was die App schon erfüllt und was du in der Play Console noch selbst machen musst.
 
+## Zwei Versionen der Handy-App
+
+| | GitHub-Version | Google-Play-Version |
+|---|---|---|
+| Paketname | `de.remotemc.app` | `de.remotemc.app.play` |
+| Datei | `RemoteMC-App-<version>.apk` | `RemoteMC-App-Play-<version>.aab` |
+| Gradle | `assembleGithubRelease` | `bundlePlayRelease` |
+| Updates | später direkt in der App (B9) | nur über den Play Store |
+| In „Über“ | `1.0.0` | `1.0.0 · Google Play` |
+
+Funktionen, Code und Design sind sonst gleich. Wegen der eigenen Paketnamen lassen sich beide
+nebeneinander installieren, obwohl Google die Play-Version mit einem anderen Schlüssel signiert.
+Der Paketname der Play-Version lässt sich nach dem ersten Hochladen nicht mehr ändern.
+
 ## Schon in der App erledigt ✅
 
 | Anforderung | Stand |
 |---|---|
 | Ziel-API (targetSdk) | 36 (Android 16), aktuelle Pflicht erfüllt |
 | 16-KB-Speicherseiten (ab Android 15 Pflicht für Apps mit nativen Bibliotheken) | alle 64-Bit-Bibliotheken (ML Kit, CameraX) sind 16-KB-ausgerichtet, geprüft im Release-Build |
-| App-Bundle (AAB) | der Release-Workflow baut zusätzlich `RemoteMC-App-<version>.aab` (Artefakt „RemoteMC-App-bundle“) |
+| App-Bundle (AAB) | der Release-Workflow baut die Play-Version als `RemoteMC-App-Play-<version>.aab` (Artefakt „RemoteMC-App-Play“) |
 | Versionsnummer | steigt mit der Version (1.0.1 → 10001); mit `-Prmc.versionCode=…` überschreibbar |
 | Prüfer ohne Minecraft-Server | eingebauter **Demo-Server** („Demo-Server ausprobieren“ bei leerer Serverliste), läuft komplett im Handy |
 | Datenschutzerklärung in der App | Einstellungen → Über (Kurzfassung), vollständig in `docs/PRIVACY.md` |
@@ -16,7 +30,7 @@ Was die App schon erfüllt und was du in der Play Console noch selbst machen mus
 | Keine Werbung, kein Tracking, kein Konto | ✅ |
 | Berechtigungen | nur Kamera (QR-Code), Benachrichtigungen, Internet; alle erst bei Bedarf abgefragt |
 | Vordergrunddienst | Typ `specialUse` mit Begründung im Manifest, nur wenn Benachrichtigungen eingeschaltet sind |
-| Keine Selbst-Aktualisierung | die App lädt keinen Code nach (wichtig: der geplante APK-Updater B9 darf nur in der GitHub-Version aktiv sein) |
+| Keine Selbst-Aktualisierung | die Play-Version lädt keinen Code nach; der geplante APK-Updater (B9) ist dort per `BuildConfig.SELF_UPDATE = false` abgeschaltet |
 
 ## Vor dem Hochladen klären ⚠️
 
@@ -30,9 +44,8 @@ Was die App schon erfüllt und was du in der Play Console noch selbst machen mus
    keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 4096 -validity 10000
    base64 -w0 upload.jks   # → RMC_KEYSTORE_BASE64
    ```
-   Den Schlüssel gut sichern. Play signiert die App danach selbst (Play App Signing). Folge: Die
-   Play-Version und die GitHub-APK haben verschiedene Signaturen und lassen sich **nicht
-   übereinander installieren** – wer wechselt, muss die App einmal deinstallieren.
+   Den Schlüssel gut sichern. Play signiert die App danach selbst (Play App Signing). Da die
+   Play-Version einen eigenen Paketnamen hat, stört das die GitHub-APK nicht.
 3. **Neues privates Entwicklerkonto** (25 $ einmalig, Identitätsprüfung): Vor der Veröffentlichung
    verlangt Google einen **geschlossenen Test mit mindestens 12 Testern über 14 Tage**.
 
@@ -73,6 +86,6 @@ Was die App schon erfüllt und was du in der Play Console noch selbst machen mus
 
 ## Veröffentlichen
 1. Version taggen, z. B. `git tag v1.0.1 && git push origin v1.0.1`
-2. Im Release-Workflow das Artefakt **RemoteMC-App-bundle** herunterladen
+2. Im Release-Workflow das Artefakt **RemoteMC-App-Play** herunterladen
 3. Play Console → Test → Geschlossener Test → neuer Release → `.aab` hochladen
 4. Nach 14 Tagen mit 12 Testern: Produktion beantragen

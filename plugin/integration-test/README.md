@@ -20,5 +20,5 @@ python3 playertest.py /tmp/rmc-paper <token> 1.21.4            # 14 checks with 
 `apitest.py` ends with the lockout test, which locks out 127.0.0.1 for the configured time;
 set `SKIP_LOCKOUT=1` to keep using the same server afterwards.
 
-The Android app has a matching test: `./gradlew testDebugUnitTest -Prmc.it.link="remotemc://…"`
+The Android app has a matching test: `./gradlew testGithubDebugUnitTest -Prmc.it.link="remotemc://…"`
 pairs the app's network code against a running server.

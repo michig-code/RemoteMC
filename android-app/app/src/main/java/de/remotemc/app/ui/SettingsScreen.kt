@@ -118,7 +118,7 @@ fun SettingsScreen(
     settings: AppSettings,
     onChange: ((AppSettings) -> AppSettings) -> Unit,
     onBack: () -> Unit,
-    versionName: String = BuildConfig.VERSION_NAME,
+    versionName: String = BuildConfig.VERSION_NAME + if (BuildConfig.STORE == "play") " · Google Play" else "",
     onShowGuide: () -> Unit = {},
 ) {
     val uri = LocalUriHandler.current
