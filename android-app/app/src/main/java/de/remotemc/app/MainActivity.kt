@@ -38,6 +38,7 @@ import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ThemeMode
 import de.remotemc.app.data.suggestedDeviceName
 import de.remotemc.app.notify.WatchService
+import de.remotemc.app.net.DemoServer
 import de.remotemc.app.ui.OnboardingScreen
 import de.remotemc.app.ui.ServerListScreen
 import de.remotemc.app.ui.ServerScreen
@@ -203,6 +204,10 @@ private fun AppNavigation(
                 onReorder = repo::setOrder,
                 onToggleNotify = { repo.upsert(it.copy(notify = !it.notify)) },
                 alertsOn = settings.alerts.enabled,
+                onDemo = {
+                    repo.upsert(DemoServer.profile(context.getString(R.string.demo_name)))
+                    nav.navigate(Routes.server(DemoServer.ID))
+                },
             )
         }
         composable(

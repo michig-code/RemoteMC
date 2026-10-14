@@ -543,4 +543,8 @@
     <string name="fav_widget_hint">Nur für Befehle ohne Platzhalter und ohne Nachfrage</string>
     <string name="action_undo">Rückgängig</string>
     <string name="files_restored">%s wiederhergestellt</string>
+    <string name="demo_try">Demo-Server ausprobieren</string>
+    <string name="demo_name">Demo-Server</string>
+    <string name="demo_banner">Demo-Server mit Beispieldaten – nichts verlässt dein Handy.</string>
+    <string name="settings_disclaimer">Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden.</string>
 </resources>

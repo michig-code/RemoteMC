@@ -1,6 +1,6 @@
 # Privacy policy – RemoteMC
 
-_Last updated: 2026-10-12_
+_Last updated: 2026-10-14_
 
 RemoteMC (the Android app and the server plugin) does not collect, sell or share personal data.
 
@@ -9,7 +9,13 @@ RemoteMC (the Android app and the server plugin) does not collect, sell or share
   your device, encrypted with a key from the Android Keystore, and are excluded from backups.
 - Loads player skins from Mojang's texture server (`textures.minecraft.net`, address supplied by
   your server) and, for players who are not online, head images from `minotar.net` by name.
+- What you do in the app (console commands, chat messages, player actions, file edits) and the device
+  name you choose when pairing are sent only to your own server, over an encrypted connection. The
+  developer never receives them.
 - Uses the camera only while you scan a pairing QR code; images are processed on the device and not stored.
+- Background notifications are off by default. When you turn them on, the app keeps a connection to
+  your servers (shown as a permanent notification) and nothing else.
+- The built-in demo server runs entirely on your device; it sends nothing anywhere.
 - No analytics, no advertising, no accounts.
 
 **Plugin**

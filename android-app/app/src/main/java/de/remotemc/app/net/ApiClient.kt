@@ -290,6 +290,8 @@ object Http {
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
+            // The built-in demo server answers here, without network.
+            .addInterceptor(DemoServer.interceptor)
             .build()
     }
 

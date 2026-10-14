@@ -246,6 +246,12 @@ fun SettingsScreen(
                             stringResource(R.string.settings_privacy),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                        )
+                        Text(
+                            stringResource(R.string.settings_disclaimer),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(16.dp),
                         )
                     }

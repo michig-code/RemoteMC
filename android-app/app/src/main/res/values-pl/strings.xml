@@ -559,4 +559,8 @@
     <string name="fav_widget_hint">Tylko dla poleceń bez symboli zastępczych i bez pytania</string>
     <string name="action_undo">Cofnij</string>
     <string name="files_restored">Przywrócono %s</string>
+    <string name="demo_try">Wypróbuj serwer demo</string>
+    <string name="demo_name">Serwer demo</string>
+    <string name="demo_banner">Serwer demo z przykładowymi danymi – nic nie opuszcza telefonu.</string>
+    <string name="settings_disclaimer">To nie jest oficjalny produkt Minecraft. Niezatwierdzony przez Mojang ani Microsoft i niezwiązany z nimi.</string>
 </resources>

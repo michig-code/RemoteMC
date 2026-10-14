@@ -529,4 +529,8 @@
     <string name="fav_widget_hint">Yalnızca yer tutucusuz ve sorusuz komutlar için</string>
     <string name="action_undo">Geri al</string>
     <string name="files_restored">%s geri yüklendi</string>
+    <string name="demo_try">Demo sunucuyu dene</string>
+    <string name="demo_name">Demo sunucu</string>
+    <string name="demo_banner">Örnek verilerle demo sunucu – hiçbir şey telefonundan çıkmaz.</string>
+    <string name="settings_disclaimer">Resmi bir Minecraft ürünü değildir. Mojang veya Microsoft tarafından onaylanmamıştır ve onlarla ilişkili değildir.</string>
 </resources>

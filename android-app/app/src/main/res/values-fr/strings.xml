@@ -544,4 +544,8 @@
     <string name="fav_widget_hint">Seulement pour les commandes sans espace réservé ni question</string>
     <string name="action_undo">Annuler</string>
     <string name="files_restored">%s restauré</string>
+    <string name="demo_try">Essayer le serveur de démo</string>
+    <string name="demo_name">Serveur de démo</string>
+    <string name="demo_banner">Serveur de démo avec des données d’exemple – rien ne quitte ton téléphone.</string>
+    <string name="settings_disclaimer">Produit non officiel de Minecraft. Non approuvé par Mojang ou Microsoft et sans lien avec eux.</string>
 </resources>

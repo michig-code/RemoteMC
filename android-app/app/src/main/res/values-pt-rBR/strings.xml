@@ -544,4 +544,8 @@
     <string name="fav_widget_hint">Só para comandos sem marcadores e sem pergunta</string>
     <string name="action_undo">Desfazer</string>
     <string name="files_restored">%s restaurado</string>
+    <string name="demo_try">Experimentar o servidor de demonstração</string>
+    <string name="demo_name">Servidor de demonstração</string>
+    <string name="demo_banner">Servidor de demonstração com dados de exemplo – nada sai do seu celular.</string>
+    <string name="settings_disclaimer">Não é um produto oficial do Minecraft. Não aprovado pela Mojang ou Microsoft nem associado a elas.</string>
 </resources>

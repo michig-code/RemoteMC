@@ -124,6 +124,9 @@ class ScreenshotTest {
 
     @Test fun serverList() = shot("01_servers", content = list())
     @Test fun serverListLight() = shot("02_servers_light", dark = false, content = list())
+    @Test fun serverListEmpty() = shot("02c_servers_empty") {
+        ServerListScreen(emptyList(), {}, {}, { _, _ -> }, {}, {}, {}, onDemo = {})
+    }
     @Test fun serverSearch() = shot("02b_servers_search", content = list("192.168"))
     @Test fun dashboard() = shot("03_dashboard") { server(Tab.Dashboard) }
     @Test fun dashboardLight() = shot("04_dashboard_light", dark = false) { server(Tab.Dashboard) }

@@ -560,4 +560,8 @@
     <string name="fav_widget_hint">Only for commands without placeholders and without a question</string>
     <string name="action_undo">Undo</string>
     <string name="files_restored">%s restored</string>
+    <string name="demo_try">Try the demo server</string>
+    <string name="demo_name">Demo server</string>
+    <string name="demo_banner">Demo server with sample data – nothing leaves your phone.</string>
+    <string name="settings_disclaimer">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</string>
 </resources>

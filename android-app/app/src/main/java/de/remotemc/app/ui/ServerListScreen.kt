@@ -65,6 +65,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -102,6 +103,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.net.ApiClient
+import de.remotemc.app.net.DemoServer
 import de.remotemc.app.net.Http
 import de.remotemc.app.ui.components.AppLogo
 import de.remotemc.app.ui.components.Badge
@@ -169,6 +171,8 @@ fun ServerListScreen(
     alertsOn: Boolean = false,
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
     initialQuery: String = "",
+    /** Adds and opens the built-in demo server (shown while the list is empty). */
+    onDemo: (() -> Unit)? = null,
 ) {
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
@@ -235,7 +239,12 @@ fun ServerListScreen(
                 item(key = "header") { Header(servers.size, onSettings) }
                 if (servers.isEmpty()) {
                     item(key = "empty") {
-                        EmptyState(Icons.Outlined.Dns, stringResource(R.string.servers_empty_title), stringResource(R.string.servers_empty_text))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            EmptyState(Icons.Outlined.Dns, stringResource(R.string.servers_empty_title), stringResource(R.string.servers_empty_text))
+                            if (onDemo != null) {
+                                OutlinedButton(onClick = onDemo) { Text(stringResource(R.string.demo_try)) }
+                            }
+                        }
                     }
                 } else {
                     if (servers.size > 1) {
@@ -607,9 +616,13 @@ private fun ServerCard(
                         }
                     }
                     Text(
-                        server.address + if (!server.tls) " · " + stringResource(R.string.servers_unencrypted) else "",
+                        when {
+                            DemoServer.isDemo(server) -> stringResource(R.string.demo_name)
+                            !server.tls -> server.address + " · " + stringResource(R.string.servers_unencrypted)
+                            else -> server.address
+                        },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (!server.tls) statusTextColor(McColors.Warning) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (!server.tls && !DemoServer.isDemo(server)) statusTextColor(McColors.Warning) else MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

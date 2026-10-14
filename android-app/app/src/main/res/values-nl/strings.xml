@@ -529,4 +529,8 @@
     <string name="fav_widget_hint">Alleen voor opdrachten zonder plaatshouders en zonder vraag</string>
     <string name="action_undo">Ongedaan maken</string>
     <string name="files_restored">%s hersteld</string>
+    <string name="demo_try">Probeer de demoserver</string>
+    <string name="demo_name">Demoserver</string>
+    <string name="demo_banner">Demoserver met voorbeeldgegevens – er verlaat niets je telefoon.</string>
+    <string name="settings_disclaimer">Geen officieel Minecraft-product. Niet goedgekeurd door of verbonden met Mojang of Microsoft.</string>
 </resources>

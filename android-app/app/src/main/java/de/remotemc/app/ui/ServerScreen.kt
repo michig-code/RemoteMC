@@ -93,6 +93,7 @@ import de.remotemc.app.data.TextFile
 import de.remotemc.app.data.Whitelist
 import de.remotemc.app.data.WorldDetails
 import de.remotemc.app.net.ApiError
+import de.remotemc.app.net.DemoServer
 import de.remotemc.app.ui.components.ConnectionState
 import de.remotemc.app.ui.components.LocalAnimations
 import de.remotemc.app.ui.components.StatusPill
@@ -217,6 +218,10 @@ fun ServerScreen(vm: ServerViewModel, onBack: () -> Unit, onRepair: () -> Unit) 
     // Stay connected only while the screen is visible.
     LaunchedEffect(vm) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) { vm.runConnection() }
+    }
+    // The demo server says once what it is.
+    LaunchedEffect(vm) {
+        if (DemoServer.isDemo(vm.profile)) snackbar.showSnackbar(context.getString(R.string.demo_banner))
     }
     LaunchedEffect(vm) {
         vm.messages.collect { notice ->

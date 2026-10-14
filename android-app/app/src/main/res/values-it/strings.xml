@@ -544,4 +544,8 @@
     <string name="fav_widget_hint">Solo per comandi senza segnaposto e senza domanda</string>
     <string name="action_undo">Annulla</string>
     <string name="files_restored">%s ripristinato</string>
+    <string name="demo_try">Prova il server demo</string>
+    <string name="demo_name">Server demo</string>
+    <string name="demo_banner">Server demo con dati di esempio: nulla lascia il tuo telefono.</string>
+    <string name="settings_disclaimer">Non è un prodotto ufficiale di Minecraft. Non approvato da Mojang o Microsoft né associato a loro.</string>
 </resources>

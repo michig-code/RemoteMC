@@ -20,7 +20,8 @@ Paper, Purpur, Folia or Spigot server, run /remotemc pair and scan the QR code.
 • Light and dark theme, 9 colour themes or your own, Material You, tablet layout
 • English, German, Spanish, French, Italian, Dutch, Polish, Brazilian Portuguese, Turkish and Russian
 • No account, no ads, no tracking
+• No server yet? Try the built-in demo server first
 
 Developed with the help of the AI Claude (Anthropic); tested and maintained by michig-code.
 
-RemoteMC is not affiliated with Mojang or Microsoft.
+NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.

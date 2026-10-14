@@ -16,7 +16,8 @@ android {
         val version = (project.findProperty("rmc.version") as String?) ?: "1.0.0"
         val (major, minor, patch) = (version.split('.').map { it.takeWhile(Char::isDigit).toIntOrNull() ?: 0 } + listOf(0, 0, 0))
         versionName = version
-        versionCode = major * 10_000 + minor * 100 + patch
+        // Google Play needs a higher number for every upload; -Prmc.versionCode overrides it.
+        versionCode = (project.findProperty("rmc.versionCode") as String?)?.toIntOrNull() ?: (major * 10_000 + minor * 100 + patch)
     }
 
     signingConfigs {

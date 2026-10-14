@@ -559,4 +559,8 @@
     <string name="fav_widget_hint">Только для команд без заполнителей и без вопроса</string>
     <string name="action_undo">Отменить</string>
     <string name="files_restored">%s восстановлен</string>
+    <string name="demo_try">Попробовать демо-сервер</string>
+    <string name="demo_name">Демо-сервер</string>
+    <string name="demo_banner">Демо-сервер с примерами данных – ничего не покидает телефон.</string>
+    <string name="settings_disclaimer">Не является официальным продуктом Minecraft. Не одобрено Mojang или Microsoft и не связано с ними.</string>
 </resources>
