@@ -13,7 +13,7 @@
     <string name="action_save">Сохранить</string>
     <string name="action_send">Отправить</string>
     <string name="action_skip">Пропустить</string>
-    <string name="onboarding_welcome_title">Ваш сервер у вас в кармане</string>
+    <string name="onboarding_welcome_title">Ваш сервер всегда под рукой</string>
     <string name="onboarding_welcome_text">Смотрите, кто онлайн, следите за производительностью, общайтесь с игроками и выполняйте команды – в реальном времени и с шифрованием.</string>
     <string name="onboarding_plugin_title">Установите плагин</string>
     <string name="onboarding_plugin_text">Поместите плагин RemoteMC в папку plugins вашего сервера Paper, Purpur, Folia или Spigot (1.20.6 или новее) и перезапустите его.</string>
@@ -24,7 +24,7 @@
     <string name="onboarding_scan_text">Отсканируйте QR-код в этом приложении. Каждый телефон получает собственный доступ, который можно отозвать в любой момент.</string>
     <string name="onboarding_start">Начать</string>
     <string name="servers_title">Мои серверы</string>
-    <string name="servers_tagline">Ваш сервер у вас в кармане</string>
+    <string name="servers_tagline">Ваш сервер всегда под рукой</string>
     <string name="servers_add">Добавить сервер</string>
     <string name="servers_empty_title">Серверов пока нет</string>
     <string name="servers_empty_text">Установите плагин RemoteMC на сервер, выполните /remotemc pair и нажмите «Добавить сервер».</string>

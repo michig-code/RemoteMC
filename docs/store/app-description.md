@@ -3,7 +3,7 @@
 **Short description (80 chars):** Manage your Minecraft server from your phone – live, secure and free.
 
 **Full description:**
-RemoteMC puts your Minecraft server in your pocket. Install the free RemoteMC plugin on your
+RemoteMC lets you manage your Minecraft server from your phone, wherever you are. Install the free RemoteMC plugin on your
 Paper, Purpur, Folia or Spigot server, run /remotemc pair and scan the QR code.
 
 • Live dashboard: TPS, MSPT, memory, uptime and worlds, with charts of the last hour, day or week

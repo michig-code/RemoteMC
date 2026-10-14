@@ -13,7 +13,7 @@
     <string name="action_save">Opslaan</string>
     <string name="action_send">Versturen</string>
     <string name="action_skip">Overslaan</string>
-    <string name="onboarding_welcome_title">Je server in je broekzak</string>
+    <string name="onboarding_welcome_title">Je server,\nwaar je ook bent</string>
     <string name="onboarding_welcome_text">Zie wie er online is, houd de prestaties in de gaten, chat met spelers en voer commando\'s uit – live en versleuteld.</string>
     <string name="onboarding_plugin_title">Installeer de plugin</string>
     <string name="onboarding_plugin_text">Zet de RemoteMC-plugin in de plugins-map van je Paper-, Purpur-, Folia- of Spigot-server (1.20.6 of nieuwer) en herstart de server.</string>
@@ -24,7 +24,7 @@
     <string name="onboarding_scan_text">Scan de QR-code met deze app. Elke telefoon krijgt eigen toegang, die je op elk moment kunt intrekken.</string>
     <string name="onboarding_start">Aan de slag</string>
     <string name="servers_title">Mijn servers</string>
-    <string name="servers_tagline">Je server, in je broekzak</string>
+    <string name="servers_tagline">Je server, waar je ook bent</string>
     <string name="servers_add">Server toevoegen</string>
     <string name="servers_empty_title">Nog geen server</string>
     <string name="servers_empty_text">Installeer de RemoteMC-plugin op je server, voer /remotemc pair uit en tik op “Server toevoegen”.</string>

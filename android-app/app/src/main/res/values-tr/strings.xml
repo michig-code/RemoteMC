@@ -13,7 +13,7 @@
     <string name="action_save">Kaydet</string>
     <string name="action_send">Gönder</string>
     <string name="action_skip">Atla</string>
-    <string name="onboarding_welcome_title">Sunucun cebinde</string>
+    <string name="onboarding_welcome_title">Sunucun,\nnerede olursan ol</string>
     <string name="onboarding_welcome_text">Kimin çevrimiçi olduğunu gör, performansı takip et, oyuncularla sohbet et ve komut çalıştır – canlı ve şifreli.</string>
     <string name="onboarding_plugin_title">Eklentiyi kur</string>
     <string name="onboarding_plugin_text">RemoteMC eklentisini Paper, Purpur, Folia veya Spigot sunucunun (1.20.6 veya üstü) plugins klasörüne koy ve sunucuyu yeniden başlat.</string>
@@ -24,7 +24,7 @@
     <string name="onboarding_scan_text">QR kodu bu uygulamayla tara. Her telefon kendi erişimini alır ve bu erişimi istediğin zaman iptal edebilirsin.</string>
     <string name="onboarding_start">Başla</string>
     <string name="servers_title">Sunucularım</string>
-    <string name="servers_tagline">Sunucun, cebinde</string>
+    <string name="servers_tagline">Sunucun, nerede olursan ol</string>
     <string name="servers_add">Sunucu ekle</string>
     <string name="servers_empty_title">Henüz sunucu yok</string>
     <string name="servers_empty_text">RemoteMC eklentisini sunucuna kur, /remotemc pair komutunu çalıştır ve “Sunucu ekle”ye dokun.</string>

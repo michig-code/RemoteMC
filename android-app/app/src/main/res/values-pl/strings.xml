@@ -13,7 +13,7 @@
     <string name="action_save">Zapisz</string>
     <string name="action_send">Wyślij</string>
     <string name="action_skip">Pomiń</string>
-    <string name="onboarding_welcome_title">Twój serwer w kieszeni</string>
+    <string name="onboarding_welcome_title">Twój serwer,\ngdziekolwiek jesteś</string>
     <string name="onboarding_welcome_text">Sprawdzaj, kto jest online, śledź wydajność, czatuj z graczami i wykonuj komendy – na żywo i z szyfrowaniem.</string>
     <string name="onboarding_plugin_title">Zainstaluj plugin</string>
     <string name="onboarding_plugin_text">Wrzuć plugin RemoteMC do folderu plugins na serwerze Paper, Purpur, Folia lub Spigot (1.20.6 lub nowszym) i uruchom serwer ponownie.</string>
@@ -24,7 +24,7 @@
     <string name="onboarding_scan_text">Zeskanuj kod QR tą aplikacją. Każdy telefon dostaje własny dostęp, który możesz w każdej chwili cofnąć.</string>
     <string name="onboarding_start">Zaczynamy</string>
     <string name="servers_title">Moje serwery</string>
-    <string name="servers_tagline">Twój serwer, w Twojej kieszeni</string>
+    <string name="servers_tagline">Twój serwer, gdziekolwiek jesteś</string>
     <string name="servers_add">Dodaj serwer</string>
     <string name="servers_empty_title">Brak serwerów</string>
     <string name="servers_empty_text">Zainstaluj plugin RemoteMC na serwerze, wpisz /remotemc pair i dotknij „Dodaj serwer”.</string>

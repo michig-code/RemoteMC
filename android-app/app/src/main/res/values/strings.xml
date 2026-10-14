@@ -18,7 +18,7 @@
     <string name="action_skip">Skip</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_welcome_title">Your server in your pocket</string>
+    <string name="onboarding_welcome_title">Your server,\nwherever you are</string>
     <string name="onboarding_welcome_text">See who is online, keep an eye on performance, chat with players and run commands – live and encrypted.</string>
     <string name="onboarding_plugin_title">Install the plugin</string>
     <string name="onboarding_plugin_text">Put the RemoteMC plugin into the plugins folder of your Paper, Purpur, Folia or Spigot server (1.20.6 or newer) and restart it.</string>
@@ -31,7 +31,7 @@
 
     <!-- Server list -->
     <string name="servers_title">My servers</string>
-    <string name="servers_tagline">Your server, in your pocket</string>
+    <string name="servers_tagline">Your server, wherever you are</string>
     <string name="servers_add">Add server</string>
     <string name="servers_empty_title">No server yet</string>
     <string name="servers_empty_text">Install the RemoteMC plugin on your server, run /remotemc pair and tap “Add server”.</string>
