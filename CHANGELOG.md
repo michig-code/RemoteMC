@@ -33,6 +33,13 @@ First public release of **RemoteMC**.
   Turkish and Russian; update check
 - Imports settings and the access token from the McRemote prototype
 
+### iPhone test version (new, `ios-app/`)
+- Small SwiftUI app for iOS 17+ (built with the iOS 26 SDK): pair by scanning the QR code of
+  `/remotemc pair` with the camera, by link or by address and code (certificate pinned like on
+  Android), server list with status, server page with status, players online and a console command
+- Built on request by `ios.yml` on a GitHub Mac as an unsigned .ipa, to install with AltStore or
+  Sideloadly; English and German
+
 ### Windows app (new)
 - Server list as a grid: the grid button (or holding a card without moving it) shows a blue frame
   with handles like a home-screen widget; drag them to size each card in grid cells (1×1 up to full

@@ -1,7 +1,9 @@
 # RemoteMC – Arbeitsweise
 
 RemoteMC besteht aus dem Server-Plugin (`plugin/`), der Handy-App (`android-app/`, Versionen
-„github“ und „play“) und der Windows-App (`desktop-app/`, teilt Code und Texte mit der Handy-App).
+„github“ und „play“), der Windows-App (`desktop-app/`, teilt Code und Texte mit der Handy-App) und
+einer kleinen iPhone-Testversion (`ios-app/`, SwiftUI; lässt sich hier nicht bauen – `ios.yml` baut
+sie auf einem Intel-Mac von GitHub als unsignierte .ipa).
 Der Besitzer schreibt Deutsch – antworte auf Deutsch.
 
 ## Updates: erst sammeln, dann programmieren
