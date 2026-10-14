@@ -52,7 +52,7 @@ jobs:
           cp app/build/outputs/bundle/playRelease/app-play-release.aab "../RemoteMC-App-Play-${GITHUB_REF_NAME#v}.aab"
 
       - name: Keep the Play bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-App-Play
           path: RemoteMC-App-Play-*.aab
