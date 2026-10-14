@@ -1,5 +1,10 @@
 package de.remotemc.desktop
 
+import de.remotemc.app.net.ApiError
+import androidx.compose.material.icons.outlined.GppMaybe
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import de.remotemc.app.net.DemoServer
 import de.remotemc.desktop.res.action_undo
 import org.jetbrains.compose.resources.getString
@@ -83,20 +88,21 @@ enum class Pane(val label: StringResource, val icon: ImageVector, val minRole: R
 }
 
 @Composable
-fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit) {
+fun ServerScreen(model: AppModel, profile: ServerProfile, onBack: () -> Unit, onRepair: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
     val session = remember(profile.id) { ServerSession(profile, scope, model.servers, model.history, model.extras) }
     DisposableEffect(session) {
         session.start()
         onDispose { session.stop() }
     }
-    ServerContent(session, onBack)
+    ServerContent(session, onBack, onRepair = onRepair)
 }
 
 /** Separate from the connection so screenshot tests can show it with fixed data. */
 @Composable
-fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0) {
+fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane = Pane.OVERVIEW, playersView: Int = 0, onRepair: () -> Unit = {}) {
     var pane by rememberSaveable { mutableStateOf(initialPane) }
+    var openWorld by remember { mutableStateOf<String?>(null) } // world card clicked on the overview
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(session) {
         for (m in session.messages) {
@@ -125,7 +131,15 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                         ),
                         selected = pane == p,
                         onClick = { pane = p },
-                        icon = { Icon(p.icon, null) },
+                        icon = {
+                            val online = session.players.size
+                            // Like on the phone: the number of players on the Players icon.
+                            if (p == Pane.PLAYERS && online > 0) {
+                                androidx.compose.material3.BadgedBox(badge = { androidx.compose.material3.Badge { Text(online.toString()) } }) { Icon(p.icon, null) }
+                            } else {
+                                Icon(p.icon, null)
+                            }
+                        },
                         label = { Text(stringResource(p.label), textAlign = TextAlign.Center, maxLines = 2) },
                     )
                 }
@@ -133,6 +147,7 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
             }
             Column(Modifier.fillMaxSize()) {
                 TopBar(session)
+                AccessBanner(session.error, onRepair)
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     val animate = LocalAnimations.current
                     // Switching areas slides up or down, following the order in the side bar.
@@ -150,11 +165,14 @@ fun ServerContent(session: ServerSession, onBack: () -> Unit, initialPane: Pane 
                         label = "pane",
                     ) { shown ->
                     when (shown) {
-                        Pane.OVERVIEW -> OverviewPane(session)
+                        Pane.OVERVIEW -> OverviewPane(
+                            session,
+                            onWorld = if (Pane.WORLDS in panes) ({ name -> openWorld = name; pane = Pane.WORLDS }) else null,
+                        )
                         Pane.PLAYERS -> PlayersPane(session, playersView)
                         Pane.CONSOLE -> ConsolePane(session)
                         Pane.CHAT -> ChatPane(session)
-                        Pane.WORLDS -> WorldsPane(session)
+                        Pane.WORLDS -> WorldsPane(session, openWorld)
                         Pane.PLUGINS -> PluginsPane(session)
                         Pane.SCHEDULES -> SchedulesPane(session)
                         Pane.FILES -> FilesPane(session)
@@ -211,5 +229,31 @@ private fun relativeTime(time: Long): String {
         minutes < 60 -> pluralStringResource(Res.plurals.time_minutes_ago, minutes, minutes)
         minutes < 24 * 60 -> (minutes / 60).let { pluralStringResource(Res.plurals.time_hours_ago, it, it) }
         else -> (minutes / (24 * 60)).let { pluralStringResource(Res.plurals.time_days_ago, it, it) }
+    }
+}
+
+/** Explains problems the user has to act on: a changed certificate or revoked access (like on the phone). */
+@Composable
+private fun AccessBanner(error: Throwable?, onRepair: () -> Unit) {
+    val message = when {
+        error is ApiError.CertificateChanged -> Res.string.banner_certificate_changed
+        error is ApiError.Http && error.code == "invalid_token" -> Res.string.banner_token_revoked
+        else -> null
+    } ?: return
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.GppMaybe, null, tint = MaterialTheme.colorScheme.onErrorContainer)
+            Spacer(Modifier.width(12.dp))
+            Text(stringResource(message), color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
+            Button(
+                onClick = onRepair,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+            ) { Text(stringResource(Res.string.action_pair_again)) }
+        }
     }
 }

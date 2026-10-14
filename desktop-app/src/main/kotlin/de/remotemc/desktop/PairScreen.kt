@@ -61,17 +61,17 @@ private data class Checked(
 
 /** Adds a server with the 6-digit code from /remotemc pair, a pasted link, or an access token. */
 @Composable
-fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit) {
+fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit, repair: ServerProfile? = null) {
     val parsed = remember(link) { link?.let(ConnectLink::parse) }
     val settings by model.settings.settings.collectAsState()
-    var host by remember { mutableStateOf(parsed?.host.orEmpty()) }
-    var port by remember { mutableStateOf((parsed?.port ?: 8765).toString()) }
+    var host by remember { mutableStateOf(parsed?.host ?: repair?.host.orEmpty()) }
+    var port by remember { mutableStateOf((parsed?.port ?: repair?.port ?: 8765).toString()) }
     var code by remember { mutableStateOf(parsed?.code.orEmpty()) }
     var token by remember { mutableStateOf(parsed?.token.orEmpty()) }
     var useToken by remember { mutableStateOf(parsed?.token != null) }
-    var tls by remember { mutableStateOf(parsed?.tls ?: true) }
-    var name by remember { mutableStateOf("") }
-    var device by remember { mutableStateOf(settings.deviceName) }
+    var tls by remember { mutableStateOf(parsed?.tls ?: repair?.tls ?: true) }
+    var name by remember { mutableStateOf(repair?.name.orEmpty()) }
+    var device by remember { mutableStateOf(repair?.deviceName?.takeIf { it.isNotBlank() } ?: settings.deviceName) }
     var checked by remember { mutableStateOf<Checked?>(null) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -104,7 +104,8 @@ fun PairScreen(model: AppModel, link: String?, onDone: (String?) -> Unit) {
         error = null
         scope.launch {
             try {
-                val base = ServerProfile(name = "", host = c.host, token = "")
+                // Pairing again keeps the server's id (open tab), folder, pins and notification choice.
+                val base = repair ?: ServerProfile(name = "", host = c.host, token = "")
                 val profile = if (!useToken) {
                     val r = ApiClient.pair(c.host, c.port, c.tls, c.fingerprint, code.trim(), device.trim())
                     base.copy(token = r.token, role = r.role)

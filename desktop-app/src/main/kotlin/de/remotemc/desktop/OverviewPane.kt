@@ -75,6 +75,8 @@ fun OverviewPane(
     session: ServerSession,
     loadHistory: (suspend (HistoryRange) -> PerformanceHistory)? = { session.client.history(it) },
     startEditing: Boolean = false,
+    /** Opens a world's details (the Worlds area); null = world cards are not clickable. */
+    onWorld: ((String) -> Unit)? = null,
 ) {
     val status = session.status
     if (status == null) {
@@ -83,7 +85,7 @@ fun OverviewPane(
             if (error != null) {
                 var text by remember(error) { mutableStateOf("") }
                 LaunchedEffect(error) { text = errorText(error) }
-                EmptyState(stringResource(Res.string.dashboard_unreachable_title), text)
+                EmptyState(stringResource(Res.string.dashboard_unreachable_title), text + "\n\n" + stringResource(Res.string.dashboard_unreachable_hint))
             } else {
                 CircularProgressIndicator()
             }
@@ -119,7 +121,7 @@ fun OverviewPane(
                 Column(m) {
                     SectionTitle(stringResource(Res.string.dashboard_worlds))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp), maxItemsInEachRow = 3) {
-                        status.worlds.forEachIndexed { i, w -> WorldCard(w, Modifier.weight(1f).widthIn(min = 220.dp).staggeredAppear(6 + i)) }
+                        status.worlds.forEachIndexed { i, w -> WorldCard(w, Modifier.weight(1f).widthIn(min = 220.dp).staggeredAppear(6 + i), onWorld?.let { { it(w.name) } }) }
                     }
                 }
             }
@@ -252,13 +254,13 @@ private fun MemoryCard(status: ServerStatus, modifier: Modifier) {
 }
 
 @Composable
-private fun WorldCard(world: WorldInfo, modifier: Modifier) {
+private fun WorldCard(world: WorldInfo, modifier: Modifier, onClick: (() -> Unit)? = null) {
     val (color, label) = when (world.environment) {
         "NETHER" -> McColors.Nether to stringResource(Res.string.world_nether)
         "THE_END" -> McColors.End to stringResource(Res.string.world_end)
         else -> McColors.Grass to stringResource(Res.string.world_overworld)
     }
-    McCard(modifier) {
+    McCard(modifier, onClick = onClick) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(40.dp).padding(0.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.fillMaxSize()) { drawRoundRect(color, cornerRadius = androidx.compose.ui.geometry.CornerRadius(10.dp.toPx())) }

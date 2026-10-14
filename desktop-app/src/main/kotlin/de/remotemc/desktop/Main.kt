@@ -51,7 +51,7 @@ import javax.imageio.ImageIO
 
 sealed interface Screen {
     data object Servers : Screen
-    data class Pair(val link: String? = null) : Screen
+    data class Pair(val link: String? = null, val repair: String? = null) : Screen
     data class Server(val id: String) : Screen
     data object Settings : Screen
 }
@@ -192,11 +192,16 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                         saveable.SaveableStateProvider(id) {
                             when (id) {
                                 Tabs.SETTINGS -> SettingsScreen(model, onBack = { tabs.close(Tabs.SETTINGS) })
-                                Tabs.PAIR -> PairScreen(model, tabs.pairLink, onDone = { newId ->
+                                Tabs.PAIR -> PairScreen(model, tabs.pairLink, repair = tabs.pairRepair?.let(model.servers::get), onDone = { newId ->
                                     tabs.close(Tabs.PAIR)
-                                    if (newId != null) tabs.open(newId)
+                                    if (newId != null) {
+                                        tabs.restart(newId)
+                                        tabs.open(newId)
+                                    }
                                 })
-                                else -> tabs.session(id)?.let { ServerContent(it, onBack = tabs::showHome) }
+                                else -> tabs.session(id)?.let {
+                                    ServerContent(it, onBack = tabs::showHome, onRepair = { tabs.openSpecial(Tabs.PAIR, repair = id) })
+                                }
                             }
                         }
                         return@Box
@@ -207,15 +212,16 @@ fun App(model: AppModel, start: Screen = Screen.Servers, tabs: Tabs? = null, con
                             onOpen = { id -> if (tabs != null) tabs.open(id) else screen = Screen.Server(id) },
                             onAdd = { link -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, link) else screen = Screen.Pair(link) },
                             onSettings = { if (tabs != null) tabs.openSpecial(Tabs.SETTINGS) else screen = Screen.Settings },
+                            onRepair = { id -> if (tabs != null) tabs.openSpecial(Tabs.PAIR, repair = id) else screen = Screen.Pair(repair = id) },
                         )
-                        is Screen.Pair -> PairScreen(model, s.link, onDone = { id ->
+                        is Screen.Pair -> PairScreen(model, s.link, repair = s.repair?.let(model.servers::get), onDone = { id ->
                             screen = Screen.Servers
                             if (id != null) { if (tabs != null) tabs.open(id) else screen = Screen.Server(id) }
                         })
                         is Screen.Server -> {
                             val profile = model.servers.get(s.id)
                             if (profile == null) screen = Screen.Servers
-                            else ServerScreen(model, profile, onBack = { screen = Screen.Servers })
+                            else ServerScreen(model, profile, onBack = { screen = Screen.Servers }, onRepair = { screen = Screen.Pair(repair = s.id) })
                         }
                         Screen.Settings -> SettingsScreen(model, onBack = { screen = Screen.Servers })
                     }

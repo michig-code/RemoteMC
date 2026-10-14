@@ -13,6 +13,8 @@ import androidx.compose.material.icons.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOff
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -124,6 +126,8 @@ fun ServerListScreen(
     onAdd: (String?) -> Unit,
     onSettings: () -> Unit,
     probe: suspend (ServerProfile) -> ServerStatus = { ApiClient(it, Http.quick).status() },
+    /** Pairs a server again (new token or certificate), keeping its name, folder and place. */
+    onRepair: (String) -> Unit = {},
 ) {
     val servers by model.servers.servers.collectAsState()
     val alertsOn = model.settings.settings.collectAsState().value.alerts.enabled
@@ -134,6 +138,7 @@ fun ServerListScreen(
     var renamingFolder by remember { mutableStateOf<String?>(null) }
     var removingFolder by remember { mutableStateOf<String?>(null) }
     var collapsed by remember { mutableStateOf(setOf<String>()) }
+    var refreshAll by remember { mutableIntStateOf(0) } // checks every server again (also in closed folders)
     val clipboard = LocalClipboardManager.current
     val demoName = stringResource(Res.string.demo_name)
     val rows = buildRows(servers, query, collapsed)
@@ -215,6 +220,9 @@ fun ServerListScreen(
                             Text(stringResource(Res.string.scan_paste_link))
                         }
                         Spacer(Modifier.width(8.dp))
+                        if (servers.isNotEmpty()) {
+                            IconButton(onClick = { ProbeCache.clear(); refreshAll++ }) { Icon(Icons.Outlined.Refresh, stringResource(Res.string.action_refresh)) }
+                        }
                         IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, stringResource(Res.string.settings_title)) }
                     }
                 }
@@ -302,6 +310,8 @@ fun ServerListScreen(
                                         alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
                                         onPin = { model.servers.setPinned(server.id, !server.pinned) },
                                         onMoveToFolder = { moving = server },
+                                        onRepair = { onRepair(server.id) },
+                                        refreshAll = refreshAll,
                                         dragging = dragging,
                                         dropTarget = hoverTarget == server.id,
                                         modifier = Modifier
@@ -524,6 +534,8 @@ private fun ServerCard(
     onToggleNotify: () -> Unit = {},
     onPin: () -> Unit = {},
     onMoveToFolder: () -> Unit = {},
+    onRepair: () -> Unit = {},
+    refreshAll: Int = 0,
     dragging: Boolean = false,
     /** Another server is held over this one: dropping it makes a folder. */
     dropTarget: Boolean = false,
@@ -531,8 +543,8 @@ private fun ServerCard(
 ) {
     var menu by remember { mutableStateOf(false) }
     var refresh by remember { mutableIntStateOf(0) }
-    val state by produceState(ProbeCache[server.id] ?: Probe.Loading, server.id, server.baseUrl, server.token, refresh) {
-        if (refresh > 0) value = Probe.Loading
+    val state by produceState(ProbeCache[server.id] ?: Probe.Loading, server.id, server.baseUrl, server.token, refresh, refreshAll) {
+        if (refresh > 0 || refreshAll > 0) value = Probe.Loading
         while (true) {
             value = try {
                 Probe.Online(probe(server))
@@ -603,6 +615,10 @@ private fun ServerCard(
                         DropdownMenuItem(
                             { Text(stringResource(Res.string.servers_move_to_folder)) },
                             { menu = false; onMoveToFolder() }, leadingIcon = { Icon(Icons.Outlined.DriveFileMove, null) },
+                        )
+                        DropdownMenuItem(
+                            { Text(stringResource(Res.string.action_pair_again)) },
+                            { menu = false; onRepair() }, leadingIcon = { Icon(Icons.Outlined.QrCode2, null) },
                         )
                         DropdownMenuItem({ Text(stringResource(Res.string.servers_rename)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
                         if (alertsOn) {

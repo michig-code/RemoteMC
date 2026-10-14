@@ -96,9 +96,9 @@ private val Times = listOf(
 /** Time, weather, difficulty and game rules of each world (admins). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorldsPane(session: ServerSession) {
+fun WorldsPane(session: ServerSession, initialWorld: String? = null) {
     val worlds = session.status?.worlds.orEmpty().map { it.name }
-    var selected by remember { mutableStateOf(worlds.firstOrNull()) }
+    var selected by remember { mutableStateOf(initialWorld?.takeIf { it in worlds } ?: worlds.firstOrNull()) }
     val world = selected?.takeIf { it in worlds } ?: worlds.firstOrNull() ?: return
     val manage = session.manage
     val (loader, reload) = rememberLoader(world) { manage.world(world) }

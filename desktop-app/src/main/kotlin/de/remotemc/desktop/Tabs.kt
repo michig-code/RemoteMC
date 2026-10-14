@@ -24,6 +24,9 @@ class Tabs(
     /** remotemc:// link to start the "add server" tab with (pasted or from the clipboard). */
     var pairLink by mutableStateOf<String?>(null)
         private set
+    /** Server to pair again in the "add server" tab (keeps its name, folder and place). */
+    var pairRepair by mutableStateOf<String?>(null)
+        private set
 
     init {
         if (persist) {
@@ -35,8 +38,11 @@ class Tabs(
     }
 
     /** Opens (or shows) the settings or the "add server" tab. */
-    fun openSpecial(key: String, link: String? = null) {
-        if (key == PAIR) pairLink = link
+    fun openSpecial(key: String, link: String? = null, repair: String? = null) {
+        if (key == PAIR) {
+            pairLink = link
+            pairRepair = repair
+        }
         if (key !in open) open += key
         active = key
         save()
@@ -79,6 +85,12 @@ class Tabs(
     }
 
     fun existing(id: String): ServerSession? = sessions[id]
+
+    /** Reconnects an open tab, e.g. after the server was paired again (new token). */
+    fun restart(id: String) {
+        sessions.remove(id)?.stop() ?: return
+        session(id)
+    }
 
     /** The live connection of an open tab (started on first use). */
     fun session(id: String): ServerSession? {
