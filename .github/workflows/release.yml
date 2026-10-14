@@ -16,7 +16,7 @@ jobs:
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
       HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v4
         with:
@@ -100,7 +100,7 @@ jobs:
         shell: bash
         working-directory: desktop-app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with:
           # JetBrains Runtime: the installer ships it, so the window keeps Windows' own frame
