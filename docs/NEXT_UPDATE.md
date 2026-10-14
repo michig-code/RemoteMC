@@ -7,14 +7,17 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| | | | | |
+| 1 | Updates in der Handy-App (B9) | Handy (nur GitHub-Version) | Die App sucht beim Start und alle 6 Stunden auf GitHub nach einer neuen Version (abschaltbar). Gibt es eine, **ploppt unten ein Hinweis auf** („Update 1.1.0 verfügbar – Jetzt aktualisieren“). Ein Tipp lädt die APK, prüft die Prüfsumme und öffnet den Android-Installer; Einstellungen bleiben erhalten. In den Einstellungen: „Nach Updates suchen“ und die aktuelle Version. Die Play-Version bekommt nichts davon (Updates über den Play Store). | ☐ |
+| 2 | Update-Popup unten rechts am PC | Windows | Die Windows-App sucht schon nach Updates; neu ist ein **kleines Popup unten rechts** im Fenster („Update verfügbar – Installieren / Später“), statt nur eines Hinweises in der Titelleiste. | ☐ |
+| 3 | Hilfe-Seite | Handy | Neues Thema „App aktualisieren“ in allen Sprachen. | ☐ |
+
+**Hinweis:** Beides findet erst etwas, wenn es auf GitHub einen Release gibt – der erste Release kommt aber erst auf deine Anweisung. Testen kann ich es vorher mit einem nachgestellten Release.
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): QR-Karte verschwindet beim Wegwerfen und nach dem Pairen.
 
 ## Offene Fragen
 
-- B9 (App-Updates direkt in der APK): wartet auf die Entscheidung, ob das Repo öffentlich wird
-  oder ein eigenes öffentliches Repo für Releases bekommt.
+- Keine (das Repo ist öffentlich, damit sind App-Updates über GitHub-Releases möglich).
 
 ## Ideen für spätere Updates
 
