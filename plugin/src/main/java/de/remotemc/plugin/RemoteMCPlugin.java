@@ -54,6 +54,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     private Messages messages;
     private TokenStore tokens;
     private final PairingManager pairing = new PairingManager();
+    private PairMaps pairMaps;
     private LoginGuard loginGuard;
     private AuditLog audit;
     private final EventHub hub = new EventHub();
@@ -99,10 +100,13 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         console.attach();
         chat = new ChatBuffer(hub);
 
+        org.bukkit.NamespacedKey mapKey = QrCodes.codeKey(this);
+        pairMaps = new PairMaps(mapKey, new de.remotemc.plugin.pairing.PairMapListener(mapKey, pairing, scheduler));
         getServer().getPluginManager().registerEvents(new GameListener(chat), this);
         getServer().getPluginManager().registerEvents(
                 Platform.PAPER ? new PaperChatListener(chat) : new SpigotChatListener(chat), this);
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(pairMaps.listener(), this);
 
         startApi();
         // Live status for connected apps every 2 seconds.
@@ -236,6 +240,9 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
 
     public TokenStore tokens() { return tokens; }
     public PairingManager pairing() { return pairing; }
+
+    /** QR maps of /remotemc pair: their item key and the listener that cleans them up. */
+    private record PairMaps(org.bukkit.NamespacedKey key, de.remotemc.plugin.pairing.PairMapListener listener) {}
     public LoginGuard loginGuard() { return loginGuard; }
     public AuditLog audit() { return audit; }
     public EventHub hub() { return hub; }
@@ -251,7 +258,10 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
     public TlsManager tls() { return tls; }
 
     /** Tells admins that a device was paired. */
-    public void onDevicePaired(String device, Role role) {
+    public void onDevicePaired(String device, Role role, String code) {
+        if (pairMaps != null) {
+            pairMaps.listener().paired(code);
+        }
         String msg = messages.prefixed("pair-success", "device", device, "role", role.id());
         Bukkit.getConsoleSender().sendMessage(msg);
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -311,7 +321,7 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         if (sender instanceof Player player) {
             String mapName = messages.get("pair-map-name", "code", code.code());
             scheduler.entity(player, () -> {
-                ItemStack map = QrCodes.mapItem(player, qr, mapName);
+                ItemStack map = QrCodes.mapItem(player, qr, mapName, pairMaps.key(), code.code());
                 player.getInventory().addItem(map).values()
                         .forEach(rest -> player.getWorld().dropItem(player.getLocation(), rest));
                 return null;

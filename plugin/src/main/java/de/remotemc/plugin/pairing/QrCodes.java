@@ -8,12 +8,15 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.awt.Color;
 import java.nio.charset.Charset;
@@ -71,7 +74,20 @@ public final class QrCodes {
 
     /** Map item showing the QR code. Must be called on the player's thread. */
     @SuppressWarnings("deprecation")
-    public static ItemStack mapItem(Player player, BitMatrix m, String name) {
+    /** Marks pairing maps with their code (removed when dropped or after pairing). */
+    public static NamespacedKey codeKey(Plugin plugin) {
+        return new NamespacedKey(plugin, "pair_code");
+    }
+
+    /** The pairing code of a QR map, or null for any other item. */
+    public static String codeOf(ItemStack item, NamespacedKey key) {
+        if (item == null || item.getType() != Material.FILLED_MAP || !item.hasItemMeta()) {
+            return null;
+        }
+        return item.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
+    }
+
+    public static ItemStack mapItem(Player player, BitMatrix m, String name, NamespacedKey key, String code) {
         MapView view = Bukkit.createMap(player.getWorld());
         view.getRenderers().forEach(view::removeRenderer);
         view.setTrackingPosition(false);
@@ -82,6 +98,7 @@ public final class QrCodes {
         MapMeta meta = (MapMeta) item.getItemMeta();
         meta.setMapView(view);
         meta.setDisplayName("§a" + name);
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, code);
         item.setItemMeta(meta);
         return item;
     }

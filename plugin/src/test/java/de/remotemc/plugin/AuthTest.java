@@ -67,6 +67,10 @@ class AuthTest {
         assertNotNull(redeemed);
         assertEquals(Role.VIEWER, redeemed.role());
         assertNull(pairing.redeem(code.code()));
+        // The QR map of a used code is removed; other codes are not "used".
+        assertTrue(pairing.isUsed(code.code()));
+        assertFalse(pairing.isUsed("123456"));
+        assertFalse(pairing.isUsed(null));
     }
 
     @Test

@@ -19,7 +19,7 @@
     <string name="files_row_text">Конфиги, логи, загрузка файлов</string>
     <string name="help_add_server_title">Добавить сервер</string>
     <string name="help_add_server_where">Список серверов › Добавить сервер</string>
-    <string name="help_add_server_text">Установите плагин RemoteMC на свой сервер Minecraft и введите /remotemc pair в игре или в консоли сервера. Затем нажмите «Добавить сервер» в приложении и отсканируйте QR-код – или введите адрес и 6-значный код.</string>
+    <string name="help_add_server_text">Установите плагин RemoteMC на свой сервер Minecraft и введите /remotemc pair в игре или в консоли сервера. Затем нажмите «Добавить сервер» в приложении и отсканируйте QR-код – или введите адрес и 6-значный код. Карта из /remotemc pair исчезает, как только телефон подключится по ней или если вы её выбросите.</string>
     <string name="help_add_server_keys">подключить, связать, QR, код, новый, плагин, установить, ссылка</string>
     <string name="help_demo_title">Попробовать демо-сервер</string>
     <string name="help_demo_where">Список серверов (пустой) › Попробовать демо-сервер</string>

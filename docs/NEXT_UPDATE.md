@@ -7,8 +7,9 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| 1 | QR-Karte verschwindet beim Wegwerfen | Plugin | Wirft ein Spieler die Kopplungs-Karte aus `/remotemc pair` **selbst** weg (Q-Taste, aus dem Inventar ziehen), wird sie gelöscht statt auf dem Boden zu landen. Fällt sie nur herunter, weil das Inventar voll war, bleibt sie liegen und kann aufgehoben werden. | ☐ |
-| 2 | QR-Karte verschwindet nach dem Pairen | Plugin | Sobald mit dem Code ein Handy gepaired wurde, wird die Karte aus dem Inventar (und ggf. der Hand) des Spielers entfernt – auch wenn er sie in eine Truhe gelegt hat, wird sie beim nächsten Anfassen ungültig. | ☐ |
+| | | | | |
+
+Zuletzt umgesetzt (siehe `CHANGELOG.md`): QR-Karte verschwindet beim Wegwerfen und nach dem Pairen.
 
 ## Offene Fragen
 

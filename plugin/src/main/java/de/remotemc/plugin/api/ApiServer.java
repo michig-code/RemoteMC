@@ -448,7 +448,7 @@ public final class ApiServer {
         String token = plugin.tokens().create(device.replaceAll("[\\p{Cntrl}]", ""), code.role());
         TokenStore.Token created = plugin.tokens().authenticate(token);
         plugin.audit().log(created.name() + "/" + created.role().id(), ip, "paired (code from " + code.createdBy() + ")");
-        plugin.onDevicePaired(created.name(), created.role());
+        plugin.onDevicePaired(created.name(), created.role(), code.code());
 
         JsonObject o = new JsonObject();
         o.addProperty("token", token);

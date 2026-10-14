@@ -19,6 +19,9 @@ public final class PairingManager {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final Map<String, Code> codes = new ConcurrentHashMap<>();
+    /** Codes that paired a device (newest last), so their QR maps can be removed. */
+    private final java.util.Set<String> used = java.util.Collections.synchronizedSet(new java.util.LinkedHashSet<>());
+    private static final int MAX_USED = 200;
     private final AtomicInteger failures = new AtomicInteger();
 
     public Code create(Role role, int validMinutes, String createdBy) {
@@ -44,7 +47,18 @@ public final class PairingManager {
             }
             return null;
         }
+        synchronized (used) {
+            used.add(c.code());
+            if (used.size() > MAX_USED) {
+                used.remove(used.iterator().next());
+            }
+        }
         return c;
+    }
+
+    /** True once a device has paired with this code. */
+    public boolean isUsed(String code) {
+        return code != null && used.contains(code);
     }
 
     /** Replaces open pairing codes in a text, so they cannot be read from the console stream. */

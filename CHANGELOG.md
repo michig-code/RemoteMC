@@ -7,6 +7,7 @@ First public release of **RemoteMC**.
 ### Plugin
 - Built-in HTTPS with a self-signed certificate; the app pins its fingerprint
 - `/remotemc pair`: one-time 6-digit code and QR code (in-game map or console)
+- The QR map disappears when the player throws it away or once a phone has paired with its code
 - Per-device access with roles **admin**, **moderator** and **viewer**; `/remotemc token create | list | revoke`
 - Live updates via Server-Sent Events (console, chat, joins/leaves, status)
 - Versioned API (`/api/v1`) with stable error codes, audit log (`audit.log`)

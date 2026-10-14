@@ -19,7 +19,7 @@
     <string name="files_row_text">Edytuj konfiguracje, czytaj logi, wysyłaj pliki</string>
     <string name="help_add_server_title">Dodawanie serwera</string>
     <string name="help_add_server_where">Lista serwerów › Dodaj serwer</string>
-    <string name="help_add_server_text">Zainstaluj plugin RemoteMC na swoim serwerze Minecraft i wpisz /remotemc pair w grze lub w konsoli serwera. Potem dotknij „Dodaj serwer” w aplikacji i zeskanuj kod QR – albo wpisz adres i 6-cyfrowy kod.</string>
+    <string name="help_add_server_text">Zainstaluj plugin RemoteMC na swoim serwerze Minecraft i wpisz /remotemc pair w grze lub w konsoli serwera. Potem dotknij „Dodaj serwer” w aplikacji i zeskanuj kod QR – albo wpisz adres i 6-cyfrowy kod. Mapa z /remotemc pair znika, gdy telefon się nią sparuje albo gdy ją wyrzucisz.</string>
     <string name="help_add_server_keys">połącz, sparuj, QR, kod, nowy, plugin, instalacja, link</string>
     <string name="help_demo_title">Wypróbuj serwer demo</string>
     <string name="help_demo_where">Lista serwerów (pusta) › Wypróbuj serwer demo</string>
