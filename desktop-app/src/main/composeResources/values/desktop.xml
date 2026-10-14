@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">Only offline alerts pop up from %1$s to %2$s</string>
     <string name="update_toast_text">Your servers and settings stay.</string>
+    <string name="desktop_demo_banner">Demo server with sample data – nothing leaves your PC.</string>
 </resources>

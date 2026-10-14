@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">Dalle %1$s alle %2$s compaiono solo gli avvisi offline</string>
     <string name="update_toast_text">Server e impostazioni restano.</string>
+    <string name="desktop_demo_banner">Server demo con dati di esempio – nulla lascia il tuo PC.</string>
 </resources>

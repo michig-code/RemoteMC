@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import de.remotemc.app.net.DemoServer
 import de.remotemc.desktop.res.action_undo
 import org.jetbrains.compose.resources.getString
 import androidx.compose.material3.SnackbarResult
@@ -170,7 +171,7 @@ private fun TopBar(session: ServerSession) {
     Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 16.dp, top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(session.profile.name, style = MaterialTheme.typography.headlineSmall)
-            Text(session.profile.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(if (DemoServer.isDemo(session.profile)) stringResource(Res.string.desktop_demo_banner) else session.profile.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Surface(onClick = session::retry, shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
             Row(Modifier.padding(start = 6.dp, end = 14.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {

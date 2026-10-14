@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Alles van de telefoon ook op de pc: overzicht, spelers, console, chat, werelden, plugins, taken en bestanden</item>
+        <item>Probeer eerst alles uit met de ingebouwde demoserver</item>
         <item>Meerdere servers in tabbladen, verstelbare gesplitste weergaven</item>
         <item>Commandomenu, favorieten, macro’s en console doorzoeken (Ctrl+F)</item>
         <item>Meerdere spelers kiezen met Ctrl+klik</item>

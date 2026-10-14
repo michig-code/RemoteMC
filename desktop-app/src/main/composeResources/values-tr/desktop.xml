@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">%1$s ile %2$s arasında yalnızca çevrimdışı uyarıları görünür</string>
     <string name="update_toast_text">Sunucuların ve ayarların korunur.</string>
+    <string name="desktop_demo_banner">Örnek verilerle demo sunucu – hiçbir şey bilgisayarından çıkmaz.</string>
 </resources>

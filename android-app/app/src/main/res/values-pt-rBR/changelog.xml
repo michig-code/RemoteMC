@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Tudo do celular também no PC: visão geral, jogadores, console, chat, mundos, plugins, tarefas e arquivos</item>
+        <item>Experimente tudo antes com o servidor de demonstração embutido</item>
         <item>Vários servidores em abas, telas divididas ajustáveis</item>
         <item>Menu de comandos, favoritos, macros e busca no console (Ctrl+F)</item>
         <item>Selecione vários jogadores com Ctrl+clique</item>

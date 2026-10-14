@@ -1,5 +1,7 @@
 package de.remotemc.desktop
 
+import kotlin.test.assertNotNull
+import kotlinx.coroutines.cancel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import de.remotemc.app.ui.ConsoleEntry
@@ -91,6 +93,26 @@ class ScreenshotTest {
     }
 
     @Test fun servers() = shot("01_servers") { ServerListScreen(model, {}, {}, {}, probe = { if (it.port == 8765 && it.tls) sample else error("down") }) }
+    @Test fun serversEmpty() = shot("02b_servers_empty") {
+        val empty = Files.createTempDirectory("rmc").toFile()
+        ServerListScreen(AppModel(ServerStore(File(empty, "servers.dat")), model.settings, CommandHistory(File(empty, "h.json")), ServerExtras.inMemory()), {}, {}, {})
+    }
+    @Test fun demoServer() {
+        // A real session against the built-in demo server: connects, loads and shows its sample data.
+        val profile = de.remotemc.app.net.DemoServer.profile("Demo server")
+        val scope = CoroutineScope(Dispatchers.Default)
+        val live = ServerSession(profile, scope, model.servers, model.history)
+        live.start()
+        val deadline = System.currentTimeMillis() + 10_000
+        while ((live.status == null || live.players.isEmpty()) && System.currentTimeMillis() < deadline) Thread.sleep(100)
+        try {
+            assertNotNull(live.status, "demo server did not answer")
+            shot("25_demo_server") { ServerContent(live, {}, Pane.OVERVIEW) }
+        } finally {
+            live.stop()
+            scope.cancel()
+        }
+    }
     @Test fun serversLight() = shot("02_servers_light", dark = false) { ServerListScreen(model, {}, {}, {}, probe = { sample }) }
     @Test fun overview() = shot("03_overview") { ServerContent(session(), {}, Pane.OVERVIEW) }
     @Test fun playersPane() = shot("04_players") { ServerContent(session(), {}, Pane.PLAYERS) }

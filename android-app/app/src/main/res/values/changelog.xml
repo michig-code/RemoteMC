@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Everything from the phone on the PC: overview, players, console, chat, worlds, plugins, tasks and files</item>
+        <item>Try everything first with the built-in demo server</item>
         <item>Several servers in tabs, resizable split views</item>
         <item>Command menu, favorites, macros and console search (Ctrl+F)</item>
         <item>Select several players with Ctrl+click</item>

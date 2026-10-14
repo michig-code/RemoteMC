@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">De %1$s a %2$s solo aparecen avisos de desconexión</string>
     <string name="update_toast_text">Tus servidores y ajustes se conservan.</string>
+    <string name="desktop_demo_banner">Servidor de demostración con datos de ejemplo: nada sale de tu PC.</string>
 </resources>

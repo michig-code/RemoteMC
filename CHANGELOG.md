@@ -33,6 +33,7 @@ First public release of **RemoteMC**.
 - Imports settings and the access token from the McRemote prototype
 
 ### Windows app (new)
+- Built-in demo server with sample data, to try everything without a server of your own
 - Server list, pairing (code, pasted link or token, with certificate check), overview with
   history chart, players with all actions, coloured console with suggestions and history, chat
 - File manager with editor (Ctrl+S), add and remove plugins; resizable split views

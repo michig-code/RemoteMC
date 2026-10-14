@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Wszystko z telefonu także na PC: przegląd, gracze, konsola, czat, światy, pluginy, zadania i pliki</item>
+        <item>Wypróbuj wszystko najpierw na wbudowanym serwerze demo</item>
         <item>Wiele serwerów w kartach, regulowane widoki dzielone</item>
         <item>Menu komend, ulubione, makra i wyszukiwanie w konsoli (Ctrl+F)</item>
         <item>Wybór kilku graczy przez Ctrl+klik</item>

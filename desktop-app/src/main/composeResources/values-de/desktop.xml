@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">Von %1$s bis %2$s erscheinen nur Offline-Meldungen</string>
     <string name="update_toast_text">Deine Server und Einstellungen bleiben erhalten.</string>
+    <string name="desktop_demo_banner">Demo-Server mit Beispieldaten – nichts verlässt deinen PC.</string>
 </resources>

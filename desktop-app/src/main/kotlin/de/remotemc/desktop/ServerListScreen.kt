@@ -66,6 +66,7 @@ import de.remotemc.app.data.Role
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.data.ServerStatus
 import de.remotemc.app.net.ApiClient
+import de.remotemc.app.net.DemoServer
 import de.remotemc.app.net.Http
 import de.remotemc.desktop.res.*
 import kotlinx.coroutines.CancellationException
@@ -97,6 +98,7 @@ fun ServerListScreen(
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
     val clipboard = LocalClipboardManager.current
     val shown = servers.filter { it.matches(query) }
+    val demoName = stringResource(Res.string.demo_name)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -161,8 +163,15 @@ fun ServerListScreen(
                 }
                 if (servers.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(Modifier.fillMaxWidth().height(320.dp)) {
-                            EmptyState(stringResource(Res.string.servers_empty_title), stringResource(Res.string.servers_empty_text))
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.fillMaxWidth().height(180.dp)) {
+                                EmptyState(stringResource(Res.string.servers_empty_title), stringResource(Res.string.servers_empty_text))
+                            }
+                            // A made-up server inside the app, to look around without a server of one's own.
+                            OutlinedButton(onClick = {
+                                model.servers.upsert(DemoServer.profile(demoName))
+                                onOpen(DemoServer.ID)
+                            }) { Text(stringResource(Res.string.demo_try)) }
                         }
                     }
                 }
@@ -250,10 +259,15 @@ private fun ServerCard(
                             Badge(roleLabel(server.role), MaterialTheme.colorScheme.tertiary)
                         }
                     }
+                    val demo = DemoServer.isDemo(server)
                     Text(
-                        server.address + if (!server.tls) " · " + stringResource(Res.string.servers_unencrypted) else "",
+                        when {
+                            demo -> stringResource(Res.string.demo_name)
+                            !server.tls -> server.address + " · " + stringResource(Res.string.servers_unencrypted)
+                            else -> server.address
+                        },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (!server.tls) McColors.Warning else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (!server.tls && !demo) McColors.Warning else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Box {

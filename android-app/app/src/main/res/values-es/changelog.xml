@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Todo lo del móvil también en el PC: resumen, jugadores, consola, chat, mundos, plugins, tareas y archivos</item>
+        <item>Pruébalo todo primero con el servidor de demostración integrado</item>
         <item>Varios servidores en pestañas, vistas divididas ajustables</item>
         <item>Menú de comandos, favoritos, macros y búsqueda en la consola (Ctrl+F)</item>
         <item>Selecciona varios jugadores con Ctrl+clic</item>

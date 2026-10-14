@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Tout ce que fait le téléphone, aussi sur PC : aperçu, joueurs, console, chat, mondes, plugins, tâches et fichiers</item>
+        <item>Essayez tout d’abord avec le serveur de démo intégré</item>
         <item>Plusieurs serveurs en onglets, vues partagées réglables</item>
         <item>Menu des commandes, favoris, macros et recherche dans la console (Ctrl+F)</item>
         <item>Sélectionner plusieurs joueurs avec Ctrl+clic</item>

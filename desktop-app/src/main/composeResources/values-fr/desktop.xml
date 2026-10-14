@@ -39,4 +39,5 @@
     </plurals>
     <string name="settings_notify_quiet_text_pc">De %1$s à %2$s, seules les alertes hors ligne s’affichent</string>
     <string name="update_toast_text">Vos serveurs et réglages sont conservés.</string>
+    <string name="desktop_demo_banner">Serveur de démo avec des données d’exemple – rien ne quitte ton PC.</string>
 </resources>

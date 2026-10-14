@@ -41,6 +41,7 @@
     </string-array>
     <string-array name="changelog_windows_items">
         <item>Telefondaki her şey bilgisayarda da: genel bakış, oyuncular, konsol, sohbet, dünyalar, eklentiler, görevler ve dosyalar</item>
+        <item>Her şeyi önce yerleşik demo sunucuyla dene</item>
         <item>Sekmelerde birden fazla sunucu, ayarlanabilir bölünmüş görünümler</item>
         <item>Komut menüsü, favoriler, makrolar ve konsol araması (Ctrl+F)</item>
         <item>Ctrl+tık ile birkaç oyuncu seç</item>
