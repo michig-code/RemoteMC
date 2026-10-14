@@ -7,6 +7,7 @@ Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmie
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
+| 1 | Serverliste als Raster | Handy + Windows | Wie beim Bearbeiten der Startseite: Server-Karten in einem Raster anordnen und per Ziehen an einer Ecke größer oder kleiner machen (z. B. klein = Name + Status, breit = mit Spielern/TPS, groß = mit Spielerköpfen). Bearbeiten wie bei „Übersicht anpassen“ (Karte gedrückt halten), Ordner und Anpinnen bleiben. | ☐ |
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Ordner durch Ineinanderziehen und Ordner anpinnen (Handy +
 PC), Server-Ordner am PC, Logo ohne Kasten, Tabs verschieben und Server andocken (PC), die übrigen
@@ -15,7 +16,7 @@ u. a.), Installer in RemoteMC-Farben.
 
 ## Offene Fragen
 
-- Keine.
+- Raster: Welche Größen sollen Karten haben können (z. B. 1×1, 2×1, 2×2) und was zeigt eine große Karte zusätzlich?
 
 ## Hinweise
 
