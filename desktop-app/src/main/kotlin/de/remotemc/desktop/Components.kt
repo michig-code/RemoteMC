@@ -148,7 +148,7 @@ fun Bar(fraction: Float, color: Color, modifier: Modifier = Modifier, height: Dp
 fun AppLogo(size: Dp) {
     Image(
         org.jetbrains.compose.resources.painterResource(Res.drawable.logo), null,
-        Modifier.size(size).clip(RoundedCornerShape(size * 0.24f)),
+        Modifier.size(size),
     )
 }
 

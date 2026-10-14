@@ -75,22 +75,15 @@ import de.remotemc.app.ui.util.SkinFaceTransformation
 
 enum class ConnectionState { Connecting, Online, Offline }
 
-/** The app logo on its gradient tile. */
+/** The app logo: the block on its own, without a tile behind it. */
 @Composable
 fun AppLogo(size: Dp, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(size)
-            .clip(RoundedCornerShape(size * 0.28f))
-            .background(Brush.linearGradient(listOf(Color(0xFF263238), Color(0xFF0E1411)))),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize().scale(1.5f),
-        )
-    }
+    Image(
+        painterResource(R.drawable.ic_launcher_foreground),
+        contentDescription = null,
+        // The drawing fills about half of its 108 × 108 canvas.
+        modifier = modifier.size(size).scale(1.9f),
+    )
 }
 
 /** False when the user turned animations off in the settings. */
