@@ -102,7 +102,7 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
@@ -110,11 +110,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.appcompat:appcompat:1.7.0") // per-app language API on Android < 13
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.8.0") // per-app language API on Android < 13
     implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
@@ -125,7 +125,7 @@ dependencies {
     implementation("sh.calvin.reorderable:reorderable:2.5.1") // drag to sort the server list
     implementation("androidx.glance:glance-appwidget:1.1.1") // home screen widget
     implementation("androidx.glance:glance-material3:1.1.1")
-    implementation("androidx.work:work-runtime-ktx:2.10.0") // widget refresh
+    implementation("androidx.work:work-runtime-ktx:2.12.0") // widget refresh
 
     // QR scanner: CameraX + ML Kit with the bundled model (works without Google Play services)
     implementation("androidx.camera:camera-camera2:1.4.1")
