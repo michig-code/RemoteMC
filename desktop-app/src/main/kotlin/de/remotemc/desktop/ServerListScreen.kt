@@ -1,5 +1,41 @@
 package de.remotemc.desktop
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material.icons.outlined.DriveFileMove
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOff
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.zIndex
+import de.remotemc.app.data.ListRow
+import de.remotemc.app.data.ListTitle
+import de.remotemc.app.data.buildRows
+import de.remotemc.app.data.drop
+import de.remotemc.app.data.folderOf
+import de.remotemc.app.data.mergeInto
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
+import kotlin.math.abs
+import kotlin.math.sign
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +53,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -96,9 +130,48 @@ fun ServerListScreen(
     var query by remember { mutableStateOf("") }
     var renaming by remember { mutableStateOf<ServerProfile?>(null) }
     var deleting by remember { mutableStateOf<ServerProfile?>(null) }
+    var moving by remember { mutableStateOf<ServerProfile?>(null) }
+    var renamingFolder by remember { mutableStateOf<String?>(null) }
+    var removingFolder by remember { mutableStateOf<String?>(null) }
+    var collapsed by remember { mutableStateOf(setOf<String>()) }
     val clipboard = LocalClipboardManager.current
-    val shown = servers.filter { it.matches(query) }
     val demoName = stringResource(Res.string.demo_name)
+    val rows = buildRows(servers, query, collapsed)
+    val folders = remember(servers) { servers.map { it.folder }.filter { it.isNotBlank() }.distinct() }
+
+    // Drag a server onto the middle of another one to put both into a folder; past the middle they swap.
+    val slots = remember { mutableStateMapOf<String, Rect>() } // where each card sits (without the drag)
+    var held by remember { mutableStateOf<Pair<String, Rect>?>(null) } // the dragged card and where it is now
+    var hoverTarget by remember { mutableStateOf<String?>(null) }
+    var dragStart by remember { mutableStateOf<List<ServerProfile>?>(null) }
+    var merging by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val currentServers by rememberUpdatedState(servers)
+    val shownIds = rows.mapNotNullTo(HashSet()) { (it as? ListRow.Server)?.server?.id }
+    fun targetUnder(r: Rect, self: String): String? = slots.entries.firstOrNull { (id, b) ->
+        id != self && id in shownIds &&
+            abs(r.center.x - b.center.x) < b.width * 0.3f && abs(r.center.y - b.center.y) < b.height * 0.3f
+    }?.key
+    /** Another card only swaps with the dragged one once that is past its middle (seen from where it came). */
+    fun canSwap(id: String): Boolean {
+        val (heldId, r) = held ?: return true
+        if (id == heldId) return true
+        val b = slots[id] ?: return true
+        val from = slots[heldId] ?: return true
+        val c = r.center
+        return if (abs(b.center.y - from.center.y) > b.height / 2) {
+            (c.y - b.center.y) * sign(b.center.y - from.center.y) > b.height * 0.2f
+        } else {
+            (c.x - b.center.x) * sign(b.center.x - from.center.x) > b.width * 0.2f
+        }
+    }
+
+    val gridState = rememberLazyGridState()
+    val reorder = rememberReorderableLazyGridState(gridState) { from, to ->
+        val id = from.key as? String ?: return@rememberReorderableLazyGridState
+        val result = drop(currentServers, rows, id, to.key, collapsed) ?: return@rememberReorderableLazyGridState
+        result.expand?.let { collapsed = collapsed - it }
+        model.servers.setOrder(result.servers)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -116,11 +189,12 @@ fun ServerListScreen(
             LazyVerticalGrid(
                 GridCells.Adaptive(340.dp),
                 Modifier.fillMaxSize().widthIn(max = 1200.dp),
+                state = gridState,
                 contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 96.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                item(span = { GridItemSpan(maxLineSpan) }, key = "header") {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppLogo(56.dp)
                         Spacer(Modifier.width(16.dp))
@@ -145,11 +219,16 @@ fun ServerListScreen(
                     }
                 }
                 if (servers.size > 1) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    item(span = { GridItemSpan(maxLineSpan) }, key = "search") {
                         TextField(
                             query, { query = it },
                             placeholder = { Text(stringResource(Res.string.servers_search)) },
                             leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                            trailingIcon = {
+                                if (query.isNotEmpty()) {
+                                    IconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_clear)) }
+                                }
+                            },
                             singleLine = true,
                             shape = CircleShape,
                             colors = TextFieldDefaults.colors(
@@ -162,7 +241,7 @@ fun ServerListScreen(
                     }
                 }
                 if (servers.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.fillMaxWidth().height(180.dp)) {
                                 EmptyState(stringResource(Res.string.servers_empty_title), stringResource(Res.string.servers_empty_text))
@@ -174,31 +253,154 @@ fun ServerListScreen(
                             }) { Text(stringResource(Res.string.demo_try)) }
                         }
                     }
-                }
-                itemsIndexed(shown, key = { _, it -> it.id }) { index, server ->
-                    Box(Modifier.staggeredAppear(index)) {
-                        ServerCard(
-                            server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
-                            alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
+                } else if (rows.isEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }, key = "no-match") {
+                        Text(
+                            stringResource(Res.string.servers_no_match, query.trim()),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
                         )
+                    }
+                }
+                rows.forEachIndexed { index, row ->
+                    when (row) {
+                        is ListRow.Title -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
+                            // Nothing can go above the first title.
+                            ReorderableItem(reorder, key = row.key, enabled = index > 0) {
+                                Text(
+                                    stringResource(if (row.title == ListTitle.PINNED) Res.string.servers_pinned else Res.string.servers_title),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                                )
+                            }
+                        }
+                        is ListRow.Folder -> item(key = row.key, span = { GridItemSpan(maxLineSpan) }) {
+                            ReorderableItem(reorder, key = row.key) {
+                                FolderHeader(
+                                    row,
+                                    onToggle = { collapsed = if (row.expanded) collapsed + row.name else collapsed - row.name },
+                                    onPin = { model.servers.setFolderPinned(row.name, !row.pinned) },
+                                    onRename = { renamingFolder = row.name },
+                                    onRemove = { removingFolder = row.name },
+                                )
+                            }
+                        }
+                        is ListRow.Server -> item(key = row.key) {
+                            val server = row.server
+                            ReorderableItem(
+                                reorder, key = row.key, enabled = canSwap(row.key),
+                                modifier = Modifier.onGloballyPositioned { c ->
+                                    val r = c.boundsInRoot()
+                                    if (slots[server.id] != r) slots[server.id] = r
+                                },
+                            ) { dragging ->
+                                Box(Modifier.staggeredAppear(index)) {
+                                    ServerCard(
+                                        server, probe, { onOpen(server.id) }, { renaming = server }, { deleting = server },
+                                        alertsOn = alertsOn, onToggleNotify = { model.servers.upsert(server.copy(notify = !server.notify)) },
+                                        onPin = { model.servers.setPinned(server.id, !server.pinned) },
+                                        onMoveToFolder = { moving = server },
+                                        dragging = dragging,
+                                        dropTarget = hoverTarget == server.id,
+                                        modifier = Modifier
+                                            .draggableHandle(
+                                                enabled = query.isBlank(),
+                                                onDragStarted = { dragStart = currentServers },
+                                                onDragStopped = {
+                                                    val target = hoverTarget
+                                                    hoverTarget = null
+                                                    held = null
+                                                    if (target != null) {
+                                                        val folder = folderOf(currentServers, target)
+                                                        if (folder != null) {
+                                                            // Onto a server in a folder: it simply joins that folder.
+                                                            model.servers.setOrder(mergeInto(currentServers, server.id, target, folder))
+                                                        } else {
+                                                            merging = server.id to target
+                                                        }
+                                                    }
+                                                },
+                                            )
+                                            .onGloballyPositioned { c ->
+                                                if (dragging) {
+                                                    val r = c.boundsInRoot()
+                                                    held = server.id to r
+                                                    hoverTarget = targetUnder(r, server.id)
+                                                }
+                                            },
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    renaming?.let { p ->
-        var name by remember(p.id) { mutableStateOf(p.name) }
-        AlertDialog(
-            onDismissRequest = { renaming = null },
-            title = { Text(stringResource(Res.string.servers_rename)) },
-            text = { OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(stringResource(Res.string.pair_server_name)) }) },
-            confirmButton = {
-                TextButton(enabled = name.isNotBlank(), onClick = { model.servers.upsert(p.copy(name = name.trim())); renaming = null }) {
-                    Text(stringResource(Res.string.action_save))
-                }
+    merging?.let { (id, target) ->
+        // A new folder from two servers: name it, or cancel and the server goes back where it was.
+        NameDialog(
+            title = stringResource(Res.string.servers_new_folder),
+            text = stringResource(Res.string.servers_new_folder_text),
+            label = stringResource(Res.string.servers_folder_name),
+            initial = "",
+            confirm = stringResource(Res.string.servers_folder_create),
+            onDismiss = {
+                dragStart?.let { model.servers.setOrder(it) }
+                merging = null
             },
-            dismissButton = { TextButton(onClick = { renaming = null }) { Text(stringResource(Res.string.action_cancel)) } },
+            onSave = { name ->
+                model.servers.setOrder(mergeInto(currentServers, id, target, name))
+                collapsed = collapsed - name
+                merging = null
+            },
+        )
+    }
+    renaming?.let { p ->
+        NameDialog(
+            title = stringResource(Res.string.servers_rename),
+            label = stringResource(Res.string.pair_server_name),
+            initial = p.name,
+            onDismiss = { renaming = null },
+            onSave = { model.servers.upsert(p.copy(name = it)); renaming = null },
+        )
+    }
+    renamingFolder?.let { folder ->
+        NameDialog(
+            title = stringResource(Res.string.servers_rename_folder),
+            label = stringResource(Res.string.servers_folder_name),
+            initial = folder,
+            onDismiss = { renamingFolder = null },
+            onSave = { model.servers.renameFolder(folder, it); renamingFolder = null },
+        )
+    }
+    moving?.let { p ->
+        MoveToFolderDialog(
+            current = p.folder,
+            folders = folders,
+            onDismiss = { moving = null },
+            onMove = { folder ->
+                model.servers.setFolder(p.id, folder)
+                // Pinned servers are listed on top; moving one into a folder means "show it there".
+                if (p.pinned && folder.isNotBlank()) model.servers.setPinned(p.id, false)
+                collapsed = collapsed - folder
+                moving = null
+            },
+        )
+    }
+    removingFolder?.let { folder ->
+        AlertDialog(
+            onDismissRequest = { removingFolder = null },
+            icon = { Icon(Icons.Outlined.FolderOff, null) },
+            title = { Text(stringResource(Res.string.servers_remove_folder)) },
+            text = { Text(stringResource(Res.string.servers_remove_folder_text, folder)) },
+            confirmButton = {
+                TextButton(onClick = { model.servers.removeFolder(folder); removingFolder = null }) { Text(stringResource(Res.string.action_remove)) }
+            },
+            dismissButton = { TextButton(onClick = { removingFolder = null }) { Text(stringResource(Res.string.action_cancel)) } },
         )
     }
     deleting?.let { p ->
@@ -213,6 +415,105 @@ fun ServerListScreen(
 }
 
 @Composable
+private fun FolderHeader(row: ListRow.Folder, onToggle: () -> Unit, onPin: () -> Unit, onRename: () -> Unit, onRemove: () -> Unit) {
+    var menu by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(if (row.expanded) 0f else -90f, motion(), label = "chevron")
+    Row(
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable(onClick = onToggle)
+            .pointerHoverIcon(PointerIcon.Hand).padding(start = 4.dp, top = 4.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Default.ExpandMore,
+            stringResource(if (row.expanded) Res.string.servers_folder_collapse else Res.string.servers_folder_expand),
+            Modifier.size(20.dp).rotate(rotation),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(6.dp))
+        Icon(Icons.Outlined.Folder, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(8.dp))
+        Text(row.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.width(8.dp))
+        Badge(row.count.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+        if (row.pinned) {
+            Spacer(Modifier.width(6.dp))
+            Icon(Icons.Filled.PushPin, stringResource(Res.string.servers_pinned), Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+        }
+        Spacer(Modifier.weight(1f))
+        Box {
+            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(Res.string.action_more)) }
+            DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    { Text(stringResource(if (row.pinned) Res.string.servers_unpin else Res.string.servers_pin)) },
+                    { menu = false; onPin() }, leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                )
+                DropdownMenuItem({ Text(stringResource(Res.string.servers_rename_folder)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
+                DropdownMenuItem({ Text(stringResource(Res.string.servers_remove_folder)) }, { menu = false; onRemove() }, leadingIcon = { Icon(Icons.Outlined.FolderOff, null) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun NameDialog(
+    title: String,
+    label: String,
+    initial: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+    text: String? = null,
+    confirm: String = stringResource(Res.string.action_save),
+) {
+    var name by remember { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column {
+                if (text != null) Text(text, Modifier.padding(bottom = 12.dp))
+                OutlinedTextField(name, { if (it.length <= 40) name = it }, singleLine = true, label = { Text(label) })
+            }
+        },
+        confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onSave(name.trim()) }) { Text(confirm) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
+    )
+}
+
+@Composable
+private fun MoveToFolderDialog(current: String, folders: List<String>, onDismiss: () -> Unit, onMove: (String) -> Unit) {
+    var selected by remember { mutableStateOf(current) }
+    var newFolder by remember { mutableStateOf("") }
+    val target = newFolder.trim().ifEmpty { selected }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.servers_move_to_folder)) },
+        text = {
+            Column {
+                (listOf("") + folders).forEach { folder ->
+                    Row(
+                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                            .clickable { selected = folder; newFolder = "" }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = newFolder.isBlank() && selected == folder, onClick = { selected = folder; newFolder = "" })
+                        Text(folder.ifBlank { stringResource(Res.string.servers_no_folder) })
+                    }
+                }
+                OutlinedTextField(
+                    newFolder, { if (it.length <= 30) newFolder = it },
+                    singleLine = true,
+                    label = { Text(stringResource(Res.string.servers_new_folder)) },
+                    leadingIcon = { Icon(Icons.Outlined.CreateNewFolder, null) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+            }
+        },
+        confirmButton = { TextButton(enabled = target != current, onClick = { onMove(target) }) { Text(stringResource(Res.string.action_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
+    )
+}
+
+@Composable
 private fun ServerCard(
     server: ServerProfile,
     probe: suspend (ServerProfile) -> ServerStatus,
@@ -221,6 +522,12 @@ private fun ServerCard(
     onDelete: () -> Unit,
     alertsOn: Boolean = false,
     onToggleNotify: () -> Unit = {},
+    onPin: () -> Unit = {},
+    onMoveToFolder: () -> Unit = {},
+    dragging: Boolean = false,
+    /** Another server is held over this one: dropping it makes a folder. */
+    dropTarget: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     var menu by remember { mutableStateOf(false) }
     var refresh by remember { mutableIntStateOf(0) }
@@ -238,7 +545,19 @@ private fun ServerCard(
             delay(if (value is Probe.Online) 10_000 else 3_000)
         }
     }
-    McCard(Modifier.fillMaxWidth(), onClick = onOpen) {
+    val lift by animateFloatAsState(if (dragging) 1.03f else if (dropTarget) 0.96f else 1f, label = "lift")
+    McCard(
+        modifier.fillMaxWidth().zIndex(if (dragging) 1f else 0f)
+            .graphicsLayer {
+                scaleX = lift
+                scaleY = lift
+                shadowElevation = if (dragging) 16.dp.toPx() else 0f
+                shape = RoundedCornerShape(20.dp)
+                clip = false
+            }
+            .then(if (dropTarget) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)) else Modifier),
+        onClick = onOpen,
+    ) {
         Column(Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -249,6 +568,10 @@ private fun ServerCard(
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(server.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        if (server.pinned) {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(Icons.Filled.PushPin, stringResource(Res.string.servers_pinned), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                        }
                         if (alertsOn && !server.notify) {
                             Spacer(Modifier.width(6.dp))
                             Icon(Icons.Outlined.NotificationsOff, stringResource(Res.string.servers_notify_muted), Modifier.size(16.dp),
@@ -273,6 +596,14 @@ private fun ServerCard(
                 Box {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(Res.string.action_more)) }
                     DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(
+                            { Text(stringResource(if (server.pinned) Res.string.servers_unpin else Res.string.servers_pin)) },
+                            { menu = false; onPin() }, leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
+                        )
+                        DropdownMenuItem(
+                            { Text(stringResource(Res.string.servers_move_to_folder)) },
+                            { menu = false; onMoveToFolder() }, leadingIcon = { Icon(Icons.Outlined.DriveFileMove, null) },
+                        )
                         DropdownMenuItem({ Text(stringResource(Res.string.servers_rename)) }, { menu = false; onRename() }, leadingIcon = { Icon(Icons.Outlined.Edit, null) })
                         if (alertsOn) {
                             DropdownMenuItem(

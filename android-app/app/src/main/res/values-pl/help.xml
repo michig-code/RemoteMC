@@ -27,7 +27,7 @@
     <string name="help_demo_keys">test, przykład, wypróbuj, demo</string>
     <string name="help_organize_title">Sortowanie, przypinanie i grupowanie serwerów</string>
     <string name="help_organize_where">Lista serwerów › ⋮ obok serwera</string>
-    <string name="help_organize_text">Menu ⋮ przypina serwer na górze, przenosi go do folderu, zmienia nazwę, włącza lub wyłącza jego powiadomienia, paruje go ponownie albo usuwa. Przytrzymaj serwer i przeciągnij, by zmienić kolejność. Przy kilku serwerach na górze pojawia się wyszukiwarka.</string>
+    <string name="help_organize_text">Menu ⋮ przypina serwer na górze, przenosi go do folderu, zmienia nazwę, włącza lub wyłącza jego powiadomienia, paruje go ponownie albo usuwa. Przytrzymaj serwer i przeciągnij, by zmienić kolejność. Przy kilku serwerach na górze pojawia się wyszukiwarka. Upuść serwer na inny, aby umieścić oba w nowym folderze – aplikacja zapyta o nazwę (Anuluj odkłada serwer z powrotem). Foldery też można przypiąć na górze (⋮ obok folderu).</string>
     <string name="help_organize_keys">kolejność, folder, zmień nazwę, usuń, przypnij, szukaj, sortuj</string>
     <string name="help_roles_title">Moderatorzy i widzowie</string>
     <string name="help_roles_where">Na twoim serwerze › /remotemc pair moderator</string>

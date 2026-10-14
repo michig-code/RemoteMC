@@ -304,7 +304,8 @@ fun ServerListScreen(
                     }
                     itemsIndexed(rows, key = { _, row -> row.key }) { i, row ->
                         when (row) {
-                            is ListRow.Title -> ReorderableItem(reorder, key = row.key) {
+                            // Nothing can go above the first title (it would only stall the drag).
+                            is ListRow.Title -> ReorderableItem(reorder, key = row.key, enabled = i > 0) {
                                 SectionTitle(stringResource(if (row.title == ListTitle.PINNED) R.string.servers_pinned else R.string.servers_title))
                             }
                             is ListRow.Folder -> ReorderableItem(reorder, key = row.key) { FolderHeader(

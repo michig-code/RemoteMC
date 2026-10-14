@@ -27,7 +27,7 @@
     <string name="help_demo_keys">test, örnek, dene, demo</string>
     <string name="help_organize_title">Sunucuları sırala, sabitle ve grupla</string>
     <string name="help_organize_where">Sunucu listesi › sunucunun yanındaki ⋮</string>
-    <string name="help_organize_text">⋮ menüsü bir sunucuyu en üste sabitler, klasöre taşır, yeniden adlandırır, bildirimlerini açar veya kapatır, yeniden eşler ya da kaldırır. Sırayı değiştirmek için sunucuyu basılı tutup sürükle. Birkaç sunucu olunca üstte bir arama alanı çıkar.</string>
+    <string name="help_organize_text">⋮ menüsü bir sunucuyu en üste sabitler, klasöre taşır, yeniden adlandırır, bildirimlerini açar veya kapatır, yeniden eşler ya da kaldırır. Sırayı değiştirmek için sunucuyu basılı tutup sürükle. Birkaç sunucu olunca üstte bir arama alanı çıkar. Bir sunucuyu diğerinin üzerine bırakınca ikisi yeni bir klasöre girer – uygulama adını sorar (İptal sunucuyu geri koyar). Klasörler de en üste sabitlenebilir (klasörün yanındaki ⋮).</string>
     <string name="help_organize_keys">sıra, klasör, yeniden adlandır, sil, kaldır, sabitle, ara, sırala</string>
     <string name="help_roles_title">Moderatörler ve izleyiciler</string>
     <string name="help_roles_where">Sunucunda › /remotemc pair moderator</string>

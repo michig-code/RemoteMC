@@ -27,7 +27,7 @@
     <string name="help_demo_keys">test, esempio, provare, demo</string>
     <string name="help_organize_title">Ordinare, fissare e raggruppare i server</string>
     <string name="help_organize_where">Elenco server › ⋮ accanto a un server</string>
-    <string name="help_organize_text">Il menu ⋮ fissa un server in alto, lo sposta in una cartella, lo rinomina, attiva o disattiva le sue notifiche, lo abbina di nuovo o lo rimuove. Tieni premuto un server e trascinalo per cambiare l’ordine. Con più server appare una ricerca in alto.</string>
+    <string name="help_organize_text">Il menu ⋮ fissa un server in alto, lo sposta in una cartella, lo rinomina, attiva o disattiva le sue notifiche, lo abbina di nuovo o lo rimuove. Tieni premuto un server e trascinalo per cambiare l’ordine. Con più server appare una ricerca in alto. Rilascia un server su un altro per metterli entrambi in una nuova cartella: l’app chiede il nome (Annulla rimette il server al suo posto). Anche le cartelle si possono fissare in alto (⋮ accanto alla cartella).</string>
     <string name="help_organize_keys">ordine, cartella, rinominare, eliminare, rimuovere, fissare, cercare</string>
     <string name="help_roles_title">Moderatori e spettatori</string>
     <string name="help_roles_where">Sul tuo server › /remotemc pair moderator</string>

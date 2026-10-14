@@ -27,7 +27,7 @@
     <string name="help_demo_keys">Test, Beispiel, ausprobieren, Demo</string>
     <string name="help_organize_title">Server sortieren, anheften, gruppieren</string>
     <string name="help_organize_where">Serverliste › ⋮ neben einem Server</string>
-    <string name="help_organize_text">Das ⋮-Menü heftet einen Server oben an, verschiebt ihn in einen Ordner, benennt ihn um, schaltet seine Benachrichtigungen ein oder aus, koppelt ihn neu oder entfernt ihn. Server gedrückt halten und ziehen ändert die Reihenfolge. Ab mehreren Servern erscheint oben ein Suchfeld.</string>
+    <string name="help_organize_text">Das ⋮-Menü heftet einen Server oben an, verschiebt ihn in einen Ordner, benennt ihn um, schaltet seine Benachrichtigungen ein oder aus, koppelt ihn neu oder entfernt ihn. Server gedrückt halten und ziehen ändert die Reihenfolge. Ab mehreren Servern erscheint oben ein Suchfeld. Lässt du einen Server auf einem anderen los, landen beide in einem neuen Ordner – die App fragt nach dem Namen (Abbrechen legt den Server zurück). Auch Ordner lassen sich oben anheften (⋮ neben dem Ordner).</string>
     <string name="help_organize_keys">Reihenfolge, Ordner, umbenennen, löschen, entfernen, anheften, suchen, sortieren</string>
     <string name="help_roles_title">Moderatoren und Zuschauer</string>
     <string name="help_roles_where">Auf deinem Server › /remotemc pair moderator</string>

@@ -27,6 +27,7 @@ kotlin {
             "de/remotemc/app/net/**",
             "de/remotemc/app/data/Models.kt",
             "de/remotemc/app/data/ServerProfile.kt",
+            "de/remotemc/app/data/ServerList.kt",
             "de/remotemc/app/data/ConnectLink.kt",
             "de/remotemc/app/data/AlertSettings.kt",
             "de/remotemc/app/data/DashboardLayout.kt",
@@ -61,6 +62,7 @@ dependencies {
     implementation("org.jetbrains.runtime:jbr-api:1.10.1")
 
     testImplementation(kotlin("test"))
+    testImplementation(compose.desktop.uiTestJUnit4) // find and click things in UI tests
 }
 
 // The app's own version (for the update check), from the same -Prmc.version as the installers.

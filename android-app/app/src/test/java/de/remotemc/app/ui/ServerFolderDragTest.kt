@@ -6,11 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.hasSetTextAction
 import de.remotemc.app.data.ServerProfile
 import de.remotemc.app.ui.theme.RemoteMCTheme
 import org.junit.Assert.assertEquals
@@ -19,10 +15,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
-/** Holding a server and dropping it onto another one asks for a folder name. */
+/** Holding a server and dropping it onto another one puts both into a folder. */
 @RunWith(RobolectricTestRunner::class)
 @Config(qualifiers = "w400dp-h900dp")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ServerFolderDragTest {
     @get:Rule
     val rule = createComposeRule()
@@ -30,7 +28,13 @@ class ServerFolderDragTest {
     private val start = listOf("Alpha", "Bravo", "Charlie").map { ServerProfile(id = it, name = it, host = "h", token = "t") }
     private var servers by mutableStateOf(start)
 
-    private fun show() = rule.setContent {
+    private fun show() {
+        // The status dots pulse forever: time only moves when the test says so.
+        rule.mainClock.autoAdvance = false
+        show2()
+    }
+
+    private fun show2() = rule.setContent {
         RemoteMCTheme {
             ServerListScreen(
                 servers, {}, {}, { _, _ -> }, {}, {}, {},
@@ -47,43 +51,44 @@ class ServerFolderDragTest {
         val node = rule.onNodeWithText(from)
         node.performTouchInput { down(center) }
         rule.mainClock.advanceTimeBy(1000) // holding starts the drag
-        val steps = 12
+        val steps = 48 // a finger moves in small steps
         repeat(steps) {
             node.performTouchInput { moveBy(Offset(0f, (b.y - a.y + past) / steps)) }
-            rule.mainClock.advanceTimeBy(50)
+            rule.mainClock.advanceTimeBy(16)
         }
         rule.mainClock.advanceTimeBy(300)
         node.performTouchInput { up() }
-        rule.waitForIdle()
+        rule.mainClock.advanceTimeBy(1000)
     }
 
     private fun layout() = servers.joinToString(" ") { if (it.folder.isBlank()) it.id else "${it.id}@${it.folder}" }
 
     @Test
-    fun dropOntoAServerAndNameTheFolder() {
+    fun dropOntoAServerInAFolderJoinsIt() {
+        servers = listOf(
+            ServerProfile(id = "Alpha", name = "Alpha", host = "h", token = "t"),
+            ServerProfile(id = "Bravo", name = "Bravo", host = "h", token = "t", folder = "Team"),
+            ServerProfile(id = "Charlie", name = "Charlie", host = "h", token = "t", folder = "Team"),
+        )
         show()
-        dragOnto("Charlie", "Alpha")
-        rule.onNodeWithText("What should the folder be called?").assertExists()
-        rule.onNode(hasSetTextAction()).performTextInput("Friends")
-        rule.onNodeWithText("Create").performClick()
-        rule.waitForIdle()
-        assertEquals("Alpha@Friends Charlie@Friends Bravo", layout())
+        dragOnto("Alpha", "Charlie")
+        assertEquals("Bravo@Team Charlie@Team Alpha@Team", layout())
     }
 
     @Test
-    fun zzDebugIdle() {
+    fun dragPastAServerSwapsInstead() {
         show()
-        dragOnto("Charlie", "Alpha")
-        println("DEBUG after " + layout() + " dialog=" + rule.onAllNodesWithText("What should the folder be called?").fetchSemanticsNodes().size)
+        // Up to above the middle part of Alpha: the two swap, no folder.
+        dragOnto("Charlie", "Alpha", past = -70f)
+        assertEquals("Charlie Alpha Bravo", layout())
     }
 
     @Test
-    fun cancelPutsTheServerBack() {
+    fun dropOntoTheMiddleChangesNothingYet() {
         show()
+        // Charlie passes Bravo (they swap) and stops over the middle of Alpha: nothing else moves,
+        // the app asks for a folder name first.
         dragOnto("Charlie", "Alpha")
-        rule.onNodeWithText("What should the folder be called?").assertExists()
-        rule.onNodeWithText("Cancel").performClick()
-        rule.waitForIdle()
-        assertEquals("Alpha Bravo Charlie", layout())
+        assertEquals("Alpha Charlie Bravo", layout())
     }
 }

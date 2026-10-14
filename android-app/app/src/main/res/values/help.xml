@@ -27,7 +27,7 @@
     <string name="help_demo_keys">test, example, sample, try out, demo</string>
     <string name="help_organize_title">Sort, pin and group servers</string>
     <string name="help_organize_where">Server list › ⋮ next to a server</string>
-    <string name="help_organize_text">The ⋮ menu pins a server to the top, moves it into a folder, renames it, turns its notifications on or off, pairs it again or removes it. Hold a server and drag it to change the order. With several servers a search field appears at the top.</string>
+    <string name="help_organize_text">The ⋮ menu pins a server to the top, moves it into a folder, renames it, turns its notifications on or off, pairs it again or removes it. Hold a server and drag it to change the order. With several servers a search field appears at the top. Drop a server onto another one to put both into a new folder – the app asks for its name (Cancel puts the server back). Folders can be pinned to the top too (⋮ next to the folder).</string>
     <string name="help_organize_keys">order, folder, rename, delete, remove, pin, search, sort</string>
     <string name="help_roles_title">Moderators and viewers</string>
     <string name="help_roles_where">On your server › /remotemc pair moderator</string>

@@ -1,5 +1,6 @@
 package de.remotemc.desktop
 
+import de.remotemc.app.data.withFolderPins
 import com.sun.jna.platform.win32.Crypt32Util
 import de.remotemc.app.data.AlertSettings
 import de.remotemc.app.data.SecureBox
@@ -62,6 +63,28 @@ class ServerStore(private val file: File = File(AppDirs.dir, "servers.dat")) {
     fun setOrder(list: List<ServerProfile>) {
         if (list.map { it.id }.sorted() == _servers.value.map { it.id }.sorted()) save(list)
     }
+
+    fun setPinned(id: String, pinned: Boolean) = update(id) { it.copy(pinned = pinned) }
+
+    /** Moves a server into [folder] (blank = out of any folder); it takes over the folder's pin. */
+    fun setFolder(id: String, folder: String) =
+        save(_servers.value.map { if (it.id == id) it.copy(folder = folder.trim(), folderPinned = false) else it }.withFolderPins())
+
+    fun renameFolder(old: String, new: String) = save(
+        _servers.value.map {
+            if (it.folder == old) it.copy(folder = new.trim(), folderPinned = it.folderPinned && new.isNotBlank()) else it
+        }.withFolderPins(),
+    )
+
+    /** Removes the folder; its servers stay, without a folder. */
+    fun removeFolder(name: String) = renameFolder(name, "")
+
+    /** Pins or unpins a whole folder. */
+    fun setFolderPinned(folder: String, pinned: Boolean) =
+        save(_servers.value.map { if (it.folder == folder) it.copy(folderPinned = pinned) else it })
+
+    private fun update(id: String, change: (ServerProfile) -> ServerProfile) =
+        save(_servers.value.map { if (it.id == id) change(it) else it })
 
     private fun load(): List<ServerProfile> = runCatching {
         if (!file.isFile) return emptyList()

@@ -27,7 +27,7 @@
     <string name="help_demo_keys">prueba, ejemplo, probar, demo</string>
     <string name="help_organize_title">Ordenar, fijar y agrupar servidores</string>
     <string name="help_organize_where">Lista de servidores › ⋮ junto a un servidor</string>
-    <string name="help_organize_text">El menú ⋮ fija un servidor arriba, lo mueve a una carpeta, le cambia el nombre, activa o desactiva sus notificaciones, lo vuelve a vincular o lo quita. Mantén pulsado un servidor y arrástralo para cambiar el orden. Con varios servidores aparece un buscador arriba.</string>
+    <string name="help_organize_text">El menú ⋮ fija un servidor arriba, lo mueve a una carpeta, le cambia el nombre, activa o desactiva sus notificaciones, lo vuelve a vincular o lo quita. Mantén pulsado un servidor y arrástralo para cambiar el orden. Con varios servidores aparece un buscador arriba. Suelta un servidor sobre otro para meter ambos en una carpeta nueva: la app pide su nombre (Cancelar devuelve el servidor a su sitio). Las carpetas también se pueden fijar arriba (⋮ junto a la carpeta).</string>
     <string name="help_organize_keys">orden, carpeta, renombrar, borrar, quitar, fijar, buscar, ordenar</string>
     <string name="help_roles_title">Moderadores y espectadores</string>
     <string name="help_roles_where">En tu servidor › /remotemc pair moderator</string>
