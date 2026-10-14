@@ -149,8 +149,33 @@ fun SettingsScreen(model: AppModel, onBack: () -> Unit, version: String = AppVer
                         Text(stringResource(Res.string.settings_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("Data: " + AppDirs.dir.path, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         var changelog by remember { mutableStateOf(false) }
-                        OutlinedButton(onClick = { changelog = true }) { Text(stringResource(Res.string.changelog_title)) }
+                        var licenses by remember { mutableStateOf(false) }
+                        val uri = androidx.compose.ui.platform.LocalUriHandler.current
+                        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { changelog = true }) { Text(stringResource(Res.string.changelog_title)) }
+                            OutlinedButton(onClick = { uri.openUri(PLUGIN_DOWNLOAD_URL) }) { Text(stringResource(Res.string.settings_get_plugin)) }
+                            OutlinedButton(onClick = { uri.openUri(SOURCE_URL) }) { Text(stringResource(Res.string.settings_source)) }
+                            OutlinedButton(onClick = { licenses = true }) { Text(stringResource(Res.string.settings_licenses)) }
+                        }
+                        Text(stringResource(Res.string.settings_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         if (changelog) ChangelogDialog(version) { changelog = false }
+                        if (licenses) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { licenses = false },
+                                title = { Text(stringResource(Res.string.settings_licenses)) },
+                                text = {
+                                    Text(
+                                        "RemoteMC – MIT\n\n" +
+                                            "Compose Multiplatform, Kotlin, kotlinx.coroutines – Apache 2.0\n" +
+                                            "OkHttp – Apache 2.0\n" +
+                                            "Reorderable (sh.calvin) – Apache 2.0\n" +
+                                            "JNA – Apache 2.0\n" +
+                                            "Player heads – textures.minecraft.net, minotar.net",
+                                    )
+                                },
+                                confirmButton = { androidx.compose.material3.TextButton(onClick = { licenses = false }) { Text(stringResource(Res.string.action_close)) } },
+                            )
+                        }
                     }
                 }
             }
@@ -327,3 +352,6 @@ private fun Swatch(color: Color, selected: Boolean, onClick: () -> Unit) {
 /** Version written by the build (-Prmc.version), or the dev default. */
 val AppVersion: String = AppModel::class.java.getResource("/remotemc-version.txt")?.readText()?.trim()?.ifBlank { null }
     ?: AppModel::class.java.`package`?.implementationVersion ?: "1.0.0"
+
+const val PLUGIN_DOWNLOAD_URL = "https://github.com/michig-code/RemoteMC/releases/latest"
+const val SOURCE_URL = "https://github.com/michig-code/RemoteMC"

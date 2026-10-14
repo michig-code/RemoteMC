@@ -177,6 +177,13 @@ class CommandHistory(private val file: File = File(AppDirs.dir, "history.json"))
         writePrivate(file, data.toString().toByteArray(Charsets.UTF_8))
         return list
     }
+
+    fun remove(serverId: String, command: String): List<String> {
+        val list = load(serverId).filter { it != command }
+        data.put(serverId, JSONArray(list))
+        writePrivate(file, data.toString().toByteArray(Charsets.UTF_8))
+        return list
+    }
 }
 
 /** [SecureBox] with Windows DPAPI (like the Keystore on the phone): for the saved snapshots. */

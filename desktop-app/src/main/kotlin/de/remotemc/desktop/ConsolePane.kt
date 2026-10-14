@@ -1,5 +1,14 @@
 package de.remotemc.desktop
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import de.remotemc.desktop.res.menu_open
 import de.remotemc.desktop.res.macro_stop
@@ -119,8 +128,19 @@ fun ConsolePane(session: ServerSession, initialQuery: String = "", initialLevel:
     val selected = if (matches.isEmpty()) -1 else if (current in matches.indices) current else matches.lastIndex
     val selectedKey = matches.getOrNull(selected)?.let { shown[it].key }
 
+    // New lines scroll into view only while the log is at its end; scrolling up pauses that.
+    val atBottom by remember {
+        derivedStateOf {
+            val info = list.layoutInfo
+            (info.visibleItemsInfo.lastOrNull()?.index ?: 0) >= info.totalItemsCount - 1
+        }
+    }
+    var follow by remember { mutableStateOf(true) }
+    LaunchedEffect(list) {
+        snapshotFlow { atBottom }.collect { if (list.isScrollInProgress) follow = it }
+    }
     LaunchedEffect(shown.size) {
-        if (query.isBlank() && shown.isNotEmpty()) list.scrollToItem(shown.size - 1)
+        if (query.isBlank() && follow && shown.isNotEmpty()) list.scrollToItem(shown.size - 1)
     }
     LaunchedEffect(selected, matches.size, query) {
         matches.getOrNull(selected)?.let { list.animateScrollToItem((it - 3).coerceAtLeast(0)) }
@@ -205,17 +225,32 @@ fun ConsolePane(session: ServerSession, initialQuery: String = "", initialLevel:
             }) { Icon(Icons.Outlined.ContentCopy, stringResource(Res.string.console_copy)) }
         }
         Surface(Modifier.weight(1f).fillMaxWidth(), color = McColors.Terminal, shape = RoundedCornerShape(16.dp)) {
-            SelectionContainer {
-                LazyColumn(state = list, contentPadding = PaddingValues(16.dp)) {
-                    if (shown.isEmpty()) {
-                        item {
-                            Text(
-                                stringResource(if (session.console.isEmpty()) Res.string.console_waiting else Res.string.console_no_lines),
-                                color = Color.Gray, fontFamily = FontFamily.Monospace,
-                            )
+            Box {
+                SelectionContainer {
+                    LazyColumn(state = list, contentPadding = PaddingValues(16.dp)) {
+                        if (shown.isEmpty()) {
+                            item {
+                                Text(
+                                    stringResource(if (session.console.isEmpty()) Res.string.console_waiting else Res.string.console_no_lines),
+                                    color = Color.Gray, fontFamily = FontFamily.Monospace,
+                                )
+                            }
                         }
+                        items(shown, key = { it.key }) { e -> ConsoleRow(e, query, e.key == selectedKey) }
                     }
-                    items(shown, key = { it.key }) { e -> ConsoleRow(e, query, e.key == selectedKey) }
+                }
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !atBottom && shown.isNotEmpty(),
+                    enter = fadeIn(), exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
+                ) {
+                    SmallFloatingActionButton(
+                        onClick = {
+                            follow = true
+                            scope.launch { list.animateScrollToItem((shown.size - 1).coerceAtLeast(0)) }
+                        },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ) { Icon(Icons.Default.KeyboardArrowDown, stringResource(Res.string.console_scroll_down)) }
                 }
             }
         }
@@ -250,8 +285,18 @@ fun ConsolePane(session: ServerSession, initialQuery: String = "", initialLevel:
         }
         if (session.history.isNotEmpty()) {
             LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(session.history) { cmd ->
-                    AssistChip(onClick = { setInput(cmd) }, label = { Text("/$cmd", fontFamily = FontFamily.Monospace) })
+                items(session.history, key = { it }) { cmd ->
+                    AssistChip(
+                        onClick = { setInput(cmd) },
+                        label = { Text("/$cmd", fontFamily = FontFamily.Monospace) },
+                        // The ✕ forgets the command (long press on the phone).
+                        trailingIcon = {
+                            Icon(
+                                Icons.Outlined.Close, stringResource(Res.string.console_recent_forget),
+                                Modifier.size(16.dp).clip(CircleShape).clickable { session.forgetCommand(cmd) },
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -363,7 +408,9 @@ fun ChatPane(session: ServerSession) {
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 SelectionContainer {
                     LazyColumn(Modifier.fillMaxSize(), state = list, verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
-                        items(session.chat, key = { "${it.id}-${it.time}" }) { e -> ChatRow(e) }
+                        // Real skins for players who are online (like on the phone).
+                        val skins = session.players.associate { it.name to it.skin }
+                        items(session.chat, key = { "${it.id}-${it.time}" }) { e -> ChatRow(e, skins[e.player]) }
                     }
                 }
             }
@@ -387,7 +434,7 @@ fun ChatPane(session: ServerSession) {
 }
 
 @Composable
-private fun ChatRow(e: ChatEntry) {
+private fun ChatRow(e: ChatEntry, skin: String? = null) {
     val time = TimeFormat.format(Date(e.time)).dropLast(3)
     when (e.type) {
         ChatEntry.Type.JOIN, ChatEntry.Type.QUIT -> Text(
@@ -396,7 +443,7 @@ private fun ChatRow(e: ChatEntry) {
             style = MaterialTheme.typography.bodyMedium,
         )
         else -> Row {
-            PlayerHead(e.player.ifBlank { "Server" }, 32.dp)
+            PlayerHead(e.player.ifBlank { "Server" }, 32.dp, skin)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 8.dp)) {
                 Text(

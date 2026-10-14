@@ -512,6 +512,11 @@ class ServerSession(
     }
 
     /** Fixed data for screenshot tests (no connection). */
+    /** Removes a command from the recent commands. */
+    fun forgetCommand(command: String) {
+        history = historyStore.remove(profile.id, command)
+    }
+
     internal fun showPreview(status: ServerStatus, players: List<PlayerInfo>, console: List<ConsoleEntry>, chat: List<ChatEntry>, session: Session, history: List<String>) {
         this.status = status
         this.players = players

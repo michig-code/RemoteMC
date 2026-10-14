@@ -13,8 +13,6 @@ import de.remotemc.desktop.res.fav_add
 import de.remotemc.desktop.res.fav_command
 import de.remotemc.desktop.res.fav_empty
 import de.remotemc.desktop.res.fav_title
-import de.remotemc.desktop.res.fav_widget
-import de.remotemc.desktop.res.fav_widget_hint
 import de.remotemc.desktop.res.macro_add
 import de.remotemc.desktop.res.macro_add_step
 import de.remotemc.desktop.res.macro_empty
@@ -446,7 +444,6 @@ private fun <T> LazyListScope.shortcutItems(
 private fun FavoriteDialog(initial: Favorite, isNew: Boolean, onSave: (Favorite) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
     var command by remember { mutableStateOf(initial.command) }
     var confirm by remember { mutableStateOf(initial.confirm) }
-    var widget by remember { mutableStateOf(initial.widget) }
     val fits = Favorite(command = command, confirm = confirm).fitsWidget
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -465,20 +462,11 @@ private fun FavoriteDialog(initial: Favorite, isNew: Boolean, onSave: (Favorite)
                 Text(stringResource(Res.string.placeholder_help), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
                 ConfirmSwitch(confirm) { confirm = it }
-                Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.fav_widget))
-                        if (!fits) {
-                            Text(stringResource(Res.string.fav_widget_hint), style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                    Switch(checked = widget && fits, onCheckedChange = { widget = it }, enabled = fits)
-                }
+                // No "show on widget" switch: the PC has no home-screen widget (the setting is kept).
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(initial.copy(command = command.trim(), confirm = confirm, widget = widget && fits)) }, enabled = command.isNotBlank()) {
+            TextButton(onClick = { onSave(initial.copy(command = command.trim(), confirm = confirm, widget = initial.widget && fits)) }, enabled = command.isNotBlank()) {
                 Text(stringResource(Res.string.action_save))
             }
         },

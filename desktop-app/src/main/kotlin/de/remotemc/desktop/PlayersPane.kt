@@ -1,5 +1,11 @@
 package de.remotemc.desktop
 
+import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import de.remotemc.desktop.res.action_send
 import de.remotemc.desktop.res.players_inventory
@@ -129,7 +135,18 @@ fun PlayersPane(session: ServerSession, initialView: Int = 0, initialSelection: 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun OnlinePlayers(session: ServerSession, initialSelection: Set<String>) {
-    val players = session.players.sortedBy { it.name.lowercase() }
+    var query by remember { mutableStateOf("") }
+    var sort by remember { mutableStateOf(SortBy.NAME) }
+    val all = session.players
+    val players = all
+        .filter { query.isBlank() || it.name.contains(query.trim(), ignoreCase = true) }
+        .sortedWith(
+            when (sort) {
+                SortBy.NAME -> compareBy { it.name.lowercase() }
+                SortBy.PING -> compareBy { it.ping }
+                SortBy.WORLD -> compareBy<PlayerInfo> { it.world }.thenBy { it.name.lowercase() }
+            },
+        )
     var selected by remember { mutableStateOf<String?>(null) }
     // Several players: Ctrl+click or a long press selects; the bar below acts on all of them.
     val canSelect = session.role.atLeast(Role.MODERATOR)
@@ -141,10 +158,18 @@ private fun OnlinePlayers(session: ServerSession, initialSelection: Set<String>)
     fun toggle(name: String) {
         picked = if (name in picked) picked - name else picked + name
     }
-    if (players.isEmpty()) {
+    if (all.isEmpty()) {
         EmptyState(stringResource(Res.string.players_empty_title), stringResource(Res.string.players_empty_text))
     } else {
         Column(Modifier.fillMaxSize()) {
+            if (all.size > 1) SearchAndSort(query, { query = it }, sort, { sort = it })
+            if (players.isEmpty()) {
+                Text(
+                    stringResource(Res.string.players_no_match, query.trim()),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 28.dp, top = 24.dp),
+                )
+            }
             if (selecting) {
                 Row(Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { picked = emptySet() }) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_close)) }
@@ -282,11 +307,16 @@ private fun PlayerCard(p: PlayerInfo, picked: Boolean = false, onLongClick: (() 
                 }
                 Text("${p.world} · ${p.x}, ${p.y}, ${p.z}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(6.dp))
-                Bar((p.health / p.maxHealth).toFloat(), McColors.Heart, height = 6.dp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Favorite, null, Modifier.size(12.dp), tint = McColors.Heart)
+                    Spacer(Modifier.width(4.dp))
+                    Box(Modifier.weight(1f)) { Bar((p.health / p.maxHealth).toFloat(), McColors.Heart, height = 6.dp) }
+                    Spacer(Modifier.width(10.dp))
+                    Badge(gameModeLabel(p.gameMode), gameModeColor(p.gameMode))
+                }
             }
             Spacer(Modifier.width(12.dp))
-            Text(stringResource(Res.string.unit_ping, p.ping), style = MaterialTheme.typography.labelLarge,
-                color = when { p.ping < 100 -> McColors.Online; p.ping < 250 -> McColors.Warning; else -> McColors.Offline })
+            PingIndicator(p.ping)
         }
     }
 }
@@ -426,3 +456,81 @@ private fun PlayerDialog(session: ServerSession, p: PlayerInfo, others: List<Str
 private fun Action(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) =
     AssistChip(onClick, label = { Text(label) }, leadingIcon = { Icon(icon, null, tint = color) })
 
+
+private enum class SortBy(val label: StringResource) {
+    NAME(Res.string.players_sort_name), PING(Res.string.players_sort_ping), WORLD(Res.string.players_sort_world)
+}
+
+@Composable
+private fun SearchAndSort(query: String, onQuery: (String) -> Unit, sort: SortBy, onSort: (SortBy) -> Unit) {
+    var menu by remember { mutableStateOf(false) }
+    Row(Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp).widthIn(max = 640.dp), verticalAlignment = Alignment.CenterVertically) {
+        TextField(
+            query, onQuery,
+            placeholder = { Text(stringResource(Res.string.players_search)) },
+            leadingIcon = { Icon(Icons.Outlined.Search, null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) IconButton(onClick = { onQuery("") }) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_clear)) }
+            },
+            singleLine = true,
+            shape = CircleShape,
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
+            modifier = Modifier.weight(1f),
+        )
+        Box {
+            IconButton(onClick = { menu = true }) { Icon(Icons.AutoMirrored.Outlined.Sort, stringResource(Res.string.players_sort)) }
+            DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                SortBy.entries.forEach {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(it.label)) },
+                        onClick = { onSort(it); menu = false },
+                        trailingIcon = { if (it == sort) Text("✓") },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Signal bars like in the Minecraft player list, with the ping below. */
+@Composable
+private fun PingIndicator(ping: Int) {
+    val (bars, color) = when {
+        ping < 80 -> 4 to McColors.Online
+        ping < 150 -> 3 to McColors.Online
+        ping < 300 -> 2 to McColors.Warning
+        else -> 1 to McColors.Offline
+    }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            (1..4).forEach { i ->
+                Box(
+                    Modifier.width(4.dp).height((4 + i * 3).dp).clip(RoundedCornerShape(1.dp))
+                        .background(if (i <= bars) color else MaterialTheme.colorScheme.surfaceContainerHighest),
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(stringResource(Res.string.unit_ping, ping), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun gameModeLabel(mode: String) = when (mode) {
+    "SURVIVAL" -> stringResource(Res.string.gamemode_survival)
+    "CREATIVE" -> stringResource(Res.string.gamemode_creative)
+    "ADVENTURE" -> stringResource(Res.string.gamemode_adventure)
+    "SPECTATOR" -> stringResource(Res.string.gamemode_spectator)
+    else -> mode.lowercase()
+}
+
+private fun gameModeColor(mode: String) = when (mode) {
+    "CREATIVE" -> McColors.End
+    "ADVENTURE" -> McColors.Food
+    "SPECTATOR" -> Color(0xFF64B5F6)
+    else -> McColors.Grass
+}
