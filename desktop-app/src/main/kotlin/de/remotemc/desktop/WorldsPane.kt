@@ -136,36 +136,47 @@ fun WorldsPane(session: ServerSession, initialWorld: String? = null) {
         loader.error?.let { ErrorLine(it) }
         SplitView("worlds", 0.48f, Modifier.fillMaxSize(), minLeft = 300.dp, minRight = 260.dp, left = {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                McCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(Res.string.world_time), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            Text(clockTime(liveTime(d)), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
-                        }
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Times.forEach { (id, label, icon) ->
-                                AssistChip(
-                                    onClick = { change("time", JSONObject().put("time", id)) },
-                                    label = { Text(stringResource(label)) },
-                                    leadingIcon = { Icon(icon, null, Modifier.size(18.dp)) },
-                                    enabled = !loader.busy,
-                                )
+                if (!d.hasSky) {
+                    // Nether and End: no day and night, no weather.
+                    McCard(Modifier.fillMaxWidth()) {
+                        Text(
+                            stringResource(Res.string.world_no_sky),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(18.dp),
+                        )
+                    }
+                } else {
+                    McCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(stringResource(Res.string.world_time), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                                Text(clockTime(liveTime(d)), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+                            }
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Times.forEach { (id, label, icon) ->
+                                    AssistChip(
+                                        onClick = { change("time", JSONObject().put("time", id)) },
+                                        label = { Text(stringResource(label)) },
+                                        leadingIcon = { Icon(icon, null, Modifier.size(18.dp)) },
+                                        enabled = !loader.busy,
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                McCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(stringResource(Res.string.world_weather), style = MaterialTheme.typography.titleMedium)
-                        val current = when {
-                            d.thunder -> "thunder"
-                            d.storm -> "rain"
-                            else -> "clear"
+                    McCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(stringResource(Res.string.world_weather), style = MaterialTheme.typography.titleMedium)
+                            val current = when {
+                                d.thunder -> "thunder"
+                                d.storm -> "rain"
+                                else -> "clear"
+                            }
+                            Choice(
+                                listOf("clear" to Res.string.weather_clear, "rain" to Res.string.weather_rain, "thunder" to Res.string.weather_thunder),
+                                current, !loader.busy,
+                            ) { change("weather", JSONObject().put("weather", it)) }
                         }
-                        Choice(
-                            listOf("clear" to Res.string.weather_clear, "rain" to Res.string.weather_rain, "thunder" to Res.string.weather_thunder),
-                            current, !loader.busy,
-                        ) { change("weather", JSONObject().put("weather", it)) }
                     }
                 }
                 McCard(Modifier.fillMaxWidth()) {

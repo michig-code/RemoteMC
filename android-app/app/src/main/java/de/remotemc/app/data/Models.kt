@@ -294,6 +294,9 @@ data class WorldDetails(
     val difficulty: String,
     val gameRules: List<GameRuleInfo>,
 ) {
+    /** Nether and End have no day and night and no weather; time and weather can't be set there. */
+    val hasSky: Boolean get() = environment != "NETHER" && environment != "THE_END"
+
     companion object {
         fun fromJson(o: JSONObject): WorldDetails {
             val rules = o.optJSONArray("gamerules") ?: JSONArray()

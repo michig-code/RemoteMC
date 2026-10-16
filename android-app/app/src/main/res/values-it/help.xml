@@ -51,7 +51,7 @@
     <string name="help_customize_keys">layout, disporre, nascondere, spostare, modificare, schede</string>
     <string name="help_worlds_title">Ora, meteo e regole</string>
     <string name="help_worlds_where">Panoramica › Mondi › tocca un mondo</string>
-    <string name="help_worlds_text">Tocca un mondo per impostare l’ora del giorno, il meteo e la difficoltà o cambiare regole come keepInventory. Solo admin.</string>
+    <string name="help_worlds_text">Tocca un mondo per impostare l’ora del giorno, il meteo e la difficoltà o cambiare regole come keepInventory. Solo admin. Il Nether e l’End non hanno ora né meteo, quindi lì si cambiano solo difficoltà e regole di gioco.</string>
     <string name="help_worlds_keys">mondo, giorno, notte, pioggia, temporale, difficoltà, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Gestire i giocatori</string>
     <string name="help_players_where">Apri un server › Giocatori › tocca un giocatore</string>

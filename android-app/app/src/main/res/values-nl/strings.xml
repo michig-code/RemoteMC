@@ -549,4 +549,5 @@
     <string name="block_header">Kop</string>
     <string name="block_search">Zoeken</string>
     <string name="block_servers">Servers</string>
+    <string name="world_no_sky">De Nether en het End hebben geen tijd van de dag en geen weer.</string>
 </resources>

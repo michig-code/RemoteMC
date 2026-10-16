@@ -51,7 +51,7 @@
     <string name="help_customize_keys">layout, arrange, hide, move, edit, cards, order</string>
     <string name="help_worlds_title">Time, weather and game rules</string>
     <string name="help_worlds_where">Overview › Worlds › tap a world</string>
-    <string name="help_worlds_text">Tap a world to set the time of day, the weather and the difficulty, or to switch game rules like keepInventory. Admins only.</string>
+    <string name="help_worlds_text">Tap a world to set the time of day, the weather and the difficulty, or to switch game rules like keepInventory. Admins only. The Nether and the End have no time of day and no weather, so only difficulty and game rules can be changed there.</string>
     <string name="help_worlds_keys">world, day, night, rain, thunder, difficulty, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Manage players</string>
     <string name="help_players_where">Open a server › Players › tap a player</string>

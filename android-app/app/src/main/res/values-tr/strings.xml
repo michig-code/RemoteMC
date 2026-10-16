@@ -549,4 +549,5 @@
     <string name="block_header">Başlık</string>
     <string name="block_search">Arama</string>
     <string name="block_servers">Sunucular</string>
+    <string name="world_no_sky">Nether ve End’de gün saati ve hava durumu yoktur.</string>
 </resources>

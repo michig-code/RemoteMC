@@ -51,7 +51,7 @@
     <string name="help_customize_keys">indeling, ordenen, verbergen, verplaatsen, bewerken, kaarten</string>
     <string name="help_worlds_title">Tijd, weer en spelregels</string>
     <string name="help_worlds_where">Overzicht › Werelden › tik op een wereld</string>
-    <string name="help_worlds_text">Tik op een wereld om de tijd, het weer en de moeilijkheid in te stellen of spelregels zoals keepInventory om te zetten. Alleen voor admins.</string>
+    <string name="help_worlds_text">Tik op een wereld om de tijd, het weer en de moeilijkheid in te stellen of spelregels zoals keepInventory om te zetten. Alleen voor admins. De Nether en het End hebben geen tijd en geen weer; daar pas je alleen moeilijkheid en spelregels aan.</string>
     <string name="help_worlds_keys">wereld, dag, nacht, regen, onweer, moeilijkheid, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Spelers beheren</string>
     <string name="help_players_where">Server openen › Spelers › tik op een speler</string>

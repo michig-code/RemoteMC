@@ -51,7 +51,7 @@
     <string name="help_customize_keys">düzen, sırala, gizle, taşı, düzenle, kartlar</string>
     <string name="help_worlds_title">Saat, hava ve oyun kuralları</string>
     <string name="help_worlds_where">Genel bakış › Dünyalar › bir dünyaya dokun</string>
-    <string name="help_worlds_text">Günün saatini, havayı ve zorluğu ayarlamak ya da keepInventory gibi kuralları değiştirmek için bir dünyaya dokun. Sadece adminler için.</string>
+    <string name="help_worlds_text">Günün saatini, havayı ve zorluğu ayarlamak ya da keepInventory gibi kuralları değiştirmek için bir dünyaya dokun. Sadece adminler için. Nether ve End’de saat ve hava yoktur; orada yalnızca zorluk ve oyun kuralları değiştirilebilir.</string>
     <string name="help_worlds_keys">dünya, gündüz, gece, yağmur, fırtına, zorluk, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Oyuncuları yönet</string>
     <string name="help_players_where">Sunucuyu aç › Oyuncular › bir oyuncuya dokun</string>

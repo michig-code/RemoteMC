@@ -85,6 +85,8 @@ First public release of **RemoteMC**.
 - "What's new" in the settings lists everything RemoteMC can do
 
 ### App
+- Worlds: the Nether and the End show a note instead of time and weather (they have neither); the plugin
+  refuses time and weather there too (`no_sky`)
 - Server list as a grid: the grid button (or holding a card without moving it) shows a blue frame
   with handles like a home-screen widget; drag them to size each card in grid cells (1×1 up to full
   width, 1–4 rows). Bigger cards show more: players, TPS, memory bar, version, MOTD; a 1×1 card

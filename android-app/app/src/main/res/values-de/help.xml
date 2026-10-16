@@ -51,7 +51,7 @@
     <string name="help_customize_keys">Layout, anordnen, ausblenden, verschieben, bearbeiten, Karten, Reihenfolge</string>
     <string name="help_worlds_title">Uhrzeit, Wetter und Spielregeln</string>
     <string name="help_worlds_where">Übersicht › Welten › Welt antippen</string>
-    <string name="help_worlds_text">Tippe auf eine Welt, um Tageszeit, Wetter und Schwierigkeit einzustellen oder Spielregeln wie keepInventory umzuschalten. Nur für Admins.</string>
+    <string name="help_worlds_text">Tippe auf eine Welt, um Tageszeit, Wetter und Schwierigkeit einzustellen oder Spielregeln wie keepInventory umzuschalten. Nur für Admins. Nether und End haben keine Uhrzeit und kein Wetter – dort lassen sich nur Schwierigkeit und Spielregeln ändern.</string>
     <string name="help_worlds_keys">Welt, Tag, Nacht, Regen, Gewitter, Schwierigkeit, Gamerule, keepInventory, Nether, End</string>
     <string name="help_players_title">Spieler verwalten</string>
     <string name="help_players_where">Server öffnen › Spieler › Spieler antippen</string>

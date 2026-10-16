@@ -147,6 +147,7 @@ class ScreenshotTest {
     @Test fun whitelist() = shot("09_whitelist") { ServerContent(session(), {}, Pane.PLAYERS, playersView = 1) }
     @Test fun bans() = shot("10_bans", dark = false) { ServerContent(session(), {}, Pane.PLAYERS, playersView = 2) }
     @Test fun worlds() = shot("11_worlds") { ServerContent(session(), {}, Pane.WORLDS) }
+    @Test fun worldsNether() = shot("11b_worlds_nether") { WorldsPane(session(), "world_nether") }
     @Test fun plugins() = shot("12_plugins") { ServerContent(session(), {}, Pane.PLUGINS) }
     @Test fun schedules() = shot("13_schedules") { ServerContent(session(), {}, Pane.SCHEDULES) }
     @Test fun chatShort() = shot("14_chat_short") { ServerContent(session(sampleChat.takeLast(1)), {}, Pane.CHAT) }
@@ -258,7 +259,7 @@ private class SampleManagement(private val now: Long) : Management {
     )
     override suspend fun pardon(name: String) = bans().filter { it.name != name }
     override suspend fun world(name: String) = WorldDetails(
-        name, "NORMAL", 13_000, storm = true, thunder = false, difficulty = "NORMAL",
+        name, when (name) { "world_nether" -> "NETHER"; "world_the_end" -> "THE_END"; else -> "NORMAL" }, 13_000, storm = true, thunder = false, difficulty = "NORMAL",
         gameRules = listOf(
             GameRuleInfo("doDaylightCycle", true, "true"), GameRuleInfo("doFireTick", true, "false"),
             GameRuleInfo("doMobSpawning", true, "true"), GameRuleInfo("keepInventory", true, "true"),

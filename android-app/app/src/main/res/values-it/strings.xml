@@ -564,4 +564,5 @@
     <string name="block_header">Intestazione</string>
     <string name="block_search">Ricerca</string>
     <string name="block_servers">Server</string>
+    <string name="world_no_sky">Il Nether e l’End non hanno ora del giorno né meteo.</string>
 </resources>

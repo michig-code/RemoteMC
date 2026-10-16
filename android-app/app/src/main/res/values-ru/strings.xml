@@ -579,4 +579,5 @@
     <string name="block_header">Заголовок</string>
     <string name="block_search">Поиск</string>
     <string name="block_servers">Серверы</string>
+    <string name="world_no_sky">В Незере и Энде нет времени суток и погоды.</string>
 </resources>

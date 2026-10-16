@@ -51,7 +51,7 @@
     <string name="help_customize_keys">раскладка, упорядочить, скрыть, переместить, изменить, карточки</string>
     <string name="help_worlds_title">Время, погода и правила</string>
     <string name="help_worlds_where">Обзор › Миры › нажать на мир</string>
-    <string name="help_worlds_text">Нажмите на мир, чтобы задать время суток, погоду и сложность или переключить правила вроде keepInventory. Только для админов.</string>
+    <string name="help_worlds_text">Нажмите на мир, чтобы задать время суток, погоду и сложность или переключить правила вроде keepInventory. Только для админов. В Незере и Энде нет времени суток и погоды, там можно менять только сложность и правила игры.</string>
     <string name="help_worlds_keys">мир, день, ночь, дождь, гроза, сложность, gamerule, keepInventory, незер, энд</string>
     <string name="help_players_title">Управление игроками</string>
     <string name="help_players_where">Открыть сервер › Игроки › нажать на игрока</string>

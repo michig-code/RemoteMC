@@ -51,7 +51,7 @@
     <string name="help_customize_keys">diseño, organizar, ocultar, mover, editar, tarjetas</string>
     <string name="help_worlds_title">Hora, clima y reglas</string>
     <string name="help_worlds_where">Resumen › Mundos › tocar un mundo</string>
-    <string name="help_worlds_text">Toca un mundo para ajustar la hora del día, el clima y la dificultad, o cambiar reglas como keepInventory. Solo administradores.</string>
+    <string name="help_worlds_text">Toca un mundo para ajustar la hora del día, el clima y la dificultad, o cambiar reglas como keepInventory. Solo administradores. El Nether y el End no tienen hora del día ni clima, así que allí solo se cambian la dificultad y las reglas.</string>
     <string name="help_worlds_keys">mundo, día, noche, lluvia, tormenta, dificultad, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Gestionar jugadores</string>
     <string name="help_players_where">Abrir un servidor › Jugadores › tocar un jugador</string>

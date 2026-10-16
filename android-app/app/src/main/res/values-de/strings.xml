@@ -563,4 +563,5 @@
     <string name="block_header">Kopf</string>
     <string name="block_search">Suche</string>
     <string name="block_servers">Server</string>
+    <string name="world_no_sky">Im Nether und im End gibt es keine Uhrzeit und kein Wetter.</string>
 </resources>

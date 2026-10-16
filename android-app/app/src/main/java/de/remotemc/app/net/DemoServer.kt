@@ -296,6 +296,9 @@ object DemoServer {
 
         private fun worldAction(name: String, action: String, body: JSONObject): JSONObject {
             val w = worlds[name] ?: throw Fail(404, "world_unknown", "No world $name")
+            if ((action == "time" || action == "weather") && w.getString("environment") in setOf("NETHER", "THE_END")) {
+                throw Fail(400, "no_sky", "The Nether and the End have no time of day and no weather")
+            }
             when (action) {
                 "time" -> w.put("time", when (val t = body.optString("time")) {
                     "morning" -> 0; "day" -> 1000; "noon" -> 6000; "evening" -> 12000; "night" -> 13000; "midnight" -> 18000

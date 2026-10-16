@@ -51,7 +51,7 @@
     <string name="help_customize_keys">układ, ułóż, ukryj, przesuń, edytuj, karty</string>
     <string name="help_worlds_title">Czas, pogoda i zasady gry</string>
     <string name="help_worlds_where">Przegląd › Światy › dotknij świata</string>
-    <string name="help_worlds_text">Dotknij świata, by ustawić porę dnia, pogodę i poziom trudności albo przełączyć zasady jak keepInventory. Tylko dla adminów.</string>
+    <string name="help_worlds_text">Dotknij świata, by ustawić porę dnia, pogodę i poziom trudności albo przełączyć zasady jak keepInventory. Tylko dla adminów. Nether i End nie mają pory dnia ani pogody, więc zmienisz tam tylko poziom trudności i zasady gry.</string>
     <string name="help_worlds_keys">świat, dzień, noc, deszcz, burza, trudność, gamerule, keepInventory, nether, end</string>
     <string name="help_players_title">Zarządzanie graczami</string>
     <string name="help_players_where">Otwórz serwer › Gracze › dotknij gracza</string>

@@ -169,30 +169,41 @@ fun WorldSheet(world: String, actions: WorldActions, onDismiss: () -> Unit) {
                 return@LazyColumn
             }
 
-            item(key = "time") {
-                SectionTitle(stringResource(R.string.world_time) + " · " + clockTime(liveTime(d)))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Times.forEach { (id, label, icon) ->
-                        AssistChip(
-                            onClick = { change("time", JSONObject().put("time", id)) },
-                            label = { Text(stringResource(label)) },
-                            leadingIcon = { Icon(icon, null, Modifier.size(18.dp)) },
-                            enabled = !busy,
-                        )
+            if (!d.hasSky) {
+                item(key = "no-sky") {
+                    Text(
+                        stringResource(R.string.world_no_sky),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+            } else {
+                item(key = "time") {
+                    SectionTitle(stringResource(R.string.world_time) + " · " + clockTime(liveTime(d)))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Times.forEach { (id, label, icon) ->
+                            AssistChip(
+                                onClick = { change("time", JSONObject().put("time", id)) },
+                                label = { Text(stringResource(label)) },
+                                leadingIcon = { Icon(icon, null, Modifier.size(18.dp)) },
+                                enabled = !busy,
+                            )
+                        }
                     }
                 }
-            }
-            item(key = "weather") {
-                SectionTitle(stringResource(R.string.world_weather))
-                val current = when {
-                    d.thunder -> "thunder"
-                    d.storm -> "rain"
-                    else -> "clear"
+                item(key = "weather") {
+                    SectionTitle(stringResource(R.string.world_weather))
+                    val current = when {
+                        d.thunder -> "thunder"
+                        d.storm -> "rain"
+                        else -> "clear"
+                    }
+                    Choice(
+                        listOf("clear" to R.string.weather_clear, "rain" to R.string.weather_rain, "thunder" to R.string.weather_thunder),
+                        current, enabled = !busy,
+                    ) { change("weather", JSONObject().put("weather", it)) }
                 }
-                Choice(
-                    listOf("clear" to R.string.weather_clear, "rain" to R.string.weather_rain, "thunder" to R.string.weather_thunder),
-                    current, enabled = !busy,
-                ) { change("weather", JSONObject().put("weather", it)) }
             }
             item(key = "difficulty") {
                 SectionTitle(stringResource(R.string.world_difficulty))

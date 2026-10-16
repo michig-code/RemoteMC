@@ -579,4 +579,5 @@
     <string name="block_header">Nagłówek</string>
     <string name="block_search">Wyszukiwanie</string>
     <string name="block_servers">Serwery</string>
+    <string name="world_no_sky">Nether i End nie mają pory dnia ani pogody.</string>
 </resources>

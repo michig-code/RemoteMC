@@ -69,7 +69,15 @@ final class WorldControl {
         return o;
     }
 
+    /** Nether and End have no day and night and no weather. */
+    private static void requireSky(World w) throws ApiException {
+        if (w.getEnvironment() == World.Environment.NETHER || w.getEnvironment() == World.Environment.THE_END) {
+            throw ApiException.badRequest("no_sky", "The Nether and the End have no time of day and no weather");
+        }
+    }
+
     static void setTime(World w, String time) throws ApiException {
+        requireSky(w);
         long ticks = switch (time) {
             case "morning" -> 0;
             case "day" -> 1000;
@@ -83,6 +91,7 @@ final class WorldControl {
     }
 
     static void setWeather(World w, String weather) throws ApiException {
+        requireSky(w);
         switch (weather) {
             case "clear" -> {
                 w.setStorm(false);

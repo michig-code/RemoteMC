@@ -580,4 +580,5 @@
     <string name="block_header">Header</string>
     <string name="block_search">Search</string>
     <string name="block_servers">Servers</string>
+    <string name="world_no_sky">The Nether and the End have no time of day and no weather.</string>
 </resources>
