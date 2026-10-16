@@ -3,11 +3,11 @@
 Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmiert wird
 (siehe [`CLAUDE.md`](../CLAUDE.md)). Erst wenn die Liste freigegeben ist, beginnt die Umsetzung.
 
-**Status:** sammeln
+**Status:** wartet auf Freigabe
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| | | | | |
+| 1 | Nether und End ohne Uhrzeit und Wetter | Handy + Windows + Plugin | In Nether und End gibt es keine Uhrzeit und kein Wetter. Die Welt-Einstellungen zeigen dort statt der Knöpfe einen kurzen Hinweis; Schwierigkeit und Spielregeln bleiben. Das Plugin lehnt Uhrzeit/Wetter für diese Welten ab (falls es doch jemand versucht). Demo-Server angepasst, Hilfe-Text ergänzt. | ☐ |
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Web-Oberfläche im Plugin (Browser/iPhone), iPhone-Testversion (`ios-app/`), Serverliste als Raster mit Größen-Anfassern (Handy +
 PC), Anfasser in der Übersicht, Karteninhalt und Bildschirm-Bausteine frei anordnen.
