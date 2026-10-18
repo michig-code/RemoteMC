@@ -3,16 +3,19 @@
 Hier wird alles gesammelt, was ins nächste Update soll – **bevor** programmiert wird
 (siehe [`CLAUDE.md`](../CLAUDE.md)). Erst wenn die Liste freigegeben ist, beginnt die Umsetzung.
 
-**Status:** sammeln
+**Status:** wartet auf Freigabe
 
 | # | Funktion / Änderung | Teile | Beschreibung | Erledigt |
 |---|---|---|---|---|
-| | | | | |
+| 1 | Fabric-Mod (Minecraft 26.x) | Neue Mod `fabric-mod/` + Plugin (Umbau) | Eine reine Server-Mod für Fabric-Server, die genau wie das Plugin arbeitet – die Apps (Handy, Windows, Web) merken keinen Unterschied: Kopplung mit `/remotemc pair` (QR-Karte, Konsole, Link), HTTPS mit eigenem Zertifikat, Rollen-Tokens, Audit-Log, Live-Konsole, Chat, Status/TPS/Verlauf, Spieler (Kick, Bann, Heilen, Spielmodus, Teleport, Inventar), Whitelist/Banliste, Welten (Zeit, Wetter, Schwierigkeit, Spielregeln), Dateien, geplante Aufgaben, Web-Oberfläche, 10 Sprachen. Spieler brauchen die Mod nicht. **Umbau:** Der vom Server unabhängige Teil des Plugins (API, Kopplung, TLS, Puffer, Verlauf, Dateien …) wird gemeinsam genutzt, damit Plugin und Mod immer gleich bleiben; nur die Anbindung an Paper bzw. Fabric ist getrennt. Test gegen einen echten Fabric-Server mit `apitest.py`. CI baut die Mod mit. | ☐ |
 
 Zuletzt umgesetzt (siehe `CHANGELOG.md`): Nether/End ohne Uhrzeit und Wetter, Web-Oberfläche im Plugin (Browser/iPhone), iPhone-Testversion (`ios-app/`), Serverliste als Raster mit Größen-Anfassern (Handy +
 PC), Anfasser in der Übersicht, Karteninhalt und Bildschirm-Bausteine frei anordnen.
 
 ## Offene Fragen
+
+- Fabric-Mod: weitere Minecraft-Versionen (z. B. 1.21.x) später als eigene Ausgaben? Upload auf
+  Modrinth erst auf ausdrücklichen Auftrag.
 
 
 
