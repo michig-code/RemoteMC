@@ -1,0 +1,13 @@
+{
+	"schemaVersion": 1,
+	"id": "remotemc",
+	"version": "${version}",
+	"name": "RemoteMC",
+	"description": "Control your Minecraft server from the RemoteMC app – live, encrypted and free.",
+	"authors": ["michig-code"],
+	"contact": { "homepage": "https://github.com/michig-code/RemoteMC", "sources": "https://github.com/michig-code/RemoteMC" },
+	"license": "MIT",
+	"environment": "server",
+	"entrypoints": { "server": ["de.remotemc.fabric.RemoteMCMod"] },
+	"depends": { "fabricloader": ">=0.19.5", "minecraft": "~26.3", "java": ">=25", "fabric-api": "*" }
+}

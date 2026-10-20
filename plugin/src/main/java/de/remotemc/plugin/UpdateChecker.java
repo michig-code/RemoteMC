@@ -10,16 +10,16 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /** Looks up the latest GitHub release once at startup (off the main thread). */
-final class UpdateChecker {
+public final class UpdateChecker {
 
     static final String RELEASES_API = "https://api.github.com/repos/michig-code/RemoteMC/releases/latest";
 
-    record Update(String version, String url) {}
+    public record Update(String version, String url) {}
 
     private UpdateChecker() {}
 
     /** Returns the newer release, or null if up to date / unreachable. */
-    static Update check(String currentVersion) {
+    public static Update check(String currentVersion) {
         try {
             HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5))
                     .followRedirects(HttpClient.Redirect.NORMAL) // survives repository renames

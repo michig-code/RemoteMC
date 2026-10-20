@@ -1,29 +1,22 @@
 package de.remotemc.plugin;
 
 import com.google.zxing.common.BitMatrix;
-import de.remotemc.plugin.api.ApiServer;
-import de.remotemc.plugin.auth.LoginGuard;
-import de.remotemc.plugin.auth.PairingManager;
-import de.remotemc.plugin.auth.Role;
-import de.remotemc.plugin.auth.TokenStore;
-import de.remotemc.plugin.live.ChatBuffer;
-import de.remotemc.plugin.live.ConsoleBuffer;
-import de.remotemc.plugin.live.EventHub;
+import de.remotemc.plugin.api.BukkitGame;
+import de.remotemc.plugin.core.RemoteMC;
+import de.remotemc.plugin.core.Sender;
+import de.remotemc.plugin.core.Settings;
 import de.remotemc.plugin.live.GameListener;
-import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.live.PaperChatListener;
-import de.remotemc.plugin.live.Schedules;
-import de.remotemc.plugin.live.Snapshots;
 import de.remotemc.plugin.live.SpigotChatListener;
+import de.remotemc.plugin.pairing.PairMapListener;
 import de.remotemc.plugin.pairing.QrCodes;
 import de.remotemc.plugin.platform.Platform;
 import de.remotemc.plugin.platform.Scheduler;
-import de.remotemc.plugin.tls.TlsManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -34,44 +27,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+/** RemoteMC as a Paper/Spigot/Folia plugin: Bukkit glue around the shared {@link RemoteMC} core. */
 public final class RemoteMCPlugin extends JavaPlugin implements Listener {
 
-    public static final String PERMISSION = "remotemc.admin";
+    public static final String PERMISSION = RemoteMC.PERMISSION;
 
-    private Messages messages;
-    private TokenStore tokens;
-    private final PairingManager pairing = new PairingManager();
-    private PairMaps pairMaps;
-    private LoginGuard loginGuard;
-    private AuditLog audit;
-    private final EventHub hub = new EventHub();
-    private ConsoleBuffer console;
-    private ChatBuffer chat;
-    private Snapshots snapshots;
+    private RemoteMC core;
     private Scheduler scheduler;
-    private TlsManager tls;
-    private ApiServer api;
-    private Runnable statusTask;
-    private Runnable historyTask;
-    private History history;
-    private Schedules schedules;
-    private ScheduledExecutorService housekeeping;
-    private volatile UpdateChecker.Update update;
-
-    // ── Lifecycle ───────────────────────────────────────────────────────
+    private NamespacedKey mapKey;
+    private PairMapListener pairMaps;
 
     @Override
     public void onEnable() {
@@ -79,121 +46,37 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         saveDefaultConfig();
         // Adds settings introduced in newer versions while keeping the user's values.
         getConfig().options().copyDefaults(true);
-
-        scheduler = Scheduler.create(this);
-        tokens = new TokenStore(new File(getDataFolder(), "tokens.yml"), getLogger());
-        tokens.load();
         String legacy = getConfig().getString("api.token", "");
-        if (legacy != null && !legacy.isBlank()) {
-            tokens.importLegacy(legacy);
-            getConfig().set("api.token", null);
-            getLogger().info("Moved the old access token to tokens.yml (name: Legacy token).");
-        }
+        getConfig().set("api.token", null);
         saveConfig();
 
-        messages = new Messages(this, getConfig().getString("language", "en"));
-        loginGuard = new LoginGuard(getConfig().getInt("security.max-failed-attempts", 5),
-                getConfig().getLong("security.lockout-seconds", 300));
-        audit = new AuditLog(new File(getDataFolder(), "audit.log"), getLogger(), getConfig().getBoolean("audit-log", true));
-        snapshots = new Snapshots(getDescription().getVersion());
-        console = new ConsoleBuffer(hub, getConfig().getInt("console.buffer-size", 500), this::redact);
-        console.attach();
-        chat = new ChatBuffer(hub);
-
-        org.bukkit.NamespacedKey mapKey = QrCodes.codeKey(this);
-        pairMaps = new PairMaps(mapKey, new de.remotemc.plugin.pairing.PairMapListener(mapKey, pairing, scheduler));
-        getServer().getPluginManager().registerEvents(new GameListener(chat), this);
-        getServer().getPluginManager().registerEvents(
-                Platform.PAPER ? new PaperChatListener(chat) : new SpigotChatListener(chat), this);
-        getServer().getPluginManager().registerEvents(this, this);
-        getServer().getPluginManager().registerEvents(pairMaps.listener(), this);
-
-        startApi();
-        // Live status for connected apps every 2 seconds.
-        statusTask = scheduler.repeat(() -> {
-            if (hub.hasSubscribers()) {
-                hub.publish("status", snapshots.full(), Role.VIEWER);
+        scheduler = Scheduler.create(this);
+        mapKey = QrCodes.codeKey(this);
+        BukkitGame game = new BukkitGame(this, scheduler, code -> {
+            if (pairMaps != null) {
+                pairMaps.paired(code);
             }
-        }, 40L);
-
-        housekeeping = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "RemoteMC-Housekeeping");
-            t.setDaemon(true);
-            return t;
         });
-        housekeeping.scheduleAtFixedRate(tokens::saveIfDirty, 5, 5, TimeUnit.MINUTES);
-        // Scheduled commands: checked every 5 seconds, run on the server thread.
-        schedules = new Schedules(new File(getDataFolder(), "schedules.json"), getLogger(), java.time.ZoneId.systemDefault());
-        housekeeping.scheduleAtFixedRate(() -> {
-            try {
-                schedules.tick(System.currentTimeMillis(),
-                        (task, seconds) -> scheduler.global(() -> {
-                            Bukkit.broadcastMessage(messages.prefixed("schedule-warning", "task", task.name,
-                                    "time", seconds >= 60 ? (seconds / 60) + " min" : seconds + " s"));
-                            return null;
-                        }),
-                        task -> {
-                            if (!getConfig().getBoolean("security.allow-commands", true)) {
-                                return;
-                            }
-                            // The block list may have changed since the task was saved.
-                            try {
-                                ApiServer.checkCommand(task.command, getConfig().getStringList("security.blocked-commands"));
-                            } catch (Exception e) {
-                                getLogger().warning("Scheduled task '" + task.name + "' skipped: " + e.getMessage());
-                                return;
-                            }
-                            audit.log("schedule " + task.name, "-", "command: /" + task.command);
-                            scheduler.global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), task.command));
-                        });
-            } catch (RuntimeException e) {
-                getLogger().warning("Scheduled task failed: " + e);
-            }
-        }, 5, 5, TimeUnit.SECONDS);
-        // Performance history: measure on the server thread every minute, save off it.
-        if (getConfig().getBoolean("history", true)) {
-            ScheduledExecutorService saver = housekeeping;
-            history = new History(new File(getDataFolder(), "history.csv"), getLogger());
-            historyTask = scheduler.repeat(() -> {
-                double[] tps = Platform.tps();
-                Runtime rt = Runtime.getRuntime();
-                History.Sample sample = new History.Sample(System.currentTimeMillis(),
-                        tps.length == 0 ? -1 : Math.min(20.0, tps[0]), Platform.mspt(),
-                        (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024, Bukkit.getOnlinePlayers().size());
-                saver.execute(() -> history.add(sample));
-            }, 1200L);
+        core = new RemoteMC(getDataFolder(), getLogger(), getDescription().getVersion(), new BukkitSettings(), game);
+        game.bind(core);
+        core.start();
+        if (legacy != null && !legacy.isBlank()) {
+            core.tokens().importLegacy(legacy);
+            getLogger().info("Moved the old access token to tokens.yml (name: Legacy token).");
         }
-        if (getConfig().getBoolean("update-check", true)) {
-            housekeeping.execute(() -> {
-                update = UpdateChecker.check(getDescription().getVersion());
-                if (update != null) {
-                    getLogger().info("RemoteMC " + update.version() + " is available: " + update.url());
-                }
-            });
-        }
-        getLogger().info("Running on " + Platform.name() + ". Pair the app with /remotemc pair");
+
+        pairMaps = new PairMapListener(mapKey, core.pairing(), scheduler);
+        getServer().getPluginManager().registerEvents(new GameListener(core.chat()), this);
+        getServer().getPluginManager().registerEvents(
+                Platform.PAPER ? new PaperChatListener(core.chat()) : new SpigotChatListener(core.chat()), this);
+        getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(pairMaps, this);
     }
 
     @Override
     public void onDisable() {
-        if (statusTask != null) {
-            statusTask.run();
-        }
-        if (historyTask != null) {
-            historyTask.run();
-        }
-        stopApi();
-        if (console != null) {
-            console.detach();
-        }
-        if (tokens != null) {
-            tokens.saveIfDirty();
-        }
-        if (housekeeping != null) {
-            housekeeping.shutdownNow();
-        }
-        if (audit != null) {
-            audit.close();
+        if (core != null) {
+            core.stop();
         }
     }
 
@@ -211,293 +94,108 @@ public final class RemoteMCPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    private void startApi() {
-        try {
-            tls = null;
-            if (getConfig().getBoolean("api.tls", true)) {
-                tls = new TlsManager(new File(getDataFolder(), "tls.p12"), getLogger());
-                tls.load();
-            }
-            api = new ApiServer(this);
-            api.start();
-            getLogger().info("API listening on port " + getConfig().getInt("api.port")
-                    + (tls != null ? " (HTTPS, fingerprint " + tls.shortFingerprint() + ")" : " (HTTP, unencrypted)"));
-        } catch (Exception e) {
-            getLogger().severe("Could not start the RemoteMC API: " + e.getMessage()
-                    + " – is port " + getConfig().getInt("api.port") + " already in use?");
-            api = null;
-        }
-    }
-
-    private void stopApi() {
-        if (api != null) {
-            api.stop();
-            api = null;
-        }
-    }
-
-    // ── Accessors for the API ───────────────────────────────────────────
-
-    public TokenStore tokens() { return tokens; }
-    public PairingManager pairing() { return pairing; }
-
-    /** QR maps of /remotemc pair: their item key and the listener that cleans them up. */
-    private record PairMaps(org.bukkit.NamespacedKey key, de.remotemc.plugin.pairing.PairMapListener listener) {}
-    public LoginGuard loginGuard() { return loginGuard; }
-    public AuditLog audit() { return audit; }
-    public EventHub hub() { return hub; }
-    public ConsoleBuffer console() { return console; }
-    public ChatBuffer chat() { return chat; }
-    public Snapshots snapshots() { return snapshots; }
-    public Scheduler scheduler() { return scheduler; }
-
-    public Schedules schedules() { return schedules; }
-
-    /** Null when the history is turned off in the config. */
-    public History history() { return history; }
-    public TlsManager tls() { return tls; }
-
-    /** Tells admins that a device was paired. */
-    public void onDevicePaired(String device, Role role, String code) {
-        if (pairMaps != null) {
-            pairMaps.listener().paired(code);
-        }
-        String msg = messages.prefixed("pair-success", "device", device, "role", role.id());
-        Bukkit.getConsoleSender().sendMessage(msg);
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.hasPermission(PERMISSION)) {
-                p.sendMessage(msg);
-            }
-        }
-    }
-
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        UpdateChecker.Update u = update;
-        if (u != null && event.getPlayer().hasPermission(PERMISSION)) {
-            event.getPlayer().sendMessage(messages.prefixed("update-available",
-                    "version", u.version(), "current", getDescription().getVersion(), "url", u.url()));
-        }
+        core.onJoin(new BukkitSender(event.getPlayer()));
     }
-
-    // ── Commands ────────────────────────────────────────────────────────
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(messages.prefixed("no-permission"));
-            return true;
-        }
-        String sub = args.length == 0 ? "pair" : args[0].toLowerCase(Locale.ROOT);
-        switch (sub) {
-            case "pair" -> pair(sender, args.length > 1 ? args[1] : "admin");
-            case "info" -> info(sender);
-            case "token", "tokens" -> token(sender, Arrays.copyOfRange(args, Math.min(1, args.length), args.length));
-            case "reload" -> reload(sender);
-            default -> sender.sendMessage(messages.prefixed("usage"));
-        }
+        core.command(new BukkitSender(sender), args);
         return true;
-    }
-
-    private void pair(CommandSender sender, String roleArg) {
-        Role role = Role.parse(roleArg);
-        if (role == null) {
-            sender.sendMessage(messages.prefixed("role-invalid"));
-            return;
-        }
-        if (api == null) {
-            sender.sendMessage(messages.prefixed("api-stopped"));
-            return;
-        }
-        int minutes = Math.max(1, getConfig().getInt("security.pairing-code-minutes", 5));
-        PairingManager.Code code = pairing.create(role, minutes, sender.getName());
-        String address = publicAddress();
-        int port = getConfig().getInt("api.port");
-        String link = "remotemc://" + hostForUri(address) + ":" + port + "?code=" + code.code()
-                + (tls != null ? "&fp=" + tls.fingerprintToken() : "&tls=0");
-        BitMatrix qr = QrCodes.encode(link);
-
-        sender.sendMessage(messages.prefixed("pair-header", "code", code.code(), "minutes", minutes, "role", role.id()));
-        if (sender instanceof Player player) {
-            String mapName = messages.get("pair-map-name", "code", code.code());
-            scheduler.entity(player, () -> {
-                ItemStack map = QrCodes.mapItem(player, qr, mapName, pairMaps.key(), code.code());
-                player.getInventory().addItem(map).values()
-                        .forEach(rest -> player.getWorld().dropItem(player.getLocation(), rest));
-                return null;
-            });
-            sender.sendMessage(messages.get("pair-scan"));
-        } else if (QrCodes.consoleSupportsBlocks()) {
-            sender.sendMessage(messages.get("pair-scan-console"));
-            QrCodes.toText(qr).forEach(sender::sendMessage);
-        }
-        sender.sendMessage(messages.get("pair-manual", "address", address, "port", port, "code", code.code()));
-        if (tls != null) {
-            sender.sendMessage(messages.get("pair-verify", "short", tls.shortFingerprint()));
-        }
-        TextComponent linkLine = new TextComponent(messages.get("pair-link"));
-        TextComponent clickable = new TextComponent(link);
-        clickable.setColor(net.md_5.bungee.api.ChatColor.AQUA);
-        clickable.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, link));
-        clickable.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(messages.get("pair-link-hover"))));
-        linkLine.addExtra(clickable);
-        sender.spigot().sendMessage(linkLine);
-        if (getConfig().getBoolean("web", false)) {
-            // The same code works in the browser (web app of the API server).
-            String web = (tls != null ? "https://" : "http://") + hostForUri(address) + ":" + port + "/#code=" + code.code();
-            TextComponent webLine = new TextComponent(messages.get("pair-web"));
-            TextComponent open = new TextComponent(web);
-            open.setColor(net.md_5.bungee.api.ChatColor.AQUA);
-            open.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, web));
-            webLine.addExtra(open);
-            sender.spigot().sendMessage(webLine);
-        }
-    }
-
-    private void info(CommandSender sender) {
-        if (api != null) {
-            sender.sendMessage(messages.prefixed("api-running", "port", getConfig().getInt("api.port"),
-                    "tls", messages.get(tls != null ? "tls-on" : "tls-off")));
-            if (tls != null) {
-                sender.sendMessage(messages.get("fingerprint", "fp", tls.shortFingerprint()));
-            }
-        } else {
-            sender.sendMessage(messages.prefixed("api-stopped"));
-        }
-        sender.sendMessage(messages.get("info-tokens", "count", tokens.size()));
-        sender.sendMessage(messages.get("info-clients", "count", hub.subscriberCount()));
-    }
-
-    private void token(CommandSender sender, String[] args) {
-        String action = args.length == 0 ? "list" : args[0].toLowerCase(Locale.ROOT);
-        switch (action) {
-            case "create" -> {
-                if (args.length < 2) {
-                    sender.sendMessage(messages.prefixed("usage"));
-                    return;
-                }
-                Role role = Role.parse(args.length > 2 ? args[2] : "admin");
-                if (role == null) {
-                    sender.sendMessage(messages.prefixed("role-invalid"));
-                    return;
-                }
-                if (tokens.nameExists(args[1])) {
-                    sender.sendMessage(messages.prefixed("token-exists", "name", args[1]));
-                    return;
-                }
-                String token = tokens.create(args[1], role);
-                audit.log(sender.getName(), "-", "created token " + args[1] + " (" + role.id() + ")");
-                sender.sendMessage(messages.prefixed("token-created", "name", args[1], "role", role.id()));
-                TextComponent value = new TextComponent(token + " ");
-                value.setColor(net.md_5.bungee.api.ChatColor.WHITE);
-                value.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, token));
-                value.addExtra(new TextComponent(messages.get("token-copy")));
-                sender.spigot().sendMessage(value);
-            }
-            case "list" -> {
-                if (tokens.size() == 0) {
-                    sender.sendMessage(messages.prefixed("token-list-empty"));
-                    return;
-                }
-                sender.sendMessage(messages.prefixed("token-list-header"));
-                DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-                for (TokenStore.Token t : tokens.all()) {
-                    sender.sendMessage(messages.get("token-list-entry", "name", t.name(), "role", t.role().id(),
-                            "used", t.lastUsed() == 0 ? messages.get("never") : format.format(new Date(t.lastUsed()))));
-                }
-            }
-            case "revoke", "delete", "remove" -> {
-                String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-                if (tokens.revoke(name)) {
-                    audit.log(sender.getName(), "-", "revoked token " + name);
-                    sender.sendMessage(messages.prefixed("token-revoked", "name", name));
-                } else {
-                    sender.sendMessage(messages.prefixed("token-not-found", "name", name));
-                }
-            }
-            default -> sender.sendMessage(messages.prefixed("usage"));
-        }
-    }
-
-    private void reload(CommandSender sender) {
-        stopApi();
-        reloadConfig();
-        messages = new Messages(this, getConfig().getString("language", "en"));
-        loginGuard.configure(getConfig().getInt("security.max-failed-attempts", 5), getConfig().getLong("security.lockout-seconds", 300));
-        audit.setEnabled(getConfig().getBoolean("audit-log", true));
-        console.resize(getConfig().getInt("console.buffer-size", 500));
-        tokens.load();
-        startApi();
-        sender.sendMessage(messages.prefixed("reloaded"));
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission(PERMISSION)) {
-            return Collections.emptyList();
-        }
-        List<String> options = switch (args.length) {
-            case 1 -> List.of("pair", "info", "token", "reload");
-            case 2 -> switch (args[0].toLowerCase(Locale.ROOT)) {
-                case "pair" -> List.of("admin", "moderator", "viewer");
-                case "token" -> List.of("create", "list", "revoke");
-                default -> List.of();
-            };
-            case 3 -> args[0].equalsIgnoreCase("token") && args[1].equalsIgnoreCase("revoke")
-                    ? tokens.all().stream().map(TokenStore.Token::name).toList() : List.of();
-            case 4 -> args[0].equalsIgnoreCase("token") && args[1].equalsIgnoreCase("create")
-                    ? List.of("admin", "moderator", "viewer") : List.of();
-            default -> List.of();
-        };
-        String last = args[args.length - 1].toLowerCase(Locale.ROOT);
-        return options.stream().filter(o -> o.toLowerCase(Locale.ROOT).startsWith(last)).toList();
+        return sender.hasPermission(PERMISSION) ? core.tabComplete(args) : Collections.emptyList();
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────
-
-    private static final java.util.regex.Pattern TOKEN = java.util.regex.Pattern.compile("rmc_[A-Za-z0-9_-]{20,}");
-    private static final java.util.regex.Pattern QR_LINE = java.util.regex.Pattern.compile("^[█▀▄ ]{10,}$");
-
-    /**
-     * Console lines are visible to moderators in the app; access tokens, pairing codes and
-     * console QR codes would let them gain admin access, so they are hidden.
-     */
-    private String redact(String line) {
-        String stripped = de.remotemc.plugin.live.Formatting.strip(line).strip();
-        if (QR_LINE.matcher(stripped).matches()) {
-            return "[QR code hidden]";
+    /** config.yml through Bukkit (keeps the comments and adds new settings). */
+    private final class BukkitSettings implements Settings {
+        @Override
+        public String getString(String path, String def) {
+            return getConfig().getString(path, def);
         }
-        return pairing.redact(TOKEN.matcher(line).replaceAll("rmc_[hidden]"));
+
+        @Override
+        public int getInt(String path, int def) {
+            return getConfig().getInt(path, def);
+        }
+
+        @Override
+        public long getLong(String path, long def) {
+            return getConfig().getLong(path, def);
+        }
+
+        @Override
+        public boolean getBoolean(String path, boolean def) {
+            return getConfig().getBoolean(path, def);
+        }
+
+        @Override
+        public List<String> getStringList(String path) {
+            return getConfig().getStringList(path);
+        }
+
+        @Override
+        public void reload() {
+            reloadConfig();
+        }
     }
 
-    /** Address for QR codes: configured address, server-ip, or the machine's LAN address. */
-    String publicAddress() {
-        String configured = getConfig().getString("api.public-address", "");
-        if (configured != null && !configured.isBlank()) {
-            return configured.strip();
+    /** A Bukkit command sender (console or player). */
+    private final class BukkitSender implements Sender {
+        private final CommandSender sender;
+
+        BukkitSender(CommandSender sender) {
+            this.sender = sender;
         }
-        String ip = Bukkit.getIp();
-        if (ip != null && !ip.isBlank() && !ip.equals("0.0.0.0")) {
-            return ip;
+
+        @Override
+        public String name() {
+            return sender.getName();
         }
-        try {
-            for (NetworkInterface nif : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                if (!nif.isUp() || nif.isLoopback() || nif.isVirtual()) {
-                    continue;
-                }
-                for (InetAddress addr : Collections.list(nif.getInetAddresses())) {
-                    if (addr instanceof Inet4Address && addr.isSiteLocalAddress()) {
-                        return addr.getHostAddress();
-                    }
-                }
+
+        @Override
+        public boolean isPlayer() {
+            return sender instanceof Player;
+        }
+
+        @Override
+        public boolean hasPermission() {
+            return sender.hasPermission(PERMISSION);
+        }
+
+        @Override
+        public void send(String text) {
+            sender.sendMessage(text);
+        }
+
+        @Override
+        public void sendLink(String prefix, String text, String value, boolean open, String hover) {
+            TextComponent line = new TextComponent(prefix);
+            TextComponent link = new TextComponent(text);
+            link.setColor(net.md_5.bungee.api.ChatColor.AQUA);
+            link.setClickEvent(new ClickEvent(open ? ClickEvent.Action.OPEN_URL : ClickEvent.Action.COPY_TO_CLIPBOARD, value));
+            if (hover != null) {
+                link.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hover)));
             }
-        } catch (Exception ignored) {
-            // fall through
+            line.addExtra(link);
+            sender.spigot().sendMessage(line);
         }
-        return "localhost";
-    }
 
-    private static String hostForUri(String host) {
-        return host.contains(":") && !host.startsWith("[") ? "[" + host + "]" : host;
+        @Override
+        public boolean giveQrMap(BitMatrix qr, String name, String code) {
+            if (!(sender instanceof Player player)) {
+                return false;
+            }
+            scheduler.entity(player, () -> {
+                ItemStack map = QrCodes.mapItem(player, qr, name, mapKey, code);
+                player.getInventory().addItem(map).values()
+                        .forEach(rest -> player.getWorld().dropItem(player.getLocation(), rest));
+                return null;
+            });
+            return true;
+        }
     }
 }

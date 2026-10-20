@@ -2,6 +2,7 @@ package de.remotemc.plugin.live;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.remotemc.plugin.core.RemoteMC;
 import de.remotemc.plugin.platform.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,13 +12,10 @@ import org.bukkit.entity.Player;
 /** Builds the status and player JSON. Call on the main / global region thread. */
 public final class Snapshots {
 
-    public static final String[] FEATURES = {"history", "moderation", "worlds", "plugins", "schedules", "teleport", "files", "inventory"};
+    private final RemoteMC core;
 
-    private final long startedAt = System.currentTimeMillis();
-    private final String pluginVersion;
-
-    public Snapshots(String pluginVersion) {
-        this.pluginVersion = pluginVersion;
+    public Snapshots(RemoteMC core) {
+        this.core = core;
     }
 
     public JsonObject status() {
@@ -26,28 +24,9 @@ public final class Snapshots {
         o.addProperty("version", Bukkit.getVersion());
         o.addProperty("minecraftVersion", Platform.minecraftVersion());
         o.addProperty("platform", Platform.name());
-        o.addProperty("pluginVersion", pluginVersion);
-        // What this plugin version can do, so apps hide what an older plugin lacks.
-        JsonArray features = new JsonArray();
-        for (String f : FEATURES) {
-            features.add(f);
-        }
-        o.add("features", features);
         o.addProperty("onlinePlayers", Bukkit.getOnlinePlayers().size());
         o.addProperty("maxPlayers", Bukkit.getMaxPlayers());
-
-        JsonArray tps = new JsonArray();
-        for (double d : Platform.tps()) {
-            tps.add(Math.min(20.0, Math.round(d * 100.0) / 100.0));
-        }
-        o.add("tps", tps);
-        double mspt = Platform.mspt();
-        o.addProperty("mspt", mspt < 0 ? -1 : Math.round(mspt * 100.0) / 100.0);
-
-        Runtime rt = Runtime.getRuntime();
-        o.addProperty("memoryUsedMb", (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024);
-        o.addProperty("memoryMaxMb", rt.maxMemory() / 1024 / 1024);
-        o.addProperty("uptimeSeconds", (System.currentTimeMillis() - startedAt) / 1000);
+        core.addCommonStatus(o);
 
         JsonArray worlds = new JsonArray();
         for (World w : Bukkit.getWorlds()) {
@@ -100,14 +79,6 @@ public final class Snapshots {
             arr.add(o);
         }
         return arr;
-    }
-
-    /** Status + players in one object (used for the live stream). */
-    public JsonObject full() {
-        JsonObject o = new JsonObject();
-        o.add("status", status());
-        o.add("players", players());
-        return o;
     }
 
     /**

@@ -9,7 +9,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import de.remotemc.plugin.RemoteMCPlugin;
+import de.remotemc.plugin.core.Game;
+import de.remotemc.plugin.core.RemoteMC;
+import de.remotemc.plugin.core.Tasks;
 import de.remotemc.plugin.auth.PairingManager;
 import de.remotemc.plugin.auth.Role;
 import de.remotemc.plugin.auth.TokenStore;
@@ -19,12 +21,6 @@ import de.remotemc.plugin.live.EventHub;
 import de.remotemc.plugin.live.Formatting;
 import de.remotemc.plugin.live.History;
 import de.remotemc.plugin.live.Schedules;
-import de.remotemc.plugin.platform.Platform;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.GameMode;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +55,8 @@ public final class ApiServer {
     private static final long HEARTBEAT_MILLIS = 15_000;
     private static final Pattern PLAYER_NAME = Pattern.compile("[A-Za-z0-9_.]{1,16}");
 
-    private final RemoteMCPlugin plugin;
+    private final RemoteMC plugin;
+    private final Game game;
     private final AtomicInteger openStreams = new AtomicInteger();
     private HttpServer server;
     private ExecutorService executor;
@@ -72,27 +69,29 @@ public final class ApiServer {
         }
     }
 
-    public ApiServer(RemoteMCPlugin plugin) {
+    public ApiServer(RemoteMC plugin) {
         this.plugin = plugin;
+        this.game = plugin.game();
     }
 
     public void start() throws IOException {
         // The server folder; RemoteMC's own folder (tokens, TLS key, audit log) stays out of reach.
-        java.io.File dataFolder = plugin.getDataFolder().getAbsoluteFile();
-        files = new FileManager(dataFolder.getParentFile().getParentFile().toPath(), dataFolder.toPath());
+        java.io.File dataFolder = plugin.dataFolder().getAbsoluteFile();
+        files = new FileManager(game.serverFolder().toAbsolutePath(), dataFolder.toPath());
         // Deleted files stay restorable for a day (in RemoteMC's own, hidden folder).
         files.useTrash(dataFolder.toPath().resolve("trash"));
         // RemoteMC's own JAR can be seen but not deleted: that would cut off the app for good.
-        String ownJar = pluginFile(plugin, files);
-        if (ownJar != null) {
+        java.nio.file.Path ownJar = game.ownJar();
+        String ownFile = ownJar == null ? null : files.relativeOrNull(ownJar);
+        if (ownFile != null) {
             try {
-                files.lock(files.resolve(ownJar));
+                files.lock(files.resolve(ownFile));
             } catch (ApiException e) {
                 // not inside the server folder: nothing the app could delete
             }
         }
-        String host = plugin.getConfig().getString("api.host", "0.0.0.0");
-        int port = plugin.getConfig().getInt("api.port", 8765);
+        String host = plugin.config().getString("api.host", "0.0.0.0");
+        int port = plugin.config().getInt("api.port", 8765);
         InetSocketAddress address = new InetSocketAddress(host, port);
         if (plugin.tls() != null) {
             HttpsServer https = HttpsServer.create(address, 0);
@@ -131,7 +130,7 @@ public final class ApiServer {
     private void web(HttpExchange ex) {
         try {
             String method = ex.getRequestMethod().toUpperCase(Locale.ROOT);
-            WebFiles.File file = plugin.getConfig().getBoolean("web", false) && (method.equals("GET") || method.equals("HEAD"))
+            WebFiles.File file = plugin.config().getBoolean("web", false) && (method.equals("GET") || method.equals("HEAD"))
                     ? WebFiles.find(ex.getRequestURI().getPath()) : null;
             var headers = ex.getResponseHeaders();
             if (file == null) {
@@ -193,7 +192,7 @@ public final class ApiServer {
         } catch (ApiException e) {
             sendError(ex, e.status, e.code, e.getMessage());
         } catch (Exception e) {
-            plugin.getLogger().warning("API error: " + e);
+            plugin.logger().warning("API error: " + e);
             sendError(ex, 500, "internal", "Internal error: " + e.getMessage());
         } finally {
             ex.close();
@@ -207,7 +206,7 @@ public final class ApiServer {
                 return me(caller);
             }
             case "GET /api/v1/status" -> {
-                return global(() -> plugin.snapshots().status());
+                return global(game::statusNow);
             }
             case "GET /api/v1/history" -> {
                 History history = plugin.history();
@@ -223,7 +222,7 @@ public final class ApiServer {
             }
             case "GET /api/v1/players" -> {
                 JsonObject o = new JsonObject();
-                o.add("players", global(() -> plugin.snapshots().players()));
+                o.add("players", global(game::playersNow));
                 return o;
             }
             case "GET /api/v1/console" -> {
@@ -239,8 +238,8 @@ public final class ApiServer {
             }
             case "GET /api/v1/commands" -> {
                 require(caller, Role.ADMIN);
-                List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
-                return global(() -> Commands.list(blocked));
+                List<String> blocked = plugin.config().getStringList("security.blocked-commands");
+                return game.commands(blocked);
             }
             case "GET /api/v1/complete" -> {
                 require(caller, Role.ADMIN);
@@ -252,11 +251,11 @@ public final class ApiServer {
                     throw new ApiException(413, "too_large", "Buffer too long");
                 }
                 String finalBuffer = buffer;
-                List<String> blocked = plugin.getConfig().getStringList("security.blocked-commands");
+                List<String> blocked = plugin.config().getStringList("security.blocked-commands");
                 // Suggestions are only useful while typing: a hanging tab completer of another
                 // plugin must not keep the app waiting, so give up early with an empty list.
                 try {
-                    return await(plugin.scheduler().global(() -> Commands.complete(finalBuffer, blocked)), COMPLETE_TIMEOUT_SECONDS);
+                    return Tasks.await(game.complete(finalBuffer, blocked), COMPLETE_TIMEOUT_SECONDS);
                 } catch (ApiException e) {
                     if (!"timeout".equals(e.code)) {
                         throw e;
@@ -269,7 +268,7 @@ public final class ApiServer {
             }
             case "GET /api/v1/whitelist" -> {
                 require(caller, Role.MODERATOR);
-                return global(Moderation::whitelist);
+                return game.whitelist();
             }
             case "POST /api/v1/whitelist" -> {
                 require(caller, Role.ADMIN);
@@ -278,28 +277,25 @@ public final class ApiServer {
                     throw ApiException.badRequest("bad_request", "Missing field: enabled");
                 }
                 boolean on = body.get("enabled").getAsBoolean();
-                global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:whitelist " + (on ? "on" : "off")));
+                game.setWhitelist(on);
                 plugin.audit().log(caller.who(), caller.ip(), "whitelist " + (on ? "on" : "off"));
-                return global(Moderation::whitelist);
+                return game.whitelist();
             }
             case "POST /api/v1/whitelist/add", "POST /api/v1/whitelist/remove" -> {
                 require(caller, Role.MODERATOR);
                 String name = playerName(stringField(readBody(ex), "name", 16));
                 boolean add = path.endsWith("/add");
                 // The vanilla command also looks up players who never joined.
-                boolean listed = global(() -> {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:whitelist " + (add ? "add " : "remove ") + name);
-                    return Moderation.isWhitelisted(name);
-                });
+                boolean listed = game.changeWhitelist(name, add);
                 if (listed != add) {
                     throw ApiException.notFound("player_unknown", "No Minecraft account named " + name);
                 }
                 plugin.audit().log(caller.who(), caller.ip(), "whitelist " + (add ? "add " : "remove ") + name);
-                return global(Moderation::whitelist);
+                return game.whitelist();
             }
             case "GET /api/v1/plugins" -> {
                 require(caller, Role.MODERATOR);
-                return global(() -> plugins(files));
+                return game.plugins(files);
             }
             case "GET /api/v1/files" -> {
                 requireFiles(caller);
@@ -363,7 +359,7 @@ public final class ApiServer {
             }
             case "POST /api/v1/schedules" -> {
                 require(caller, Role.ADMIN);
-                if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+                if (!plugin.config().getBoolean("security.allow-commands", true)) {
                     throw ApiException.forbidden("Console commands are disabled in config.yml");
                 }
                 JsonObject body = readBody(ex);
@@ -381,7 +377,7 @@ public final class ApiServer {
             }
             case "GET /api/v1/bans" -> {
                 require(caller, Role.MODERATOR);
-                return global(Moderation::bans);
+                return game.bans();
             }
             case "POST /api/v1/command" -> {
                 require(caller, Role.ADMIN);
@@ -401,10 +397,10 @@ public final class ApiServer {
                     switch (parts[5]) {
                         case "delete" -> plugin.schedules().delete(task.id);
                         case "run" -> {
-                            if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+                            if (!plugin.config().getBoolean("security.allow-commands", true)) {
                                 throw ApiException.forbidden("Console commands are disabled in config.yml");
                             }
-                            global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), task.command));
+                            game.runConsoleCommand(task.command);
                         }
                         default -> throw ApiException.notFound("not_found", "Unknown action: " + parts[5]);
                     }
@@ -414,25 +410,18 @@ public final class ApiServer {
                 if (method.equals("POST") && parts.length == 6 && parts[3].equals("bans") && parts[5].equals("pardon")) {
                     require(caller, Role.MODERATOR);
                     String name = playerName(parts[4]);
-                    boolean stillBanned = global(() -> {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:pardon " + name);
-                        return Moderation.isBanned(name);
-                    });
+                    boolean stillBanned = game.pardon(name);
                     if (stillBanned) {
                         throw new ApiException(500, "action_failed", "Could not unban " + name);
                     }
                     plugin.audit().log(caller.who(), caller.ip(), "pardon " + name);
-                    return global(Moderation::bans);
+                    return game.bans();
                 }
                 if (method.equals("GET") && parts.length == 6 && parts[3].equals("players") && parts[5].equals("inventory")) {
                     require(caller, Role.MODERATOR);
                     String name = playerName(parts[4]);
-                    Player p = Bukkit.getPlayerExact(name);
-                    if (p == null) {
-                        throw ApiException.notFound("player_offline", "Player " + name + " is not online");
-                    }
-                    // Read on the player's own thread (Folia); looking is logged like any action.
-                    JsonObject inventory = await(plugin.scheduler().entity(p, () -> Inventories.of(p)));
+                    // Looking is logged like any action.
+                    JsonObject inventory = game.inventory(name);
                     plugin.audit().log(caller.who(), caller.ip(), "view inventory of " + name);
                     return inventory;
                 }
@@ -455,7 +444,7 @@ public final class ApiServer {
         TokenStore.Token token = plugin.tokens().authenticate(presented);
         if (token == null) {
             if (plugin.loginGuard().fail(ip)) {
-                plugin.getLogger().warning("Locked out " + ip + " after too many invalid tokens");
+                plugin.logger().warning("Locked out " + ip + " after too many invalid tokens");
                 plugin.audit().log("-", ip, "lockout (invalid tokens)");
             }
             throw new ApiException(401, "invalid_token", "Invalid or revoked token");
@@ -473,9 +462,9 @@ public final class ApiServer {
     private JsonObject ping() {
         JsonObject o = new JsonObject();
         o.addProperty("app", "RemoteMC");
-        o.addProperty("version", plugin.getDescription().getVersion());
+        o.addProperty("version", plugin.version());
         o.addProperty("apiVersion", API_VERSION);
-        o.addProperty("platform", Platform.name());
+        o.addProperty("platform", game.platformName());
         return o;
     }
 
@@ -507,8 +496,8 @@ public final class ApiServer {
         JsonObject o = new JsonObject();
         o.addProperty("name", caller.name());
         o.addProperty("role", caller.role().id());
-        o.addProperty("commandsEnabled", plugin.getConfig().getBoolean("security.allow-commands", true));
-        o.addProperty("capturesCommandOutput", Platform.capturesCommandOutput());
+        o.addProperty("commandsEnabled", plugin.config().getBoolean("security.allow-commands", true));
+        o.addProperty("capturesCommandOutput", game.capturesCommandOutput());
         o.addProperty("apiVersion", API_VERSION);
         return o;
     }
@@ -522,7 +511,7 @@ public final class ApiServer {
         }
         try (EventHub.Subscription sub = plugin.hub().subscribe(caller.role())) {
             JsonObject hello = me(caller);
-            hello.add("snapshot", global(() -> plugin.snapshots().full()));
+            hello.add("snapshot", global(plugin::snapshotNow));
             hello.addProperty("consoleLast", plugin.console().lastId());
             hello.addProperty("chatLast", plugin.chat().lastId());
 
@@ -578,19 +567,15 @@ public final class ApiServer {
         return o;
     }
 
-    @SuppressWarnings("deprecation")
     private JsonObject broadcast(Caller caller, String message) throws Exception {
-        global(() -> {
-            Bukkit.broadcastMessage("§8[§aServer§8]§r " + message);
-            return null;
-        });
+        game.broadcast("§8[§aServer§8]§r " + message);
         plugin.chat().add(ChatBuffer.Type.BROADCAST, caller.name(), message);
         plugin.audit().log(caller.who(), caller.ip(), "broadcast: " + message);
         return ok();
     }
 
     private String checkCommand(String command) throws ApiException {
-        return checkCommand(command, plugin.getConfig().getStringList("security.blocked-commands"));
+        return checkCommand(command, plugin.config().getStringList("security.blocked-commands"));
     }
 
     /** Strips the slash and refuses empty and blocked commands. */
@@ -613,7 +598,7 @@ public final class ApiServer {
     }
 
     private JsonObject runCommand(Caller caller, String command) throws Exception {
-        if (!plugin.getConfig().getBoolean("security.allow-commands", true)) {
+        if (!plugin.config().getBoolean("security.allow-commands", true)) {
             throw ApiException.forbidden("Console commands are disabled in config.yml");
         }
         String cmd = checkCommand(command);
@@ -621,19 +606,16 @@ public final class ApiServer {
         String finalCmd = cmd;
         List<String> output = new ArrayList<>();
         plugin.audit().log(caller.who(), caller.ip(), "command: /" + finalCmd);
-        plugin.getLogger().info(caller.name() + " ran: /" + finalCmd);
-        boolean success = global(() -> {
-            CommandSender sender = Platform.commandSender(output);
-            return Bukkit.dispatchCommand(sender, finalCmd);
-        });
+        plugin.logger().info(caller.name() + " ran: /" + finalCmd);
+        boolean success = game.runCommand(finalCmd, output);
 
-        if (Platform.capturesCommandOutput()) {
+        if (game.capturesCommandOutput()) {
             awaitLateOutput(output);
         }
 
         JsonObject o = new JsonObject();
         o.addProperty("success", success);
-        o.addProperty("captured", Platform.capturesCommandOutput());
+        o.addProperty("captured", game.capturesCommandOutput());
         JsonArray plain = new JsonArray();
         JsonArray formatted = new JsonArray();
         synchronized (output) {
@@ -667,7 +649,6 @@ public final class ApiServer {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private JsonObject playerAction(Caller caller, String name, String action, JsonObject body) throws Exception {
         if (!PLAYER_NAME.matcher(name).matches()) {
             throw ApiException.badRequest("bad_request", "Invalid player name");
@@ -682,66 +663,27 @@ public final class ApiServer {
         require(caller, action.equals("op") || action.equals("deop") ? Role.ADMIN : Role.MODERATOR);
 
         if (action.equals("teleport")) {
-            Player p = Bukkit.getPlayerExact(name);
-            if (p == null) {
-                throw ApiException.notFound("player_offline", "Player " + name + " is not online");
-            }
             String to = body.has("to") ? body.get("to").getAsString() : "";
             if (!to.equals("spawn") && !PLAYER_NAME.matcher(to).matches()) {
                 throw ApiException.badRequest("bad_request", "Invalid teleport target");
             }
-            org.bukkit.Location target;
-            if (to.equals("spawn")) {
-                target = global(() -> Bukkit.getWorlds().get(0).getSpawnLocation());
-            } else {
-                Player other = Bukkit.getPlayerExact(to);
-                if (other == null) {
-                    throw ApiException.notFound("player_offline", "Player " + to + " is not online");
-                }
-                // Read the other player's position on their own thread (Folia).
-                target = await(plugin.scheduler().entity(other, other::getLocation));
-            }
-            onPlayer(p, () -> Platform.teleport(p, target));
+            game.playerAction(name, action, body, finalReason);
             plugin.audit().log(caller.who(), caller.ip(), "teleport " + name + " to " + to);
             return ok();
         }
         if (action.equals("ban")) {
             // The vanilla command also resolves offline players.
-            boolean ok = global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                    "minecraft:ban " + name + (finalReason.isEmpty() ? "" : " " + finalReason)));
-            if (!ok) {
-                throw new ApiException(500, "action_failed", "Ban failed");
+            game.ban(name, finalReason);
+        } else if (action.equals("gamemode") || action.equals("message") || action.equals("kick") || action.equals("op")
+                || action.equals("deop") || action.equals("heal")) {
+            if (action.equals("gamemode")) {
+                stringField(body, "mode", 16);
+            } else if (action.equals("message")) {
+                stringField(body, "message", 256);
             }
+            game.playerAction(name, action, body, finalReason);
         } else {
-            Player p = Bukkit.getPlayerExact(name);
-            if (p == null) {
-                throw ApiException.notFound("player_offline", "Player " + name + " is not online");
-            }
-            switch (action) {
-                case "kick" -> onPlayer(p, () -> p.kickPlayer(finalReason.isEmpty() ? "Kicked from the server" : finalReason));
-                case "op" -> global(() -> { p.setOp(true); return null; });
-                case "deop" -> global(() -> { p.setOp(false); return null; });
-                case "heal" -> onPlayer(p, () -> {
-                    p.setHealth(Platform.maxHealth(p));
-                    p.setFoodLevel(20);
-                    p.setSaturation(20f);
-                    p.setFireTicks(0);
-                });
-                case "gamemode" -> {
-                    GameMode mode;
-                    try {
-                        mode = GameMode.valueOf(stringField(body, "mode", 16).toUpperCase(Locale.ROOT));
-                    } catch (IllegalArgumentException e) {
-                        throw ApiException.badRequest("bad_request", "Unknown game mode");
-                    }
-                    onPlayer(p, () -> p.setGameMode(mode));
-                }
-                case "message" -> {
-                    String message = stringField(body, "message", 256);
-                    onPlayer(p, () -> p.sendMessage("§8[§aServer§8]§r " + message));
-                }
-                default -> throw ApiException.notFound("not_found", "Unknown action: " + action);
-            }
+            throw ApiException.notFound("not_found", "Unknown action: " + action);
         }
         plugin.audit().log(caller.who(), caller.ip(), action + " " + name + (finalReason.isEmpty() ? "" : " (" + finalReason + ")"));
         return ok();
@@ -753,7 +695,7 @@ public final class ApiServer {
     private JsonObject worldAction(Caller caller, String method, String world, String action, HttpExchange ex) throws Exception {
         require(caller, Role.ADMIN);
         if (method.equals("GET") && action.isEmpty()) {
-            return global(() -> safeDescribe(world));
+            return game.world(world);
         }
         if (!method.equals("POST")) {
             throw ApiException.notFound("not_found", "Unknown endpoint");
@@ -766,60 +708,9 @@ public final class ApiServer {
             case "gamerule" -> "gamerule " + stringField(body, "rule", 64) + " " + body.get("value");
             default -> throw ApiException.notFound("not_found", "Unknown world action: " + action);
         };
-        JsonObject result = global(() -> {
-            try {
-                World w = WorldControl.world(world);
-                switch (action) {
-                    case "time" -> WorldControl.setTime(w, body.get("time").getAsString());
-                    case "weather" -> WorldControl.setWeather(w, body.get("weather").getAsString());
-                    case "difficulty" -> WorldControl.setDifficulty(w, body.get("difficulty").getAsString());
-                    default -> WorldControl.setGameRule(w, body.get("rule").getAsString(), body.get("value"));
-                }
-                return WorldControl.describe(w);
-            } catch (ApiException e) {
-                throw new java.util.concurrent.CompletionException(e);
-            }
-        });
+        JsonObject result = game.worldAction(world, action, body);
         plugin.audit().log(caller.who(), caller.ip(), world + ": " + what);
         return result;
-    }
-
-    private static JsonObject safeDescribe(String world) {
-        try {
-            return WorldControl.describe(WorldControl.world(world));
-        } catch (ApiException e) {
-            throw new java.util.concurrent.CompletionException(e);
-        }
-    }
-
-    @SuppressWarnings("deprecation") // getDescription works on Paper and Spigot alike
-    private static JsonObject plugins(FileManager files) {
-        JsonArray arr = new JsonArray();
-        org.bukkit.plugin.Plugin[] all = Bukkit.getPluginManager().getPlugins();
-        java.util.Arrays.sort(all, java.util.Comparator.comparing(p -> p.getName().toLowerCase(Locale.ROOT)));
-        for (org.bukkit.plugin.Plugin p : all) {
-            JsonObject o = new JsonObject();
-            o.addProperty("name", p.getName());
-            o.addProperty("version", p.getDescription().getVersion());
-            o.addProperty("enabled", p.isEnabled());
-            if (p.getDescription().getDescription() != null) {
-                o.addProperty("description", p.getDescription().getDescription());
-            }
-            JsonArray authors = new JsonArray();
-            p.getDescription().getAuthors().forEach(authors::add);
-            o.add("authors", authors);
-            if (p.getDescription().getWebsite() != null) {
-                o.addProperty("website", p.getDescription().getWebsite());
-            }
-            String file = pluginFile(p, files);
-            if (file != null) {
-                o.addProperty("file", file); // so admins can remove it in the app
-            }
-            arr.add(o);
-        }
-        JsonObject o = new JsonObject();
-        o.add("plugins", arr);
-        return o;
     }
 
     private static String playerName(String name) throws ApiException {
@@ -830,34 +721,9 @@ public final class ApiServer {
     }
 
     private <T> T global(Supplier<T> task) throws Exception {
-        return await(plugin.scheduler().global(task));
+        return Tasks.await(game.global(task));
     }
 
-    private void onPlayer(Player p, Runnable task) throws Exception {
-        await(plugin.scheduler().entity(p, () -> {
-            task.run();
-            return null;
-        }));
-    }
-
-    private static <T> T await(CompletableFuture<T> future) throws Exception {
-        return await(future, 10);
-    }
-
-    private static <T> T await(CompletableFuture<T> future, int timeoutSeconds) throws Exception {
-        try {
-            return future.get(timeoutSeconds, TimeUnit.SECONDS);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            // Tasks wrap checked API errors in CompletionException to pass them out.
-            if (cause instanceof java.util.concurrent.CompletionException ce && ce.getCause() instanceof ApiException api) {
-                throw api;
-            }
-            throw cause instanceof Exception c ? c : e;
-        } catch (TimeoutException e) {
-            throw new ApiException(504, "timeout", "The server did not respond in time");
-        }
-    }
 
     private static JsonObject ok() {
         JsonObject o = new JsonObject();
@@ -878,30 +744,9 @@ public final class ApiServer {
         return "";
     }
 
-    /** The plugin's JAR relative to the server folder, if it can be found there. */
-    private static String pluginFile(org.bukkit.plugin.Plugin p, FileManager files) {
-        try {
-            java.security.CodeSource source = p.getClass().getProtectionDomain().getCodeSource();
-            if (source == null || files == null) {
-                return null;
-            }
-            java.nio.file.Path jar = java.nio.file.Path.of(source.getLocation().toURI());
-            // Paper loads a remapped copy from plugins/.paper-remapped/; the file to manage is the original.
-            for (java.nio.file.Path p2 = jar.getParent(); p2 != null; p2 = p2.getParent()) {
-                if (p2.getFileName() != null && p2.getFileName().toString().equals(".paper-remapped")) {
-                    jar = p2.getParent().resolve(jar.getFileName());
-                    break;
-                }
-            }
-            return java.nio.file.Files.isRegularFile(jar) ? files.relativeOrNull(jar) : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private void requireFiles(Caller caller) throws ApiException {
         require(caller, Role.ADMIN);
-        if (!plugin.getConfig().getBoolean("security.allow-files", true)) {
+        if (!plugin.config().getBoolean("security.allow-files", true)) {
             throw ApiException.forbidden("File access is disabled in config.yml");
         }
     }

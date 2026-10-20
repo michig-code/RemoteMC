@@ -1,7 +1,6 @@
 package de.remotemc.plugin.auth;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
+import de.remotemc.plugin.core.Yaml;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,38 +46,40 @@ public final class TokenStore {
 
     public synchronized void load() {
         byHash.clear();
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
-        ConfigurationSection section = yaml.getConfigurationSection("tokens");
+        Map<String, Object> section = Yaml.section(Yaml.load(file), "tokens");
         if (section == null) {
             return;
         }
-        for (String id : section.getKeys(false)) {
-            ConfigurationSection t = section.getConfigurationSection(id);
-            Role role = t == null ? null : Role.parse(t.getString("role"));
-            String hash = t == null ? null : t.getString("hash");
+        for (String id : section.keySet()) {
+            Map<String, Object> t = Yaml.section(section, id);
+            Role role = t == null ? null : Role.parse(t.get("role") == null ? null : String.valueOf(t.get("role")));
+            String hash = t == null || t.get("hash") == null ? null : String.valueOf(t.get("hash"));
             if (role == null || hash == null) {
                 logger.warning("Ignoring invalid token entry '" + id + "' in tokens.yml");
                 continue;
             }
-            byHash.put(hash, new Token(id, t.getString("name", id), role, hash, t.getLong("created"), t.getLong("last-used")));
+            String name = t.get("name") == null ? id : String.valueOf(t.get("name"));
+            byHash.put(hash, new Token(id, name, role, hash, number(t.get("created")), number(t.get("last-used"))));
         }
     }
 
     public synchronized void save() {
-        YamlConfiguration yaml = new YamlConfiguration();
-        yaml.options().setHeader(List.of(
-                "RemoteMC access tokens (only hashes are stored).",
-                "Manage them with /remotemc token list | revoke <name>"));
+        Map<String, Object> tokens = new LinkedHashMap<>();
         for (Token t : byHash.values()) {
-            String path = "tokens." + t.id();
-            yaml.set(path + ".name", t.name());
-            yaml.set(path + ".role", t.role().id());
-            yaml.set(path + ".hash", t.hash());
-            yaml.set(path + ".created", t.created());
-            yaml.set(path + ".last-used", t.lastUsed());
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("name", t.name());
+            entry.put("role", t.role().id());
+            entry.put("hash", t.hash());
+            entry.put("created", t.created());
+            entry.put("last-used", t.lastUsed());
+            tokens.put(t.id(), entry);
         }
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("tokens", tokens);
         try {
-            yaml.save(file);
+            Yaml.save(file, List.of(
+                    "RemoteMC access tokens (only hashes are stored).",
+                    "Manage them with /remotemc token list | revoke <name>"), root);
             dirty = false;
         } catch (IOException e) {
             logger.severe("Could not save tokens.yml: " + e.getMessage());
@@ -160,6 +162,10 @@ public final class TokenStore {
 
     public int size() {
         return byHash.size();
+    }
+
+    private static long number(Object o) {
+        return o instanceof Number n ? n.longValue() : 0;
     }
 
     static byte[] randomBytes(int n) {
