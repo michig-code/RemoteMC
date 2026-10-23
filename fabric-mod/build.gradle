@@ -5,10 +5,42 @@ plugins {
 group = 'de.remotemc'
 base { archivesName = 'RemoteMC-Fabric' }
 
+// The mod shares everything that does not depend on the server software with the plugin
+// (API, pairing, tokens, TLS, console, chat, history, tasks, files, web app, texts). Only the
+// Bukkit glue of the plugin is left out; the Fabric glue lives in src/main/java.
+def plugin = file('../plugin/src/main')
+sourceSets {
+	main {
+		java {
+			srcDir new File(plugin, 'java')
+			exclude 'de/remotemc/plugin/RemoteMCPlugin.java'
+			exclude 'de/remotemc/plugin/api/BukkitGame.java'
+			exclude 'de/remotemc/plugin/api/Commands.java'
+			exclude 'de/remotemc/plugin/api/Moderation.java'
+			exclude 'de/remotemc/plugin/api/Inventories.java'
+			exclude 'de/remotemc/plugin/api/WorldControl.java'
+			exclude 'de/remotemc/plugin/live/GameListener.java'
+			exclude 'de/remotemc/plugin/live/PaperChatListener.java'
+			exclude 'de/remotemc/plugin/live/SpigotChatListener.java'
+			exclude 'de/remotemc/plugin/live/Snapshots.java'
+			exclude 'de/remotemc/plugin/pairing/PairMapListener.java'
+			exclude 'de/remotemc/plugin/pairing/QrCodes.java'
+			exclude 'de/remotemc/plugin/platform/**'
+		}
+		resources {
+			srcDir new File(plugin, 'resources')
+			exclude 'plugin.yml'
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Bundled into the mod's JAR (Minecraft already ships Gson and Log4j).
+	include(implementation("com.google.zxing:core:3.5.3"))
+	include(implementation("org.yaml:snakeyaml:2.3"))
 }
 
 processResources {
