@@ -1,13 +1,9 @@
 name: iOS test version
 
-# Builds the small iPhone test version (ios-app/) on a Mac. Runs only when the iPhone app changes
-# or on request ("Run workflow"); public repositories pay nothing for the Mac.
+# Builds the small iPhone test version (ios-app/) on a Mac. Only on request ("Run workflow"),
+# never automatically on a push.
 # The result is an unsigned .ipa – install it with Sideloadly or AltStore and your Apple ID.
 on:
-  push:
-    paths:
-      - 'ios-app/**'
-      - '.github/workflows/ios.yml'
   workflow_dispatch:
 
 concurrency:
