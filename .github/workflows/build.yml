@@ -28,7 +28,7 @@ jobs:
       android: ${{ steps.filter.outcome == 'success' && steps.filter.outputs.android || 'true' }}
       desktop: ${{ steps.filter.outcome == 'success' && steps.filter.outputs.desktop || 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v3
@@ -56,8 +56,8 @@ jobs:
     if: needs.changes.outputs.plugin == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -65,7 +65,7 @@ jobs:
       - name: Build and unit tests
         run: mvn -B package
         working-directory: plugin
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-plugin
           path: plugin/target/RemoteMC-*.jar
@@ -77,8 +77,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -101,30 +101,30 @@ jobs:
     if: needs.changes.outputs.android == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Lint, unit tests and screenshot comparison
         run: ./gradlew lintGithubDebug lintPlayDebug testGithubDebugUnitTest -Proborazzi.test.verify=true
         working-directory: android-app
       - name: Release build
         run: ./gradlew assembleGithubRelease bundlePlayRelease
         working-directory: android-app
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-app
           path: android-app/app/build/outputs/apk/github/release/*.apk
           if-no-files-found: error
       # Google Play version (signed with the debug key here; the release workflow signs it for upload).
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-app-play
           path: android-app/app/build/outputs/bundle/playRelease/*.aab
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: screenshot-diffs
@@ -139,15 +139,15 @@ jobs:
       run:
         working-directory: desktop-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Tests
         run: ./gradlew test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: desktop-screenshots
@@ -163,17 +163,17 @@ jobs:
         shell: bash
         working-directory: desktop-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           # JetBrains Runtime: the installer ships it, so the window keeps Windows' own frame
           # (native dragging, snapping and animations) with RemoteMC's tabs in the title bar.
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Installers and portable JAR
         run: ./gradlew packageMsi packageExe packageUberJarForCurrentOS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-Windows
           path: |

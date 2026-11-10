@@ -1,3 +1,4 @@
+# Once a month, one bundled pull request per area (instead of one per library).
 version: 2
 updates:
   - package-ecosystem: gradle
@@ -5,13 +6,25 @@ updates:
     schedule:
       interval: monthly
     groups:
-      androidx:
-        patterns: ["androidx.*"]
+      android:
+        patterns: ["*"]
   - package-ecosystem: maven
     directory: /plugin
     schedule:
       interval: monthly
+    groups:
+      plugin:
+        patterns: ["*"]
+    ignore:
+      # The plugin is built against the oldest supported Paper API (1.20.6) on purpose,
+      # so it keeps running on every server version from 1.20.6 to 26.x.
+      - dependency-name: "io.papermc.paper:paper-api"
+      # Provided by the server at runtime.
+      - dependency-name: "org.apache.logging.log4j:log4j-core"
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

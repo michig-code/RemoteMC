@@ -20,7 +20,7 @@ jobs:
     runs-on: macos-15-intel
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Newest Xcode (iOS 26 SDK)
         run: |
           ls -d /Applications/Xcode*.app
@@ -43,7 +43,7 @@ jobs:
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/RemoteMC.app Payload/
           zip -qry RemoteMC-iOS-test.ipa Payload
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-iOS-test
           path: ios-app/RemoteMC-iOS-test.ipa

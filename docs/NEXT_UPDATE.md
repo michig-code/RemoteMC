@@ -28,6 +28,10 @@ PC), Anfasser in der Übersicht, Karteninhalt und Bildschirm-Bausteine frei anor
 
 ## Ideen für spätere Updates
 
+- Android-Werkzeuge aktualisieren (gemeinsam, mit Tests und neuen Screenshots): Android-Gradle-Plugin
+  8 → 9, Kotlin 2.1 → 2.4 (inkl. Compose-Compiler), androidx-Paket, okhttp + okhttp-tls 4 → 5,
+  Roborazzi 1.32 → 1.76 (aus den Dependabot-PRs #7, #8, #9, #15, #16, #17).
+
 - Große Serverkarten: Spielerköpfe und Mini-Verlauf (braucht je Server eine zusätzliche Abfrage).
 - Übersicht: Teile innerhalb einer Karte (z. B. die drei TPS-Werte) einzeln verschieben; Höhe der
   Übersichtskarten per Anfasser.

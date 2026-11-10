@@ -16,9 +16,9 @@ jobs:
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
       HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -27,11 +27,11 @@ jobs:
         working-directory: plugin
         run: mvn -B package -Drevision="${GITHUB_REF_NAME#v}"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Build app (signed when the keystore secrets are set)
         working-directory: android-app
         env:
@@ -52,13 +52,13 @@ jobs:
           cp app/build/outputs/bundle/playRelease/app-play-release.aab "../RemoteMC-App-Play-${GITHUB_REF_NAME#v}.aab"
 
       - name: Keep the Play bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: RemoteMC-App-Play
           path: RemoteMC-App-Play-*.aab
 
       - name: GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: |
@@ -100,14 +100,14 @@ jobs:
         shell: bash
         working-directory: desktop-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           # JetBrains Runtime: the installer ships it, so the window keeps Windows' own frame
           # (native dragging, snapping and animations) with RemoteMC's tabs in the title bar.
           distribution: jetbrains
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Installers
         run: |
           V="${GITHUB_REF_NAME#v}"
@@ -116,7 +116,7 @@ jobs:
           cp build/compose/binaries/main/msi/*.msi "out/RemoteMC-Windows-$V.msi"
           cp build/compose/binaries/main/exe/*.exe "out/RemoteMC-Windows-$V-Setup.exe"
           cp build/compose/jars/*.jar "out/RemoteMC-Windows-$V-portable.jar"
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: desktop-app/out/*
 
